@@ -1,0 +1,119 @@
+@model SunMovement.Web.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h1>Admin Dashboard</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Products</h5>
+                <p class="card-text display-4">@Model.ProductCount</p>
+                <a href="/admin/manage/products" class="btn btn-outline-light">Manage Products</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Services</h5>
+                <p class="card-text display-4">@Model.ServiceCount</p>
+                <a href="/admin/manage/services" class="btn btn-outline-light">Manage Services</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="card-text display-4">@Model.OrderCount</p>
+                <a href="/admin/manage/orders" class="btn btn-outline-light">Manage Orders</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Events</h5>
+                <p class="card-text display-4">@Model.EventCount</p>
+                <a href="/admin/manage/events" class="btn btn-outline-light">Manage Events</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">Unread Messages</h5>
+                <p class="card-text display-4">@Model.UnreadMessageCount / @Model.TotalMessageCount</p>
+                <a href="/admin/manage/messages" class="btn btn-outline-light">Manage Messages</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <h5 class="card-title">FAQs</h5>
+                <p class="card-text display-4">@Model.FAQCount</p>
+                <a href="/admin/manage/faqs" class="btn btn-outline-light">Manage FAQs</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-dark">            
+            <div class="card-body">
+                <h5 class="card-title">Users</h5>
+                <p class="card-text display-4">@Model.UserCount</p>
+                <a href="/admin/manage/users" class="btn btn-outline-light">Manage Users</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders Section -->
+<div class="mt-4">
+    <h3>Recent Orders</h3>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.RecentOrders != null)
+                {
+                    foreach (var order in Model.RecentOrders as dynamic)
+                    {
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.CustomerName</td>
+                            <td>@order.Date.ToString("d")</td>
+                            <td>$@order.Total.ToString("F2")</td>
+                            <td>@order.Status</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No recent orders</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <a href="/admin/manage/orders" class="btn btn-primary">View All Orders</a>
+</div>

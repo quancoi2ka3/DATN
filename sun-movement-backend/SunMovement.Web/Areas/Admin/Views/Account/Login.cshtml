@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Login";
+    // Automatically redirect to the non-area Account/Login
+    var redirectUrl = Url.Action("Login", "Account", new { area = "" });
+}
+
+<script>
+    // Use JavaScript to redirect to avoid any server-side context issues
+    window.location.href = '@Html.Raw(redirectUrl)';
+</script>
+
+<div class="text-center">
+    <h1>Redirecting to login page...</h1>
+    <p>If you are not redirected automatically, <a href="@redirectUrl">click here</a>.</p>
+</div>

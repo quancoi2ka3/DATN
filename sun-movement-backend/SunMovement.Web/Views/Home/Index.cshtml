@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Sun Movement Administration</h1>
+    <p class="lead">Welcome to the Sun Movement management portal.</p>
+    
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="mt-4">
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-primary">Go to Admin Dashboard</a>
+            </div>
+        }
+        else
+        {
+            <p>You are logged in, but you don't have admin privileges.</p>
+        }
+    }
+    else
+    {
+        <div class="mt-4">
+            <p>Please log in to access the administration features.</p>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+        </div>
+    }
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Products</h5>
+                <p class="card-text">Manage your store's products including sportswear and supplements.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Services</h5>
+                <p class="card-text">Manage services such as Yoga, Strength Training, and Calisthenics.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Orders</h5>
+                <p class="card-text">Track and manage customer orders and payments.</p>
+            </div>
+        </div>
+    </div>
+</div>

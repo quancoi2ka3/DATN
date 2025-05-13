@@ -1,0 +1,289 @@
+@using SunMovement.Core.Models
+@model string
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+    
+    // If any of these are null, they'll be shown as 0
+    int productCount = ViewBag.ProductCount ?? 0;
+    int serviceCount = ViewBag.ServiceCount ?? 0;
+    int orderCount = ViewBag.OrderCount ?? 0;
+    int eventCount = ViewBag.EventCount ?? 0;
+    int faqCount = ViewBag.FAQCount ?? 0;
+    int unreadMessageCount = ViewBag.UnreadMessageCount ?? 0;
+    int totalMessageCount = ViewBag.TotalMessageCount ?? 0;
+    decimal totalSales = ViewBag.TotalSales ?? 0m;
+    
+    // Recent orders (this would normally come from a repository)
+    var recentOrders = ViewBag.RecentOrders ?? new List<dynamic>();
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-primary mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-primary text-uppercase mb-1">
+                                Products
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@productCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/products">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-success mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-success text-uppercase mb-1">
+                                Services
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@serviceCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dumbbell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/services">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-warning mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-warning text-uppercase mb-1">
+                                Orders
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@orderCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/orders">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-danger mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-danger text-uppercase mb-1">
+                                Events
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@eventCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/events">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-info mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-info text-uppercase mb-1">
+                                FAQs
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@faqCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-question-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/faqs">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-dashboard border-secondary mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-secondary text-uppercase mb-1">
+                                Messages
+                                @if (unreadMessageCount > 0)
+                                {
+                                    <span class="badge bg-danger ms-2">@unreadMessageCount</span>
+                                }
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">@totalMessageCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/messages">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6 col-md-12">
+            <div class="card card-dashboard border-success mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="text-xs text-success text-uppercase mb-1">
+                                Total Sales
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold">$@totalSales.ToString("N2")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small stretched-link" href="/admin/orders">View Details</a>
+                    <div class="small"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+      <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-shopping-cart me-1"></i>
+                    Recent Orders
+                </div>
+                <div class="card-body">
+                    @if (recentOrders.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in recentOrders)
+                                    {
+                                        <tr>
+                                            <td><a href="/admin/orders/details/@order.Id">@order.Id</a></td>
+                                            <td>@order.CustomerName</td>
+                                            <td>@order.Date.ToString("MM/dd/yyyy")</td>
+                                            <td>$@order.Total.ToString("F2")</td>
+                                            <td>
+                                                @switch (order.Status)
+                                                {
+                                                    case "Pending":
+                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                        break;
+                                                    case "Processing":
+                                                        <span class="badge bg-info">Processing</span>
+                                                        break;
+                                                    case "Shipped":
+                                                        <span class="badge bg-primary">Shipped</span>
+                                                        break;
+                                                    case "Delivered":
+                                                        <span class="badge bg-success">Delivered</span>
+                                                        break;
+                                                    case "Cancelled":
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@order.Status</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="/admin/orders" class="btn btn-primary btn-sm">View All Orders</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p>No recent orders available.</p>
+                        <a href="/admin/orders" class="btn btn-primary btn-sm">View All Orders</a>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-tools me-1"></i>
+                    Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/admin/products/create" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-2"></i> Add New Product
+                        </a>
+                        <a href="/admin/services/create" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-2"></i> Add New Service
+                        </a>
+                        <a href="/admin/events/create" class="btn btn-danger btn-sm">
+                            <i class="fas fa-plus me-2"></i> Add New Event
+                        </a>
+                        <a href="/admin/faqs/create" class="btn btn-info btn-sm text-white">
+                            <i class="fas fa-plus me-2"></i> Add New FAQ
+                        </a>
+                    </div>
+
+                    <hr />
+                    
+                    <div class="alert alert-info mt-3">
+                        <h5><i class="fas fa-info-circle me-2"></i>Welcome!</h5>
+                        <p class="mb-0">Welcome to the Sun Movement admin portal. From here, you can manage all aspects of your business.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+@model SunMovement.Core.Models.FAQ
+@{
+    ViewData["Title"] = "FAQ Details";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">FAQ Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/admin/faqs">FAQs</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i> FAQ Information
+        </div>
+        <div class="card-body">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <strong>Question</strong>
+                </div>
+                <div class="card-body">
+                    @Model.Question
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <strong>Answer</strong>
+                </div>
+                <div class="card-body">
+                    @Html.Raw(Model.Answer.Replace("\n", "<br>"))
+                </div>
+            </div>
+              <dl class="row">
+                <dt class="col-sm-3">Category</dt>
+                <dd class="col-sm-9">@Model.Category.ToString()</dd>
+                
+                <dt class="col-sm-3">Display Order</dt>
+                <dd class="col-sm-9">@Model.DisplayOrder</dd>
+                
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactive</span>
+                    }
+                </dd>
+                
+                <dt class="col-sm-3">Created</dt>
+                <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+                
+                <dt class="col-sm-3">Last Updated</dt>
+                <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Never")</dd>
+            </dl>
+            
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,98 @@
+@model SunMovement.Core.Models.Service
+@{
+    ViewData["Title"] = "Service Details";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Service Details</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/admin/services">Services</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i> Service Information
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: contain;" />
+                    }
+                    else
+                    {
+                        <div class="bg-light text-center p-5">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                            <p class="mt-3">No image available</p>
+                        </div>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+                        
+                        <dt class="col-sm-3">Type</dt>
+                        <dd class="col-sm-9">@Model.Type</dd>
+                        
+                        <dt class="col-sm-3">Price</dt>
+                        <dd class="col-sm-9">$@Model.Price.ToString("F2")</dd>
+                        
+                        <dt class="col-sm-3">Status</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </dd>
+                        
+                        <dt class="col-sm-3">Schedules</dt>
+                        <dd class="col-sm-9">
+                            @(Model.Schedules != null ? Model.Schedules.Count : 0)
+                            <a href="/admin/services/@Model.Id/schedules" class="btn btn-sm btn-outline-primary ms-2">
+                                Manage Schedules
+                            </a>
+                        </dd>
+                        
+                        <dt class="col-sm-3">Created</dt>
+                        <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+                        
+                        <dt class="col-sm-3">Last Updated</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Never")</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col">
+                    <h5>Description</h5>
+                    <p class="border p-3 bg-light">@Model.Description</p>
+                </div>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Features))
+            {
+                <div class="row mt-4">
+                    <div class="col">
+                        <h5>Features</h5>
+                        <pre class="border p-3 bg-light">@Model.Features</pre>
+                    </div>
+                </div>
+            }
+            
+            <div class="mt-4">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>

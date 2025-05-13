@@ -1,0 +1,384 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display/SF-Pro-Display-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display/SF-Pro-Display-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display/SF-Pro-Display-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('/fonts/SF-Pro-Display/SF-Pro-Display-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 5 77% 57%;  /* Sun Movement coral/red color */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 5 77% 57%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 5 77% 57%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 5 77% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'SF Pro Display', sans-serif;
+  }
+}
+
+/* ======== CUSTOM ANIMATIONS AND EFFECTS ======== */
+
+/* Flame Effect Animation */
+@keyframes flameFlicker {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.1); }
+}
+
+.flame-effect {
+  animation: flameFlicker 2s ease-in-out infinite alternate;
+  filter: blur(0.3px);
+}
+
+/* Fire Gradient Animation */
+@keyframes fireGradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.fire-gradient {
+  background: linear-gradient(90deg, #ff4e50, #f9d423, #ff4e50);
+  background-size: 200% 200%;
+  animation: fireGradientMove 5s ease infinite;
+}
+
+.fire-text {
+  background: linear-gradient(90deg, #ff4e50, #f9d423, #ff4e50);
+  background-size: 200% 200%;
+  animation: fireGradientMove 3s ease infinite;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0px 0px 10px rgba(255, 78, 80, 0.3);
+}
+
+/* Pulse Glow Effect */
+@keyframes pulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 78, 80, 0.6)); }
+  50% { filter: drop-shadow(0 0 15px rgba(255, 78, 80, 0.8)); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Energy Burst Effect */
+@keyframes energyBurst {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
+}
+
+.energy-burst {
+  animation: energyBurst 2s ease-in-out infinite;
+}
+
+/* Strong Entrance Animation */
+@keyframes strongEntrance {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.strong-entrance {
+  animation: strongEntrance 0.5s ease-out forwards;
+}
+
+/* Staggered Entrance for Children */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: strongEntrance 0.5s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Power Shake Animation */
+@keyframes powerShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+.power-shake:hover {
+  animation: powerShake 0.5s ease-in-out infinite;
+}
+
+/* Dramatic Text Shadow */
+.dramatic-text {
+  text-shadow: 0px 0px 10px rgba(255, 78, 80, 0.7);
+}
+
+/* Energetic Border Animation */
+@keyframes energyBorder {
+  0% { border-image-source: linear-gradient(45deg, #ff4e50, #f9d423); }
+  50% { border-image-source: linear-gradient(45deg, #f9d423, #ff4e50); }
+  100% { border-image-source: linear-gradient(45deg, #ff4e50, #f9d423); }
+}
+
+.energy-border {
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  border-image-slice: 1;
+  border-image-source: linear-gradient(45deg, #ff4e50, #f9d423);
+  animation: energyBorder 3s ease infinite;
+}
+
+/* Burning Button Effect */
+.burning-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.burning-button:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #ff4e50, #f9d423);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.burning-button:hover:before {
+  opacity: 0.8;
+}
+
+.burning-button:after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(45deg, #ff4e50, #f9d423);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.burning-button:hover:after {
+  opacity: 1;
+  filter: blur(3px);
+}
+
+/* Fitness Cards Special Effects */
+.fitness-card {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.fitness-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+.fitness-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #ff4e50, #f9d423, #ff4e50);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.fitness-card:hover::before {
+  opacity: 1;
+  animation: fireGradientMove 3s ease infinite;
+}
+
+/* Dynamic Radial Menu Animation */
+@keyframes radialPulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.radial-menu-item {
+  transition: all 0.3s ease;
+}
+
+.radial-menu-item:hover {
+  animation: radialPulse 1.5s ease-in-out infinite;
+}
+
+/* Fire Text Blink Effect */
+@keyframes fireTextBlink {
+  0%, 100% { text-shadow: 0 0 5px rgba(255, 78, 80, 0.7); }
+  50% { text-shadow: 0 0 15px rgba(255, 78, 80, 0.9), 0 0 30px rgba(249, 212, 35, 0.5); }
+}
+
+.fire-text-blink {
+  animation: fireTextBlink 2s ease-in-out infinite;
+}
+
+/* Powerful Hover Lift Effect */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+/* Fire Button Hover Effect */
+.fire-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.fire-button::before {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(0deg, rgba(255, 78, 80, 0.8), rgba(249, 212, 35, 0.8));
+  transition: all 0.3s ease;
+  filter: blur(5px);
+  transform-origin: bottom;
+  transform: scaleY(0);
+  z-index: -1;
+}
+
+.fire-button:hover::before {
+  transform: scaleY(3);
+  bottom: 0;
+}
+
+/* Energetic Loading Spinner */
+@keyframes energeticSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.energetic-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 78, 80, 0.3);
+  border-radius: 50%;
+  border-top-color: #ff4e50;
+  animation: energeticSpin 1s linear infinite;
+}
+
+/* Streak Effect for Athletic Movements */
+@keyframes streakEffect {
+  0% { transform: translateX(-100%) scaleX(0); opacity: 0; }
+  50% { transform: translateX(0%) scaleX(1); opacity: 0.7; }
+  100% { transform: translateX(100%) scaleX(0); opacity: 0; }
+}
+
+.streak-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.streak-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.streak-container:hover .streak-effect {
+  animation: streakEffect 1s ease-in-out;
+}

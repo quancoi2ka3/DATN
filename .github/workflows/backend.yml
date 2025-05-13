@@ -1,0 +1,44 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'sun-movement-backend/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'sun-movement-backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore sun-movement-backend/SunMovement.sln
+      
+    - name: Build
+      run: dotnet build --no-restore sun-movement-backend/SunMovement.sln
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal sun-movement-backend/SunMovement.sln
+      
+  # Add deployment steps here when you are ready to deploy the backend
+  # deploy:
+  #  needs: build
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Deploy to Azure Web App
+  #      uses: azure/webapps-deploy@v2
+  #      with:
+  #        app-name: 'your-app-name'
+  #        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+  #        package: ./sun-movement-backend/SunMovement.Web/bin/Release/net8.0/publish

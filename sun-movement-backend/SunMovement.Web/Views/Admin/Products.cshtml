@@ -2,11 +2,9 @@
 
 @{
     ViewData["Title"] = "Manage Products";
-}
-
-<div class="d-flex justify-content-between align-items-center mb-4">
+}    <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Products</h1>
-    <a asp-action="CreateProduct" class="btn btn-primary">Add New Product</a>
+    <a href="@ViewBag.CreateProductUrl" class="btn btn-primary">Add New Product</a>
 </div>
 
 @if (!Model.Any())
@@ -55,11 +53,10 @@ else
                             {
                                 <span class="badge bg-light text-dark">No</span>
                             }
-                        </td>
-                        <td>
+                        </td>                        <td>
                             <div class="btn-group" role="group">
-                                <a asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <a asp-action="DeleteProduct" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                                <a href="@(ViewBag.EditProductUrl + item.Id)" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="@(ViewBag.DeleteProductUrl + item.Id)" class="btn btn-sm btn-outline-danger">Delete</a>
                             </div>
                         </td>
                     </tr>

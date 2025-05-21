@@ -56,7 +56,12 @@ namespace SunMovement.Web.Controllers
         }        [HttpGet("products")]
         public async Task<IActionResult> Products()
         {
+            // Get the products but provide the URL for actions that should use the proper ProductsAdmin controller
             var products = await _unitOfWork.Products.GetAllAsync();
+            ViewBag.CreateProductUrl = "/admin/products/create";
+            ViewBag.EditProductUrl = "/admin/products/edit/";
+            ViewBag.DeleteProductUrl = "/admin/products/delete/";
+            ViewBag.DetailsProductUrl = "/admin/products/details/";
             return View("~/Views/Admin/Products.cshtml", products);
         }
 

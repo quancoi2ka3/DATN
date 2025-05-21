@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Edit Product";
+    // Redirect script to ensure we use the ProductsAdmin controller
+    string redirect = "<script>window.location.href = '/admin/products/edit/" + Model.Id + "';</script>";
+    @Html.Raw(redirect)
 }
 
 <h1>Edit Product</h1>
@@ -9,7 +12,7 @@
 
 <div class="row">
     <div class="col-md-8">
-        <form asp-action="EditProduct" method="post" enctype="multipart/form-data">
+        <form action="/admin/products/edit/@Model.Id" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             

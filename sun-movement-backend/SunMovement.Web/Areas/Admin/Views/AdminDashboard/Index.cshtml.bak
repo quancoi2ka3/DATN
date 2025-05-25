@@ -1,0 +1,146 @@
+@model SunMovement.Web.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+    
+    // Using model properties directly now
+    int productCount = Model.ProductCount;
+    int serviceCount = Model.ServiceCount;
+    int orderCount = Model.OrderCount;
+    int eventCount = Model.EventCount;
+    int faqCount = Model.FAQCount;
+    int unreadMessageCount = Model.UnreadMessageCount;
+    int totalMessageCount = Model.TotalMessageCount;
+    decimal totalSales = 0m; // Calculate if needed
+      // Recent orders will come directly from Model.RecentOrders
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Admin Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">                <div class="card-body">
+                    <h5 class="card-title">Products</h5>
+                    <p class="card-text h2">@productCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/products">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Services</h5>
+                    <p class="card-text h2">@serviceCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/services">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">                <div class="card-body">
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text h2">@orderCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/orders">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">                <div class="card-body">
+                    <h5 class="card-title">Events</h5>
+                    <p class="card-text h2">@eventCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/events">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card bg-danger text-white mb-4">                <div class="card-body">
+                    <h5 class="card-title">Messages</h5>
+                    <p class="card-text h2">@unreadMessageCount / @totalMessageCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/contactmessages">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card bg-secondary text-white mb-4">                <div class="card-body">
+                    <h5 class="card-title">FAQs</h5>
+                    <p class="card-text h2">@faqCount</p>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="/admin/faqs">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Recent Orders
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>                </thead>
+                <tbody>
+                    @if (Model.RecentOrders != null)
+                    {
+                        foreach (var order in (dynamic)Model.RecentOrders)
+                        {
+                            <tr>
+                                <td>@order.Id</td>
+                                <td>@order.CustomerName</td>
+                                <td>@order.Date.ToString("yyyy-MM-dd")</td>
+                                <td>@order.Total.ToString("C")</td>
+                                <td>@order.Status</td>
+                                <td>
+                                    <a href="/admin/orders/details/@order.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">No recent orders available.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

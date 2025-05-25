@@ -1,0 +1,13 @@
+@{
+    Layout = null;
+    Context.Response.Redirect("/admin", true);
+    return;
+}
+
+<!-- If JavaScript is disabled, show a link -->
+<h2>Admin Dashboard has moved</h2>
+<p>The admin dashboard has moved to a new location. If you are not redirected automatically, please <a href="/admin">click here</a>.</p>
+
+<script>
+    window.location.href = '/admin';
+</script>

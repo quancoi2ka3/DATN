@@ -8,7 +8,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 {
     [Authorize(Roles = "Admin")]
     [Area("Admin")]
-    [Route("admin/messages")]
+    [Route("admin/contactmessages")]
     public class ContactMessagesAdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -45,23 +45,6 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             return View(message);
         }
 
-        [HttpPost("mark-read/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkAsRead(int id)
-        {
-            var message = await _unitOfWork.ContactMessages.GetByIdAsync(id);
-            if (message == null)
-            {
-                return NotFound();
-            }
-
-            message.IsRead = true;
-            await _unitOfWork.ContactMessages.UpdateAsync(message);
-            await _unitOfWork.CompleteAsync();
-            
-            return RedirectToAction(nameof(Index));
-        }
-
         [HttpGet("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -85,6 +68,38 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
 
             await _unitOfWork.ContactMessages.DeleteAsync(message);
+            await _unitOfWork.CompleteAsync();
+            
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet("mark-read/{id}")]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            var message = await _unitOfWork.ContactMessages.GetByIdAsync(id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            message.IsRead = true;
+            await _unitOfWork.ContactMessages.UpdateAsync(message);
+            await _unitOfWork.CompleteAsync();
+            
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet("mark-unread/{id}")]
+        public async Task<IActionResult> MarkAsUnread(int id)
+        {
+            var message = await _unitOfWork.ContactMessages.GetByIdAsync(id);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            message.IsRead = false;
+            await _unitOfWork.ContactMessages.UpdateAsync(message);
             await _unitOfWork.CompleteAsync();
             
             return RedirectToAction(nameof(Index));

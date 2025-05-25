@@ -51,49 +51,50 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
         [HttpPost("update-status/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStatus(int id, OrderStatus status)
+        public async Task<IActionResult> UpdateStatus(int id, Order order)
         {
-            var order = await _unitOfWork.Orders.GetByIdAsync(id);
-            if (order == null)
+            if (id != order.Id)
             {
                 return NotFound();
             }
 
-            order.Status = status;
-            order.UpdatedAt = System.DateTime.UtcNow;
-            await _unitOfWork.Orders.UpdateAsync(order);
-            await _unitOfWork.CompleteAsync();
-            
-            return RedirectToAction(nameof(Details), new { id });
-        }
-
-        [HttpGet("update-tracking/{id}")]
-        public async Task<IActionResult> UpdateTracking(int id)
-        {
-            var order = await _unitOfWork.Orders.GetByIdAsync(id);
-            if (order == null)
+            if (ModelState.IsValid)
             {
-                return NotFound();
+                try
+                {
+                    var existingOrder = await _unitOfWork.Orders.GetByIdAsync(id);
+                    if (existingOrder == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingOrder.Status = order.Status;
+                    existingOrder.UpdatedAt = System.DateTime.UtcNow;
+
+                    await _unitOfWork.Orders.UpdateAsync(existingOrder);
+                    await _unitOfWork.CompleteAsync();
+                    
+                    return RedirectToAction(nameof(Details), new { id = order.Id });
+                }
+                catch (System.Exception)
+                {
+                    if (!await OrderExists(order.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
             return View(order);
         }
 
-        [HttpPost("update-tracking/{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateTracking(int id, string trackingNumber)
+        private async Task<bool> OrderExists(int id)
         {
             var order = await _unitOfWork.Orders.GetByIdAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            order.TrackingNumber = trackingNumber;
-            order.UpdatedAt = System.DateTime.UtcNow;
-            await _unitOfWork.Orders.UpdateAsync(order);
-            await _unitOfWork.CompleteAsync();
-            
-            return RedirectToAction(nameof(Details), new { id });
+            return order != null;
         }
     }
 }

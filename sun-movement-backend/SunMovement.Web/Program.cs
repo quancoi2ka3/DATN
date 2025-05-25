@@ -23,6 +23,14 @@ builder.Services.AddMvc()
         options.Conventions.AuthorizeAreaFolder("Admin", "/");
     });
 
+// Configure routing to support Areas
+builder.Services.Configure<RouteOptions>(options =>
+{
+    options.LowercaseUrls = true;
+    options.LowercaseQueryStrings = true;
+    options.AppendTrailingSlash = false;
+});
+
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
@@ -164,23 +172,13 @@ app.MapControllerRoute(
     pattern: "account/{action=Index}/{id?}",
     defaults: new { controller = "Account", area = "" });
 
-app.MapControllerRoute(
-    name: "admin-area",
-    pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}",
-    defaults: new { area = "Admin" });
-
-// Define route for admin dashboard
-app.MapControllerRoute(
-    name: "admin-dashboard",
-    pattern: "admin",
-    defaults: new { controller = "AdminDashboard", action = "Index", area = "Admin" });
-
+// Legacy admin route for backward compatibility
 app.MapControllerRoute(
     name: "admin-manage",
     pattern: "admin/manage/{action=Index}/{id?}",
     defaults: new { controller = "Admin" });
 
-// Create area-specific routes
+// Create area-specific routes for Admin area
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",

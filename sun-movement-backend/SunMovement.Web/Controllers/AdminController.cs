@@ -7,9 +7,8 @@ using SunMovement.Web.Models;
 using System.Threading.Tasks;
 
 namespace SunMovement.Web.Controllers
-{
-    [Authorize(Roles = "Admin")]
-    [Route("admin/manage")] // Changed route to avoid conflicts
+{    [Authorize(Roles = "Admin")]
+    [Route("admin/manage")] // Legacy route that will redirect to the new admin area
     public class AdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -19,11 +18,16 @@ namespace SunMovement.Web.Controllers
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-        }
-
-        [HttpGet("")]
+        }        [HttpGet("")]
         [HttpGet("dashboard")]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            // Redirect to the new admin area dashboard
+            return RedirectPermanent("/admin");
+        }
+        
+        // Legacy method kept for reference
+        private async Task<IActionResult> LegacyIndex()
         {
             // Create a model for the dashboard
             var model = new AdminDashboardViewModel
@@ -54,57 +58,36 @@ namespace SunMovement.Web.Controllers
 
             return View("~/Views/Admin/Index.cshtml", model);
         }        [HttpGet("products")]
-        public async Task<IActionResult> Products()
+        public IActionResult Products()
         {
-            // Get the products but provide the URL for actions that should use the proper ProductsAdmin controller
-            var products = await _unitOfWork.Products.GetAllAsync();
-            ViewBag.CreateProductUrl = "/admin/products/create";
-            ViewBag.EditProductUrl = "/admin/products/edit/";
-            ViewBag.DeleteProductUrl = "/admin/products/delete/";
-            ViewBag.DetailsProductUrl = "/admin/products/details/";
-            return View("~/Views/Admin/Products.cshtml", products);
-        }
-
-        [HttpGet("services")]
-        public async Task<IActionResult> Services()
+            // Redirect to the new area-based products admin controller
+            return RedirectPermanent("/admin/products");
+        }        [HttpGet("services")]
+        public IActionResult Services()
         {
-            var services = await _unitOfWork.Services.GetAllAsync();
-            return View("~/Views/Admin/Services.cshtml", services);
-        }
-
-        [HttpGet("orders")]
-        public async Task<IActionResult> Orders()
+            return RedirectPermanent("/admin/services");
+        }        [HttpGet("orders")]
+        public IActionResult Orders()
         {
-            var orders = await _unitOfWork.Orders.GetAllAsync();
-            return View("~/Views/Admin/Orders.cshtml", orders);
-        }
-
-        [HttpGet("messages")]
-        public async Task<IActionResult> Messages()
+            return RedirectPermanent("/admin/orders");
+        }        [HttpGet("messages")]
+        public IActionResult Messages()
         {
-            var messages = await _unitOfWork.ContactMessages.GetAllAsync();
-            return View("~/Views/Admin/Messages.cshtml", messages);
-        }
-
-        [HttpGet("events")]
-        public async Task<IActionResult> Events()
+            return RedirectPermanent("/admin/contactmessages");
+        }        [HttpGet("events")]
+        public IActionResult Events()
         {
-            var events = await _unitOfWork.Events.GetAllAsync();
-            return View("~/Views/Admin/Events.cshtml", events);
-        }
-
-        [HttpGet("faqs")]
-        public async Task<IActionResult> FAQs()
+            return RedirectPermanent("/admin/events");
+        }        [HttpGet("faqs")]
+        public IActionResult FAQs()
         {
-            var faqs = await _unitOfWork.FAQs.GetAllAsync();
-            return View("~/Views/Admin/FAQs.cshtml", faqs);
-        }
-
-        [HttpGet("users")]
+            return RedirectPermanent("/admin/faqs");
+        }        [HttpGet("users")]
         public IActionResult Users()
         {
-            var users = _userManager.Users;
-            return View("~/Views/Admin/Users.cshtml", users);
+            // Note: You may need to create a UsersAdminController in the Admin area
+            // For now, redirect to admin dashboard
+            return RedirectPermanent("/admin");
         }
     }
 }

@@ -119,6 +119,17 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var faq = await _unitOfWork.FAQs.GetByIdAsync(id);
+            if (faq == null)
+            {
+                return NotFound();
+            }
+            return View(faq);
+        }
+
         private async Task<bool> FAQExists(int id)
         {
             var faq = await _unitOfWork.FAQs.GetByIdAsync(id);

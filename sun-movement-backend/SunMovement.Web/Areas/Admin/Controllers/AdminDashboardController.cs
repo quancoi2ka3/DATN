@@ -21,7 +21,9 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         public AdminDashboardController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-        }        [HttpGet("")]
+        }
+        
+        [HttpGet("")]
         [HttpGet("dashboard")]
         public async Task<IActionResult> Index()
         {
@@ -32,28 +34,28 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     .OrderByDescending(o => o.OrderDate)
                     .Take(5)
                     .Select(o => new
-                {
-                    Id = o.Id,
-                    CustomerName = o.CustomerName,
-                    Date = o.OrderDate,
-                    Total = o.TotalAmount,
-                    Status = o.Status.ToString()
-                })
-                .ToList();
+                    {
+                        Id = o.Id,
+                        CustomerName = o.CustomerName,
+                        Date = o.OrderDate,
+                        Total = o.TotalAmount,
+                        Status = o.Status.ToString()
+                    })
+                    .ToList();
 
-            var model = new AdminDashboardViewModel
-            {
-                ProductCount = await _unitOfWork.Products.CountAsync(),
-                ServiceCount = await _unitOfWork.Services.CountAsync(),
-                OrderCount = await _unitOfWork.Orders.CountAsync(),
-                EventCount = await _unitOfWork.Events.CountAsync(),
-                FAQCount = await _unitOfWork.FAQs.CountAsync(),
-                UnreadMessageCount = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead),
-                TotalMessageCount = await _unitOfWork.ContactMessages.CountAsync(),
-                UserCount = 0, // Will need to inject UserManager to get this count
-                RecentOrders = recentOrders
-            };
-              return View("~/Views/Admin/Index.cshtml", model); // Use explicit path and model
+                var model = new AdminDashboardViewModel
+                {
+                    ProductCount = await _unitOfWork.Products.CountAsync(),
+                    ServiceCount = await _unitOfWork.Services.CountAsync(),
+                    OrderCount = await _unitOfWork.Orders.CountAsync(),
+                    EventCount = await _unitOfWork.Events.CountAsync(),
+                    FAQCount = await _unitOfWork.FAQs.CountAsync(),
+                    UnreadMessageCount = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead),
+                    TotalMessageCount = await _unitOfWork.ContactMessages.CountAsync(),                    UserCount = 0, // Will need to inject UserManager to get this count
+                    RecentOrders = recentOrders
+                };
+                
+                return View("Index", model); // Explicitly specify the view name
             }
             catch (Exception ex)
             {

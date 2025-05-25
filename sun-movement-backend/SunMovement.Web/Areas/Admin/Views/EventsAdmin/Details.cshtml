@@ -37,13 +37,12 @@
                         <dd class="col-sm-9">@Model.Title</dd>
                         
                         <dt class="col-sm-3">Date</dt>
-                        <dd class="col-sm-9">@Model.EventDate.ToString("dddd, MMMM d, yyyy")</dd>
-                          <dt class="col-sm-3">Time</dt>
+                        <dd class="col-sm-9">@Model.EventDate.ToString("dddd, MMMM d, yyyy")</dd>                        <dt class="col-sm-3">Time</dt>
                         <dd class="col-sm-9">
-                            @(Model.StartTime?.ToString(@"hh\:mm") ?? "")
+                            @(Model.StartTime?.ToString("hh\\:mm") ?? "")
                             @if (Model.EndTime.HasValue)
                             {
-                                <span> - @Model.EndTime.Value.ToString(@"hh\:mm")</span>
+                                <span> - @Model.EndTime.Value.ToString("hh\\:mm")</span>
                             }
                         </dd>
                         

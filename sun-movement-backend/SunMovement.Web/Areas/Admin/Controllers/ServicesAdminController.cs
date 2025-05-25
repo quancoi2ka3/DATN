@@ -154,7 +154,10 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 return NotFound();
             }
             return View(service);
-        }        [HttpGet("{serviceId}/schedules")]
+        }
+        
+        // Schedule management
+        [HttpGet("{serviceId}/schedules")]
         public async Task<IActionResult> Schedules(int serviceId)
         {
             var service = await _unitOfWork.Services.GetWithSchedulesAsync(serviceId);
@@ -166,14 +169,13 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             ViewBag.ServiceName = service.Name;
             return View(service.Schedules ?? new List<ServiceSchedule>());
         }
-
+        
         [HttpGet("{serviceId}/schedules/create")]
         public IActionResult CreateSchedule(int serviceId)
         {
-            ViewBag.ServiceId = serviceId;
             return View(new ServiceSchedule { ServiceId = serviceId });
         }
-
+        
         [HttpPost("{serviceId}/schedules/create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateSchedule(int serviceId, ServiceSchedule schedule)
@@ -182,43 +184,31 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 return BadRequest();
             }
-
-            if (ModelState.IsValid)
+              if (ModelState.IsValid)
             {
-                var service = await _unitOfWork.Services.GetByIdAsync(serviceId);
-                if (service == null)
-                {
-                    return NotFound();
-                }
-
                 await _unitOfWork.Services.AddScheduleAsync(schedule);
                 await _unitOfWork.CompleteAsync();
-                
                 return RedirectToAction(nameof(Schedules), new { serviceId });
             }
-            ViewBag.ServiceId = serviceId;
             return View(schedule);
-        }        [HttpGet("{serviceId}/schedules/edit/{id}")]
+        }
+          [HttpGet("{serviceId}/schedules/edit/{id}")]
         public async Task<IActionResult> EditSchedule(int serviceId, int id)
         {
-            var service = await _unitOfWork.Services.GetByIdAsync(serviceId);
+            var service = await _unitOfWork.Services.GetWithSchedulesAsync(serviceId);
             if (service == null || service.Schedules == null)
             {
                 return NotFound();
             }
-
+            
             var schedule = service.Schedules.FirstOrDefault(s => s.Id == id);
             if (schedule == null)
             {
                 return NotFound();
             }
-
-            ViewBag.ServiceId = serviceId;
-            ViewBag.ServiceName = service.Name;
             return View(schedule);
         }
-
-        [HttpPost("{serviceId}/schedules/edit/{id}")]
+          [HttpPost("{serviceId}/schedules/edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditSchedule(int serviceId, int id, ServiceSchedule schedule)
         {
@@ -226,54 +216,50 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-
+            
             if (ModelState.IsValid)
             {
                 await _unitOfWork.Services.UpdateScheduleAsync(schedule);
                 await _unitOfWork.CompleteAsync();
-                
                 return RedirectToAction(nameof(Schedules), new { serviceId });
             }
-            ViewBag.ServiceId = serviceId;
             return View(schedule);
-        }        [HttpGet("{serviceId}/schedules/delete/{id}")]
+        }
+          [HttpGet("{serviceId}/schedules/delete/{id}")]
         public async Task<IActionResult> DeleteSchedule(int serviceId, int id)
         {
-            var service = await _unitOfWork.Services.GetByIdAsync(serviceId);
+            var service = await _unitOfWork.Services.GetWithSchedulesAsync(serviceId);
             if (service == null || service.Schedules == null)
             {
                 return NotFound();
             }
-
+            
             var schedule = service.Schedules.FirstOrDefault(s => s.Id == id);
             if (schedule == null)
             {
                 return NotFound();
             }
-
-            ViewBag.ServiceId = serviceId;
-            ViewBag.ServiceName = service.Name;
             return View(schedule);
-        }        [HttpPost("{serviceId}/schedules/delete/{id}")]
+        }
+          [HttpPost("{serviceId}/schedules/delete/{id}")]
         [ValidateAntiForgeryToken]
         [ActionName("DeleteSchedule")]
         public async Task<IActionResult> DeleteScheduleConfirmed(int serviceId, int id)
         {
-            var service = await _unitOfWork.Services.GetByIdAsync(serviceId);
+            var service = await _unitOfWork.Services.GetWithSchedulesAsync(serviceId);
             if (service == null || service.Schedules == null)
             {
                 return NotFound();
             }
-
+            
             var schedule = service.Schedules.FirstOrDefault(s => s.Id == id);
             if (schedule == null)
             {
                 return NotFound();
             }
-
+            
             await _unitOfWork.Services.DeleteScheduleAsync(schedule);
             await _unitOfWork.CompleteAsync();
-            
             return RedirectToAction(nameof(Schedules), new { serviceId });
         }
 

@@ -20,5 +20,8 @@ namespace SunMovement.Core.Models
         public TimeSpan? StartTime { get; set; }
         public TimeSpan? EndTime { get; set; }
         public int? Capacity { get; set; }
+        
+        // Computed properties
+        public DateTime StartDate => EventDate.Date;
     }
 }

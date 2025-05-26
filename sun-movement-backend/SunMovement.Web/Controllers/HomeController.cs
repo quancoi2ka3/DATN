@@ -33,11 +33,25 @@ public class HomeController : Controller
     public IActionResult Privacy()
     {
         return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    }    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error(int? statusCode = null)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var errorViewModel = new ErrorViewModel 
+        { 
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+        };
+
+        if (statusCode.HasValue)
+        {
+            _logger.LogWarning($"Error with status code: {statusCode} occurred. Request ID: {errorViewModel.RequestId}");
+            ViewBag.StatusCode = statusCode;
+            Response.StatusCode = statusCode.Value;
+        }
+        else
+        {
+            _logger.LogError($"An unexpected error occurred. Request ID: {errorViewModel.RequestId}");
+        }
+
+        return View(errorViewModel);
     }
 }

@@ -1,14 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 
-namespace SunMovement.Web.Controllers.Api
+namespace SunMovement.Web.Areas.Api.Controllers
 {
+    [Area("Api")]
     [Route("api/faqs")]
     [ApiController]
     public class FAQsController : ControllerBase
@@ -24,7 +23,7 @@ namespace SunMovement.Web.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FAQ>>> GetFAQs()
         {
-            var faqs = await _unitOfWork.FAQs.FindAsync(f => f.IsActive);
+            var faqs = await _unitOfWork.FAQs.GetAllAsync();
             return Ok(faqs);
         }
 
@@ -33,24 +32,13 @@ namespace SunMovement.Web.Controllers.Api
         public async Task<ActionResult<FAQ>> GetFAQ(int id)
         {
             var faq = await _unitOfWork.FAQs.GetByIdAsync(id);
+
             if (faq == null)
             {
                 return NotFound();
             }
-            return Ok(faq);
-        }
 
-        // GET: api/faqs/category/general
-        [HttpGet("category/{category}")]
-        public async Task<ActionResult<IEnumerable<FAQ>>> GetFAQsByCategory(string category)
-        {
-            if (!Enum.TryParse<FAQCategory>(category, true, out var faqCategory))
-            {
-                return BadRequest("Invalid category");
-            }
-
-            var faqs = await _unitOfWork.FAQs.FindAsync(f => f.IsActive && f.Category == faqCategory);
-            return Ok(faqs);
+            return faq;
         }
 
         // POST: api/faqs
@@ -58,10 +46,7 @@ namespace SunMovement.Web.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<FAQ>> CreateFAQ(FAQ faq)
         {
-            faq.CreatedAt = DateTime.UtcNow;
             await _unitOfWork.FAQs.AddAsync(faq);
-            await _unitOfWork.CompleteAsync();
-
             return CreatedAtAction(nameof(GetFAQ), new { id = faq.Id }, faq);
         }
 
@@ -75,22 +60,13 @@ namespace SunMovement.Web.Controllers.Api
                 return BadRequest();
             }
 
-            var existingFAQ = await _unitOfWork.FAQs.GetByIdAsync(id);
-            if (existingFAQ == null)
+            var exists = await _unitOfWork.FAQs.ExistsAsync(id);
+            if (!exists)
             {
                 return NotFound();
             }
 
-            existingFAQ.Question = faq.Question;
-            existingFAQ.Answer = faq.Answer;
-            existingFAQ.Category = faq.Category;
-            existingFAQ.DisplayOrder = faq.DisplayOrder;
-            existingFAQ.IsActive = faq.IsActive;
-            existingFAQ.UpdatedAt = DateTime.UtcNow;
-
-            await _unitOfWork.FAQs.UpdateAsync(existingFAQ);
-            await _unitOfWork.CompleteAsync();
-
+            await _unitOfWork.FAQs.UpdateAsync(faq);
             return NoContent();
         }
 
@@ -105,12 +81,7 @@ namespace SunMovement.Web.Controllers.Api
                 return NotFound();
             }
 
-            // Soft delete
-            faq.IsActive = false;
-            faq.UpdatedAt = DateTime.UtcNow;
-            await _unitOfWork.FAQs.UpdateAsync(faq);
-            await _unitOfWork.CompleteAsync();
-
+            await _unitOfWork.FAQs.DeleteAsync(faq);
             return NoContent();
         }
     }

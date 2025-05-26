@@ -5,18 +5,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Web.Areas.Api.Models;
 
-namespace SunMovement.Web.Controllers.Api
+namespace SunMovement.Web.Areas.Api.Controllers
 {
+    [Area("Api")]
     [Route("api/contact")]
     [ApiController]
     public class ContactController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
-        public ContactController(IUnitOfWork unitOfWork)
+        public ContactController(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         // GET: api/contact
@@ -34,61 +38,75 @@ namespace SunMovement.Web.Controllers.Api
         public async Task<ActionResult<ContactMessage>> GetMessage(int id)
         {
             var message = await _unitOfWork.ContactMessages.GetByIdAsync(id);
+
             if (message == null)
             {
                 return NotFound();
             }
 
-            // Mark as read if not already
+            // Mark as read if not already read
             if (!message.IsRead)
             {
                 message.IsRead = true;
                 message.ReadAt = DateTime.UtcNow;
                 await _unitOfWork.ContactMessages.UpdateAsync(message);
-                await _unitOfWork.CompleteAsync();
             }
 
-            return Ok(message);
-        }
-
-        // GET: api/contact/unread
-        [HttpGet("unread")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<ContactMessage>>> GetUnreadMessages()
-        {
-            var messages = await _unitOfWork.ContactMessages.FindAsync(m => !m.IsRead);
-            return Ok(messages);
+            return message;
         }
 
         // POST: api/contact
         [HttpPost]
-        public async Task<ActionResult<ContactMessage>> SendMessage(ContactMessage message)
+        public async Task<ActionResult<ContactMessage>> SubmitContactForm(ContactFormModel model)
         {
-            message.CreatedAt = DateTime.UtcNow;
-            message.IsRead = false;
-            message.ReadAt = null;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var message = new ContactMessage
+            {
+                Name = model.Name,
+                Email = model.Email,
+                Subject = model.Subject,
+                Message = model.Message,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
 
             await _unitOfWork.ContactMessages.AddAsync(message);
-            await _unitOfWork.CompleteAsync();
+
+            // Send notification email to admin about new contact message
+            try
+            {
+                await _emailService.SendContactNotificationAsync(message);
+            }
+            catch (Exception)
+            {
+                // Log error but don't return it to client
+                // Message is still saved in the database
+            }
 
             return CreatedAtAction(nameof(GetMessage), new { id = message.Id }, message);
         }
 
-        // PUT: api/contact/5/read
-        [HttpPut("{id}/read")]
+        // PUT: api/contact/5
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> MarkAsRead(int id)
+        public async Task<IActionResult> UpdateMessage(int id, ContactMessage contactMessage)
         {
-            var message = await _unitOfWork.ContactMessages.GetByIdAsync(id);
-            if (message == null)
+            if (id != contactMessage.Id)
+            {
+                return BadRequest();
+            }
+
+            var exists = await _unitOfWork.ContactMessages.ExistsAsync(id);
+            if (!exists)
             {
                 return NotFound();
             }
 
-            message.IsRead = true;
-            message.ReadAt = DateTime.UtcNow;
-            await _unitOfWork.ContactMessages.UpdateAsync(message);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.ContactMessages.UpdateAsync(contactMessage);
 
             return NoContent();
         }
@@ -105,7 +123,6 @@ namespace SunMovement.Web.Controllers.Api
             }
 
             await _unitOfWork.ContactMessages.DeleteAsync(message);
-            await _unitOfWork.CompleteAsync();
 
             return NoContent();
         }

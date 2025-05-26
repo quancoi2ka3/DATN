@@ -8,8 +8,9 @@ using SunMovement.Core.DTOs;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 
-namespace SunMovement.Web.Controllers.Api
+namespace SunMovement.Web.Areas.Api.Controllers
 {
+    [Area("Api")]
     [Route("api/services")]
     [ApiController]
     public class ServicesController : ControllerBase
@@ -121,10 +122,10 @@ namespace SunMovement.Web.Controllers.Api
                 Id = service.Id,
                 Name = service.Name,
                 Description = service.Description,
-                ImageUrl = service.ImageUrl,
+                ImageUrl = service.ImageUrl ?? string.Empty,
                 Price = service.Price,
                 Type = service.Type,
-                Features = service.Features,
+                Features = service.Features ?? string.Empty,
                 IsActive = service.IsActive
             };
         }

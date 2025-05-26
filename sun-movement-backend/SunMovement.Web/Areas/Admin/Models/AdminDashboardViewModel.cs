@@ -1,4 +1,4 @@
-namespace SunMovement.Web.Models
+namespace SunMovement.Web.Areas.Admin.Models
 {
     public class AdminDashboardViewModel
     {

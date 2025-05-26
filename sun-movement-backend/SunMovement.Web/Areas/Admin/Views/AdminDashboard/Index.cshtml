@@ -1,7 +1,7 @@
-@model SunMovement.Web.Models.AdminDashboardViewModel
+@model SunMovement.Web.Areas.Admin.Models.AdminDashboardViewModel
 @{
     ViewData["Title"] = "Admin Dashboard";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = "_AdminLayout";
     
     // Using model properties directly now
     int productCount = Model.ProductCount;

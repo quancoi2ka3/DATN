@@ -9,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SunMovement.Core.Models;
+using SunMovement.Web.Areas.Api.Models;
 
-namespace SunMovement.Web.Controllers.Api
+namespace SunMovement.Web.Areas.Api.Controllers
 {
+    [Area("Api")]
     [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -32,14 +34,14 @@ namespace SunMovement.Web.Controllers.Api
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterModel model)
-        {
+        {            
             var user = new ApplicationUser
             {
                 UserName = model.Email,
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                DateOfBirth = model.DateOfBirth,
+                DateOfBirth = model.DateOfBirth ?? DateTime.UtcNow,  // Use current date if null
                 Address = model.Address,
                 CreatedAt = DateTime.UtcNow,
                 PhoneNumber = model.PhoneNumber
@@ -63,80 +65,96 @@ namespace SunMovement.Web.Controllers.Api
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginModel model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+            try
             {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Invalid credentials" });
+                }
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+
+                if (result.Succeeded)
+                {
+                    user.LastLogin = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var token = GenerateJwtToken(user, roles);
+
+                    return Ok(new 
+                    { 
+                        token,
+                        expiration = DateTime.UtcNow.AddMinutes(GetJwtDurationInMinutes()),
+                        user = new {
+                            id = user.Id,
+                            email = user.Email,
+                            firstName = user.FirstName,
+                            lastName = user.LastName,
+                            roles
+                        }
+                    });
+                }
+
                 return Unauthorized(new { message = "Invalid credentials" });
             }
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-
-            if (result.Succeeded)
+            catch (Exception ex)
             {
-                user.LastLogin = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
-
-                var roles = await _userManager.GetRolesAsync(user);
-                var token = GenerateJwtToken(user, roles);
-
-                return Ok(new 
-                { 
-                    token,
-                    expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:DurationInMinutes"])),
-                    user = new {
-                        id = user.Id,
-                        email = user.Email,
-                        firstName = user.FirstName,
-                        lastName = user.LastName,
-                        roles
-                    }
-                });
+                return StatusCode(500, new { message = "An error occurred during login", error = ex.Message });
             }
+        }
 
-            return Unauthorized(new { message = "Invalid credentials" });
+        private double GetJwtDurationInMinutes()
+        {
+            string? durationStr = _configuration["Jwt:DurationInMinutes"];
+            if (!string.IsNullOrEmpty(durationStr) && double.TryParse(durationStr, out double parsedDuration))
+            {
+                return parsedDuration;
+            }
+            return 60; // Default to 60 minutes
         }
 
         private string GenerateJwtToken(ApplicationUser user, IList<string> roles)
-        {            var claims = new List<Claim>
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+            
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.Name, user.UserName ?? string.Empty)
             };
 
-            // Add roles as claims
+            // Add role claims
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
-            }            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025"));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:DurationInMinutes"] ?? "60"));
+            }
 
+            // Get JWT key with fallback
+            string jwtKey = _configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025";
+            
+            // Get JWT issuer and audience with fallbacks
+            string issuer = _configuration["Jwt:Issuer"] ?? "SunMovement.Web";
+            string audience = _configuration["Jwt:Audience"] ?? "SunMovement.Client";
+            
+            // Create token
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddMinutes(GetJwtDurationInMinutes());
+            
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds
             );
-
+            
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-    }    public class RegisterModel
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public DateTime DateOfBirth { get; set; }
-        public string Address { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-    }
-
-    public class LoginModel
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
     }
 }

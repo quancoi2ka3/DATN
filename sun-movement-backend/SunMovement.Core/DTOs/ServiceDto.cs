@@ -9,12 +9,13 @@ namespace SunMovement.Core.DTOs
         public int Id { get; set; }
         
         [Required]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         [Required]
-        public string Description { get; set; }
+        public required string Description { get; set; }
         
-        public string ImageUrl { get; set; }
+        [Required]
+        public required string ImageUrl { get; set; } = string.Empty;
         
         [Required]
         [Range(0.01, double.MaxValue)]
@@ -23,8 +24,8 @@ namespace SunMovement.Core.DTOs
         [Required]
         public ServiceType Type { get; set; }
         
-        public string Features { get; set; }
+        public required string Features { get; set; } = string.Empty;
         
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

@@ -62,16 +62,35 @@ builder.Services.AddAuthentication(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
+    
+    // Get JWT values with fallbacks
+    string jwtKey = builder.Configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025";
+    string issuer = builder.Configuration["Jwt:Issuer"] ?? "SunMovement.Web";
+    string audience = builder.Configuration["Jwt:Audience"] ?? "SunMovement.Client";
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025")),
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ClockSkew = TimeSpan.Zero
+    };
+    
+    // Handle JWT validation errors
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context => 
+        {
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Response.Headers.Append("Token-Expired", "true");
+            }
+            return Task.CompletedTask;
+        }
     };
 })
 // Add support for authentication scheme that can handle both cookies and JWT
@@ -107,8 +126,20 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+// Register real services for production use, but conditionally use mocks for development/testing
+if (builder.Environment.IsDevelopment())
+{
+    // Use mock services for development/testing
+    builder.Services.AddScoped<IEmailService, SunMovement.Web.Areas.Api.Models.NoOpEmailService>();
+    builder.Services.AddTransient<IFileUploadService, SunMovement.Web.Areas.Api.Models.MockFileUploadService>();
+}
+else
+{
+    // Use real services for production
+    builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddTransient<IFileUploadService, FileUploadService>();
+}
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -151,7 +182,10 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    // Use our custom error handler
+    app.UseExceptionHandler("/Error");
+    // Add detailed status code pages for common errors
+    app.UseStatusCodePagesWithReExecute("/Error/{0}");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -172,17 +206,17 @@ app.MapControllerRoute(
     pattern: "account/{action=Index}/{id?}",
     defaults: new { controller = "Account", area = "" });
 
-// Legacy admin route for backward compatibility
-app.MapControllerRoute(
-    name: "admin-manage",
-    pattern: "admin/manage/{action=Index}/{id?}",
-    defaults: new { controller = "Admin" });
-
 // Create area-specific routes for Admin area
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",
     pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}");
+
+// Create area-specific routes for API area
+app.MapAreaControllerRoute(
+    name: "api",
+    areaName: "Api",
+    pattern: "api/{controller=Home}/{action=Index}/{id?}");
 
 // Default route 
 app.MapControllerRoute(

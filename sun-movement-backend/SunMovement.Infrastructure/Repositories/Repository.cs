@@ -58,11 +58,27 @@ namespace SunMovement.Infrastructure.Repositories
         public async Task<int> CountAsync()
         {
             return await _dbSet.CountAsync();
-        }
-
-        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+        }        public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.CountAsync(predicate);
+        }        public async Task<bool> ExistsAsync(int id)
+        {
+            var entity = await _dbSet.FindAsync(id);
+            return entity != null;
+        }
+
+        public virtual async Task<T> GetOrderWithDetailsAsync(int id)
+        {
+            // This is a base implementation that should be overridden in OrderRepository
+            // For generic repositories, just return the entity by ID
+            return await GetByIdAsync(id);
+        }
+
+        public virtual async Task<IEnumerable<SunMovement.Core.Models.Order>> GetOrdersByUserIdAsync(string userId)
+        {
+            // This is a base implementation that should be overridden in OrderRepository
+            // For generic repositories, return an empty list
+            return new List<SunMovement.Core.Models.Order>();
         }
     }
 }

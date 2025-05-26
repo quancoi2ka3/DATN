@@ -1,0 +1,56 @@
+@{
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link href="~/admin/css/styles.css" rel="stylesheet" />
+    @await RenderSectionAsync("Styles", required: false)
+}
+
+<div class="d-flex" id="admin-wrapper">
+    <!-- Sidebar -->
+    <div class="border-end bg-white" id="sidebar-wrapper">
+        <div class="sidebar-heading border-bottom bg-light">SunMovement Admin</div>
+        <div class="list-group list-group-flush">
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">Products</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">Services</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index">Orders</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="EventsAdmin" asp-action="Index">Events</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="FAQsAdmin" asp-action="Index">FAQs</a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" asp-area="Admin" asp-controller="ContactMessagesAdmin" asp-action="Index">Messages</a>
+        </div>
+    </div>
+    <!-- Page content wrapper -->
+    <div id="page-content-wrapper">
+        <!-- Top navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="container-fluid">
+                <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="/">View Site</a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content -->
+        <div class="container-fluid">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/scripts.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+}

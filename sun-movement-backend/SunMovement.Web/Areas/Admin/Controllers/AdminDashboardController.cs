@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Web.Areas.Admin.Models;
 using SunMovement.Web.Models;
 using System;
 using System.Collections.Generic;

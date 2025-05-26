@@ -1,0 +1,40 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="m-0"><i class="fas fa-exclamation-triangle me-2"></i>Error</h2>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-4 text-secondary">@(ViewBag.ErrorMessage ?? "An error occurred while processing your request.")</h3>
+                    
+                    @if (Model.ShowRequestId)
+                    {
+                        <div class="alert alert-info">
+                            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                        </div>
+                    }
+                    
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i> Return to Home
+                        </a>
+                    </div>
+                </div>
+                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            <strong>Development Mode</strong> - Additional error information may be available in the logs.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

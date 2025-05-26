@@ -5,17 +5,10 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using SunMovement.Core.Interfaces;
 
 namespace SunMovement.Core.Services
-{
-    public interface IFileUploadService
-    {
-        Task<string> UploadFileAsync(IFormFile file, string folder);
-        Task<bool> DeleteFileAsync(string filePath);
-        Task<string> UploadProductImageAsync(IFormFile imageFile);
-        Task<string> UploadServiceImageAsync(IFormFile imageFile);
-        Task<string> UploadEventImageAsync(IFormFile imageFile);
-    }    public class FileUploadService : IFileUploadService
+{public class FileUploadService : IFileUploadService
     {
         private readonly IHostEnvironment _environment;
         private readonly ILogger<FileUploadService> _logger;

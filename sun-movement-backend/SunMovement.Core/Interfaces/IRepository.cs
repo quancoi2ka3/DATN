@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using SunMovement.Core.Models;
 
 namespace SunMovement.Core.Interfaces
 {
@@ -16,5 +17,10 @@ namespace SunMovement.Core.Interfaces
         Task DeleteAsync(T entity);
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
+        Task<bool> ExistsAsync(int id);
+        
+        // Special methods for repository implementation
+        Task<T> GetOrderWithDetailsAsync(int id);
+        Task<IEnumerable<Order>> GetOrdersByUserIdAsync(string userId);
     }
 }

@@ -1,13 +1,67 @@
 # Sun Movement Backend
 
-This is the backend API for the Sun Movement application. It provides all the necessary functionality to power the Sun Movement frontend, including user authentication, product management, service management, orders, events, FAQs, and contact messaging.
+This is the backend API and admin interface for the Sun Movement application. It provides all the necessary functionality to power the Sun Movement frontend, including user authentication, product management, service management, orders, events, FAQs, and contact messaging.
 
-## Project Structure
+## Project Structure (Updated)
 
-- **SunMovement.Core**: Contains the domain models, interfaces, and business logic services
-- **SunMovement.Infrastructure**: Contains data access implementation, repositories, and database context
-- **SunMovement.Web**: The ASP.NET Core MVC application that exposes the API endpoints and serves the web interface
-- **SunMovement.Tests**: Contains unit tests for the application
+The project now follows a clean, standardized ASP.NET Core MVC architecture with improved organization:
+
+```
+SunMovement.Web/ - Main web application
+├── Areas/ - Feature-based areas of the application
+│   ├── Admin/ - Admin features
+│   │   ├── Controllers/ - Admin-specific controllers
+│   │   ├── Models/ - Admin-specific view models
+│   │   └── Views/ - Admin-specific views with dedicated layouts
+│   └── Api/ - API endpoints
+│       ├── Controllers/ - API controllers with [Area] attributes
+│       └── Models/ - API request/response models and mock services
+├── Controllers/ - Main application controllers (non-area)
+├── Models/ - Shared view models
+├── Views/ - MVC views
+└── wwwroot/ - Static assets
+
+SunMovement.Core/ - Core domain models and business logic
+├── DTOs/ - Data Transfer Objects
+├── Interfaces/ - Service and repository interfaces
+├── Models/ - Domain models
+└── Services/ - Business logic services
+
+SunMovement.Infrastructure/ - Data access and external services
+├── Data/ - Database context and configuration
+├── Migrations/ - EF Core migrations
+└── Repositories/ - Repository implementations
+
+SunMovement.Tests/ - Contains unit tests for the application
+```
+
+### Areas
+
+The application is organized into areas for better separation of concerns:
+
+#### Admin Area
+
+Contains all admin-related functionality for managing the site:
+- Dashboard for analytics and monitoring
+- Products administration
+- Services administration
+- Orders management
+- Events management
+- FAQs management
+- Contact message management
+- Admin dashboard
+
+#### API Area
+
+Contains all API controllers for the frontend:
+- Authentication API
+- Products API
+- Services API
+- Orders API
+- Events API
+- FAQs API
+- Contact API
+- Uploads API
 
 ## Features
 

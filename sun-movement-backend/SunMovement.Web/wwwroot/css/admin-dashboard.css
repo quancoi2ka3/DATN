@@ -1,0 +1,173 @@
+/* Custom styles for the dashboard widgets */
+
+.border-left-primary {
+    border-left: 4px solid var(--primary-color) !important;
+}
+
+.border-left-success {
+    border-left: 4px solid var(--success-color) !important;
+}
+
+.border-left-info {
+    border-left: 4px solid var(--info-color) !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid var(--warning-color) !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid var(--danger-color) !important;
+}
+
+/* Chart containers */
+.chart-area {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 260px;
+    width: 100%;
+}
+
+/* Recent activities styling */
+.activity-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e3e6f0;
+}
+
+.activity-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.activity-item::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 0.25rem;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+/* Additional responsive fixes */
+@media (max-width: 991.98px) {
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 0;
+    }
+    
+    .chart-area, .chart-pie {
+        height: 250px;
+    }
+}
+
+/* Custom styling for tables in admin sections */
+.admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.admin-table thead th {
+    background-color: rgba(0,0,0,0.03);
+    font-weight: 600;
+    border-top: none;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+}
+
+.admin-table tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/* Action buttons in tables */
+.action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.825rem;
+}
+
+body[data-theme='dark'] .dashboard-widget {
+    background-color: var(--dark-color);
+    color: var(--bs-body-color);
+}
+
+body[data-theme='dark'] .chart-area canvas,
+body[data-theme='dark'] .chart-pie canvas {
+    filter: brightness(0.9);
+}
+
+body[data-theme='dark'] .admin-table thead th {
+    background-color: rgba(255,255,255,0.05);
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+
+body[data-theme='dark'] .admin-table tbody tr:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+body[data-theme='dark'] .border-left-primary,
+body[data-theme='dark'] .border-left-success,
+body[data-theme='dark'] .border-left-info,
+body[data-theme='dark'] .border-left-warning,
+body[data-theme='dark'] .border-left-danger {
+    border-left-color: inherit !important;
+}
+
+/* Improve visualization of cards */
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body[data-theme='dark'] .card {
+    background-color: var(--dark-color);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    background-color: rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+body[data-theme='dark'] .card-header {
+    background-color: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Loading spinner for async operations */
+.loading-spinner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}

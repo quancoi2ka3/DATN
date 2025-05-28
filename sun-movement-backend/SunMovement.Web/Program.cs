@@ -12,6 +12,62 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel with explicit HTTPS port
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // Set up HTTP endpoint
+    serverOptions.ListenAnyIP(5000);
+    
+    try {
+        // Set up HTTPS endpoint
+        serverOptions.ListenAnyIP(5001, listenOptions =>
+        {
+            listenOptions.UseHttps();
+        });
+    }
+    catch (Exception ex)
+    {
+        // Log the exception but continue with HTTP
+        Console.WriteLine($"Failed to configure HTTPS: {ex.Message}");
+        Console.WriteLine("Continuing with HTTP only. To use HTTPS, run 'dotnet dev-certs https --trust' to install the development certificate.");
+    }
+});
+
+// This helps ensure the development certificate is created
+if (builder.Environment.IsDevelopment())
+{
+    // Try to create development certificate if it doesn't exist
+    try
+    {
+        var process = new System.Diagnostics.Process
+        {
+            StartInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = "dev-certs https --check",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+
+        if (!output.Contains("valid"))
+        {
+            Console.WriteLine("Creating development certificate...");
+            System.Diagnostics.Process.Start("dotnet", "dev-certs https --trust");
+        }
+    }
+    catch
+    {
+        Console.WriteLine("Warning: Could not check or create the development certificate.");
+        Console.WriteLine("To use HTTPS, run 'dotnet dev-certs https --trust' to install the development certificate.");
+    }
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -22,14 +78,6 @@ builder.Services.AddMvc()
     {
         options.Conventions.AuthorizeAreaFolder("Admin", "/");
     });
-
-// Configure routing to support Areas
-builder.Services.Configure<RouteOptions>(options =>
-{
-    options.LowercaseUrls = true;
-    options.LowercaseQueryStrings = true;
-    options.AppendTrailingSlash = false;
-});
 
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -62,35 +110,16 @@ builder.Services.AddAuthentication(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
-    
-    // Get JWT values with fallbacks
-    string jwtKey = builder.Configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025";
-    string issuer = builder.Configuration["Jwt:Issuer"] ?? "SunMovement.Web";
-    string audience = builder.Configuration["Jwt:Audience"] ?? "SunMovement.Client";
-    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = issuer,
-        ValidAudience = audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "ThisIsMySecretKeyForSunMovementApp2025")),
         ClockSkew = TimeSpan.Zero
-    };
-    
-    // Handle JWT validation errors
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context => 
-        {
-            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-            {
-                context.Response.Headers.Append("Token-Expired", "true");
-            }
-            return Task.CompletedTask;
-        }
     };
 })
 // Add support for authentication scheme that can handle both cookies and JWT
@@ -126,27 +155,19 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-
-// Register real services for production use, but conditionally use mocks for development/testing
-if (builder.Environment.IsDevelopment())
-{
-    // Use mock services for development/testing
-    builder.Services.AddScoped<IEmailService, SunMovement.Web.Areas.Api.Models.NoOpEmailService>();
-    builder.Services.AddTransient<IFileUploadService, SunMovement.Web.Areas.Api.Models.MockFileUploadService>();
-}
-else
-{
-    // Use real services for production
-    builder.Services.AddScoped<IEmailService, EmailService>();
-    builder.Services.AddTransient<IFileUploadService, FileUploadService>();
-}
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 // Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJsApp",
         corsBuilder => corsBuilder
-            .WithOrigins("http://localhost:3000") // Add your frontend URL
+            .WithOrigins(
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "http://localhost:5000",
+                "https://localhost:5001") // Add all possible frontend URLs
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
@@ -182,15 +203,43 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Use our custom error handler
-    app.UseExceptionHandler("/Error");
-    // Add detailed status code pages for common errors
-    app.UseStatusCodePagesWithReExecute("/Error/{0}");
+    app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Safe HTTPS redirection that first checks if development environment 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+else
+{
+    // In development, handle HTTPS redirection manually
+    // to prevent errors if developer certificate isn't set up
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.IsHttps || context.Request.Headers["X-Forwarded-Proto"] == "https")
+        {
+            // Already HTTPS
+            await next();
+            return;
+        }
+
+        // Try HTTPS redirect, but gracefully handle if not available
+        try
+        {
+            var httpsPort = 5001;
+            var httpsUrl = $"https://{context.Request.Host.Host}:{httpsPort}{context.Request.Path}{context.Request.QueryString}";
+            context.Response.Redirect(httpsUrl);
+        }
+        catch
+        {
+            // If redirection fails, continue with HTTP
+            await next();
+        }
+    });
+}
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -206,17 +255,27 @@ app.MapControllerRoute(
     pattern: "account/{action=Index}/{id?}",
     defaults: new { controller = "Account", area = "" });
 
-// Create area-specific routes for Admin area
+app.MapControllerRoute(
+    name: "admin-area",
+    pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}",
+    defaults: new { area = "Admin" });
+
+// Define route for admin dashboard
+app.MapControllerRoute(
+    name: "admin-dashboard",
+    pattern: "admin",
+    defaults: new { controller = "AdminDashboard", action = "Index", area = "Admin" });
+
+app.MapControllerRoute(
+    name: "admin-manage",
+    pattern: "admin/manage/{action=Index}/{id?}",
+    defaults: new { controller = "Admin" });
+
+// Create area-specific routes
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",
     pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}");
-
-// Create area-specific routes for API area
-app.MapAreaControllerRoute(
-    name: "api",
-    areaName: "Api",
-    pattern: "api/{controller=Home}/{action=Index}/{id?}");
 
 // Default route 
 app.MapControllerRoute(

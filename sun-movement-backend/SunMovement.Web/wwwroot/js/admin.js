@@ -1,18 +1,37 @@
 // Admin panel functionality
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin.js loaded - DOMContentLoaded fired');
+    
     // Sidebar toggle functionality
     const sidebarToggle = document.getElementById('sidebarToggle');
+    console.log('Sidebar toggle button found:', sidebarToggle);
+    
     if (sidebarToggle) {
         // Check if sidebar state is saved in localStorage
-        if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
+        const savedState = localStorage.getItem('sb|sidebar-toggle');
+        console.log('Saved sidebar state:', savedState);
+        
+        if (savedState === 'true') {
             document.body.classList.add('sb-sidenav-toggled');
+            console.log('Applied saved toggled state');
         }
         
         sidebarToggle.addEventListener('click', function(e) {
             e.preventDefault();
+            console.log('Sidebar toggle clicked');
+            
             document.body.classList.toggle('sb-sidenav-toggled');
-            localStorage.setItem('sb|sidebar-toggle', document.body.classList.contains('sb-sidenav-toggled'));
+            const isToggled = document.body.classList.contains('sb-sidenav-toggled');
+            
+            console.log('Sidebar toggled. New state:', isToggled);
+            console.log('Body classes:', document.body.className);
+            
+            localStorage.setItem('sb|sidebar-toggle', isToggled);
         });
+        
+        console.log('Sidebar toggle event listener attached');
+    } else {
+        console.error('Sidebar toggle button not found!');
     }
 
     // Theme toggle functionality

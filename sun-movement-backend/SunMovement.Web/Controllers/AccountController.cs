@@ -53,14 +53,18 @@ namespace SunMovement.Web.Controllers
             }  
   
             return View(model);  
-        }
-  
-        [HttpPost]  
+        }        [HttpPost]  
         [ValidateAntiForgeryToken]  
         public async Task<IActionResult> Logout()  
         {  
             await _signInManager.SignOutAsync();  
             return RedirectToAction(nameof(HomeController.Index), "Home");  
-        }  
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }  
-}  
+}

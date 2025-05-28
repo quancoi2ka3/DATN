@@ -1,4 +1,32 @@
 /* Admin panel styles */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --sidebar-bg: #212529;
+    --sidebar-color: rgba(255, 255, 255, 0.85);
+    --sidebar-heading: rgba(255, 255, 255, 0.6);
+    --topnav-bg: #343a40;
+    --topnav-color: rgba(255, 255, 255, 0.85);
+    --active-link-bg: rgba(255, 255, 255, 0.1);
+}
+
+body[data-theme='dark'] {
+    --light-color: #212529;
+    --dark-color: #f8f9fa;
+    --sidebar-bg: #0a0c0e;
+    --sidebar-color: rgba(255, 255, 255, 0.9);
+    --topnav-bg: #141619;
+    --active-link-bg: rgba(255, 255, 255, 0.2);
+    --bs-body-color: #e9ecef;
+    --bs-body-bg: #212529;
+}
+
 body {
     margin: 0;
     font-family: var(--bs-body-font-family);
@@ -7,9 +35,10 @@ body {
     line-height: var(--bs-body-line-height);
     color: var(--bs-body-color);
     text-align: var(--bs-body-text-align);
-    background-color: #f8f9fa;
+    background-color: var(--light-color);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .sb-nav-fixed #layoutSidenav #layoutSidenav_nav {
@@ -99,8 +128,11 @@ body {
 
 .sb-sidenav .sb-sidenav-menu .nav .nav-link .sb-nav-link-icon {
     font-size: 0.9rem;
-    padding-right: 0.5rem;
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    text-align: center;
 }
+ 
 
 .sb-sidenav .sb-sidenav-menu .nav .nav-link .sb-sidenav-collapse-arrow {
     display: inline-block;

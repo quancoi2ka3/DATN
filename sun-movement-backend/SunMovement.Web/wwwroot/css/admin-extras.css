@@ -1,0 +1,166 @@
+/* Additional styles for improved admin layout */
+.sb-sidenav .sb-sidenav-menu .nav .nav-link.active {
+    background-color: var(--active-link-bg);
+    color: #fff;
+    font-weight: 500;
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Top navigation improvements */
+.sb-topnav .navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* User profile dropdown */
+.profile-dropdown .dropdown-toggle::after {
+    display: none;
+}
+
+.profile-dropdown .dropdown-toggle img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.user-info {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.user-info .user-name {
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.user-info .user-role {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Breadcrumbs */
+.breadcrumb-wrapper {
+    background-color: rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0.5rem 1.5rem;
+}
+
+body[data-theme='dark'] .breadcrumb-wrapper {
+    background-color: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Dashboard widgets */
+.dashboard-widget {
+    border-radius: 0.375rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboard-widget:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
+
+.notification-dropdown .dropdown-menu {
+    width: 320px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.notification-dropdown .dropdown-header {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+}
+
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+    background-color: rgba(0,0,0,0.03);
+}
+
+.notification-item.unread {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.notification-item .notification-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.notification-item .notification-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+}
+
+/* Quick search */
+.quick-search {
+    position: relative;
+    max-width: 200px;
+}
+
+.quick-search .form-control {
+    padding-left: 2rem;
+    background-color: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+}
+
+.quick-search .form-control::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.quick-search .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.6);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.theme-toggle:hover {
+    color: white;
+    transform: rotate(15deg);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .sb-nav-fixed #layoutSidenav #layoutSidenav_content {
+        padding-left: 0;
+    }
+    
+    .quick-search {
+        max-width: 150px;
+    }
+    
+    .notification-dropdown .dropdown-menu {
+        width: 290px;
+    }
+}

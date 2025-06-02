@@ -7,17 +7,16 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Schedules for @serviceName</h1>
-    <ol class="breadcrumb mb-4">
+    <h1 class="mt-4">Schedules for @serviceName</h1>    <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/services">Services</a></li>
+        <li class="breadcrumb-item"><a href="/admin/servicesadmin">Services</a></li>
         <li class="breadcrumb-item active">Schedules</li>
     </ol>
     
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div><i class="fas fa-calendar-alt me-1"></i> Schedule List</div>
-            <a href="/admin/services/@serviceId/schedules/create" class="btn btn-primary btn-sm">Add New Schedule</a>
+            <a href="/admin/servicesadmin/createschedule/@serviceId" class="btn btn-primary btn-sm">Add New Schedule</a>
         </div>
         <div class="card-body">
             @if (!Model.Any())
@@ -28,7 +27,7 @@
             }
             else
             {
-                <table id="schedulesTable" class="table table-striped table-hover">
+                <table id="schedulesTable" class="table table-striped table-hover datatable">
                     <thead>
                         <tr>
                             <th>Day of Week</th>
@@ -50,14 +49,13 @@
                                 <td>@schedule.Instructor</td>
                                 <td>@schedule.Capacity</td>
                                 <td>@schedule.Location</td>
-                                <td>
-                                    <div class="btn-group table-actions">
-                                        <a href="/admin/services/@serviceId/schedules/edit/@schedule.Id" class="btn btn-sm btn-primary">
+                                <td>                                    <div class="btn-group table-actions">
+                                        <a href="/admin/servicesadmin/editschedule/@schedule.Id" class="btn btn-sm btn-primary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="/admin/services/@serviceId/schedules/delete/@schedule.Id" class="btn btn-sm btn-danger">
+                                        <button class="btn btn-sm btn-danger delete-schedule" data-schedule-id="@schedule.Id">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -65,19 +63,43 @@
                     </tbody>
                 </table>
             }
-            
-            <div class="mt-4">
-                <a href="/admin/services" class="btn btn-secondary">Back to Services</a>
+              <div class="mt-4">
+                <a href="/admin/servicesadmin" class="btn btn-secondary">Back to Services</a>
             </div>
         </div>
     </div>
 </div>
 
+@* DataTable initialization is handled by admin-datatables.js for tables with 'datatable' class *@
+
 @section Scripts {
     <script>
         $(document).ready(function() {
-            $('#schedulesTable').DataTable({
-                responsive: true
+            $('.delete-schedule').on('click', function() {
+                if (confirm('Are you sure you want to delete this schedule?')) {
+                    const scheduleId = $(this).data('schedule-id');
+                    
+                    $.ajax({
+                        url: '/admin/servicesadmin/deleteschedule/' + scheduleId,
+                        type: 'POST',
+                        success: function(result) {
+                            if (result.success) {
+                                // Display success message
+                                toastr.success(result.message || 'Schedule deleted successfully');
+                                // Reload the page after a short delay
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                // Display error message
+                                toastr.error(result.message || 'Error deleting schedule');
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Failed to delete schedule. Please try again.');
+                        }
+                    });
+                }
             });
         });
     </script>

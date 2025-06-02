@@ -32,9 +32,27 @@ namespace SunMovement.Core.Services
             if (!Array.Exists(allowedExtensions, ext => ext.Equals(fileExtension)))
             {
                 throw new ArgumentException("Invalid file type. Only image files are allowed.");
-            }            // Create uploads folder if it doesn't exist
-            var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", folder);
-            Directory.CreateDirectory(uploadsFolder);
+            }            // Create uploads folder structure if it doesn't exist
+            var wwwrootPath = Path.Combine(_environment.ContentRootPath, "wwwroot");
+            var uploadsPath = Path.Combine(wwwrootPath, "uploads");
+            var uploadsFolder = Path.Combine(uploadsPath, folder);
+            
+            // Make sure all directories in the path exist
+            if (!Directory.Exists(wwwrootPath))
+            {
+                Directory.CreateDirectory(wwwrootPath);
+                _logger.LogInformation("Created wwwroot directory");
+            }
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+                _logger.LogInformation("Created uploads directory");
+            }
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+                _logger.LogInformation($"Created {folder} uploads directory");
+            }
 
             // Generate unique filename
             var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";

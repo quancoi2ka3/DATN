@@ -3,12 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Core.Services;
+using SunMovement.Core.Mappings;
 using SunMovement.Infrastructure.Data;
 using SunMovement.Infrastructure.Repositories;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -152,11 +155,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Register repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+// Register memory cache
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ICacheService, CacheService>();
+
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+
+// Register AutoMapper profiles
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMovement.Web.Mappings.WebMappingProfile).Assembly);
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -179,18 +190,33 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Seed the database
+// Migrate and seed the database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        
+        // Apply any pending migrations
+        Console.WriteLine("Applying pending database migrations...");
+        context.Database.Migrate();
+        Console.WriteLine("Database migration completed successfully.");
+        
+        // Seed initial data
+        Console.WriteLine("Initializing database with seed data...");
         DbInitializer.Initialize(services).Wait();
+        Console.WriteLine("Database seeding completed successfully.");
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+        Console.WriteLine($"ERROR: Database setup failed: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+        }
     }
 }
 
@@ -249,29 +275,19 @@ app.UseCors("AllowNextJsApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Define route for admin area and controllers
+// Define route for account
 app.MapControllerRoute(
     name: "account",
     pattern: "account/{action=Index}/{id?}",
     defaults: new { controller = "Account", area = "" });
 
-app.MapControllerRoute(
-    name: "admin-area",
-    pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}",
-    defaults: new { area = "Admin" });
-
-// Define route for admin dashboard
+// Define route for admin dashboard shortcut
 app.MapControllerRoute(
     name: "admin-dashboard",
     pattern: "admin",
     defaults: new { controller = "AdminDashboard", action = "Index", area = "Admin" });
 
-app.MapControllerRoute(
-    name: "admin-manage",
-    pattern: "admin/manage/{action=Index}/{id?}",
-    defaults: new { controller = "Admin" });
-
-// Create area-specific routes
+// Admin area route (only one definition for admin routes)
 app.MapAreaControllerRoute(
     name: "admin",
     areaName: "Admin",

@@ -7,19 +7,21 @@ using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.DTOs;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Core.Services;
 
 namespace SunMovement.Web.Areas.Api.Controllers
 {
     [Area("Api")]
     [Route("api/services")]
-    [ApiController]
-    public class ServicesController : ControllerBase
+    [ApiController]    public class ServicesController : ControllerBase
     {
         private readonly IServiceService _serviceService;
+        private readonly ICacheService _cacheService;
 
-        public ServicesController(IServiceService serviceService)
+        public ServicesController(IServiceService serviceService, ICacheService cacheService)
         {
             _serviceService = serviceService;
+            _cacheService = cacheService;
         }
 
         // GET: api/services
@@ -128,19 +130,33 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 Features = service.Features ?? string.Empty,
                 IsActive = service.IsActive
             };
-        }
-
-        private static Service MapToEntity(ServiceDto dto, Service existingService = null)
+        }        private static Service MapToEntity(ServiceDto dto, Service existingService = null)
         {
             var service = existingService ?? new Service();
-            service.Name = dto.Name;
-            service.Description = dto.Description;
+            service.Name = dto.Name ?? string.Empty;
+            service.Description = dto.Description ?? string.Empty;
             service.ImageUrl = dto.ImageUrl;
             service.Price = dto.Price;
             service.Type = dto.Type;
-            service.Features = dto.Features;
+            service.Features = dto.Features ?? string.Empty;
             service.IsActive = dto.IsActive;
             return service;
+        }
+
+        // POST: api/services/clear-cache
+        [HttpPost("clear-cache")]
+        [Authorize(Roles = "Admin")]
+        public ActionResult ClearCache()
+        {
+            try
+            {
+                _cacheService.Clear();
+                return Ok(new { message = "Service cache cleared successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error clearing cache", error = ex.Message });
+            }
         }
     }
 }

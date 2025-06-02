@@ -15,10 +15,10 @@ namespace SunMovement.Infrastructure.Repositories
         private IProductRepository _productRepository;
         private IServiceRepository _serviceRepository;
         private IRepository<Event> _eventRepository;
-        private IRepository<FAQ> _faqRepository;
-        private IRepository<ContactMessage> _contactMessageRepository;
+        private IRepository<FAQ> _faqRepository;        private IRepository<ContactMessage> _contactMessageRepository;
         private IRepository<Order> _orderRepository;
         private IRepository<OrderItem> _orderItemRepository;
+        private IShoppingCartRepository _shoppingCartRepository;
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -41,10 +41,11 @@ namespace SunMovement.Infrastructure.Repositories
             _contactMessageRepository ??= new Repository<ContactMessage>(_context);
 
         public IRepository<Order> Orders => 
-            _orderRepository ??= new Repository<Order>(_context);
-
-        public IRepository<OrderItem> OrderItems => 
+            _orderRepository ??= new Repository<Order>(_context);        public IRepository<OrderItem> OrderItems => 
             _orderItemRepository ??= new Repository<OrderItem>(_context);
+            
+        public IShoppingCartRepository ShoppingCarts => 
+            _shoppingCartRepository ??= new ShoppingCartRepository(_context);
 
         public async Task<int> CompleteAsync()
         {

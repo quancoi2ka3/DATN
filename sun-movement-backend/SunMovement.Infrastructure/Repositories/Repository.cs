@@ -35,25 +35,25 @@ namespace SunMovement.Infrastructure.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
-        public async Task<T> AddAsync(T entity)
-        {
-            await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
-            return entity;
-        }
+    public async Task<T> AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+        // Removed SaveChangesAsync as this should be handled by UnitOfWork
+        return entity;
+    }
 
-        public async Task<T> UpdateAsync(T entity)
-        {
-            _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return entity;
-        }
+    public async Task<T> UpdateAsync(T entity)
+    {
+        _context.Entry(entity).State = EntityState.Modified;
+        // Removed SaveChangesAsync as this should be handled by UnitOfWork
+        return entity;
+    }
 
-        public async Task DeleteAsync(T entity)
-        {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+    public async Task DeleteAsync(T entity)
+    {
+        _dbSet.Remove(entity);
+        // Removed SaveChangesAsync as this should be handled by UnitOfWork
+    }
 
         public async Task<int> CountAsync()
         {

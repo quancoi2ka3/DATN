@@ -1,6 +1,6 @@
 # Sun Movement Backend
 
-This is the backend API and admin interface for the Sun Movement application. It provides all the necessary functionality to power the Sun Movement frontend, including user authentication, product management, service management, orders, events, FAQs, and contact messaging.
+This is the backend API and admin interface for the Sun Movement application. It provides all the necessary functionality to power the Sun Movement frontend, including user authentication, product management, service management, shopping cart functionality, orders, events, FAQs, and contact messaging.
 
 ## Project Structure (Updated)
 
@@ -57,6 +57,7 @@ Contains all API controllers for the frontend:
 - Authentication API
 - Products API
 - Services API
+- Shopping Cart API
 - Orders API
 - Events API
 - FAQs API
@@ -69,6 +70,7 @@ Contains all API controllers for the frontend:
 - **User Management**: User registration, login, and role-based authorization
 - **Product Management**: CRUD operations for products, categorized as Sportswear and Supplements
 - **Service Management**: CRUD operations for services, categorized as Yoga, Strength, and Calisthenics
+- **Shopping Cart**: Comprehensive shopping cart functionality with caching support, allowing users to add/remove products and services ([details](SHOPPING_CART_SYSTEM.md))
 - **Order Processing**: Order creation, updating, and tracking
 - **Event Management**: Creation and management of events
 - **FAQ Management**: Creation and management of FAQs

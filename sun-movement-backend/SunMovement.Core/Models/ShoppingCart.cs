@@ -1,0 +1,114 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SunMovement.Core.Models
+{
+    public class ShoppingCart
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
+        // Navigation properties
+        public virtual ApplicationUser? User { get; set; }
+        public virtual ICollection<CartItem>? Items { get; set; } = new List<CartItem>();
+        
+        // Computed properties
+        public decimal TotalAmount => Items?.Sum(item => item.Subtotal) ?? 0m;
+        public int TotalItems => Items?.Sum(item => item.Quantity) ?? 0;
+          // Helper methods
+        public void AddItem(Product product, int quantity)
+        {
+            if (Items == null)
+            {
+                Items = new List<CartItem>();
+            }
+            
+            var existingItem = Items.FirstOrDefault(item => item.ProductId == product.Id);
+            
+            if (existingItem != null)
+            {
+                // Update existing item
+                existingItem.Quantity += quantity;
+                existingItem.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Add new item
+                var newItem = new CartItem
+                {
+                    ProductId = product.Id,
+                    ItemName = product.Name,
+                    ItemImageUrl = product.ImageUrl ?? "",
+                    Quantity = quantity,
+                    UnitPrice = product.DiscountPrice > 0 ? product.DiscountPrice : product.Price,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                
+                Items.Add(newItem);
+            }
+            
+            UpdatedAt = DateTime.UtcNow;
+        }
+        
+        public void UpdateItemQuantity(int productId, int quantity)
+        {
+            var item = Items?.FirstOrDefault(i => i.ProductId == productId);
+            
+            if (item != null)
+            {
+                item.Quantity = quantity;
+                item.Subtotal = item.UnitPrice * quantity;
+                item.UpdatedAt = DateTime.UtcNow;
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+        
+        public void RemoveItem(int productId)
+        {
+            var item = Items?.FirstOrDefault(i => i.ProductId == productId);
+            
+            if (item != null && Items != null)
+            {
+                Items.Remove(item);
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+        
+        public void ClearItems()
+        {
+            if (Items != null)
+            {
+                Items.Clear();
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+        
+        public Order CreateOrder(string shippingAddress, string email, string phoneNumber)
+        {
+            var order = new Order
+            {
+                UserId = UserId,
+                OrderDate = DateTime.UtcNow,
+                ShippingAddress = shippingAddress,
+                Email = email,
+                PhoneNumber = phoneNumber,
+                TotalAmount = TotalAmount,
+                Status = OrderStatus.Pending,
+                Items = Items?.Select(item => new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice,
+                    Subtotal = item.Subtotal
+                }).ToList()
+            };
+            
+            return order;
+        }
+    }
+}

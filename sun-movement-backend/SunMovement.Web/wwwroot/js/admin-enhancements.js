@@ -1,32 +1,7 @@
 // Enhanced admin functionality
 $(document).ready(function() {
-    // Initialize DataTables with enhanced options
-    if ($.fn.DataTable) {
-        $('.datatable').DataTable({
-            responsive: true,
-            language: {
-                search: "<i class='fas fa-search'></i>",
-                searchPlaceholder: "Search...",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                infoEmpty: "Showing 0 to 0 of 0 entries",
-                infoFiltered: "(filtered from _MAX_ total entries)",
-                paginate: {
-                    first: "<i class='fas fa-angle-double-left'></i>",
-                    previous: "<i class='fas fa-angle-left'></i>",
-                    next: "<i class='fas fa-angle-right'></i>",
-                    last: "<i class='fas fa-angle-double-right'></i>"
-                }
-            },
-            pageLength: 10,
-            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-            dom: '<"top"fl>rt<"bottom"ip><"clear">',
-            drawCallback: function() {
-                // Add tooltips to action buttons after table draws
-                $('[data-bs-toggle="tooltip"]').tooltip();
-            }
-        });
-    }
+    // DataTable initialization is now handled by admin-datatables.js
+    // This file focuses on other enhancements
 
     // Initialize Select2 for enhanced dropdowns if available
     if ($.fn.select2) {

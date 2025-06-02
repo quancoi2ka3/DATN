@@ -8,19 +8,23 @@
     <h1 class="mt-4">Create Product</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
+        <li class="breadcrumb-item"><a href="/admin/ProductsAdmin">Products</a></li>
         <li class="breadcrumb-item active">Create</li>
     </ol>
-    
-    <div class="card mb-4">
+      <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-plus me-1"></i> New Product
         </div>
         <div class="card-body">
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> @TempData["Error"]
+                </div>
+            }
             <form asp-action="Create" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                
-                <div class="row mb-3">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                  <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label asp-for="Name" class="control-label required"></label>
@@ -35,6 +39,23 @@
                                 <option value="">-- Select Category --</option>
                             </select>
                             <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SubCategory" class="control-label">Sub Category</label>
+                            <input asp-for="SubCategory" class="form-control" />
+                            <span asp-validation-for="SubCategory" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="StockQuantity" class="control-label required">Stock Quantity</label>
+                            <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
                         </div>
                     </div>
                 </div>

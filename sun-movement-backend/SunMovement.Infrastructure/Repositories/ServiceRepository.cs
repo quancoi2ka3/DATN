@@ -46,26 +46,18 @@ namespace SunMovement.Infrastructure.Repositories
             return await _dbSet
                 .Include(s => s.Schedules)
                 .FirstOrDefaultAsync(s => s.Id == id) ?? new Service();
-        }
-
-        public async Task<ServiceSchedule> AddScheduleAsync(ServiceSchedule schedule)
+        }        public async Task<ServiceSchedule> AddScheduleAsync(ServiceSchedule schedule)
         {
             await _dbContext.ServiceSchedules.AddAsync(schedule);
-            await _dbContext.SaveChangesAsync();
             return schedule;
-        }
-
-        public async Task<ServiceSchedule> UpdateScheduleAsync(ServiceSchedule schedule)
+        }        public Task<ServiceSchedule> UpdateScheduleAsync(ServiceSchedule schedule)
         {
             _dbContext.Entry(schedule).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
-            return schedule;
-        }
-
-        public async Task DeleteScheduleAsync(ServiceSchedule schedule)
+            return Task.FromResult(schedule);
+        }        public Task DeleteScheduleAsync(ServiceSchedule schedule)
         {
             _dbContext.ServiceSchedules.Remove(schedule);
-            await _dbContext.SaveChangesAsync();
+            return Task.CompletedTask;
         }
     }
 }

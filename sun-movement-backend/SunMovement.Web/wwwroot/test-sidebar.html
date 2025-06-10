@@ -43,6 +43,7 @@
                     <h1 class="mt-4">Sidebar Toggle Test</h1>
                     <p>Click the hamburger menu button to test sidebar toggle functionality.</p>
                     <div id="debugOutput"></div>
+                    <button class="btn btn-primary mt-3" id="clearLocalStorage">Clear localStorage</button>
                 </div>
             </main>
         </div>
@@ -52,9 +53,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             const debugOutput = document.getElementById('debugOutput');
             const sidebarToggle = document.getElementById('sidebarToggle');
+            const clearLocalStorageBtn = document.getElementById('clearLocalStorage');
             
             debugOutput.innerHTML += '<p>Script loaded successfully</p>';
             debugOutput.innerHTML += '<p>Sidebar toggle button found: ' + (sidebarToggle ? 'YES' : 'NO') + '</p>';
+            debugOutput.innerHTML += '<p>Current localStorage value: ' + localStorage.getItem('sb|sidebar-toggle') + '</p>';
+            
+            // Check if sidebar state is saved in localStorage
+            const savedState = localStorage.getItem('sb|sidebar-toggle');
+            debugOutput.innerHTML += '<p>Saved sidebar state: ' + savedState + '</p>';
+            
+            if (savedState === 'true') {
+                document.body.classList.add('sb-sidenav-toggled');
+                debugOutput.innerHTML += '<p>Applied saved toggled state</p>';
+            }
             
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function(e) {
@@ -63,9 +75,20 @@
                     
                     document.body.classList.toggle('sb-sidenav-toggled');
                     const isToggled = document.body.classList.contains('sb-sidenav-toggled');
+                    
                     debugOutput.innerHTML += '<p>Sidebar is now: ' + (isToggled ? 'HIDDEN' : 'VISIBLE') + '</p>';
+                    debugOutput.innerHTML += '<p>Body classes: ' + document.body.className + '</p>';
+                    
+                    localStorage.setItem('sb|sidebar-toggle', isToggled);
+                    debugOutput.innerHTML += '<p>Updated localStorage value: ' + localStorage.getItem('sb|sidebar-toggle') + '</p>';
                 });
             }
+            
+            clearLocalStorageBtn.addEventListener('click', function() {
+                localStorage.removeItem('sb|sidebar-toggle');
+                debugOutput.innerHTML += '<p>Cleared localStorage at ' + new Date().toLocaleTimeString() + '</p>';
+                debugOutput.innerHTML += '<p>Current localStorage value: ' + localStorage.getItem('sb|sidebar-toggle') + '</p>';
+            });
         });
     </script>
 </body>

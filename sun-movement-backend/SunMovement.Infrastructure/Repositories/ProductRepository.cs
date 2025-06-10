@@ -20,14 +20,21 @@ namespace SunMovement.Infrastructure.Repositories
                 .Where(p => p.IsActive && p.IsFeatured)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(ProductCategory category)
+        }        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(ProductCategory category)
         {
-            return await _dbSet
-                .Where(p => p.IsActive && p.Category == category)
-                .OrderBy(p => p.Name)
-                .ToListAsync();
+            try
+            {
+                return await _dbSet
+                    .Where(p => p.IsActive && p.Category == category)
+                    .OrderBy(p => p.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error in GetProductsByCategoryAsync: {ex.Message}");
+                throw new Exception($"Failed to retrieve products for category {category}: {ex.Message}", ex);
+            }
         }
 
         public async Task<IEnumerable<Product>> SearchProductsAsync(string query)

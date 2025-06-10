@@ -1,13 +1,15 @@
-// filepath: next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    domains: [],
+  swcMinify: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:5203/api/:path*', // Use your backend port
+      },
+    ];
   },
-  experimental: {
-    optimizeCss: true,
-  },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

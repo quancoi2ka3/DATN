@@ -10,21 +10,20 @@ $(document).ready(function() {
         });
     }
 
-    // File input previews
-    $('.custom-file-input').on('change', function() {
-        var fileName = $(this).val().split('\\').pop();
-        $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
-        
-        // Show image preview if it's an image
+    // Image preview functionality
+    $('.form-control[type="file"]').on('change', function() {
         var fileInput = this;
+        var reader = new FileReader();
+        var previewContainer = $(fileInput).closest('.form-group').find('.image-preview');
+        
         if (fileInput.files && fileInput.files[0]) {
-            var reader = new FileReader();
             reader.onload = function(e) {
-                var previewContainer = $(fileInput).closest('.form-group').find('.image-preview');
                 if (previewContainer.length) {
+                    // Update existing preview
                     previewContainer.attr('src', e.target.result);
                 } else {
-                    $('<img class="image-preview img-fluid rounded mt-2" src="' + e.target.result + '">').insertAfter($(fileInput).closest('.custom-file'));
+                    // Create new preview
+                    $('<img class="image-preview img-fluid rounded mt-2" src="' + e.target.result + '">').insertAfter($(fileInput));
                 }
             }
             reader.readAsDataURL(fileInput.files[0]);
@@ -58,6 +57,7 @@ $(document).ready(function() {
             selector: '.richtext',
             height: 300,
             menubar: false,
+            language: 'vi',
             plugins: [
                 'advlist autolink lists link image charmap print preview anchor',
                 'searchreplace visualblocks code fullscreen',

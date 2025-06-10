@@ -1,6 +1,5 @@
 @{
-    ViewData["Title"] = "Admin Dashboard";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Trang Quản Trị";
 }
 
 <div class="container-fluid px-4">
@@ -8,19 +7,19 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
             <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                <i class="fas fa-tachometer-alt me-2"></i>Trang Quản Trị
             </h1>
-            <p class="mb-0 text-muted">Welcome back! Here's what's happening with your business today.</p>
+            <p class="mb-0 text-muted">Chào mừng trở lại! Đây là những gì đang xảy ra với doanh nghiệp của bạn hôm nay.</p>
         </div>
         <div class="d-none d-sm-inline-block">
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-download me-1"></i>Generate Report
+                    <i class="fas fa-download me-1"></i>Tạo Báo Cáo
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Sales Report</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i>User Analytics</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-search me-2"></i>Search Analytics</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Báo Cáo Bán Hàng</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i>Phân Tích Người Dùng</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-search me-2"></i>Phân Tích Tìm Kiếm</a></li>
                 </ul>
             </div>
         </div>
@@ -33,9 +32,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Products</div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Sản Phẩm</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalProducts</div>
-                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 12% from last month</div>
+                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 12% so với tháng trước</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-box fa-2x text-gray-300"></i>
@@ -44,7 +43,7 @@
                 </div>
                 <div class="card-footer bg-light">
                     <a class="small text-primary stretched-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
                     </a>
                 </div>
             </div>
@@ -55,9 +54,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Total Services</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tổng Dịch Vụ</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalServices</div>
-                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 8% from last month</div>
+                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 8% so với tháng trước</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-concierge-bell fa-2x text-gray-300"></i>
@@ -66,7 +65,7 @@
                 </div>
                 <div class="card-footer bg-light">
                     <a class="small text-warning stretched-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
                     </a>
                 </div>
             </div>
@@ -77,9 +76,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Orders</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng Đơn Hàng</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalOrders</div>
-                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 15% from last month</div>
+                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 15% so với tháng trước</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
@@ -88,7 +87,7 @@
                 </div>
                 <div class="card-footer bg-light">
                     <a class="small text-success stretched-link" asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
                     </a>
                 </div>
             </div>
@@ -99,9 +98,9 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Users</div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tổng Người Dùng</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalUsers</div>
-                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 5% from last month</div>
+                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 5% so với tháng trước</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -110,7 +109,7 @@
                 </div>
                 <div class="card-footer bg-light">
                     <a class="small text-info stretched-link" asp-area="Admin" asp-controller="UsersAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>View Details
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
                     </a>
                 </div>
             </div>
@@ -124,7 +123,7 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Page Views (Today)</div>
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Lượt Xem (Hôm Nay)</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(ViewBag.TodayPageViews ?? 1247)</div>
                         </div>
                         <div class="col-auto">
@@ -140,8 +139,8 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Revenue (This Month)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$@(ViewBag.MonthlyRevenue ?? "45,320")</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Doanh Thu (Tháng Này)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(ViewBag.MonthlyRevenue ?? "45,320") VND</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -156,7 +155,7 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Search Queries (Today)</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Lượt Tìm Kiếm (Hôm Nay)</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(ViewBag.TodaySearches ?? 342)</div>
                         </div>
                         <div class="col-auto">
@@ -172,7 +171,7 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Pending Payments</div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Thanh Toán Đang Chờ</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">@(ViewBag.PendingPayments ?? 23)</div>
                         </div>
                         <div class="col-auto">
@@ -188,16 +187,16 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-area me-2"></i>Revenue Overview
+                        <i class="fas fa-chart-area me-2"></i>Tổng Quan Doanh Thu
                     </h6>
                     <div class="dropdown no-arrow">
                         <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-                            <a class="dropdown-item" href="#">Last 7 days</a>
-                            <a class="dropdown-item" href="#">Last 30 days</a>
-                            <a class="dropdown-item" href="#">Last 90 days</a>
+                            <a class="dropdown-item" href="#">7 ngày qua</a>
+                            <a class="dropdown-item" href="#">30 ngày qua</a>
+                            <a class="dropdown-item" href="#">90 ngày qua</a>
                         </div>
                     </div>
                 </div>
@@ -213,7 +212,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-pie me-2"></i>Revenue Sources
+                        <i class="fas fa-chart-pie me-2"></i>Nguồn Doanh Thu
                     </h6>
                 </div>
                 <div class="card-body">
@@ -222,10 +221,10 @@
                     </div>
                     <div class="mt-4 text-center small">
                         <span class="mr-2">
-                            <i class="fas fa-circle text-primary"></i> Products
+                            <i class="fas fa-circle text-primary"></i> Sản Phẩm
                         </span>
                         <span class="mr-2">
-                            <i class="fas fa-circle text-success"></i> Services
+                            <i class="fas fa-circle text-success"></i> Dịch Vụ
                         </span>
                     </div>
                 </div>
@@ -239,7 +238,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-bell me-2"></i>Recent Activity & Alerts
+                        <i class="fas fa-bell me-2"></i>Hoạt Động Gần Đây & Thông Báo
                     </h6>
                 </div>
                 <div class="card-body">
@@ -249,7 +248,7 @@
                             <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                 <div>
                                     <i class="fas fa-clock text-warning me-2"></i>
-                                    <span class="small">Pending Orders</span>
+                                    <span class="small">Đơn Hàng Đang Chờ</span>
                                 </div>
                                 <span class="badge bg-warning rounded-pill">@ViewBag.PendingOrders</span>
                             </div>
@@ -259,7 +258,7 @@
                             <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                                 <div>
                                     <i class="fas fa-envelope text-info me-2"></i>
-                                    <span class="small">Unread Messages</span>
+                                    <span class="small">Tin Nhắn Chưa Đọc</span>
                                 </div>
                                 <span class="badge bg-info rounded-pill">@ViewBag.UnreadMessages</span>
                             </div>
@@ -267,14 +266,14 @@
                         <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                             <div>
                                 <i class="fas fa-exclamation-triangle text-danger me-2"></i>
-                                <span class="small">Low Stock Items</span>
+                                <span class="small">Sản Phẩm Sắp Hết Hàng</span>
                             </div>
                             <span class="badge bg-danger rounded-pill">@(ViewBag.LowStockItems ?? 5)</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
                             <div>
                                 <i class="fas fa-star text-warning me-2"></i>
-                                <span class="small">New Reviews</span>
+                                <span class="small">Đánh Giá Mới</span>
                             </div>
                             <span class="badge bg-warning rounded-pill">@(ViewBag.NewReviews ?? 12)</span>
                         </div>
@@ -282,7 +281,7 @@
                         {
                             <div class="list-group-item border-0 px-0">
                                 <i class="fas fa-check-circle text-success me-2"></i>
-                                <span class="small text-success">All notifications cleared!</span>
+                                <span class="small text-success">Tất cả thông báo đã được xử lý!</span>
                             </div>
                         }
                     </div>
@@ -294,7 +293,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-tools me-2"></i>Quick Management Actions
+                        <i class="fas fa-tools me-2"></i>Thao Tác Quản Lý Nhanh
                     </h6>
                 </div>
                 <div class="card-body">
@@ -302,37 +301,37 @@
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Create" class="btn btn-outline-primary w-100 py-3">
                                 <i class="fas fa-plus-circle fa-lg mb-2 d-block"></i>
-                                <span class="small">Add Product</span>
+                                <span class="small">Thêm Sản Phẩm</span>
                             </a>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Create" class="btn btn-outline-warning w-100 py-3">
                                 <i class="fas fa-concierge-bell fa-lg mb-2 d-block"></i>
-                                <span class="small">Add Service</span>
+                                <span class="small">Thêm Dịch Vụ</span>
                             </a>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index" class="btn btn-outline-success w-100 py-3">
                                 <i class="fas fa-clipboard-list fa-lg mb-2 d-block"></i>
-                                <span class="small">Manage Orders</span>
+                                <span class="small">Quản Lý Đơn Hàng</span>
                             </a>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="PaymentsAdmin" asp-action="Index" class="btn btn-outline-info w-100 py-3">
                                 <i class="fas fa-credit-card fa-lg mb-2 d-block"></i>
-                                <span class="small">Payment Management</span>
+                                <span class="small">Quản Lý Thanh Toán</span>
                             </a>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="AnalyticsAdmin" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
                                 <i class="fas fa-chart-bar fa-lg mb-2 d-block"></i>
-                                <span class="small">Analytics</span>
+                                <span class="small">Phân Tích</span>
                             </a>
                         </div>
                         <div class="col-lg-4 col-md-6 mb-3">
                             <a asp-area="Admin" asp-controller="ContactMessagesAdmin" asp-action="Index" class="btn btn-outline-dark w-100 py-3">
                                 <i class="fas fa-envelope fa-lg mb-2 d-block"></i>
-                                <span class="small">Messages</span>
+                                <span class="small">Tin Nhắn</span>
                             </a>
                         </div>
                     </div>
@@ -347,7 +346,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-search me-2"></i>Search Analytics
+                        <i class="fas fa-search me-2"></i>Phân Tích Tìm Kiếm
                     </h6>
                 </div>
                 <div class="card-body">
@@ -355,34 +354,34 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Search Term</th>
-                                    <th class="text-center">Count</th>
-                                    <th class="text-center">Results</th>
+                                    <th>Từ Khóa Tìm Kiếm</th>
+                                    <th class="text-center">Số Lượng</th>
+                                    <th class="text-center">Kết Quả</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>fitness equipment</td>
+                                    <td>thiết bị thể dục</td>
                                     <td class="text-center">245</td>
                                     <td class="text-center"><span class="badge bg-success">12</span></td>
                                 </tr>
                                 <tr>
-                                    <td>yoga classes</td>
+                                    <td>lớp học yoga</td>
                                     <td class="text-center">189</td>
                                     <td class="text-center"><span class="badge bg-success">8</span></td>
                                 </tr>
                                 <tr>
-                                    <td>personal training</td>
+                                    <td>huấn luyện viên cá nhân</td>
                                     <td class="text-center">156</td>
                                     <td class="text-center"><span class="badge bg-success">15</span></td>
                                 </tr>
                                 <tr>
-                                    <td>nutrition plans</td>
+                                    <td>kế hoạch dinh dưỡng</td>
                                     <td class="text-center">98</td>
                                     <td class="text-center"><span class="badge bg-warning">3</span></td>
                                 </tr>
                                 <tr>
-                                    <td>home workouts</td>
+                                    <td>tập luyện tại nhà</td>
                                     <td class="text-center">87</td>
                                     <td class="text-center"><span class="badge bg-success">9</span></td>
                                 </tr>
@@ -391,7 +390,7 @@
                     </div>
                     <div class="text-center mt-3">
                         <a href="#" class="btn btn-sm btn-primary">
-                            <i class="fas fa-chart-line me-1"></i>View Full Report
+                            <i class="fas fa-chart-line me-1"></i>Xem Báo Cáo Đầy Đủ
                         </a>
                     </div>
                 </div>
@@ -402,50 +401,50 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-credit-card me-2"></i>Payment Overview
+                        <i class="fas fa-credit-card me-2"></i>Tổng Quan Thanh Toán
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="row text-center mb-3">
                         <div class="col-4">
                             <div class="border-end">
-                                <div class="h5 font-weight-bold text-success">$@(ViewBag.TodayRevenue ?? "2,540")</div>
-                                <div class="small text-muted">Today</div>
+                                <div class="h5 font-weight-bold text-success">@(ViewBag.TodayRevenue ?? "2,540") VND</div>
+                                <div class="small text-muted">Hôm Nay</div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="border-end">
-                                <div class="h5 font-weight-bold text-info">$@(ViewBag.WeekRevenue ?? "18,290")</div>
-                                <div class="small text-muted">This Week</div>
+                                <div class="h5 font-weight-bold text-info">@(ViewBag.WeekRevenue ?? "18,290") VND</div>
+                                <div class="small text-muted">Tuần Này</div>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="h5 font-weight-bold text-primary">$@(ViewBag.MonthlyRevenue ?? "45,320")</div>
-                            <div class="small text-muted">This Month</div>
+                            <div class="h5 font-weight-bold text-primary">@(ViewBag.MonthlyRevenue ?? "45,320") VND</div>
+                            <div class="small text-muted">Tháng Này</div>
                         </div>
                     </div>
                     
                     <div class="progress mb-2" style="height: 20px;">
                         <div class="progress-bar bg-success" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
-                            Completed: 70%
+                            Hoàn thành: 70%
                         </div>
                         <div class="progress-bar bg-warning" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                            Pending: 20%
+                            Đang chờ: 20%
                         </div>
                         <div class="progress-bar bg-danger" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">
-                            Failed: 10%
+                            Thất bại: 10%
                         </div>
                     </div>
                     
                     <div class="row mt-3">
                         <div class="col-6">
                             <a href="#" class="btn btn-sm btn-outline-success w-100">
-                                <i class="fas fa-check me-1"></i>Process Pending
+                                <i class="fas fa-check me-1"></i>Xử Lý Đang Chờ
                             </a>
                         </div>
                         <div class="col-6">
                             <a href="#" class="btn btn-sm btn-outline-info w-100">
-                                <i class="fas fa-eye me-1"></i>View All
+                                <i class="fas fa-eye me-1"></i>Xem Tất Cả
                             </a>
                         </div>
                     </div>
@@ -460,7 +459,7 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-history me-2"></i>Recent Activities
+                        <i class="fas fa-history me-2"></i>Hoạt Động Gần Đây
                     </h6>
                 </div>
                 <div class="card-body">
@@ -468,33 +467,33 @@
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
-                                <h6 class="timeline-title">New Order Received</h6>
-                                <p class="timeline-text small text-muted">Order #ORD-2025-001 for fitness equipment package</p>
-                                <small class="text-muted">2 minutes ago</small>
+                                <h6 class="timeline-title">Đơn Hàng Mới Nhận Được</h6>
+                                <p class="timeline-text small text-muted">Đơn hàng #ORD-2025-001 cho gói thiết bị thể dục</p>
+                                <small class="text-muted">2 phút trước</small>
                             </div>
                         </div>
                         <div class="timeline-item">
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
-                                <h6 class="timeline-title">Payment Processed</h6>
-                                <p class="timeline-text small text-muted">Payment of $245.00 successfully processed</p>
-                                <small class="text-muted">15 minutes ago</small>
+                                <h6 class="timeline-title">Thanh Toán Đã Xử Lý</h6>
+                                <p class="timeline-text small text-muted">Thanh toán 245.000 VND đã được xử lý thành công</p>
+                                <small class="text-muted">15 phút trước</small>
                             </div>
                         </div>
                         <div class="timeline-item">
                             <div class="timeline-marker bg-warning"></div>
                             <div class="timeline-content">
-                                <h6 class="timeline-title">New User Registration</h6>
-                                <p class="timeline-text small text-muted">john.doe@email.com joined the platform</p>
-                                <small class="text-muted">1 hour ago</small>
+                                <h6 class="timeline-title">Đăng Ký Người Dùng Mới</h6>
+                                <p class="timeline-text small text-muted">nguyen.van.a@email.com đã tham gia nền tảng</p>
+                                <small class="text-muted">1 giờ trước</small>
                             </div>
                         </div>
                         <div class="timeline-item">
                             <div class="timeline-marker bg-primary"></div>
                             <div class="timeline-content">
-                                <h6 class="timeline-title">Product Updated</h6>
-                                <p class="timeline-text small text-muted">Yoga Mat Pro - Inventory updated to 25 units</p>
-                                <small class="text-muted">3 hours ago</small>
+                                <h6 class="timeline-title">Sản Phẩm Đã Cập Nhật</h6>
+                                <p class="timeline-text small text-muted">Thảm Yoga Pro - Đã cập nhật tồn kho lên 25 đơn vị</p>
+                                <small class="text-muted">3 giờ trước</small>
                             </div>
                         </div>
                     </div>
@@ -506,33 +505,33 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-server me-2"></i>System Status
+                        <i class="fas fa-server me-2"></i>Trạng Thái Hệ Thống
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Server Status</span>
-                        <span class="badge bg-success">Online</span>
+                        <span class="small">Máy Chủ</span>
+                        <span class="badge bg-success">Trực tuyến</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Database</span>
-                        <span class="badge bg-success">Connected</span>
+                        <span class="small">Cơ Sở Dữ Liệu</span>
+                        <span class="badge bg-success">Đã kết nối</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Payment Gateway</span>
-                        <span class="badge bg-success">Active</span>
+                        <span class="small">Cổng Thanh Toán</span>
+                        <span class="badge bg-success">Hoạt động</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Email Service</span>
-                        <span class="badge bg-success">Running</span>
+                        <span class="small">Dịch Vụ Email</span>
+                        <span class="badge bg-success">Đang chạy</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Backup Status</span>
-                        <span class="badge bg-info">Last: 2 hrs ago</span>
+                        <span class="small">Trạng Thái Sao Lưu</span>
+                        <span class="badge bg-info">Lần cuối: 2 giờ trước</span>
                     </div>
                     <hr>
                     <div class="text-center">
-                        <small class="text-muted">Last updated: @DateTime.Now.ToString("HH:mm")</small>
+                        <small class="text-muted">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm")</small>
                     </div>
                 </div>
             </div>
@@ -548,10 +547,10 @@
     const revenueChart = new Chart(revenueCtx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
             datasets: [{
-                label: 'Revenue',
-                data: [12000, 19000, 15000, 25000, 22000, 30000],
+                label: 'Doanh Thu',
+                data: [12000000, 19000000, 15000000, 25000000, 22000000, 30000000],
                 borderColor: 'rgb(75, 192, 192)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 tension: 0.4
@@ -565,7 +564,7 @@
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return '$' + value.toLocaleString();
+                            return value.toLocaleString() + ' VND';
                         }
                     }
                 }
@@ -578,7 +577,7 @@
     const sourcesChart = new Chart(sourcesCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Products', 'Services'],
+            labels: ['Sản Phẩm', 'Dịch Vụ'],
             datasets: [{
                 data: [65, 35],
                 backgroundColor: ['#4e73df', '#1cc88a']

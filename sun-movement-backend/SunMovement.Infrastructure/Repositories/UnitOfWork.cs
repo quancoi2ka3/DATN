@@ -18,11 +18,12 @@ namespace SunMovement.Infrastructure.Repositories
         private IRepository<FAQ> _faqRepository;        private IRepository<ContactMessage> _contactMessageRepository;
         private IRepository<Order> _orderRepository;
         private IRepository<OrderItem> _orderItemRepository;
-        private IShoppingCartRepository _shoppingCartRepository;
+        private readonly ICacheService _cacheService;
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context, ICacheService cacheService)
         {
             _context = context;
+            _cacheService = cacheService;
         }
 
         public IProductRepository Products => 
@@ -44,8 +45,7 @@ namespace SunMovement.Infrastructure.Repositories
             _orderRepository ??= new Repository<Order>(_context);        public IRepository<OrderItem> OrderItems => 
             _orderItemRepository ??= new Repository<OrderItem>(_context);
             
-        public IShoppingCartRepository ShoppingCarts => 
-            _shoppingCartRepository ??= new ShoppingCartRepository(_context);
+       
 
         public async Task<int> CompleteAsync()
         {
@@ -68,6 +68,11 @@ namespace SunMovement.Infrastructure.Repositories
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public void ClearCache()
+        {
+            _cacheService.Clear();
         }
     }
 }

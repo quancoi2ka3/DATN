@@ -1,92 +1,92 @@
 @model SunMovement.Core.Models.Product
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = "Chi Tiết Sản Phẩm";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Product Details</h1>
+    <h1 class="mt-4">Chi Tiết Sản Phẩm</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/products">Products</a></li>
-        <li class="breadcrumb-item active">Details</li>
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ Quản Trị</a></li>
+        <li class="breadcrumb-item"><a href="/admin/productsadmin">Sản Phẩm</a></li>
+        <li class="breadcrumb-item active">Chi Tiết</li>
     </ol>
     
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fas fa-info-circle me-1"></i> Product Information
+            <i class="fas fa-info-circle me-1"></i> Thông Tin Sản Phẩm
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-4">
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
-                        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: contain;" />
+                        <img src="@Url.Content(Model.ImageUrl)" alt="@Model.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: contain;" />
                     }
                     else
                     {
                         <div class="bg-light text-center p-5">
                             <i class="fas fa-image fa-3x text-muted"></i>
-                            <p class="mt-3">No image available</p>
+                            <p class="mt-3">Không có hình ảnh</p>
                         </div>
                     }
                 </div>
                 <div class="col-md-8">
                     <dl class="row">
-                        <dt class="col-sm-3">Name</dt>
+                        <dt class="col-sm-3">Tên</dt>
                         <dd class="col-sm-9">@Model.Name</dd>
                         
-                        <dt class="col-sm-3">Category</dt>
+                        <dt class="col-sm-3">Danh Mục</dt>
                         <dd class="col-sm-9">@Model.Category</dd>
                         
-                        <dt class="col-sm-3">Subcategory</dt>
-                        <dd class="col-sm-9">@(string.IsNullOrEmpty(Model.SubCategory) ? "N/A" : Model.SubCategory)</dd>
+                        <dt class="col-sm-3">Giá</dt>
+                        <dd class="col-sm-9">@Model.Price.ToString("N0") VND</dd>
                         
-                        <dt class="col-sm-3">Price</dt>
-                        <dd class="col-sm-9">$@Model.Price.ToString("F2")</dd>
+                        @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0)
+                        {
+                            <dt class="col-sm-3">Giá Khuyến Mãi</dt>
+                            <dd class="col-sm-9">@Model.DiscountPrice.Value.ToString("N0") VND</dd>
+                        }
                         
-                        <dt class="col-sm-3">Discount Price</dt>
-                        <dd class="col-sm-9">@(Model.DiscountPrice.HasValue ? $"${Model.DiscountPrice.Value.ToString("F2")}" : "N/A")</dd>
-                        
-                        <dt class="col-sm-3">Stock Quantity</dt>
+                        <dt class="col-sm-3">Số Lượng Tồn Kho</dt>
                         <dd class="col-sm-9">@Model.StockQuantity</dd>
                         
-                        <dt class="col-sm-3">Status</dt>
+                        <dt class="col-sm-3">Trạng Thái</dt>
                         <dd class="col-sm-9">
                             @if (Model.IsActive)
                             {
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-success">Hoạt Động</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Inactive</span>
+                                <span class="badge bg-secondary">Không Hoạt Động</span>
                             }
                         </dd>
                         
-                        <dt class="col-sm-3">Featured</dt>
+                        <dt class="col-sm-3">Nổi Bật</dt>
                         <dd class="col-sm-9">
                             @if (Model.IsFeatured)
                             {
-                                <span class="badge bg-primary">Featured</span>
+                                <span class="badge bg-primary">Có</span>
                             }
                             else
                             {
-                                <span class="badge bg-light text-dark">No</span>
+                                <span class="badge bg-secondary">Không</span>
                             }
                         </dd>
                         
-                        <dt class="col-sm-3">Created</dt>
+                        <dt class="col-sm-3">Ngày Tạo</dt>
                         <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
                         
-                        <dt class="col-sm-3">Last Updated</dt>
-                        <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Never")</dd>
+                        <dt class="col-sm-3">Cập Nhật Lần Cuối</dt>
+                        <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Chưa bao giờ")</dd>
                     </dl>
                 </div>
             </div>
             
             <div class="row mt-4">
                 <div class="col">
-                    <h5>Description</h5>
+                    <h5>Mô Tả</h5>
                     <p class="border p-3 bg-light">@Model.Description</p>
                 </div>
             </div>
@@ -95,16 +95,16 @@
             {
                 <div class="row mt-4">
                     <div class="col">
-                        <h5>Specifications</h5>
+                        <h5>Thông Số Kỹ Thuật</h5>
                         <pre class="border p-3 bg-light">@Model.Specifications</pre>
                     </div>
                 </div>
             }
             
             <div class="mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Chỉnh Sửa</a>
+                <a asp-action="Index" class="btn btn-secondary">Quay Lại</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
             </div>
         </div>
     </div>

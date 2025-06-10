@@ -10,6 +10,9 @@ import { SupplementsSection } from "@/components/sections/supplements";
 import { ContactCTASection } from "@/components/sections/contact-cta";
 import { TailwindLoader } from "@/components/ui/tailwind-loader";
 
+
+
+
 export default function Home() {
   return (
     <>
@@ -27,3 +30,4 @@ export default function Home() {
     </>
   );
 }
+

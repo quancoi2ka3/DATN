@@ -10,7 +10,6 @@ namespace SunMovement.Web.Mappings
         public WebMappingProfile()
         {
             // Shopping Cart ViewModel Mappings
-            CreateMap<ShoppingCart, ShoppingCartViewModel>();
             CreateMap<CartItem, CartItemViewModel>();
             
             // DTO to ViewModel Mappings

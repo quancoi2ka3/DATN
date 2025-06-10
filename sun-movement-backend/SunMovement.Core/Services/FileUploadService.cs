@@ -22,59 +22,34 @@ namespace SunMovement.Core.Services
         public async Task<string> UploadFileAsync(IFormFile file, string folder)
         {
             if (file == null || file.Length == 0)
-            {
-                throw new ArgumentException("File is empty or null");
-            }
+                return null;
 
-            // Validate file extension
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!Array.Exists(allowedExtensions, ext => ext.Equals(fileExtension)))
-            {
-                throw new ArgumentException("Invalid file type. Only image files are allowed.");
-            }            // Create uploads folder structure if it doesn't exist
-            var wwwrootPath = Path.Combine(_environment.ContentRootPath, "wwwroot");
-            var uploadsPath = Path.Combine(wwwrootPath, "uploads");
-            var uploadsFolder = Path.Combine(uploadsPath, folder);
-            
-            // Make sure all directories in the path exist
-            if (!Directory.Exists(wwwrootPath))
-            {
-                Directory.CreateDirectory(wwwrootPath);
-                _logger.LogInformation("Created wwwroot directory");
-            }
-            if (!Directory.Exists(uploadsPath))
-            {
-                Directory.CreateDirectory(uploadsPath);
-                _logger.LogInformation("Created uploads directory");
-            }
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-                _logger.LogInformation($"Created {folder} uploads directory");
-            }
-
-            // Generate unique filename
-            var uniqueFileName = $"{Guid.NewGuid()}{fileExtension}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            // Save file
             try
             {
+                // Create folder if it doesn't exist
+                var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", folder);
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Generate a unique filename
+                var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                
+                // Save the file
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                 }
-                
-                _logger.LogInformation($"File uploaded successfully: {uniqueFileName}");
-                
-                // Return relative path for storage in database
-                return $"/uploads/{folder}/{uniqueFileName}";
+
+                // Return the relative path to be stored in the database
+                // Ensure we use forward slashes for web paths
+                return $"/uploads/{folder}/{fileName}";
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error uploading file: {ex.Message}");
-                throw new IOException("Error uploading file", ex);
+                Console.WriteLine($"Error uploading file: {ex.Message}");
+                throw;
             }
         }
 

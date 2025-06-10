@@ -9,7 +9,6 @@ namespace SunMovement.Core.Mappings
         public MappingProfile()
         {
             // Shopping Cart Mappings - DTO mappings only
-            CreateMap<ShoppingCart, ShoppingCartDto>();
             CreateMap<CartItem, CartItemDto>();
 
             // Product Mappings (placeholder - update with actual properties)

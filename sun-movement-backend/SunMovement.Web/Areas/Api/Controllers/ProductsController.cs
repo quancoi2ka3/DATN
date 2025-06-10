@@ -42,18 +42,33 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 return NotFound();
             }
             return MapToDto(product);
-        }
-
-        // GET: api/products/category/sportswear
+        }        // GET: api/products/category/sportswear
         [HttpGet("category/{category}")]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProductsByCategory(string category)
         {
-            if (!Enum.TryParse<ProductCategory>(category, true, out var productCategory))
+            try
             {
-                return BadRequest("Invalid category");
-            }
+                // Check if the category string is null or empty
+                if (string.IsNullOrWhiteSpace(category))
+                {
+                    return BadRequest("Category cannot be empty");
+                }
 
-            var products = await _productService.GetProductsByCategoryAsync(productCategory);            return Ok(products.Select(MapToDto));
+                // Try to parse the category string to enum with case insensitive comparison
+                if (!Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var productCategory))
+                {
+                    return BadRequest($"Invalid category: {category}. Available categories: {string.Join(", ", Enum.GetNames(typeof(ProductCategory)))}");
+                }
+
+                var products = await _productService.GetProductsByCategoryAsync(productCategory);
+                return Ok(products.Select(MapToDto));
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error in GetProductsByCategory: {ex.Message}");
+                return StatusCode(500, $"Internal server error while retrieving products for category '{category}': {ex.Message}");
+            }
         }
         
         // POST: api/products

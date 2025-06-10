@@ -1,20 +1,20 @@
 @model SunMovement.Core.Models.FAQ
 @{
-    ViewData["Title"] = "Edit FAQ";
+    ViewData["Title"] = "Chỉnh Sửa Câu Hỏi Thường Gặp";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Edit FAQ</h1>
+    <h1 class="mt-4">Chỉnh Sửa Câu Hỏi Thường Gặp</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/faqs">FAQs</a></li>
-        <li class="breadcrumb-item active">Edit</li>
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ Quản Trị</a></li>
+        <li class="breadcrumb-item"><a href="/admin/faqs">Câu Hỏi Thường Gặp</a></li>
+        <li class="breadcrumb-item active">Chỉnh Sửa</li>
     </ol>
     
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fas fa-edit me-1"></i> Edit FAQ
+            <i class="fas fa-edit me-1"></i> Chỉnh Sửa Câu Hỏi Thường Gặp
         </div>
         <div class="card-body">
             <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
@@ -22,44 +22,45 @@
                 <input type="hidden" asp-for="Id" />
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Question" class="control-label required"></label>
+                    <label asp-for="Question" class="control-label required">Câu Hỏi</label>
                     <input asp-for="Question" class="form-control" />
                     <span asp-validation-for="Question" class="text-danger"></span>
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Answer" class="control-label required"></label>
-                    <textarea asp-for="Answer" class="form-control" rows="5"></textarea>
+                    <label asp-for="Answer" class="control-label required">Câu Trả Lời</label>
+                    <textarea asp-for="Answer" class="form-control richtext" rows="5"></textarea>
                     <span asp-validation-for="Answer" class="text-danger"></span>
                 </div>
                 
-                <div class="row mb-3">                    <div class="col-md-6">
+                <div class="row mb-3">                    
+                    <div class="col-md-6">
                         <div class="form-group">
-                            <label asp-for="Category" class="control-label"></label>
+                            <label asp-for="Category" class="control-label">Danh Mục</label>
                             <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<SunMovement.Core.Models.FAQCategory>()">
-                                <option value="">-- Select Category --</option>
+                                <option value="">-- Chọn Danh Mục --</option>
                             </select>
                             <span asp-validation-for="Category" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label asp-for="DisplayOrder" class="control-label"></label>
+                            <label asp-for="DisplayOrder" class="control-label">Thứ Tự Hiển Thị</label>
                             <input asp-for="DisplayOrder" class="form-control" type="number" min="1" />
                             <span asp-validation-for="DisplayOrder" class="text-danger"></span>
-                            <small class="form-text text-muted">Lower number appears first</small>
+                            <small class="form-text text-muted">Số nhỏ hơn sẽ hiển thị trước</small>
                         </div>
                     </div>
                 </div>
                 
                 <div class="form-check mb-3">
                     <input asp-for="IsActive" class="form-check-input" />
-                    <label asp-for="IsActive" class="form-check-label"></label>
+                    <label asp-for="IsActive" class="form-check-label">Hoạt Động</label>
                 </div>
                 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>
         </div>

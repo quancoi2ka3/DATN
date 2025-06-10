@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
+using Microsoft.AspNetCore.StaticFiles;
+using SunMovement.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -164,29 +166,48 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 // Register AutoMapper profiles
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMovement.Web.Mappings.WebMappingProfile).Assembly);
 
-// Add CORS
+// Add CORS with expanded configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJsApp",
         corsBuilder => corsBuilder
             .WithOrigins(
                 "http://localhost:3000",
-                "https://localhost:3000",
                 "http://localhost:5000",
-                "https://localhost:5001") // Add all possible frontend URLs
+                "https://localhost:5001",
+                "http://127.0.0.1:3000",
+                "https://127.0.0.1:3000") // Add all possible frontend URLs including 127.0.0.1
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials());
+            .AllowCredentials()
+            .SetIsOriginAllowed(origin => true)); // For development only - more permissive
 });
 
 // Add Swagger for API documentation
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add localization support and set default culture to Vietnamese
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "vi-VN" };
+    options.SetDefaultCulture(supportedCultures[0])
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+});
+
+// Add support for WebP MIME type
+builder.Services.Configure<StaticFileOptions>(options =>
+{
+    var provider = new FileExtensionContentTypeProvider();
+    provider.Mappings[".webp"] = "image/webp";
+    options.ContentTypeProvider = provider;
+});
 
 var app = builder.Build();
 
@@ -272,8 +293,13 @@ app.UseRouting();
 
 app.UseCors("AllowNextJsApp");
 
+app.UseApiResponseHeaders();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add localization middleware right after app.UseRouting()
+app.UseRequestLocalization();
 
 // Define route for account
 app.MapControllerRoute(
@@ -283,21 +309,25 @@ app.MapControllerRoute(
 
 // Define route for admin dashboard shortcut
 app.MapControllerRoute(
-    name: "admin-dashboard",
+    name: "trang-quan-tri",
     pattern: "admin",
     defaults: new { controller = "AdminDashboard", action = "Index", area = "Admin" });
 
 // Admin area route (only one definition for admin routes)
 app.MapAreaControllerRoute(
-    name: "admin",
+    name: "quan-tri",
     areaName: "Admin",
     pattern: "admin/{controller=AdminDashboard}/{action=Index}/{id?}");
 
 // Default route 
 app.MapControllerRoute(
-    name: "default",
+    name: "mac-dinh",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+// Add SPA routing support - redirect API requests to API controllers,
+// but forward unmatched requests to the frontend
+
 
 app.Run();

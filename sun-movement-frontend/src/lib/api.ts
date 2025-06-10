@@ -1,13 +1,16 @@
 "use client";
 
-// Base URL for API requests
-const API_BASE_URL = "/api";
+// Base URL for API requests - update this to point to your backend
+// For development, this can be a relative URL if you're using a proxy
+// If deploying separately, use the full backend URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
 
 interface ApiOptions {
   method?: string;
   body?: any;
   headers?: Record<string, string>;
   requiresAuth?: boolean;
+  cache?: RequestCache;
 }
 
 /**
@@ -22,6 +25,7 @@ export async function apiRequest<T>(
     body,
     headers = {},
     requiresAuth = true,
+    cache = "default"
   } = options;
 
   // Set up headers
@@ -44,6 +48,7 @@ export async function apiRequest<T>(
   const requestOptions: RequestInit = {
     method,
     headers: requestHeaders,
+    cache,
   };
 
   // Add body if provided
@@ -51,27 +56,37 @@ export async function apiRequest<T>(
     requestOptions.body = JSON.stringify(body);
   }
 
-  // Make the request
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, requestOptions);
+  try {
+    // Make the request
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, requestOptions);
 
-  // Handle response
-  if (!response.ok) {
-    if (response.status === 401) {
-      // Clear token if unauthorized
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+    // Handle response
+    if (!response.ok) {
+      if (response.status === 401) {
+        // Clear token if unauthorized
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+      
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `API request failed with status ${response.status}`);
+    }
+
+    // Return the data (handle empty responses)
+    if (response.status === 204) {
+      return {} as T;
     }
     
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.message || `API request failed with status ${response.status}`);
+    return response.json() as Promise<T>;
+  } catch (error) {
+    console.error("API request failed:", error);
+    throw error;
   }
-
-  // Return the data
-  return response.json() as Promise<T>;
 }
 
-// Create specialized request methods for different HTTP methods
+// Create specialized API methods for different resources
 export const api = {
+  // General HTTP methods
   get: <T>(endpoint: string, options?: Omit<ApiOptions, "method" | "body">) => 
     apiRequest<T>(endpoint, { ...options, method: "GET" }),
     
@@ -81,6 +96,95 @@ export const api = {
   put: <T>(endpoint: string, body: any, options?: Omit<ApiOptions, "method">) => 
     apiRequest<T>(endpoint, { ...options, method: "PUT", body }),
     
-  delete: <T>(endpoint: string, options?: Omit<ApiOptions, "method" | "body">) => 
-    apiRequest<T>(endpoint, { ...options, method: "DELETE" })
-};
+  delete: <T>(endpoint: string, options?: Omit<ApiOptions, "method">) => 
+    apiRequest<T>(endpoint, { ...options, method: "DELETE" }),
+    
+  // Resource-specific methods
+  products: {
+    getAll: () => api.get<ProductDto[]>('/products'),
+    getById: (id: number) => api.get<ProductDto>(`/products/${id}`),
+    getByCategoryId: (categoryId: number) => api.get<ProductDto[]>(`/products/category/${categoryId}`),
+    getByCategorySlug: (slug: string) => api.get<ProductDto[]>(`/products/category/slug/${slug}`),
+    // Convenience methods for your specific categories
+    getSportswear: () => api.products.getByCategorySlug('sportswear'),
+    getSupplements: () => api.products.getByCategorySlug('supplements'),
+  },
+  
+  services: {
+    getAll: () => api.get<ServiceDto[]>('/services'),
+    getById: (id: number) => api.get<ServiceDto>(`/services/${id}`),
+    getWithSchedules: (id: number) => api.get<ServiceDto>(`/services/${id}/schedules`),
+    getByType: (type: string) => api.get<ServiceDto[]>(`/services/type/${type}`),
+    create: (service: ServiceDto) => api.post<ServiceDto>('/services', service),
+    update: (id: number, service: ServiceDto) => api.put<void>(`/services/${id}`, service),
+    delete: (id: number) => api.delete<void>(`/services/${id}`),
+  },
+    // Categories
+  categories: {
+    getAll: () => api.get<CategoryDto[]>('/categories'),
+    getById: (id: number) => api.get<CategoryDto>(`/categories/${id}`),
+    getBySlug: (slug: string) => api.get<CategoryDto>(`/categories/slug/${slug}`),
+  },
+  auth: {
+    login: (credentials: LoginCredentials) => 
+      api.post<AuthResponse>('/auth/login', credentials, { requiresAuth: false }),
+    register: (userData: RegisterData) => 
+      api.post<AuthResponse>('/auth/register', userData, { requiresAuth: false }),
+    getCurrentUser: () => api.get<UserDto>('/auth/current-user'),
+  },
+
+  // Add more resource-specific methods as needed
+}
+
+// Define types for your API responses
+interface ProductDto {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  imageUrl?: string;
+  stockQuantity: number;
+  categoryId: number;
+  category?: CategoryDto;
+  // Add other fields based on your backend model
+}
+interface CategoryDto {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+}
+interface ServiceDto {
+  id?: number;
+  name: string;
+  description: string;
+  price: number;
+  // Add other fields based on your backend model
+}
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  // Other registration fields
+}
+
+interface AuthResponse {
+  token: string;
+  user: UserDto;
+}
+
+interface UserDto {
+  id: string;
+  email: string;
+  roles: string[];
+  // Other user properties
+}
+
+export type { ProductDto,CategoryDto, ServiceDto, LoginCredentials, RegisterData, AuthResponse, UserDto };

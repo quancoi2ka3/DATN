@@ -23,8 +23,27 @@ namespace SunMovement.Web.Areas.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FAQ>>> GetFAQs()
         {
-            var faqs = await _unitOfWork.FAQs.GetAllAsync();
-            return Ok(faqs);
+            try
+            {
+                var faqs = await _unitOfWork.FAQs.GetAllAsync();
+                
+                if (faqs == null || !faqs.Any())
+                {
+                    // Return empty array instead of 204 No Content
+                    return Ok(new List<FAQ>());
+                }
+                
+                // Explicitly clear the repository cache
+                _unitOfWork.ClearCache();
+                
+                return Ok(faqs);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error retrieving FAQs: {ex.Message}");
+                return StatusCode(500, new { message = "Internal server error while retrieving FAQs", error = ex.Message });
+            }
         }
 
         // GET: api/faqs/5

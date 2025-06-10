@@ -1,19 +1,20 @@
 @model SunMovement.Core.Models.Service
 @{
-    ViewData["Title"] = "Edit Service";
+    ViewData["Title"] = "Chỉnh Sửa Dịch Vụ";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Edit Service</h1>    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/servicesadmin">Services</a></li>
-        <li class="breadcrumb-item active">Edit</li>
+    <h1 class="mt-4">Chỉnh Sửa Dịch Vụ</h1>    
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ Quản Trị</a></li>
+        <li class="breadcrumb-item"><a href="/admin/servicesadmin">Dịch Vụ</a></li>
+        <li class="breadcrumb-item active">Chỉnh Sửa</li>
     </ol>
     
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fas fa-edit me-1"></i> Edit Service
+            <i class="fas fa-edit me-1"></i> Chỉnh Sửa Dịch Vụ
         </div>
         <div class="card-body">
             <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
@@ -23,14 +24,14 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label asp-for="Name" class="control-label required"></label>
+                            <label asp-for="Name" class="control-label required">Tên</label>
                             <input asp-for="Name" class="form-control" />
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label asp-for="Type" class="control-label required"></label>
+                            <label asp-for="Type" class="control-label required">Loại</label>
                             <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<SunMovement.Core.Models.ServiceType>()"></select>
                             <span asp-validation-for="Type" class="text-danger"></span>
                         </div>
@@ -38,44 +39,44 @@
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Description" class="control-label required"></label>
-                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <label asp-for="Description" class="control-label required">Mô Tả</label>
+                    <textarea asp-for="Description" class="form-control richtext" rows="4"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Price" class="control-label required"></label>
+                    <label asp-for="Price" class="control-label required">Giá</label>
                     <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label asp-for="Features" class="control-label"></label>
-                    <textarea asp-for="Features" class="form-control" rows="3" placeholder="Enter features in JSON format"></textarea>
+                    <label asp-for="Features" class="control-label">Đặc Điểm</label>
+                    <textarea asp-for="Features" class="form-control" rows="3" placeholder="Nhập các đặc điểm theo định dạng JSON"></textarea>
                     <span asp-validation-for="Features" class="text-danger"></span>
-                    <small class="form-text text-muted">Example: ["Feature 1", "Feature 2", "Feature 3"]</small>
+                    <small class="form-text text-muted">Ví dụ: ["Đặc điểm 1", "Đặc điểm 2", "Đặc điểm 3"]</small>
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label for="imageFile" class="control-label">Service Image</label>
+                    <label for="imageFile" class="control-label">Hình Ảnh Dịch Vụ</label>
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <div class="mb-2">
-                            <img src="@Model.ImageUrl" alt="@Model.Name" class="image-preview" />
+                            <img src="@Url.Content(Model.ImageUrl)" alt="@Model.Name" class="image-preview" />
                         </div>
                     }
-                    <input type="file" name="imageFile" id="imageFile" class="form-control" />
+                    <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
                     <input type="hidden" asp-for="ImageUrl" />
                 </div>
                 
                 <div class="form-check mb-3">
                     <input asp-for="IsActive" class="form-check-input" />
-                    <label asp-for="IsActive" class="form-check-label"></label>
+                    <label asp-for="IsActive" class="form-check-label">Hoạt Động</label>
                 </div>
                 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>
         </div>

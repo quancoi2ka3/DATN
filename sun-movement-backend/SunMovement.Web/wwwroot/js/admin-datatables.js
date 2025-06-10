@@ -7,17 +7,26 @@ $(document).ready(function() {
             var defaultConfig = {
                 responsive: true,
                 language: {
-                    search: "Search:",
-                    searchPlaceholder: "Search...",
-                    lengthMenu: "Show _MENU_ entries",
-                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    infoEmpty: "Showing 0 to 0 of 0 entries",
-                    infoFiltered: "(filtered from _MAX_ total entries)",
-                    paginate: {
-                        first: "First",
-                        previous: "Previous", 
-                        next: "Next",
-                        last: "Last"
+                    "emptyTable": "Không có dữ liệu",
+                    "info": "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                    "infoEmpty": "Hiển thị 0 đến 0 của 0 mục",
+                    "infoFiltered": "(lọc từ _MAX_ mục)",
+                    "infoPostFix": "",
+                    "thousands": ".",
+                    "lengthMenu": "Hiển thị _MENU_ mục",
+                    "loadingRecords": "Đang tải...",
+                    "processing": "Đang xử lý...",
+                    "search": "Tìm kiếm:",
+                    "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                    "paginate": {
+                        "first": "Đầu",
+                        "last": "Cuối",
+                        "next": "Tiếp",
+                        "previous": "Trước"
+                    },
+                    "aria": {
+                        "sortAscending": ": kích hoạt để sắp xếp cột tăng dần",
+                        "sortDescending": ": kích hoạt để sắp xếp cột giảm dần"
                     }
                 },
                 pageLength: 10,
@@ -27,6 +36,12 @@ $(document).ready(function() {
             // Table-specific configurations
             if (tableId === 'paymentsTable') {
                 defaultConfig.order = [[4, 'desc']]; // Order by date column descending
+            }
+            else if (tableId === 'servicesTable' || tableId === 'productsTable') {
+                // Set Vietnamese language for products and services tables
+                defaultConfig.language = {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json'
+                };
             }
 
             $(this).DataTable(defaultConfig);

@@ -12,8 +12,12 @@ namespace SunMovement.Core.Interfaces
         IRepository<ContactMessage> ContactMessages { get; }
         IRepository<Order> Orders { get; }
         IRepository<OrderItem> OrderItems { get; }
-        IShoppingCartRepository ShoppingCarts { get; }
         
         Task<int> CompleteAsync();
+
+        /// <summary>
+        /// Clears all repository caches
+        /// </summary>
+        void ClearCache();
     }
 }

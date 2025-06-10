@@ -305,6 +305,36 @@ body {
     border: 1px solid #dee2e6;
     border-radius: 0.25rem;
     margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Enhanced image handling */
+.img-thumbnail, .image-preview {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* Fix for broken or missing images */
+.img-thumbnail[src=""], .img-thumbnail:not([src]), 
+.image-preview[src=""], .image-preview:not([src]) {
+    opacity: 0.2;
+    position: relative;
+}
+
+/* Ensure correct aspect ratio */
+.table .img-thumbnail {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover;
+}
+
+/* Fix for Edit/Detail views */
+.image-preview {
+    max-width: 100%;
+    height: auto !important;
+    max-height: 300px;
+    object-fit: contain;
 }
 
 /* Status badges */

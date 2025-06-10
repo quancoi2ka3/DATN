@@ -14,52 +14,19 @@ namespace SunMovement.Web.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private readonly IShoppingCartService _cartService;
         private readonly IProductService _productService;
         private readonly IServiceService _serviceService;
         private readonly IMapper _mapper;
         private readonly ILogger<CartController> _logger;
 
-        public CartController(
-            IShoppingCartService cartService,
-            IProductService productService,
-            IServiceService serviceService,
-            IMapper mapper,
-            ILogger<CartController> logger)
-        {
-            _cartService = cartService;
-            _productService = productService;
-            _serviceService = serviceService;
-            _mapper = mapper;
-            _logger = logger;
-        }
+       
 
         private string GetUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
-        public async Task<IActionResult> Index()
-        {
-            try
-            {
-                var userId = GetUserId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return RedirectToAction("Login", "Account");
-                }
-
-                var cart = await _cartService.GetOrCreateCartAsync(userId);
-                var cartViewModel = _mapper.Map<ShoppingCartViewModel>(cart);
-                return View(cartViewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving shopping cart");
-                TempData["ErrorMessage"] = "An error occurred while retrieving the shopping cart";
-                return RedirectToAction("Index", "Home");
-            }
-        }
+       
 
         [HttpPost]
         public async Task<IActionResult> AddToCart(AddToCartViewModel viewModel)
@@ -112,15 +79,7 @@ namespace SunMovement.Web.Controllers
                     unitPrice = service.Price;
                 }
 
-                await _cartService.AddItemToCartAsync(
-                    userId,
-                    viewModel.ProductId,
-                    viewModel.ServiceId,
-                    itemName,
-                    imageUrl,
-                    unitPrice,
-                    viewModel.Quantity
-                );
+                
 
                 TempData["SuccessMessage"] = "Item added to cart successfully";
                 return RedirectToAction("Index");
@@ -149,7 +108,6 @@ namespace SunMovement.Web.Controllers
                     quantity = 1;
                 }
 
-                await _cartService.UpdateCartItemQuantityAsync(userId, itemId, quantity);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -171,7 +129,6 @@ namespace SunMovement.Web.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                await _cartService.RemoveItemFromCartAsync(userId, itemId);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -193,7 +150,6 @@ namespace SunMovement.Web.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                await _cartService.ClearCartAsync(userId);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -204,36 +160,6 @@ namespace SunMovement.Web.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Checkout()
-        {
-            try
-            {
-                var userId = GetUserId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return RedirectToAction("Login", "Account");
-                }
-
-                var cart = await _cartService.GetCartWithItemsAsync(userId);
-                if (cart == null || !cart.Items.Any())
-                {
-                    TempData["ErrorMessage"] = "Your cart is empty";
-                    return RedirectToAction("Index");
-                }
-
-                var checkoutViewModel = new CheckoutViewModel
-                {
-                    Cart = _mapper.Map<ShoppingCartViewModel>(cart)
-                };
-                return View(checkoutViewModel);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error loading checkout page");
-                TempData["ErrorMessage"] = "An error occurred while loading the checkout page";
-                return RedirectToAction("Index");
-            }
-        }
+        
     }
 }

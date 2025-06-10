@@ -95,19 +95,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     {
                         var imagePath = await _fileUploadService.UploadFileAsync(imageFile, "services");
                         service.ImageUrl = imagePath;
-                    }                    service.CreatedAt = DateTime.UtcNow;
+                    }
+                    
+                    service.CreatedAt = DateTime.UtcNow;
                     await _unitOfWork.Services.AddAsync(service);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after successful service creation
+                    // Clear cache to ensure frontend gets updated data
                     _cacheService.Clear();
                     
-                    TempData["Success"] = "Service created successfully!";
+                    TempData["Success"] = "Dịch vụ đã được tạo thành công!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error creating service: " + ex.Message);
+                    ModelState.AddModelError("", "Lỗi khi tạo dịch vụ: " + ex.Message);
                 }
             }
 
@@ -158,19 +160,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     {
                         var imagePath = await _fileUploadService.UploadFileAsync(imageFile, "services");
                         service.ImageUrl = imagePath;
-                    }                    service.UpdatedAt = DateTime.UtcNow;
+                    }
+                    
+                    service.UpdatedAt = DateTime.UtcNow;
                     await _unitOfWork.Services.UpdateAsync(service);
                     await _unitOfWork.CompleteAsync();
 
-                    // Clear cache after successful service update
+                    // Clear cache to ensure frontend gets updated data
                     _cacheService.Clear();
 
-                    TempData["Success"] = "Service updated successfully!";
+                    TempData["Success"] = "Dịch vụ đã được cập nhật thành công!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error updating service: " + ex.Message);
+                    ModelState.AddModelError("", "Lỗi khi cập nhật dịch vụ: " + ex.Message);
                 }
             }
 
@@ -211,13 +215,14 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 var service = await _unitOfWork.Services.GetByIdAsync(id);
                 if (service != null)
-                {                    await _unitOfWork.Services.DeleteAsync(service);
+                {
+                    await _unitOfWork.Services.DeleteAsync(service);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after successful service deletion
+                    // Clear cache to ensure frontend gets updated data
                     _cacheService.Clear();
                     
-                    TempData["Success"] = "Service deleted successfully!";
+                    TempData["Success"] = "Dịch vụ đã được xóa thành công!";
                 }
                 else
                 {
@@ -226,7 +231,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error deleting service: " + ex.Message;
+                TempData["Error"] = "Lỗi khi xóa dịch vụ: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));
@@ -245,6 +250,9 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     service.UpdatedAt = DateTime.UtcNow;
                     await _unitOfWork.Services.UpdateAsync(service);
                     await _unitOfWork.CompleteAsync();
+
+                    // Clear cache to reflect updated active status
+                    _cacheService.Clear();
 
                     return Json(new { success = true, isActive = service.IsActive });
                 }
@@ -330,18 +338,19 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 try
-                {                    await _unitOfWork.Services.AddScheduleAsync(schedule);
+                {
+                    await _unitOfWork.Services.AddScheduleAsync(schedule);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after adding a schedule
+                    // Clear cache to ensure schedule appears on frontend
                     _cacheService.Clear();
 
-                    TempData["Success"] = "Schedule created successfully!";
+                    TempData["Success"] = "Lịch trình đã được tạo thành công!";
                     return RedirectToAction(nameof(Schedules), new { id = schedule.ServiceId });
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error creating schedule: " + ex.Message);
+                    ModelState.AddModelError("", "Lỗi khi tạo lịch trình: " + ex.Message);
                 }
             }
 
@@ -406,18 +415,19 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 try
-                {                    await _unitOfWork.Services.UpdateScheduleAsync(schedule);
+                {
+                    await _unitOfWork.Services.UpdateScheduleAsync(schedule);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after updating a schedule
+                    // Clear cache to ensure schedule changes appear on frontend
                     _cacheService.Clear();
 
-                    TempData["Success"] = "Schedule updated successfully!";
+                    TempData["Success"] = "Lịch trình đã được cập nhật thành công!";
                     return RedirectToAction(nameof(Schedules), new { id = schedule.ServiceId });
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error updating schedule: " + ex.Message);
+                    ModelState.AddModelError("", "Lỗi khi cập nhật lịch trình: " + ex.Message);
                 }
             }
 
@@ -448,24 +458,26 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                                      .FirstOrDefault(sch => sch.Id == id);
 
                 if (schedule != null)
-                {                    await _unitOfWork.Services.DeleteScheduleAsync(schedule);
+                {
+                    await _unitOfWork.Services.DeleteScheduleAsync(schedule);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after deleting a schedule
+                    // Clear cache to ensure schedule deletion appears on frontend
                     _cacheService.Clear();
 
-                    return Json(new { success = true, message = "Schedule deleted successfully!" });
+                    return Json(new { success = true, message = "Lịch trình đã được xóa thành công!" });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Schedule not found." });
+                    return Json(new { success = false, message = "Không tìm thấy lịch trình." });
                 }
             }
             catch (Exception ex)
-            {                return Json(new { success = false, message = "Error deleting schedule: " + ex.Message });
+            {
+                return Json(new { success = false, message = "Lỗi khi xóa lịch trình: " + ex.Message });
             }
         }
-        
+
         // POST: Admin/ServicesAdmin/ClearCache
         [HttpPost]
         public IActionResult ClearCache()
@@ -473,11 +485,11 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             try
             {
                 _cacheService.Clear();
-                TempData["Success"] = "Service cache cleared successfully!";
+                TempData["Success"] = "Đã xóa bộ nhớ đệm dịch vụ thành công!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error clearing cache: " + ex.Message;
+                TempData["Error"] = "Lỗi khi xóa bộ nhớ đệm: " + ex.Message;
             }
             
             return RedirectToAction(nameof(Index));

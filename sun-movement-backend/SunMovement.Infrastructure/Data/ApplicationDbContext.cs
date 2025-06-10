@@ -17,7 +17,6 @@ namespace SunMovement.Infrastructure.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<FAQ> FAQs { get; set; }
         public DbSet<ContactMessage> ContactMessages { get; set; }
-        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -47,17 +46,6 @@ namespace SunMovement.Infrastructure.Data
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
                 
-            builder.Entity<ApplicationUser>()
-                .HasMany<ShoppingCart>()
-                .WithOne(c => c.User)
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-                
-            builder.Entity<ShoppingCart>()
-                .HasMany(c => c.Items)
-                .WithOne(ci => ci.ShoppingCart)
-                .HasForeignKey(ci => ci.ShoppingCartId)
-                .OnDelete(DeleteBehavior.Cascade);
                 
             builder.Entity<Product>()
                 .HasMany<CartItem>()

@@ -14,7 +14,8 @@ using SunMovement.Infrastructure.Data;
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]    public class ProductsAdminController : Controller
+    [Authorize(Roles = "Admin")]
+    public class ProductsAdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileUploadService _fileUploadService;
@@ -96,8 +97,24 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     // Handle image upload
                     if (imageFile != null && imageFile.Length > 0)
                     {
+                        // Validate allowed image formats
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                        var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                        
+                        if (!allowedExtensions.Contains(fileExtension))
+                        {
+                            ModelState.AddModelError("ImageFile", "Chỉ chấp nhận các định dạng ảnh: jpg, jpeg, png, gif, webp");
+                            return View(product);
+                        }
+                        
+                        // Log image information
+                        Console.WriteLine($"Processing image: {imageFile.FileName}, Type: {imageFile.ContentType}, Size: {imageFile.Length} bytes");
+                        
                         var imagePath = await _fileUploadService.UploadFileAsync(imageFile, "products");
                         product.ImageUrl = imagePath;
+                        
+                        // Log the saved path
+                        Console.WriteLine($"Image saved to path: {imagePath}");
                     }
 
                     // Make sure required fields have values
@@ -105,7 +122,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     if (string.IsNullOrEmpty(product.SubCategory))
                     {
                         product.SubCategory = string.Empty;
-                    }                    // Add debug information
+                    }
+                    // Add debug information
                     Console.WriteLine($"Adding product: {product.Name}, Category: {product.Category}, Price: {product.Price}");
                     
                     // First attempt: Add product using repository pattern
@@ -116,12 +134,12 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     
                     // Log result
                     Console.WriteLine($"Database SaveChanges result: {changesResult} changes saved");
-                      if (changesResult > 0)
+                    if (changesResult > 0)
                     {
-                        // Clear cache after successful product creation
+                        // Clear cache to ensure frontend gets updated data
                         _cacheService.Clear();
                         
-                        TempData["Success"] = "Product created successfully!";
+                        TempData["Success"] = "Sản phẩm đã được tạo thành công!";
                         return RedirectToAction(nameof(Index));
                     }
                     else
@@ -152,22 +170,17 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                             // Clear cache after successful product creation
                             _cacheService.Clear();
                             
-                            TempData["Success"] = "Product created successfully using direct database access!";
+                            TempData["Success"] = "Sản phẩm đã được tạo thành công bằng truy cập trực tiếp cơ sở dữ liệu!";
                             return RedirectToAction(nameof(Index));
                         }
-                        
-                        // Both attempts failed
-                        Console.WriteLine("WARNING: All attempts to save product failed");
-                        ModelState.AddModelError("", "Product could not be saved to the database. Please check database connection.");
-                        TempData["Error"] = "Failed to save product to the database.";
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error creating product: {ex.Message}");
                     Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                    ModelState.AddModelError("", $"Error creating product: {ex.Message}");
-                    TempData["Error"] = $"Failed to create product: {ex.Message}";
+                    ModelState.AddModelError("", $"Lỗi khi tạo sản phẩm: {ex.Message}");
+                    TempData["Error"] = $"Không thể tạo sản phẩm: {ex.Message}";
                 }
             }
             else
@@ -224,19 +237,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     {
                         var imagePath = await _fileUploadService.UploadFileAsync(imageFile, "products");
                         product.ImageUrl = imagePath;
-                    }                    product.UpdatedAt = DateTime.UtcNow;
+                    }
+                    
+                    product.UpdatedAt = DateTime.UtcNow;
                     await _unitOfWork.Products.UpdateAsync(product);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after successful product update
+                    // Clear cache to ensure frontend gets updated data
                     _cacheService.Clear();
 
-                    TempData["Success"] = "Product updated successfully!";
+                    TempData["Success"] = "Sản phẩm đã được cập nhật thành công!";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "Error updating product: " + ex.Message);
+                    ModelState.AddModelError("", "Lỗi khi cập nhật sản phẩm: " + ex.Message);
                 }
             }
 
@@ -275,24 +290,25 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(id);                if (product != null)
+                var product = await _unitOfWork.Products.GetByIdAsync(id);
+                if (product != null)
                 {
                     await _unitOfWork.Products.DeleteAsync(product);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after successful product deletion
+                    // Clear cache to ensure frontend updates
                     _cacheService.Clear();
                     
-                    TempData["Success"] = "Product deleted successfully!";
+                    TempData["Success"] = "Sản phẩm đã được xóa thành công!";
                 }
                 else
                 {
-                    TempData["Error"] = "Product not found.";
+                    TempData["Error"] = "Không tìm thấy sản phẩm.";
                 }
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error deleting product: " + ex.Message;
+                TempData["Error"] = "Lỗi khi xóa sản phẩm: " + ex.Message;
             }
 
             return RedirectToAction(nameof(Index));
@@ -306,12 +322,13 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 var product = await _unitOfWork.Products.GetByIdAsync(id);
                 if (product != null)
-                {                    product.IsFeatured = !product.IsFeatured;
+                {
+                    product.IsFeatured = !product.IsFeatured;
                     product.UpdatedAt = DateTime.UtcNow;
                     await _unitOfWork.Products.UpdateAsync(product);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after changing featured status
+                    // Clear cache to reflect updated featured status
                     _cacheService.Clear();
 
                     return Json(new { success = true, isFeatured = product.IsFeatured });
@@ -338,7 +355,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     await _unitOfWork.Products.UpdateAsync(product);
                     await _unitOfWork.CompleteAsync();
                     
-                    // Clear cache after changing active status
+                    // Clear cache to reflect updated active status
                     _cacheService.Clear();
 
                     return Json(new { success = true, isActive = product.IsActive });
@@ -392,11 +409,11 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             try
             {
                 _cacheService.Clear();
-                TempData["Success"] = "Product cache cleared successfully!";
+                TempData["Success"] = "Đã xóa bộ nhớ đệm sản phẩm thành công!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error clearing cache: " + ex.Message;
+                TempData["Error"] = "Lỗi khi xóa bộ nhớ đệm: " + ex.Message;
             }
             
             return RedirectToAction(nameof(Index));

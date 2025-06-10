@@ -19,7 +19,6 @@ namespace SunMovement.Core.Models
         public decimal Subtotal => UnitPrice * Quantity;
         
         // Navigation properties
-        public virtual ShoppingCart? ShoppingCart { get; set; }
         public virtual Product? Product { get; set; }
         public virtual Service? Service { get; set; }
     }

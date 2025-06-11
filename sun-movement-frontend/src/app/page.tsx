@@ -9,11 +9,13 @@ import { SportswearSection as SportswearPreviewSection } from "@/components/sect
 import { SupplementsSection } from "@/components/sections/supplements";
 import { ContactCTASection } from "@/components/sections/contact-cta";
 import { TailwindLoader } from "@/components/ui/tailwind-loader";
+import { getHomePageData } from "@/lib/home-page-service";
+import { AlertCircle } from "lucide-react";
 
-
-
-
-export default function Home() {
+export default async function Home() {
+  // Fetch data for all the product sections
+  const homeData = await getHomePageData();
+  
   return (
     <>
       <TailwindLoader />
@@ -24,8 +26,41 @@ export default function Home() {
       <WhyChooseSection />
       <TestimonialsSection />
       <EventsSection />
-      <SportswearPreviewSection />
-      <SupplementsSection />
+
+      {/* Display API error messages if any */}
+      {(homeData.sportswear.error || homeData.supplements.error) && (
+        <div className="container py-4">
+          {homeData.sportswear.error && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center gap-3 text-amber-500 mb-4">
+              <AlertCircle className="h-5 w-5" />
+              <div>
+                <p className="font-medium">Error loading sportswear products</p>
+                <p className="text-sm opacity-80">{homeData.sportswear.error}</p>
+              </div>
+            </div>
+          )}
+          {homeData.supplements.error && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center gap-3 text-amber-500 mb-4">
+              <AlertCircle className="h-5 w-5" />
+              <div>
+                <p className="font-medium">Error loading supplements products</p>
+                <p className="text-sm opacity-80">{homeData.supplements.error}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* Always render components with fallback data */}
+      <SportswearPreviewSection products={homeData.sportswear.products || []} />
+      <SupplementsSection products={homeData.supplements.products || []} />
+      
+      {/* Show errors if any */}
+      {(homeData.sportswear.error || homeData.supplements.error) && (
+        <div className="container py-4">
+          {/* Error messages */}
+        </div>
+      )}
       <ContactCTASection />
     </>
   );

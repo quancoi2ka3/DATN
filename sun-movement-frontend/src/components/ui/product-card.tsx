@@ -15,16 +15,29 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useCart();
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
+  const [isAdding, setIsAdding] = useState(false);
+  const { addToCart, isLoading } = useCart();
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart(product, quantity);
-    setIsOpen(false);
-    setQuantity(1);
+    setIsAdding(true);
+    
+    try {
+      const success = await addToCart(product, quantity, selectedSize, selectedColor);
+      if (success) {
+        setIsOpen(false);
+        setQuantity(1);
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -87,10 +100,22 @@ export function ProductCard({ product }: ProductCardProps) {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              
-              <Button className="mt-auto" onClick={handleAddToCart}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Thêm vào giỏ hàng
+                <Button 
+                className="mt-auto" 
+                onClick={handleAddToCart} 
+                disabled={isAdding}
+              >
+                {isAdding ? (
+                  <>
+                    <span className="animate-spin mr-2">⟳</span>
+                    Đang thêm...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Thêm vào giỏ hàng
+                  </>
+                )}
               </Button>
             </div>
           </div>

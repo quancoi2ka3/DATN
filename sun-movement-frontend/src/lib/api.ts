@@ -104,10 +104,10 @@ export const api = {
     getAll: () => api.get<ProductDto[]>('/products'),
     getById: (id: number) => api.get<ProductDto>(`/products/${id}`),
     getByCategoryId: (categoryId: number) => api.get<ProductDto[]>(`/products/category/${categoryId}`),
-    getByCategorySlug: (slug: string) => api.get<ProductDto[]>(`/products/category/slug/${slug}`),
+    getByCategory: (category: string) => api.get<ProductDto[]>(`/products/category/${category}`),
     // Convenience methods for your specific categories
-    getSportswear: () => api.products.getByCategorySlug('sportswear'),
-    getSupplements: () => api.products.getByCategorySlug('supplements'),
+    getSportswear: () => api.products.getByCategory('sportswear'),
+    getSupplements: () => api.products.getByCategory('supplements'),
   },
   
   services: {
@@ -123,7 +123,7 @@ export const api = {
   categories: {
     getAll: () => api.get<CategoryDto[]>('/categories'),
     getById: (id: number) => api.get<CategoryDto>(`/categories/${id}`),
-    getBySlug: (slug: string) => api.get<CategoryDto>(`/categories/slug/${slug}`),
+    getBySlug: (slug: string) => api.get<CategoryDto>(`/categories/${slug}`),
   },
   auth: {
     login: (credentials: LoginCredentials) => 

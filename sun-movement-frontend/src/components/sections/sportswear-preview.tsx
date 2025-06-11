@@ -1,8 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Product } from "@/lib/types";
+import { useState, useEffect } from "react";
 
-export function SportswearSection() {
+interface SportswearSectionProps {
+  products?: Product[];
+}
+
+export function SportswearSection({ products = [] }: SportswearSectionProps) {
   return (
     <section className="py-16 bg-gray-50">
       <div className="container">

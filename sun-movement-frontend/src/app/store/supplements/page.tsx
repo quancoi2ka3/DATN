@@ -3,7 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import Image from "next/image";
 import { ProductCard } from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
-import { Filter, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Filter, SlidersHorizontal, ChevronDown, AlertCircle } from "lucide-react";
 import SupplementsTopControls from "@/components/ui/SupplementsTopControls";
 
 export const metadata: Metadata = {
@@ -11,8 +11,55 @@ export const metadata: Metadata = {
   description: "Các sản phẩm thực phẩm bổ sung chất lượng cao tại Sun Movement",
 };
 
-// Sample supplements data
-const supplements = [
+import { Product } from "@/lib/types";
+import { ProductDto } from "@/lib/adapters";
+
+// Server-side data fetching function with improved error handling
+async function getSupplementsProducts(): Promise<{products: Product[], error?: string}> {
+  try {
+    const response = await fetch(`${process.env.BACKEND_URL}/api/products/category/supplements`, { 
+      next: { revalidate: 3600 }, // Cache for 1 hour
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      // Enhanced error handling with status code
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch supplements products (${response.status}): ${errorText || 'Unknown error'}`);
+    }
+    
+    const data: ProductDto[] = await response.json();
+    
+    // Map backend model to frontend model
+    return {
+      products: data.map((item) => ({
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        salePrice: item.discountPrice ?? null,
+        imageUrl: item.imageUrl || "/images/supplements/default.jpg", // Fallback image
+        category: item.category.toString(),
+        subCategory: item.subCategory || "General",
+        isBestseller: item.isFeatured ?? false,
+      })),
+      error: undefined
+    };
+  } catch (error) {
+    console.error("Error fetching supplements products:", error);
+    // Return fallback data in case of errors with error message
+    return {
+      products: fallbackSupplementsData,
+      error: error instanceof Error ? error.message : "An unknown error occurred"
+    };
+  }
+}
+
+// Fallback data in case the API is unavailable
+const fallbackSupplementsData: Product[] = [
   {
     id: "1",
     name: "Whey Protein Isolate",
@@ -21,7 +68,7 @@ const supplements = [
     salePrice: 799000,
     imageUrl: "/images/supplements/protein.jpg",
     category: "protein",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.9,
     reviews: 28,
     isNew: true,
@@ -35,7 +82,7 @@ const supplements = [
     salePrice: null,
     imageUrl: "/images/supplements/pre-workout.jpg",
     category: "pre-workout",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.7,
     reviews: 15,
     isNew: false,
@@ -49,7 +96,7 @@ const supplements = [
     salePrice: 399000,
     imageUrl: "/images/supplements/bcaa.jpg",
     category: "amino-acids",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.5,
     reviews: 12,
     isNew: false,
@@ -63,7 +110,7 @@ const supplements = [
     salePrice: null,
     imageUrl: "/images/supplements/vitamins.jpg",
     category: "vitamins",
-    brand: "Sun Wellness",
+    subCategory: "Sun Wellness",
     rating: 4.8,
     reviews: 20,
     isNew: true,
@@ -77,7 +124,7 @@ const supplements = [
     salePrice: null,
     imageUrl: "/images/supplements/creatine.jpg",
     category: "performance",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.9,
     reviews: 32,
     isNew: false,
@@ -91,7 +138,7 @@ const supplements = [
     salePrice: 699000,
     imageUrl: "/images/supplements/mass-gainer.jpg",
     category: "weight-gain",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.6,
     reviews: 18,
     isNew: false,
@@ -105,7 +152,7 @@ const supplements = [
     salePrice: null,
     imageUrl: "/images/supplements/protein.jpg", // placeholder image
     category: "vitamins",
-    brand: "Sun Wellness",
+    subCategory: "Sun Wellness",
     rating: 4.7,
     reviews: 14,
     isNew: true,
@@ -119,7 +166,7 @@ const supplements = [
     salePrice: 349000,
     imageUrl: "/images/supplements/pre-workout.jpg", // placeholder image
     category: "recovery",
-    brand: "Sun Performance",
+    subCategory: "Sun Performance",
     rating: 4.5,
     reviews: 9,
     isNew: false,
@@ -127,24 +174,28 @@ const supplements = [
   },
 ];
 
-// Category options for filter
-const categories = [
-  { value: "all", label: "Tất cả", count: supplements.length },
-  { value: "protein", label: "Protein", count: supplements.filter(p => p.category === "protein").length },
-  { value: "pre-workout", label: "Pre-Workout", count: supplements.filter(p => p.category === "pre-workout").length },
-  { value: "amino-acids", label: "Amino Acids", count: supplements.filter(p => p.category === "amino-acids").length },
-  { value: "vitamins", label: "Vitamin & Minerals", count: supplements.filter(p => p.category === "vitamins").length },
-  { value: "performance", label: "Hiệu suất", count: supplements.filter(p => p.category === "performance").length },
-  { value: "weight-gain", label: "Tăng cân", count: supplements.filter(p => p.category === "weight-gain").length },
-  { value: "recovery", label: "Phục hồi", count: supplements.filter(p => p.category === "recovery").length },
-];
+// Function to calculate category counts from products
+function getCategoryOptions(products: Product[]) {
+  return [
+    { value: "all", label: "Tất cả", count: products.length },
+    { value: "protein", label: "Protein", count: products.filter(p => p.category === "protein").length },
+    { value: "pre-workout", label: "Pre-Workout", count: products.filter(p => p.category === "pre-workout").length },
+    { value: "amino-acids", label: "Amino Acids", count: products.filter(p => p.category === "amino-acids").length },
+    { value: "vitamins", label: "Vitamin & Minerals", count: products.filter(p => p.category === "vitamins").length },
+    { value: "performance", label: "Hiệu suất", count: products.filter(p => p.category === "performance").length },
+    { value: "weight-gain", label: "Tăng cân", count: products.filter(p => p.category === "weight-gain").length },
+    { value: "recovery", label: "Phục hồi", count: products.filter(p => p.category === "recovery").length },
+  ];
+}
 
-// Brand options for filter
-const brands = [
-  { value: "all", label: "Tất cả" },
-  { value: "Sun Performance", label: "Sun Performance" },
-  { value: "Sun Wellness", label: "Sun Wellness" },
-];
+// Function to extract unique brands from products
+function getBrandOptions(products: Product[]) {
+  const uniqueBrands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
+  return [
+    { value: "all", label: "Tất cả" },
+    ...uniqueBrands.map(brand => ({ value: brand as string, label: brand as string })),
+  ];
+}
 
 // Sort options
 const sortOptions = [
@@ -157,9 +208,29 @@ const sortOptions = [
   { value: "newest", label: "Mới nhất" },
 ];
 
-export default function SupplementsPage() {
+export default async function SupplementsPage() {
+  // Fetch supplements from the API
+  const { products, error } = await getSupplementsProducts();
+  
+  // Generate category and brand options based on available products
+  const categories = getCategoryOptions(products);
+  const brands = getBrandOptions(products);
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Error display if API call failed */}
+      {error && (
+        <div className="container py-4">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center gap-3 text-red-500 mb-6">
+            <AlertCircle className="h-5 w-5" />
+            <div>
+              <p className="font-medium">Error loading products</p>
+              <p className="text-sm opacity-80">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    
       {/* Hero Section */}
       <div className="relative py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-blue-500/10 z-0"></div>
@@ -303,8 +374,7 @@ export default function SupplementsPage() {
             {/* Top Controls */}
 {/* Top Controls */}
 <SupplementsTopControls />
-            
-            {/* Featured Products */}
+              {/* Featured Products */}
             <div className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-white">Sản phẩm nổi bật</h3>
@@ -314,7 +384,7 @@ export default function SupplementsPage() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {supplements.filter(p => p.isBestseller).slice(0, 3).map((product) => (
+                {products.filter(p => p.isBestseller).slice(0, 3).map((product) => (
                   <div 
                     key={product.id} 
                     className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/50 transition-all duration-300"
@@ -341,7 +411,7 @@ export default function SupplementsPage() {
                           {Array.from({ length: 5 }).map((_, i) => (
                             <svg 
                               key={i} 
-                              className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-amber-500' : 'text-slate-600'}`} 
+                              className={`w-4 h-4 ${i < Math.floor(product.rating ?? 0) ? 'text-amber-500' : 'text-slate-600'}`} 
                               fill="currentColor" 
                               viewBox="0 0 20 20"
                             >
@@ -388,18 +458,17 @@ export default function SupplementsPage() {
                 ))}
               </div>
             </div>
-            
-            {/* All Products */}
+              {/* All Products */}
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-white">Tất cả sản phẩm</h3>
                 <div className="text-sm text-slate-400">
-                  Hiển thị {supplements.length} sản phẩm
+                  Hiển thị {products.length} sản phẩm
                 </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {supplements.map((product) => (
+                {products.map((product) => (
                   <div 
                     key={product.id} 
                     className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/50 transition-all duration-300"
@@ -426,7 +495,7 @@ export default function SupplementsPage() {
                           {Array.from({ length: 5 }).map((_, i) => (
                             <svg 
                               key={i} 
-                              className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-amber-500' : 'text-slate-600'}`} 
+                              className={`w-4 h-4 ${i < Math.floor(product.rating ?? 0) ? 'text-amber-500' : 'text-slate-600'}`} 
                               fill="currentColor" 
                               viewBox="0 0 20 20"
                             >

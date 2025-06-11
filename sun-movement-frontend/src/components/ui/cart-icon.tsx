@@ -1,19 +1,36 @@
 "use client";
 
+import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useCart, CartItem } from "@/lib/cart-context";
+import { useCart } from "@/lib/cart-context";
+import { CartItem } from "@/lib/types";
 import Image from "next/image";
-import { Plus, Minus, Trash2 } from "lucide-react";
+import { Plus, Minus, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface CartIconProps {
   className?: string;
 }
 
 export function CartIcon({ className }: CartIconProps) {
-  const { items, totalItems, totalPrice, updateQuantity, removeFromCart } = useCart();
+  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useCart();
+  const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
+  const [removingItemId, setRemovingItemId] = useState<string | null>(null);
+
+  const handleUpdateQuantity = async (itemId: string, quantity: number) => {
+    setUpdatingItemId(itemId);
+    await updateQuantity(itemId, quantity);
+    setUpdatingItemId(null);
+  };
+
+  const handleRemoveFromCart = async (itemId: string) => {
+    setRemovingItemId(itemId);
+    await removeFromCart(itemId);
+    setRemovingItemId(null);
+  };
 
   const CartItemComponent = ({ item }: { item: CartItem }) => (
     <div className="flex py-4 border-b">
@@ -31,34 +48,48 @@ export function CartIcon({ className }: CartIconProps) {
             <h3>{item.name}</h3>
             <p className="ml-4">{(item.price * item.quantity).toLocaleString()} VNĐ</p>
           </div>
-        </div>
-        <div className="flex flex-1 items-end justify-between text-sm">
+        </div>        <div className="flex flex-1 items-end justify-between text-sm">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
               className="h-7 w-7"
-              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+              disabled={updatingItemId === item.id}
             >
-              <Minus className="h-3 w-3" />
+              {updatingItemId === item.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Minus className="h-3 w-3" />
+              )}
             </Button>
             <span className="w-8 text-center">{item.quantity}</span>
             <Button
               variant="outline"
               size="icon"
               className="h-7 w-7"
-              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+              disabled={updatingItemId === item.id}
             >
-              <Plus className="h-3 w-3" />
+              {updatingItemId === item.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plus className="h-3 w-3" />
+              )}
             </Button>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => removeFromCart(item.id)}
+            onClick={() => handleRemoveFromCart(item.id)}
             className="text-red-500"
+            disabled={removingItemId === item.id}
           >
-            <Trash2 className="h-4 w-4" />
+            {removingItemId === item.id ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -97,16 +128,23 @@ export function CartIcon({ className }: CartIconProps) {
               </div>
             </div>
           )}
-        </div>
-        
-        {items.length > 0 && (
+        </div>        {items.length > 0 && (
           <div className="border-t border-gray-200 py-6 px-4">
             <div className="flex justify-between text-base font-medium text-gray-900 mb-4">
               <p>Tổng cộng</p>
               <p>{totalPrice.toLocaleString()} VNĐ</p>
             </div>
-            <Button className="w-full">
-              Thanh toán
+            <Button className="w-full" asChild disabled={isLoading}>
+              <Link href="/checkout">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  'Thanh toán'
+                )}
+              </Link>
             </Button>
           </div>
         )}

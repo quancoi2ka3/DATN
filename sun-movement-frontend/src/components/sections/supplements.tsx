@@ -5,9 +5,10 @@ import { Product } from "@/lib/types";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
-// Featured supplements for home page preview
-const featuredSupplements: Product[] = [
+// Fallback supplements in case no products are provided
+const fallbackSupplements: Product[] = [
   {
     id: "1",
     name: "Whey Protein Isolate",
@@ -34,6 +35,11 @@ const featuredSupplements: Product[] = [
   },
 ];
 
+// Props interface for the SupplementsSection component
+interface SupplementsSectionProps {
+  products?: Product[]; // Optional because it could be used in homepage without products
+}
+
 // Main supplement categories
 const mainCategories = [
   { name: "Protein", icon: "/images/supplements/protein.jpg" },
@@ -42,7 +48,24 @@ const mainCategories = [
   { name: "Vitamin & Minerals", icon: "/images/supplements/vitamins.jpg" },
 ];
 
-export function SupplementsSection() {
+export function SupplementsSection({ products }: SupplementsSectionProps) {
+  // If products are not provided (e.g., on homepage), use fallback data
+  const [displayProducts, setDisplayProducts] = useState<Product[]>(products || fallbackSupplements);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  // Update products when the props change
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setDisplayProducts(products);
+      
+      // Get featured products (using bestsellers or first 3 if none)
+      const bestsellers = products.filter(p => p.isBestseller);
+      setFeaturedProducts(bestsellers.length > 0 
+        ? bestsellers.slice(0, 3) 
+        : products.slice(0, 3));
+    }
+  }, [products]);
+
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
       <div className="container px-4 md:px-6">
@@ -80,7 +103,7 @@ export function SupplementsSection() {
         <div className="mb-10">
           <h3 className="text-2xl font-bold mb-6">Sản phẩm nổi bật</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredSupplements.map((product) => (
+            {(featuredProducts.length > 0 ? featuredProducts : displayProducts.slice(0, 3)).map((product) => (
               <div 
                 key={product.id}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -99,8 +122,7 @@ export function SupplementsSection() {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold">{product.price.toLocaleString()} VNĐ</span>
                   </div>
-                </div>
-              </div>
+                </div>              </div>
             ))}
           </div>
         </div>

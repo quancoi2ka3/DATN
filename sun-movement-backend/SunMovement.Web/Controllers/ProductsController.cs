@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace SunMovement.Web.Controllers
 {
@@ -27,9 +28,20 @@ namespace SunMovement.Web.Controllers
                 products = products.Where(p => p.IsActive);
 
                 // Apply category filter if specified
-                if (!string.IsNullOrEmpty(category) && Enum.TryParse<ProductCategory>(category, true, out var productCategory))
+                if (!string.IsNullOrEmpty(category))
                 {
-                    products = products.Where(p => p.Category == productCategory);
+                    // Try to parse as enum first
+                    if (Enum.TryParse<ProductCategory>(category, true, out var productCategory))
+                    {
+                        products = products.Where(p => p.Category == productCategory);
+                    }
+                    // Also handle the case where the category might be passed as a number
+                    else if (int.TryParse(category, out int categoryValue) && 
+                             Enum.IsDefined(typeof(ProductCategory), categoryValue))
+                    {
+                        var enumCategory = (ProductCategory)categoryValue;
+                        products = products.Where(p => p.Category == enumCategory);
+                    }
                 }
 
                 // Apply search filter if specified
@@ -80,7 +92,7 @@ namespace SunMovement.Web.Controllers
                         Description = p.Description,
                         Price = p.Price,
                         ImageUrl = p.ImageUrl,
-                        Category = p.Category.ToString(),
+                        Category = GetCategoryDisplayName(p.Category),
                         IsAvailable = p.StockQuantity > 0,
                         StockQuantity = p.StockQuantity,
                         Brand = p.SubCategory,
@@ -137,7 +149,7 @@ namespace SunMovement.Web.Controllers
                     Description = product.Description,
                     Price = product.Price,
                     ImageUrl = product.ImageUrl,
-                    Category = product.Category.ToString(),
+                    Category = GetCategoryDisplayName(product.Category),
                     IsAvailable = product.StockQuantity > 0,
                     StockQuantity = product.StockQuantity,
                     Brand = product.SubCategory,
@@ -160,6 +172,17 @@ namespace SunMovement.Web.Controllers
             // Use the latest UpdatedAt timestamp from any product as the ETag
             var latestUpdate = products.Max(p => p.UpdatedAt ?? p.CreatedAt);
             return $"W/\"products-{latestUpdate.Ticks}-{products.Count()}\"";
+        }
+
+        // Helper method to convert enum to display name
+        private string GetCategoryDisplayName(ProductCategory category)
+        {
+            return category switch
+            {
+                ProductCategory.Sportswear => "Sportwear",
+                ProductCategory.Supplements => "Supplement",
+                _ => "Unknown" // Handle unexpected values
+            };
         }
     }
 }

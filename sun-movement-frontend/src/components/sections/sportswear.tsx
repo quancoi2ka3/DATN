@@ -8,7 +8,6 @@ import { ChevronDown, ShoppingCart, Heart, Share2, Star, Plus, Minus, ArrowRight
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { useCart } from "@/lib/cart-context";
-import { sportswear, sportswearCategories } from "@/lib/data/sportswear";
 // Category options for filter
 const categories = [
   { value: "all", label: "Tất cả" },
@@ -36,13 +35,13 @@ interface SportswearProductCardProps {
   };
 }
 
-const SportswearProductCard = ({ product }: SportswearProductCardProps) => {
-  const { addToCart } = useCart();
+const SportswearProductCard = ({ product }: SportswearProductCardProps) => {  const { addToCart, isLoading } = useCart();
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
   const [showFireEffect, setShowFireEffect] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,21 +56,29 @@ const SportswearProductCard = ({ product }: SportswearProductCardProps) => {
     }
   }, [isHovering]);
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
-    
-    // Create an energetic pulse effect when adding to cart
-    if (cardRef.current) {
-      cardRef.current.classList.add('energy-burst');
-      setTimeout(() => {
-        if (cardRef.current) {
-          cardRef.current.classList.remove('energy-burst');
-        }
-      }, 700);
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    try {
+      await addToCart(product, quantity, selectedSize, selectedColor);
+      
+      // Create an energetic pulse effect when adding to cart
+      if (cardRef.current) {
+        cardRef.current.classList.add('energy-burst');
+        setTimeout(() => {
+          if (cardRef.current) {
+            cardRef.current.classList.remove('energy-burst');
+          }
+        }, 700);
+      }
+      
+      // Show success message
+      alert("Đã thêm sản phẩm vào giỏ hàng!");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Có lỗi xảy ra khi thêm vào giỏ hàng");
+    } finally {
+      setIsAdding(false);
     }
-    
-    // Show success message
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
   };
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
@@ -279,10 +286,14 @@ const SportswearProductCard = ({ product }: SportswearProductCardProps) => {
   );
 };
 
-export function SportswearSection() {
+interface SportswearSectionProps {
+  products: Product[];
+}
+
+export function SportswearSection({ products }: SportswearSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(sportswear);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products || []);
   const [sortBy, setSortBy] = useState("default");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -334,6 +345,11 @@ export function SportswearSection() {
     setProductBackgroundParticles(newProductParticles);
   }, []);
   
+  // Update filtered products when products prop changes
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
+  
   useEffect(() => {
     // Flame effect on scroll
     const handleScroll = () => {
@@ -358,10 +374,9 @@ export function SportswearSection() {
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
-  // Handle filtering and sorting products
+    // Handle filtering and sorting products
   useEffect(() => {
-    let result = [...sportswear];
+    let result = [...products];
     
     // Filter by category
     if (selectedCategory !== "all") {
@@ -525,9 +540,8 @@ export function SportswearSection() {
                     {selectedCategory === category.value && (
                       <div className="w-1 h-4 bg-white mr-2 flame-effect" style={{ filter: 'blur(1px)' }}></div>
                     )}
-                    {category.label}
-                    <div className="ml-auto bg-slate-800/70 px-2 py-0.5 rounded-full text-xs">
-                      {sportswear.filter(p => category.value === "all" ? true : p.category === category.value).length}
+                    {category.label}                    <div className="ml-auto bg-slate-800/70 px-2 py-0.5 rounded-full text-xs">
+                      {products.filter((p: Product) => category.value === "all" ? true : p.category === category.value).length}
                     </div>
                   </div>
                 </button>

@@ -5,7 +5,8 @@ export interface Product {
   price: number;
   salePrice?: number | null;
   imageUrl: string;
-  category: string;
+  category: number|string;
+  subCategory :string; // Use number for category ID or string for category slug
   details?: string;
   colors?: string[];
   sizes?: string[];
@@ -14,4 +15,16 @@ export interface Product {
   reviews?: number;
   isNew?: boolean;
   isBestseller?: boolean;
+}
+
+export interface CartItem {
+  id: string;
+  productId: string;
+  name: string;
+  imageUrl: string;
+  price: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+  addedAt: Date;
 }

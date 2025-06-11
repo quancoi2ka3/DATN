@@ -173,18 +173,18 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMoveme
 // Add CORS with expanded configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextJsApp",
+    options.AddPolicy("AllowFrontend",
         corsBuilder => corsBuilder
             .WithOrigins(
                 "http://localhost:3000",
                 "http://localhost:5000",
                 "https://localhost:5001",
                 "http://127.0.0.1:3000",
-                "https://127.0.0.1:3000") // Add all possible frontend URLs including 127.0.0.1
+                "https://127.0.0.1:3000") 
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
-            .SetIsOriginAllowed(origin => true)); // For development only - more permissive
+            .SetIsOriginAllowed(origin => true)); 
 });
 
 // Add Swagger for API documentation
@@ -291,7 +291,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors("AllowNextJsApp");
+app.UseCors("AllowFrontend");
 
 app.UseApiResponseHeaders();
 

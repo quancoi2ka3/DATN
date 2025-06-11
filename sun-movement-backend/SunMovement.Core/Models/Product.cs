@@ -5,8 +5,8 @@ namespace SunMovement.Core.Models
 {
     public enum ProductCategory
     {
-        Sportswear,
-        Supplements
+        Sportswear =0,
+        Supplements =1
     }
 
     public class Product

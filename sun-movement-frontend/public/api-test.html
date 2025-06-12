@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Testing Backend API</h1>
+    <div id="results"></div>
+    
+    <script>        async function testAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing API endpoints...</p>';
+            
+            try {
+                // Test products endpoint
+                const response = await fetch('/api/products');
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `<p>✅ Products API: ${response.status} - Found ${data.length} products</p>`;
+                
+                // Check image URLs from first 3 products
+                if (data.length > 0) {
+                    resultsDiv.innerHTML += '<h3>Products Image URL Analysis:</h3>';
+                    for (let i = 0; i < Math.min(3, data.length); i++) {
+                        const product = data[i];
+                        resultsDiv.innerHTML += `
+                            <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px;">
+                                <p><strong>${product.name}</strong></p>
+                                <p>ImageUrl: "${product.imageUrl || 'null/empty'}"</p>
+                                <p>Category: ${product.category}</p>
+                                <p>IsActive: ${product.isActive}</p>
+                                ${product.imageUrl ? `
+                                    <p>Testing image load:</p>
+                                    <img src="${product.imageUrl}" alt="${product.name}" style="max-width: 100px; max-height: 100px;" 
+                                         onload="this.parentNode.innerHTML += '<span style=color:green>✅ Image loaded successfully</span>'"
+                                         onerror="this.parentNode.innerHTML += '<span style=color:red>❌ Image failed to load</span>'">
+                                ` : '<p style="color: orange;">⚠️ No image URL provided</p>'}
+                            </div>`;
+                    }
+                }
+                
+                // Test services endpoint
+                const servicesResponse = await fetch('/api/services');
+                const servicesData = await servicesResponse.json();
+                
+                resultsDiv.innerHTML += `<p>✅ Services API: ${servicesResponse.status} - Found ${servicesData.length} services</p>`;
+                
+                // Check image URLs from services
+                if (servicesData.length > 0) {
+                    resultsDiv.innerHTML += '<h3>Services Image URL Analysis:</h3>';
+                    for (let i = 0; i < Math.min(3, servicesData.length); i++) {
+                        const service = servicesData[i];
+                        resultsDiv.innerHTML += `
+                            <div style="border: 1px solid #ccc; margin: 10px 0; padding: 10px;">
+                                <p><strong>${service.name}</strong></p>
+                                <p>ImageUrl: "${service.imageUrl || 'null/empty'}"</p>
+                                <p>Type: ${service.type}</p>
+                                <p>IsActive: ${service.isActive}</p>
+                                ${service.imageUrl ? `
+                                    <p>Testing image load:</p>
+                                    <img src="${service.imageUrl}" alt="${service.name}" style="max-width: 100px; max-height: 100px;" 
+                                         onload="this.parentNode.innerHTML += '<span style=color:green>✅ Image loaded successfully</span>'"
+                                         onerror="this.parentNode.innerHTML += '<span style=color:red>❌ Image failed to load</span>'">
+                                ` : '<p style="color: orange;">⚠️ No image URL provided</p>'}
+                            </div>`;
+                    }
+                }
+                
+                // Test supplements
+                const supplementsResponse = await fetch('/api/products/category/supplements');
+                const supplementsData = await supplementsResponse.json();
+                
+                resultsDiv.innerHTML += `<p>✅ Supplements API: ${supplementsResponse.status} - Found ${supplementsData.length} supplements</p>`;
+                
+                // Test sportswear
+                const sportswearResponse = await fetch('/api/products/category/sportswear');
+                const sportswearData = await sportswearResponse.json();
+                
+                resultsDiv.innerHTML += `<p>✅ Sportswear API: ${sportswearResponse.status} - Found ${sportswearData.length} sportswear items</p>`;
+                
+                resultsDiv.innerHTML += '<p><strong>✅ All API endpoints are working!</strong></p>';
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `<p>❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        testAPI();
+    </script>
+</body>
+</html>

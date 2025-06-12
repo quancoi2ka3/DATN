@@ -147,18 +147,34 @@ namespace SunMovement.Web.Areas.Api.Controllers
             catch (Exception ex)            {
                 return BadRequest(ex.Message);
             }
-        }
-
-        // Utility methods for mapping between entity and DTO
+        }        // Utility methods for mapping between entity and DTO
         private ProductDto MapToDto(Product product)
         {
+            // Convert relative image URLs to absolute URLs
+            string imageUrl = string.Empty;
+            if (!string.IsNullOrEmpty(product.ImageUrl))
+            {
+                if (product.ImageUrl.StartsWith("http"))
+                {
+                    // Already an absolute URL
+                    imageUrl = product.ImageUrl;
+                }
+                else
+                {
+                    // Convert relative URL to absolute URL
+                    var scheme = Request.Scheme;
+                    var host = Request.Host;
+                    imageUrl = $"{scheme}://{host}{product.ImageUrl}";
+                }
+            }
+
             return new ProductDto
             {
                 Id = product.Id,
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                ImageUrl = product.ImageUrl ?? string.Empty,
+                ImageUrl = imageUrl,
                 Category = product.Category,
                 StockQuantity = product.StockQuantity,
                 SubCategory = product.SubCategory,

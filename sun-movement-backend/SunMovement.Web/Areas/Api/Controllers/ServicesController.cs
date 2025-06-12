@@ -27,9 +27,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
         // GET: api/services
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ServiceDto>>> GetServices()
-        {
-            var services = await _serviceService.GetAllServicesAsync();
-            var serviceDtos = services.Select(MapToDto);
+        {            var services = await _serviceService.GetAllServicesAsync();
+            var serviceDtos = services.Select(s => MapToDto(s));
             return Ok(serviceDtos);
         }
 
@@ -64,10 +63,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
             if (!Enum.TryParse<ServiceType>(type, true, out var serviceType))
             {
                 return BadRequest("Invalid service type");
-            }
-
-            var services = await _serviceService.GetServicesByTypeAsync(serviceType);
-            var serviceDtos = services.Select(MapToDto);
+            }            var services = await _serviceService.GetServicesByTypeAsync(serviceType);
+            var serviceDtos = services.Select(s => MapToDto(s));
             return Ok(serviceDtos);
         }
 
@@ -115,22 +112,40 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
             await _serviceService.DeleteServiceAsync(id);
             return NoContent();
-        }
-
-        private static ServiceDto MapToDto(Service service)
+        }        private ServiceDto MapToDto(Service service)
         {
+            // Convert relative image URLs to absolute URLs
+            string imageUrl = string.Empty;
+            if (!string.IsNullOrEmpty(service.ImageUrl))
+            {
+                if (service.ImageUrl.StartsWith("http"))
+                {
+                    // Already an absolute URL
+                    imageUrl = service.ImageUrl;
+                }
+                else
+                {
+                    // Convert relative URL to absolute URL
+                    var scheme = Request.Scheme;
+                    var host = Request.Host;
+                    imageUrl = $"{scheme}://{host}{service.ImageUrl}";
+                }
+            }
+
             return new ServiceDto
             {
                 Id = service.Id,
                 Name = service.Name,
                 Description = service.Description,
-                ImageUrl = service.ImageUrl ?? string.Empty,
+                ImageUrl = imageUrl,
                 Price = service.Price,
                 Type = service.Type,
                 Features = service.Features ?? string.Empty,
                 IsActive = service.IsActive
             };
-        }        private static Service MapToEntity(ServiceDto dto, Service existingService = null)
+        }
+        
+        private static Service MapToEntity(ServiceDto dto, Service? existingService = null)
         {
             var service = existingService ?? new Service();
             service.Name = dto.Name ?? string.Empty;

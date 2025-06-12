@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 
 // For development only - handle self-signed certificates
 // This should be removed in production
-if (process.env.NODE_ENV === 'development') {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-}
+
 
 export const metadata: Metadata = {
   title: "Quần áo thể thao | Sun Movement",
@@ -48,8 +46,15 @@ const fallbackSportswearProducts: Product[] = [
 // Server-side data fetching function with error handling
 async function getSportswearProducts(): Promise<{products: Product[], error?: string}> {
   try {
-    // Use direct URL that you confirmed is working
-    const backendUrl = "https://localhost:5001";
+    // For development, use HTTPS with SSL verification disabled
+    const backendUrl = process.env.BACKEND_URL || 'https://localhost:5001';
+    
+    // Disable SSL verification for development
+    if (process.env.NODE_ENV === 'development') {
+      // @ts-ignore - This is a Node.js specific property
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+    
     const response = await fetch(`${backendUrl}/api/products/category/sportswear`, { 
       next: { revalidate: 3600 }, // Cache for 1 hour
       headers: {

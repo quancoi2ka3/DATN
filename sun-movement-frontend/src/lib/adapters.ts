@@ -26,7 +26,6 @@ export interface ProductDto {
  * @returns A properly formatted Product for the frontend
  */
 
-
 /**
  * Helper function to extract colors from specifications string
  */

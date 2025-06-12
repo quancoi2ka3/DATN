@@ -6,11 +6,17 @@ import { ProductDto } from "./adapters";
 // Fetch featured products for a specific category
 export async function getFeaturedProductsByCategory(category: string): Promise<{products: Product[], error?: string}> {
   try {
-    // Use a more robust URL construction with fallback
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    // For development, use HTTPS with SSL verification disabled
+    const backendUrl = process.env.BACKEND_URL || 'https://localhost:5001';
     const url = `${backendUrl}/api/products/category/${category}`;
     
     console.log(`Attempting to fetch from: ${url}`);
+    
+    // Disable SSL verification for development
+    if (process.env.NODE_ENV === 'development') {
+      // @ts-ignore - This is a Node.js specific property
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
     
     const response = await fetch(url, { 
       next: { revalidate: 3600 }, // Cache for 1 hour

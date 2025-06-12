@@ -17,13 +17,25 @@ import { ProductDto } from "@/lib/adapters";
 // Server-side data fetching function with improved error handling
 async function getSupplementsProducts(): Promise<{products: Product[], error?: string}> {
   try {
-    const response = await fetch(`${process.env.BACKEND_URL}/api/products/category/supplements`, { 
+    // For development, use HTTPS with custom agent to handle self-signed certificates
+    const backendUrl = process.env.BACKEND_URL || 'https://localhost:5001';
+    
+    // Create a custom fetch with SSL verification disabled for development
+    const fetchOptions: RequestInit = {
       next: { revalidate: 3600 }, // Cache for 1 hour
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-    });
+    };
+
+    // Disable SSL verification for development
+    if (process.env.NODE_ENV === 'development') {
+      // @ts-ignore - This is a Node.js specific property
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+    
+    const response = await fetch(`${backendUrl}/api/products/category/supplements`, fetchOptions);
     
     if (!response.ok) {
       // Enhanced error handling with status code

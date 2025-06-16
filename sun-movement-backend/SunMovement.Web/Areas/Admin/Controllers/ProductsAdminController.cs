@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SunMovement.Infrastructure.Data;
-using SunMovement.Infrastructure.Data;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {

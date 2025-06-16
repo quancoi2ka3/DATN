@@ -17,17 +17,15 @@ namespace SunMovement.Infrastructure.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             // Ensure database is created
-            context.Database.EnsureCreated();
-
-            // Create roles if they don't exist
-            string[] roles = { "Admin", "Customer" };
+            context.Database.EnsureCreated();            // Create roles if they don't exist
+            string[] roles = { "Admin", "Customer", "Staff" };
             foreach (string role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
                     await roleManager.CreateAsync(new IdentityRole(role));
                 }
-            }            // Create admin user if it doesn't exist
+            }// Create admin user if it doesn't exist
             var adminEmail = "admin@sunmovement.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             

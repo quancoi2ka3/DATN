@@ -77,9 +77,8 @@ export default function CalisthenicsPage() {
               Khám phá thêm <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl">
-            <Image 
-              src="/images/calisthenics.jpg" 
+          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl">            <Image 
+              src="https://localhost:5001/images/calisthenics.jpg" 
               alt="Calisthenics training at Sun Movement" 
               fill
               className="object-cover"
@@ -208,11 +207,10 @@ export default function CalisthenicsPage() {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">
-            <div className="relative h-80">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="/images/calisthenics.jpg" 
+                src="https://localhost:5001/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -232,11 +230,10 @@ export default function CalisthenicsPage() {
             </div>
           </div>
           
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">
-            <div className="relative h-80">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="/images/calisthenics.jpg" 
+                src="https://localhost:5001/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -256,11 +253,10 @@ export default function CalisthenicsPage() {
             </div>
           </div>
           
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">
-            <div className="relative h-80">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="/images/calisthenics.jpg" 
+                src="https://localhost:5001/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"

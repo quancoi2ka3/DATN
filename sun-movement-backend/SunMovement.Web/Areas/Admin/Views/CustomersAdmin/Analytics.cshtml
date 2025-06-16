@@ -1,0 +1,289 @@
+@model SunMovement.Web.ViewModels.CustomerAnalyticsViewModel
+@{
+    ViewData["Title"] = "Thống kê khách hàng";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        <li class="breadcrumb-item active">Thống kê</li>
+    </ol>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Tổng khách hàng</div>
+                            <div class="h2">@Model.TotalCustomers</div>
+                        </div>
+                        <div class="fa-3x">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-action="Index">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng hoạt động</div>
+                            <div class="h2">@Model.ActiveCustomers</div>
+                            <div class="small text-white-50">
+                                @if (Model.TotalCustomers > 0)
+                                {
+                                    <span>(@(Math.Round((double)Model.ActiveCustomers / Model.TotalCustomers * 100, 1))%)</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="fa-3x">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng mới (30 ngày)</div>
+                            <div class="h2">@Model.NewCustomersThisMonth</div>
+                            <div class="small text-white-50">
+                                @if (Model.TotalCustomers > 0)
+                                {
+                                    <span>(@(Math.Round((double)Model.NewCustomersThisMonth / Model.TotalCustomers * 100, 1))%)</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="fa-3x">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Giá trị đơn hàng TB</div>
+                            <div class="h4">@Model.AverageOrderValue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                        </div>
+                        <div class="fa-3x">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Top Customers -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-crown me-1"></i>
+                    Top 5 khách hàng VIP (theo chi tiêu)
+                </div>
+                <div class="card-body">
+                    @if (Model.TopCustomers.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @for (int i = 0; i < Model.TopCustomers.Count; i++)
+                            {
+                                var customer = Model.TopCustomers[i];
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="ranking-badge me-3">
+                                            @switch (i + 1)
+                                            {
+                                                case 1:
+                                                    <span class="badge bg-warning text-dark">#1</span>
+                                                    break;
+                                                case 2:
+                                                    <span class="badge bg-secondary">#2</span>
+                                                    break;
+                                                case 3:
+                                                    <span class="badge bg-dark">#3</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-light text-dark">#@(i + 1)</span>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-3">
+                                            <i class="fas fa-user text-muted"></i>
+                                        </div>
+                                        <div>                                            <div class="fw-bold">@customer.FirstName @customer.LastName</div>
+                                            <div class="text-muted small">@customer.Email</div>
+                                            <div class="small">
+                                                <span class="badge bg-primary">@customer.OrderCount đơn hàng</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success">@customer.TotalSpent.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                        <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-primary mt-1">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5>Chưa có dữ liệu</h5>
+                            <p class="text-muted">Chưa có khách hàng nào thực hiện mua hàng.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Statistics -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Thống kê doanh thu
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h3 class="text-success mb-1">@Model.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</h3>
+                                    <p class="text-muted mb-0">Tổng doanh thu từ khách hàng</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 border rounded">
+                                <h5 class="text-primary mb-1">@Model.AverageOrderValue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</h5>
+                                <small class="text-muted">Giá trị đơn hàng trung bình</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 border rounded">
+                                <h5 class="text-info mb-1">
+                                    @if (Model.TotalCustomers > 0)
+                                    {
+                                        @((Model.TotalRevenue / Model.TotalCustomers).ToString("C0", new System.Globalization.CultureInfo("vi-VN")))
+                                    }
+                                    else
+                                    {
+                                        <span>0 ₫</span>
+                                    }
+                                </h5>
+                                <small class="text-muted">Doanh thu/khách hàng</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="progress mb-2" style="height: 8px;">
+                                    @{
+                                        var activePercentage = Model.TotalCustomers > 0 ? (double)Model.ActiveCustomers / Model.TotalCustomers * 100 : 0;
+                                    }
+                                    <div class="progress-bar bg-success" style="width: @activePercentage%"></div>
+                                </div>
+                                <small class="text-muted">Tỷ lệ khách hàng hoạt động: @Math.Round(activePercentage, 1)%</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="progress mb-2" style="height: 8px;">
+                                    @{
+                                        var newCustomerPercentage = Model.TotalCustomers > 0 ? (double)Model.NewCustomersThisMonth / Model.TotalCustomers * 100 : 0;
+                                    }
+                                    <div class="progress-bar bg-warning" style="width: @newCustomerPercentage%"></div>
+                                </div>
+                                <small class="text-muted">Tỷ lệ khách hàng mới: @Math.Round(newCustomerPercentage, 1)%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tools me-1"></i>
+                    Công cụ quản lý
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-action="Index" class="btn btn-primary w-100">
+                                <i class="fas fa-list me-1"></i>
+                                Danh sách khách hàng
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index" class="btn btn-info w-100">
+                                <i class="fas fa-shopping-cart me-1"></i>
+                                Quản lý đơn hàng
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-warning w-100" onclick="exportCustomerData()">
+                                <i class="fas fa-download me-1"></i>
+                                Xuất dữ liệu
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-secondary w-100" onclick="printReport()">
+                                <i class="fas fa-print me-1"></i>
+                                In báo cáo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+    }
+</style>
+
+<script>
+    function exportCustomerData() {
+        // TODO: Implement export functionality
+        alert('Tính năng xuất dữ liệu sẽ được triển khai sau');
+    }
+
+    function printReport() {
+        // TODO: Implement print functionality
+        window.print();
+    }
+</script>

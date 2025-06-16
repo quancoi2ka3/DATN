@@ -10,8 +10,7 @@ using SunMovement.Core.Interfaces;
 using SunMovement.Web.ViewModels;
 
 namespace SunMovement.Web.Controllers
-{
-    [Authorize]
+{    [Authorize]
     public class CartController : Controller
     {
         private readonly IProductService _productService;
@@ -19,7 +18,17 @@ namespace SunMovement.Web.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<CartController> _logger;
 
-       
+        public CartController(
+            IProductService productService,
+            IServiceService serviceService,
+            IMapper mapper,
+            ILogger<CartController> logger)
+        {
+            _productService = productService;
+            _serviceService = serviceService;
+            _mapper = mapper;
+            _logger = logger;
+        }
 
         private string GetUserId()
         {

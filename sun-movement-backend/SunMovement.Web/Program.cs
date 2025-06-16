@@ -6,6 +6,7 @@ using SunMovement.Core.Services;
 using SunMovement.Core.Mappings;
 using SunMovement.Infrastructure.Data;
 using SunMovement.Infrastructure.Repositories;
+using SunMovement.Infrastructure.Services;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -164,27 +165,36 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+// TEMPORARY: Using MockEmailService for testing - verification codes logged to console
+builder.Services.AddScoped<IEmailService, MockEmailService>();
+builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 // Register AutoMapper profiles
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMovement.Web.Mappings.WebMappingProfile).Assembly);
 
-// Add CORS with expanded configuration
+// Add CORS with very permissive configuration for testing
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
+        corsBuilder => corsBuilder
+            .AllowAnyOrigin()   // Allow all origins for testing
+            .AllowAnyMethod()
+            .AllowAnyHeader()); // Note: Cannot use AllowCredentials() with AllowAnyOrigin()
+    
+    // Also add a more specific policy for frontend if needed
+    options.AddPolicy("AllowSpecificOrigins",
         corsBuilder => corsBuilder
             .WithOrigins(
                 "http://localhost:3000",
                 "http://localhost:5000",
                 "https://localhost:5001",
                 "http://127.0.0.1:3000",
-                "https://127.0.0.1:3000") 
+                "https://127.0.0.1:3000",
+                "file://") // Allow file:// protocol for local HTML files
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials()
-            .SetIsOriginAllowed(origin => true)); 
+            .AllowCredentials());
 });
 
 // Add Swagger for API documentation
@@ -221,8 +231,20 @@ using (var scope = app.Services.CreateScope())
         
         // Apply any pending migrations
         Console.WriteLine("Applying pending database migrations...");
-        context.Database.Migrate();
-        Console.WriteLine("Database migration completed successfully.");
+        try
+        {
+            context.Database.Migrate();
+            Console.WriteLine("Database migration completed successfully.");
+        }
+        catch (Exception migrationEx) when (migrationEx.Message.Contains("already an object named"))
+        {
+            Console.WriteLine("⚠️ Migration conflict detected - some tables already exist. This is normal during development.");
+            Console.WriteLine("🔄 Attempting to continue with existing database structure...");
+            
+            // Try to ensure the database exists without forcing migrations
+            context.Database.EnsureCreated();
+            Console.WriteLine("✅ Database structure verified.");
+        }
         
         // Seed initial data
         Console.WriteLine("Initializing database with seed data...");

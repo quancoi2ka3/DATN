@@ -25,6 +25,23 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             var totalServices = await _unitOfWork.Services.CountAsync();
             var totalOrders = await _unitOfWork.Orders.CountAsync();
             var totalUsers = _userManager.Users.Count();
+            
+            // Get customer statistics
+            var allUsers = _userManager.Users.ToList();
+            var totalCustomers = 0;
+            var activeCustomers = 0;
+            foreach (var user in allUsers)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Customer"))
+                {
+                    totalCustomers++;
+                    if (user.IsActive)
+                    {
+                        activeCustomers++;
+                    }
+                }
+            }
+            
             var pendingOrders = await _unitOfWork.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
             var unreadMessages = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead);
 
@@ -38,13 +55,13 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             // Revenue calculations (mock data - replace with real payment data)
             var todayRevenue = GetRandomRevenue(1000, 5000);
             var weekRevenue = GetRandomRevenue(8000, 25000);
-            var monthlyRevenue = GetRandomRevenue(30000, 80000);
-
-            // Set ViewBag properties
+            var monthlyRevenue = GetRandomRevenue(30000, 80000);            // Set ViewBag properties
             ViewBag.TotalProducts = totalProducts;
             ViewBag.TotalServices = totalServices;
             ViewBag.TotalOrders = totalOrders;
             ViewBag.TotalUsers = totalUsers;
+            ViewBag.TotalCustomers = totalCustomers;
+            ViewBag.ActiveCustomers = activeCustomers;
             ViewBag.PendingOrders = pendingOrders;
             ViewBag.UnreadMessages = unreadMessages;
             

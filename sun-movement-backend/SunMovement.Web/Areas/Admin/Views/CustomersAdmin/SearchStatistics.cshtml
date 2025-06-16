@@ -1,0 +1,309 @@
+@{
+    ViewData["Title"] = "Thống kê tìm kiếm khách hàng";
+}
+@model SunMovement.Web.ViewModels.CustomerSearchStatsViewModel
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        <li class="breadcrumb-item active">Thống kê tìm kiếm</li>
+    </ol>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Tổng lượt tìm kiếm</div>
+                            <div class="h4">@Model.TotalSearches.ToString("N0")</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Người tìm kiếm duy nhất</div>
+                            <div class="h4">@Model.UniqueSearchers.ToString("N0")</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Tỷ lệ click trung bình</div>
+                            <div class="h4">@Model.AverageClickThroughRate.ToString("F1")%</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Tìm kiếm không có kết quả</div>
+                            <div class="h4">@Model.NoResultsSearches</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-1"></i>
+                    Xu hướng tìm kiếm theo thời gian
+                </div>
+                <div class="card-body">
+                    <canvas id="searchTrendsChart" style="height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Từ khóa tìm kiếm hàng đầu
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        @foreach (var searchTerm in Model.TopSearchTerms.Take(10))
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <strong>@searchTerm.Term</strong>
+                                    <br>
+                                    <small class="text-muted">CTR: @searchTerm.ClickRate.ToString("F1")%</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary rounded-pill">@searchTerm.Count</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Chi tiết từ khóa tìm kiếm
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Từ khóa</th>
+                                    <th>Số lượt tìm kiếm</th>
+                                    <th>Tỷ lệ click (%)</th>
+                                    <th>Mức độ hiệu quả</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var searchTerm in Model.TopSearchTerms)
+                                {
+                                    <tr>
+                                        <td><strong>@searchTerm.Term</strong></td>
+                                        <td>@searchTerm.Count.ToString("N0")</td>
+                                        <td>@searchTerm.ClickRate.ToString("F1")%</td>
+                                        <td>
+                                            @if (searchTerm.ClickRate >= 80)
+                                            {
+                                                <span class="badge bg-success">Rất tốt</span>
+                                            }
+                                            else if (searchTerm.ClickRate >= 60)
+                                            {
+                                                <span class="badge bg-info">Tốt</span>
+                                            }
+                                            else if (searchTerm.ClickRate >= 40)
+                                            {
+                                                <span class="badge bg-warning">Trung bình</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Cần cải thiện</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="analyzeSearchTerm('@searchTerm.Term')">
+                                                <i class="fas fa-analytics"></i> Phân tích
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights and Recommendations -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-lightbulb me-1"></i>
+                    Thông tin chi tiết
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Phân tích xu hướng</h6>
+                        <ul class="mb-0">
+                            <li>Từ khóa phổ biến nhất: <strong>@Model.TopSearchTerms.FirstOrDefault()?.Term</strong></li>
+                            <li>Tỷ lệ tìm kiếm thành công: <strong>@((double)(Model.TotalSearches - Model.NoResultsSearches) / Model.TotalSearches * 100).ToString("F1")%</strong></li>
+                            <li>Trung bình tìm kiếm/người dùng: <strong>@Math.Round((double)Model.TotalSearches / Model.UniqueSearchers, 1)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-recommendations me-1"></i>
+                    Khuyến nghị cải thiện
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">Đề xuất tối ưu</h6>
+                        <ul class="mb-0">
+                            <li>Tối ưu hóa các sản phẩm cho từ khóa có CTR thấp</li>
+                            <li>Bổ sung thêm sản phẩm cho từ khóa phổ biến</li>
+                            <li>Cải thiện chức năng gợi ý tìm kiếm</li>
+                            <li>Phân tích từ khóa không có kết quả để mở rộng sản phẩm</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại danh sách khách hàng
+            </a>
+            <a asp-action="Analytics" class="btn btn-info ms-2">
+                <i class="fas fa-chart-bar me-1"></i>Thống kê khách hàng
+            </a>
+            <button type="button" class="btn btn-success ms-2" onclick="exportSearchData()">
+                <i class="fas fa-download me-1"></i>Xuất dữ liệu
+            </button>
+            <button type="button" class="btn btn-outline-primary ms-2" onclick="refreshData()">
+                <i class="fas fa-sync-alt me-1"></i>Làm mới
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search Trends Chart
+        const trendsData = @Html.Raw(Json.Serialize(Model.SearchTrends));
+        const trendsCtx = document.getElementById('searchTrendsChart');
+        
+        if (trendsCtx) {
+            new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: trendsData.map(item => new Date(item.date).toLocaleDateString('vi-VN')),
+                    datasets: [{
+                        label: 'Số lượt tìm kiếm',
+                        data: trendsData.map(item => item.totalSearches),
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 100
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+    function analyzeSearchTerm(term) {
+        alert(`Phân tích chi tiết cho từ khóa "${term}" sẽ được triển khai sau`);
+    }
+
+    function exportSearchData() {
+        // Simple CSV export
+        let csv = 'Từ khóa,Số lượt tìm kiếm,Tỷ lệ click (%)\n';
+        
+        @foreach (var term in Model.TopSearchTerms)
+        {
+            <text>csv += '@term.Term,@term.Count,@term.ClickRate.ToString("F1")\n';</text>
+        }
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `search_statistics_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function refreshData() {
+        window.location.reload();
+    }
+</script>

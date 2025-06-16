@@ -1,0 +1,206 @@
+@model List<object>
+@{
+    ViewData["Title"] = "Đánh giá của khách hàng";
+    var customer = ViewBag.Customer as SunMovement.Core.Models.ApplicationUser;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        @if (customer != null)
+        {
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@customer.Id">@customer.FirstName @customer.LastName</a></li>
+        }
+        <li class="breadcrumb-item active">Đánh giá</li>
+    </ol>    <!-- Customer Info Header -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-star me-1"></i>
+                    Đánh giá của: @(customer?.FirstName ?? "Unknown") @(customer?.LastName ?? "Customer")
+                </div>
+                <div>
+                    <span class="badge bg-info">@Model.Count đánh giá</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="row">
+        @if (Model.Any())
+        {
+            @foreach (var review in Model)
+            {
+                var reviewData = (dynamic)review;
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">@reviewData.ProductName</h6>
+                                    <div class="mt-1">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= reviewData.Rating)
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-muted"></i>
+                                            }
+                                        }
+                                        <span class="ms-2 text-muted">(@reviewData.Rating/5)</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">@((DateTime)reviewData.Date).ToString("dd/MM/yyyy")</small>
+                                    <br>
+                                    @if (reviewData.IsApproved)
+                                    {
+                                        <span class="badge bg-success">Đã duyệt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">Chờ duyệt</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-3">@reviewData.Content</p>
+                            
+                            @if (!reviewData.IsApproved)
+                            {
+                                <div class="border-top pt-3">
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-success btn-sm" onclick="approveReview('@reviewData.ProductName')">
+                                            <i class="fas fa-check me-1"></i>Duyệt đánh giá
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="rejectReview('@reviewData.ProductName')">
+                                            <i class="fas fa-times me-1"></i>Từ chối
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="respondToReview('@reviewData.ProductName')">
+                                            <i class="fas fa-reply me-1"></i>Phản hồi
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h5>Chưa có đánh giá nào</h5>
+                        <p class="text-muted">Khách hàng này chưa đánh giá sản phẩm hoặc dịch vụ nào.</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Statistics Card -->
+    @if (Model.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Thống kê đánh giá
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-center p-3 border rounded">
+                                    <h4 class="text-primary mb-1">@Model.Count</h4>
+                                    <small class="text-muted">Tổng đánh giá</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 border rounded">
+                                    <h4 class="text-warning mb-1">
+                                        @{
+                                            var avgRating = Model.Cast<dynamic>().Average(r => (int)r.Rating);
+                                        }
+                                        @Math.Round(avgRating, 1)
+                                    </h4>
+                                    <small class="text-muted">Điểm trung bình</small>
+                                </div>
+                            </div>                            <div class="col-6">
+                                <div class="text-center p-3 border rounded">
+                                    <h4 class="text-success mb-1">
+                                        @{
+                                            var approvedCount = Model.Cast<dynamic>().Count(r => (bool)r.IsApproved);
+                                        }
+                                        @approvedCount
+                                    </h4>
+                                    <small class="text-muted">Đã duyệt</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-3 border rounded">
+                                    <h4 class="text-warning mb-1">
+                                        @{
+                                            var pendingCount = Model.Cast<dynamic>().Count(r => !(bool)r.IsApproved);
+                                        }
+                                        @pendingCount
+                                    </h4>
+                                    <small class="text-muted">Chờ duyệt</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại chi tiết
+            </a>
+            <a asp-action="ActivityHistory" asp-route-id="@customer.Id" class="btn btn-info ms-2">
+                <i class="fas fa-history me-1"></i>Lịch sử hoạt động
+            </a>
+            <a asp-action="Index" class="btn btn-outline-primary ms-2">
+                <i class="fas fa-list me-1"></i>Danh sách khách hàng
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function approveReview(productName) {
+        if (confirm(`Bạn có chắc chắn muốn duyệt đánh giá cho sản phẩm "${productName}"?`)) {
+            // TODO: Implement approve review functionality
+            alert('Tính năng duyệt đánh giá sẽ được triển khai sau');
+        }
+    }
+
+    function rejectReview(productName) {
+        if (confirm(`Bạn có chắc chắn muốn từ chối đánh giá cho sản phẩm "${productName}"?`)) {
+            // TODO: Implement reject review functionality
+            alert('Tính năng từ chối đánh giá sẽ được triển khai sau');
+        }
+    }
+
+    function respondToReview(productName) {
+        const response = prompt(`Nhập phản hồi cho đánh giá sản phẩm "${productName}":`);
+        if (response && response.trim()) {
+            // TODO: Implement respond to review functionality
+            alert('Tính năng phản hồi đánh giá sẽ được triển khai sau');
+        }
+    }
+</script>

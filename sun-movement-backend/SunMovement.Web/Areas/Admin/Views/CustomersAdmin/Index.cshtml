@@ -1,0 +1,378 @@
+@model List<SunMovement.Core.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item active">Quản lý khách hàng</li>
+    </ol>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Search and Filter Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-search me-1"></i>
+            Tìm kiếm và lọc khách hàng
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchQuery" class="form-label">Tìm kiếm</label>
+                    <input type="text" class="form-control" id="searchQuery" placeholder="Tên, email, số điện thoại...">
+                </div>
+                <div class="col-md-3">
+                    <label for="statusFilter" class="form-label">Trạng thái</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Không hoạt động</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="dateFilter" class="form-label">Ngày đăng ký</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="">Tất cả thời gian</option>
+                        <option value="today">Hôm nay</option>
+                        <option value="week">7 ngày qua</option>
+                        <option value="month">30 ngày qua</option>
+                        <option value="year">Năm nay</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary" onclick="searchCustomers()">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">
+                        <i class="fas fa-times"></i> Xóa bộ lọc
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm ms-2" onclick="exportCustomers()">
+                        <i class="fas fa-download"></i> Xuất Excel
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm ms-2" onclick="refreshCustomers()">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Tổng khách hàng</div>
+                            <div class="h4">@Model.Count</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng hoạt động</div>
+                            <div class="h4">@Model.Count(c => c.IsActive)</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng mới (tháng)</div>
+                            <div class="h4">@Model.Count(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-30))</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng vô hiệu hóa</div>
+                            <div class="h4">@Model.Count(c => !c.IsActive)</div>
+                        </div>
+                        <div class="fa-2x">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6">
+                    <i class="fas fa-table me-1"></i>
+                    Danh sách khách hàng
+                </div>
+                <div class="col-md-6 text-end">
+                    <a asp-action="Analytics" class="btn btn-info btn-sm">
+                        <i class="fas fa-chart-bar me-1"></i>Thống kê
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            @foreach (var customer in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@customer.FirstName @customer.LastName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@customer.Email</td>
+                                    <td>@(customer.PhoneNumber ?? "Chưa cập nhật")</td>
+                                    <td>@customer.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (customer.IsActive)
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Vô hiệu hóa</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@customer.Id" class="btn btn-sm btn-outline-secondary" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4" id="noDataRow">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5>Không tìm thấy khách hàng nào</h5>
+                    <p class="text-muted">Chưa có khách hàng nào đăng ký.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+    }
+</style>
+
+<script>
+    let currentCustomers = [];
+    let filteredCustomers = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Store original customer list
+        const customerRows = document.querySelectorAll('#customersTableBody tr');
+        currentCustomers = Array.from(customerRows).map(row => {
+            if (row.cells && row.cells.length >= 6) {
+                return {
+                    element: row.cloneNode(true),
+                    name: row.cells[0].textContent.trim().toLowerCase(),
+                    email: row.cells[1].textContent.trim().toLowerCase(),
+                    phone: row.cells[2].textContent.trim().toLowerCase(),
+                    status: row.cells[4].textContent.trim().toLowerCase(),
+                    createdAt: row.cells[3].textContent.trim()
+                };
+            }
+            return null;
+        }).filter(item => item !== null);
+        filteredCustomers = [...currentCustomers];
+    });
+
+    function searchCustomers() {
+        const query = document.getElementById('searchQuery').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const dateFilter = document.getElementById('dateFilter').value;
+
+        filteredCustomers = currentCustomers.filter(customer => {
+            // Text search
+            const matchesQuery = !query || 
+                customer.name.includes(query) || 
+                customer.email.includes(query) || 
+                customer.phone.includes(query);
+
+            // Status filter
+            const matchesStatus = !statusFilter || 
+                (statusFilter === 'active' && customer.status.includes('hoạt động')) ||
+                (statusFilter === 'inactive' && customer.status.includes('vô hiệu hóa'));
+
+            // Date filter (simplified - would need proper date parsing)
+            const matchesDate = !dateFilter; // For now, ignore date filter
+
+            return matchesQuery && matchesStatus && matchesDate;
+        });
+
+        updateCustomerTable();
+        updateStatistics();
+    }
+
+    function updateCustomerTable() {
+        const tbody = document.getElementById('customersTableBody');
+        const noDataDiv = document.getElementById('noDataRow');
+        
+        if (!tbody) return;
+        
+        // Clear existing rows
+        tbody.innerHTML = '';
+
+        if (filteredCustomers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4"><i class="fas fa-users fa-3x text-muted mb-3"></i><h5>Không tìm thấy khách hàng nào</h5><p class="text-muted">Không có khách hàng nào phù hợp với bộ lọc hiện tại.</p></td></tr>';
+        } else {
+            filteredCustomers.forEach(customer => {
+                tbody.appendChild(customer.element.cloneNode(true));
+            });
+        }
+    }
+
+    function updateStatistics() {
+        const totalCustomers = filteredCustomers.length;
+        const activeCustomers = filteredCustomers.filter(c => c.status.includes('hoạt động')).length;
+        
+        // Update statistic cards if they exist
+        const totalCard = document.querySelector('.card.bg-primary .h4');
+        const activeCard = document.querySelector('.card.bg-success .h4');
+        
+        if (totalCard) totalCard.textContent = totalCustomers;
+        if (activeCard) activeCard.textContent = activeCustomers;
+    }
+
+    function clearFilters() {
+        document.getElementById('searchQuery').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('dateFilter').value = '';
+        
+        filteredCustomers = [...currentCustomers];
+        updateCustomerTable();
+        updateStatistics();
+    }
+
+    function refreshCustomers() {
+        window.location.reload();
+    }
+
+    function exportCustomers() {
+        // Simple CSV export
+        let csv = 'Tên,Email,Điện thoại,Ngày đăng ký,Trạng thái\n';
+        
+        filteredCustomers.forEach(customer => {
+            const row = customer.element;
+            if (row.cells && row.cells.length >= 5) {
+                const name = row.cells[0].textContent.trim().replace(/"/g, '""');
+                const email = row.cells[1].textContent.trim().replace(/"/g, '""');
+                const phone = row.cells[2].textContent.trim().replace(/"/g, '""');
+                const createdAt = row.cells[3].textContent.trim().replace(/"/g, '""');
+                const status = row.cells[4].textContent.trim().replace(/"/g, '""');
+                
+                csv += `"${name}","${email}","${phone}","${createdAt}","${status}"\n`;
+            }
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `customers_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Add Enter key support for search
+    const searchInput = document.getElementById('searchQuery');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCustomers();
+            }
+        });
+    }
+
+    // Add change event listeners for filters
+    const statusFilter = document.getElementById('statusFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    
+    if (statusFilter) statusFilter.addEventListener('change', searchCustomers);
+    if (dateFilter) dateFilter.addEventListener('change', searchCustomers);
+</script>

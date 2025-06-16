@@ -1,0 +1,224 @@
+@model SunMovement.Web.ViewModels.CustomerEditViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa khách hàng";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@Model.Id">Chi tiết</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa</li>
+    </ol>
+
+    @if (ViewData.ModelState.ErrorCount > 0)
+    {
+        <div class="alert alert-danger">
+            <h4>Có lỗi xảy ra:</h4>
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-edit me-1"></i>
+                    Thông tin khách hàng
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="FirstName" type="text" class="form-control" id="firstName" placeholder="Nhập tên">
+                                    <label for="firstName">Tên *</label>
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="LastName" type="text" class="form-control" id="lastName" placeholder="Nhập họ">
+                                    <label for="lastName">Họ *</label>
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Email" type="email" class="form-control" id="email" placeholder="Nhập email">
+                                    <label for="email">Email *</label>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="PhoneNumber" type="tel" class="form-control" id="phoneNumber" placeholder="Nhập số điện thoại">
+                                    <label for="phoneNumber">Số điện thoại</label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Address" class="form-control" id="address" placeholder="Nhập địa chỉ" style="height: 100px"></textarea>
+                            <label for="address">Địa chỉ</label>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="DateOfBirth" type="date" class="form-control" id="dateOfBirth">
+                                    <label for="dateOfBirth">Ngày sinh</label>
+                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-3" style="margin-top: 1rem;">
+                                    <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActive">
+                                    <label class="form-check-label" for="isActive">
+                                        Tài khoản hoạt động
+                                    </label>
+                                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Lưu thay đổi
+                                </button>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-times me-1"></i>
+                                    Hủy
+                                </a>
+                            </div>
+                            <div>
+                                <a asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="fas fa-list me-1"></i>
+                                    Quay lại danh sách
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Thông tin hệ thống
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="border rounded p-3">
+                                <h6 class="text-muted mb-2">ID Khách hàng</h6>
+                                <p class="mb-0 font-monospace">@Model.Id</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Lưu ý quan trọng
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <h6 class="alert-heading">Thay đổi thông tin khách hàng</h6>
+                        <p class="mb-0">
+                            • Thay đổi email sẽ ảnh hưởng đến việc đăng nhập của khách hàng<br>
+                            • Vô hiệu hóa tài khoản sẽ không cho phép khách hàng đăng nhập<br>
+                            • Mọi thay đổi sẽ có hiệu lực ngay lập tức
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tools me-1"></i>
+                    Công cụ quản lý
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                            <i class="fas fa-eye me-1"></i>
+                            Xem chi tiết
+                        </a>
+                        <a asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index" asp-route-customerId="@Model.Id" class="btn btn-outline-primary">
+                            <i class="fas fa-shopping-cart me-1"></i>
+                            Đơn hàng của khách hàng
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary" onclick="printCustomerInfo()">
+                            <i class="fas fa-print me-1"></i>
+                            In thông tin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printCustomerInfo() {
+        window.print();
+    }
+
+    // Form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phoneNumber');        // Email validation
+        emailInput.addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Phone validation
+        phoneInput.addEventListener('blur', function() {
+            const phone = this.value;
+            const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+            
+            if (phone && !phoneRegex.test(phone)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Form submission confirmation
+        form.addEventListener('submit', function(e) {
+            const confirmation = confirm('Bạn có chắc chắn muốn lưu các thay đổi này không?');
+            if (!confirmation) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>

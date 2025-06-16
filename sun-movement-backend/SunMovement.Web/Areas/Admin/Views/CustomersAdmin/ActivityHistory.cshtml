@@ -1,0 +1,237 @@
+@model List<object>
+@{
+    ViewData["Title"] = "Lịch sử hoạt động khách hàng";
+    var customer = ViewBag.Customer as SunMovement.Core.Models.ApplicationUser;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        @if (customer != null)
+        {
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@customer.Id">@customer.FirstName @customer.LastName</a></li>
+        }
+        <li class="breadcrumb-item active">Lịch sử hoạt động</li>
+    </ol>
+
+    <!-- Customer Info Header -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-user me-1"></i>
+                    Lịch sử hoạt động: @(customer?.FirstName ?? "Unknown") @(customer?.LastName ?? "Customer")
+                </div>
+                <div>
+                    @if (customer?.IsActive == true)
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Không hoạt động</span>
+                    }ata["Title"] = "Lịch sử hoạt động khách hàng";
+    var customer = ViewBag.Customer as SunMovement.Core.Models.ApplicationUser;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+        @if (customer != null)
+        {
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@customer.Id">@customer.FirstName @customer.LastName</a></li>
+        }
+        <li class="breadcrumb-item active">Lịch sử hoạt động</li>
+    </ol>
+
+    <!-- Customer Info Header -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-user me-1"></i>
+                    Lịch sử hoạt động: @customer.FirstName @customer.LastName
+                </div>
+                <div>
+                    @if (customer.IsActive)
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Vô hiệu hóa</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <strong>Email:</strong> @customer.Email
+                </div>
+                <div class="col-md-3">
+                    <strong>Điện thoại:</strong> @customer.PhoneNumber
+                </div>
+                <div class="col-md-3">
+                    <strong>Ngày tham gia:</strong> @customer.CreatedAt.ToString("dd/MM/yyyy")
+                </div>
+                <div class="col-md-3">
+                    <strong>Lần cuối đăng nhập:</strong> 
+                    @if (customer.LastLogin.HasValue)
+                    {
+                        @customer.LastLogin.Value.ToString("dd/MM/yyyy HH:mm")
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa từng đăng nhập</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Timeline -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-history me-1"></i>
+            Hoạt động gần đây
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="timeline">
+                    @foreach (var activity in Model)
+                    {
+                        var activityData = (dynamic)activity;
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                @switch (activityData.Type.ToString())
+                                {
+                                    case "Login":
+                                        <i class="fas fa-sign-in-alt text-success"></i>
+                                        break;
+                                    case "ProductView":
+                                        <i class="fas fa-eye text-info"></i>
+                                        break;
+                                    case "AddToCart":
+                                        <i class="fas fa-shopping-cart text-warning"></i>
+                                        break;
+                                    case "OrderPlaced":
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        break;
+                                    default:
+                                        <i class="fas fa-circle text-muted"></i>
+                                        break;
+                                }
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h6 class="mb-1">@GetActivityTypeDisplayName(activityData.Type.ToString())</h6>
+                                    <small class="text-muted">@((DateTime)activityData.Date).ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <p class="mb-0">@activityData.Description</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h5>Chưa có hoạt động nào</h5>
+                    <p class="text-muted">Khách hàng này chưa có hoạt động nào được ghi nhận.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <a asp-action="Details" asp-route-id="@customer.Id" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại chi tiết
+            </a>
+            <a asp-action="Reviews" asp-route-id="@customer.Id" class="btn btn-info ms-2">
+                <i class="fas fa-star me-1"></i>Xem đánh giá
+            </a>
+            <a asp-action="Index" class="btn btn-outline-primary ms-2">
+                <i class="fas fa-list me-1"></i>Danh sách khách hàng
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -23px;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #007bff;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+</style>
+
+@functions {
+    private string GetActivityTypeDisplayName(string activityType)
+    {
+        return activityType switch
+        {
+            "Login" => "Đăng nhập",
+            "Logout" => "Đăng xuất",
+            "ProductView" => "Xem sản phẩm",
+            "ProductSearch" => "Tìm kiếm sản phẩm",
+            "AddToCart" => "Thêm vào giỏ hàng",
+            "RemoveFromCart" => "Xóa khỏi giỏ hàng",
+            "OrderPlaced" => "Đặt hàng",
+            "OrderCanceled" => "Hủy đơn hàng",
+            "ProfileUpdated" => "Cập nhật hồ sơ",
+            "PasswordChanged" => "Đổi mật khẩu",
+            _ => activityType
+        };
+    }
+}

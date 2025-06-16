@@ -1,0 +1,207 @@
+/* Authentication Error Popup Notification System */
+
+/* Popup notification container styles */
+.auth-notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.auth-notification {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    margin-bottom: 15px;
+    padding: 20px;
+    border-left: 5px solid #dc3545;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.auth-notification.success {
+    border-left-color: #28a745;
+}
+
+.auth-notification.warning {
+    border-left-color: #ffc107;
+}
+
+.auth-notification.info {
+    border-left-color: #17a2b8;
+}
+
+.auth-notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.auth-notification-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-notification-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-notification-close {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.auth-notification-close:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+}
+
+.auth-notification-message {
+    color: #495057;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+.auth-notification-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e9ecef;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.auth-notification-details ul {
+    margin: 8px 0 0 0;
+    padding-left: 16px;
+}
+
+.auth-notification-details li {
+    margin-bottom: 4px;
+}
+
+/* Progress bar for auto-dismiss */
+.auth-notification-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: rgba(220, 53, 69, 0.3);
+    width: 100%;
+    transform-origin: left;
+    transition: transform linear;
+}
+
+.auth-notification.success .auth-notification-progress {
+    background-color: rgba(40, 167, 69, 0.3);
+}
+
+.auth-notification.warning .auth-notification-progress {
+    background-color: rgba(255, 193, 7, 0.3);
+}
+
+.auth-notification.info .auth-notification-progress {
+    background-color: rgba(23, 162, 184, 0.3);
+}
+
+/* Animation states */
+.auth-notification.removing {
+    opacity: 0;
+    transform: translateX(100%) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+/* Form field error highlighting */
+.form-control.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .auth-notification-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .auth-notification {
+        margin-bottom: 10px;
+        padding: 16px;
+    }
+    
+    .auth-notification-title {
+        font-size: 15px;
+    }
+    
+    .auth-notification-message {
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .auth-notification {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .auth-notification-title {
+        color: #f7fafc;
+    }
+    
+    .auth-notification-message {
+        color: #cbd5e0;
+    }
+    
+    .auth-notification-close {
+        color: #a0aec0;
+    }
+    
+    .auth-notification-close:hover {
+        background-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .auth-notification-details {
+        border-top-color: #4a5568;
+        color: #a0aec0;
+    }
+}

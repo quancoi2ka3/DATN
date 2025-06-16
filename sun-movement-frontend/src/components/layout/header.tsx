@@ -14,7 +14,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CartIcon } from "@/components/ui/cart-icon";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, ChevronDown, Phone, Instagram, Facebook, MapPin } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import AuthModal from "@/components/auth/AuthModal";
+import { useAuth } from "@/lib/auth-context";
+import { Menu, X, ChevronDown, Phone, Instagram, Facebook, MapPin, User, LogOut, Settings } from "lucide-react";
 
 const mainNavItems = [
   { label: "Trang Chủ", href: "/" },
@@ -39,6 +49,149 @@ const mainNavItems = [
   { label: "Sự Kiện", href: "/su-kien" },
   { label: "FAQ", href: "/faq" },
 ];
+
+// Auth Section Component
+function AuthSection() {
+  const { isAuthenticated, user, logout } = useAuth();
+
+  if (isAuthenticated && user) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white hover:bg-white/10 flex items-center gap-2"
+          >
+            <User className="h-4 w-4" />
+            <span className="hidden md:inline">
+              {user.firstName} {user.lastName}
+            </span>
+            <ChevronDown className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-56 bg-slate-800 border-slate-700 text-white"
+        >
+          <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-slate-700" />
+          
+          <DropdownMenuItem className="text-white hover:bg-slate-700">
+            <User className="mr-2 h-4 w-4" />
+            <Link href="/profile">Thông tin cá nhân</Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem className="text-white hover:bg-slate-700">
+            <Settings className="mr-2 h-4 w-4" />
+            <Link href="/settings">Cài đặt</Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator className="bg-slate-700" />
+          
+          <DropdownMenuItem 
+            className="text-red-400 hover:bg-slate-700 hover:text-red-300"
+            onClick={logout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Đăng xuất
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <AuthModal defaultMode="login">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-white hover:bg-white/10"
+        >
+          Đăng nhập
+        </Button>
+      </AuthModal>
+      
+      <AuthModal defaultMode="register">
+        <Button 
+          size="sm" 
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Đăng ký
+        </Button>
+      </AuthModal>
+    </div>
+  );
+}
+
+// Mobile Auth Section Component
+function MobileAuthSection() {
+  const { isAuthenticated, user, logout } = useAuth();
+
+  if (isAuthenticated && user) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 p-3 bg-slate-800 rounded-md">
+          <User className="h-8 w-8 p-2 bg-red-600 rounded-full text-white" />
+          <div className="flex-1">
+            <div className="font-medium text-white">
+              {user.firstName} {user.lastName}
+            </div>
+            <div className="text-sm text-slate-400">{user.email}</div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-slate-600 text-white hover:bg-slate-700"
+            asChild
+          >
+            <Link href="/profile">
+              <Settings className="mr-2 h-4 w-4" />
+              Cài đặt
+            </Link>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+            onClick={logout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Đăng xuất
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <AuthModal defaultMode="login">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="border-slate-600 text-white hover:bg-slate-700"
+        >
+          Đăng nhập
+        </Button>
+      </AuthModal>
+      
+      <AuthModal defaultMode="register">
+        <Button 
+          size="sm" 
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Đăng ký
+        </Button>
+      </AuthModal>
+    </div>
+  );
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -163,12 +316,13 @@ export function Header() {
               </NavigationMenuItem>
             ))}
           </NavigationMenuList>
-        </NavigationMenu>
-
-        {/* Actions */}
+        </NavigationMenu>        {/* Actions */}
         <div className="flex items-center gap-3">
           {/* Cart Icon */}
           <CartIcon className="text-white hover:text-red-300 transition-colors" />
+          
+          {/* Authentication */}
+          <AuthSection />
           
           {/* Contact Button */}
           <Button
@@ -263,9 +417,11 @@ export function Header() {
                     ))}
                   </nav>
                 </div>
-                
-                <div className="p-4 border-t border-slate-800">
-                  <Button className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white" asChild>
+                  <div className="p-4 border-t border-slate-800">
+                  {/* Mobile Authentication */}
+                  <MobileAuthSection />
+                  
+                  <Button className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white" asChild>
                     <Link href="/lien-he">
                       <Phone className="mr-2 h-4 w-4" />
                       Liên Hệ Ngay

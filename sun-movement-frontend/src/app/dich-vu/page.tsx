@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dumbbell, Flame, Heart, Users, Zap, Award, Clock, ChevronRight } from "lucide-react";
 
-const services = [
-  {
+const services = [  {
     id: "calisthenics",
     title: "Calisthenics",
     description: "Phát triển sức mạnh, sự linh hoạt và thẩm mỹ cơ thể thông qua các bài tập với trọng lượng cơ thể.",
-    image: "/images/calisthenics.jpg",
+    image: "https://localhost:5001/images/calisthenics.jpg",
     icon: Zap,
     benefits: ["Cải thiện sức mạnh cơ bản", "Tăng sự linh hoạt", "Kiểm soát cơ thể tốt hơn", "Phát triển cơ bắp hài hòa"],
     schedule: "Thứ 2, Thứ 4, Thứ 7",
@@ -21,7 +20,7 @@ const services = [
     id: "strength",
     title: "Power / Strength Training",
     description: "Xây dựng sức mạnh tối đa và sức mạnh bùng nổ với các bài tập kháng lực chuyên sâu.",
-    image: "/images/strength.jpg",
+    image: "https://localhost:5001/images/strength.jpg",
     icon: Dumbbell,
     benefits: ["Tăng sức mạnh tối đa", "Phát triển cơ bắp", "Cải thiện sức bền", "Tăng cường sức mạnh cốt lõi"],
     schedule: "Thứ 2, Thứ 3, Thứ 5, Thứ 6",

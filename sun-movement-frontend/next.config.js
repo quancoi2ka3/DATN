@@ -3,8 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     BACKEND_URL: process.env.BACKEND_URL || 'https://localhost:5001',
-  },
-  images: {
+  },  images: {
     remotePatterns: [
       {
         protocol: 'https',
@@ -29,6 +28,56 @@ const nextConfig = {
         hostname: 'localhost',
         port: '5000',
         pathname: '/uploads/**',
+      },
+      // Add support for /images/** path
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/images/**',
+      },
+      // Add support for all static assets
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/**',
       },
     ],
   },

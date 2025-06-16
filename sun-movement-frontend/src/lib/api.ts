@@ -171,8 +171,11 @@ interface LoginCredentials {
 interface RegisterData {
   email: string;
   password: string;
-  confirmPassword: string;
-  // Other registration fields
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  address: string;
+  dateOfBirth: string;
 }
 
 interface AuthResponse {

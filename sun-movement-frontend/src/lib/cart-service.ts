@@ -242,3 +242,46 @@ export async function clearCart(): Promise<{ success: boolean; error?: string }>
     };
   }
 }
+
+/**
+ * Merge guest cart with user cart after login
+ */
+export async function apiMergeGuestCart(guestCartItems: CartItem[]): Promise<{ success: boolean; items: CartItem[]; error?: string }> {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return { success: false, error: 'User not authenticated', items: [] };
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+    const response = await fetch(`${apiUrl}/api/cart/merge-guest-cart`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ guestCartItems }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { 
+        success: false, 
+        error: errorData.message || `HTTP error! status: ${response.status}`,
+        items: []
+      };
+    }
+
+    const data: CartResponse = await response.json();
+    const items = data.items.map(mapCartItemDtoToCartItem);
+    
+    return { success: true, items };
+  } catch (error) {
+    console.error('Error merging guest cart:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Network error',
+      items: []
+    };
+  }
+}

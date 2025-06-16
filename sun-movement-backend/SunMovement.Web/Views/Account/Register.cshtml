@@ -1,0 +1,591 @@
+@model SunMovement.Web.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "_Layout";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0">
+                        <i class="fas fa-user-plus me-2"></i>@ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                        </div>
+                    }
+                      <form id="registerForm" method="post">
+                        <div id="validation-summary" class="text-danger mb-3" style="display: none;"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="FirstName" class="form-label required"></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Nhập họ của bạn" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="form-label required"></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Nhập tên của bạn" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label required"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="Nhập email của bạn" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Password" class="form-label required"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input asp-for="Password" class="form-control" type="password" placeholder="Nhập mật khẩu" />
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ConfirmPassword" class="form-label required"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Xác nhận mật khẩu" />
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="PhoneNumber" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="Số điện thoại (tùy chọn)" />
+                                    </div>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="DateOfBirth" class="form-label"></label>
+                                    <input asp-for="DateOfBirth" class="form-control" type="date" />
+                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <textarea asp-for="Address" class="form-control" rows="2" placeholder="Địa chỉ của bạn (tùy chọn)"></textarea>
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                <input asp-for="AgreeToTerms" class="form-check-input" />
+                                <label asp-for="AgreeToTerms" class="form-check-label">
+                                    Tôi đồng ý với <a href="#" class="text-primary">điều khoản sử dụng</a> và <a href="#" class="text-primary">chính sách bảo mật</a>
+                                </label>
+                            </div>
+                            <span asp-validation-for="AgreeToTerms" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Đăng ký
+                            </button>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <p class="mb-0">Đã có tài khoản? 
+                                <a asp-area="" asp-controller="Account" asp-action="Login" class="text-primary text-decoration-none">
+                                    <strong>Đăng nhập ngay</strong>
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <!-- Load authentication notification system -->
+    <link rel="stylesheet" href="~/css/auth-notifications.css" />
+    <script src="~/js/auth-notifications.js"></script>
+    
+    <script>        // Enhanced registration form with popup notifications
+        $(document).ready(function() {
+            // Wait for notification system to load and initialize properly
+            setTimeout(function() {
+                // Initialize notification system  
+                if (!window.AuthNotifications) {
+                    console.error('⚠️ Notification system not loaded! Creating fallback...');
+                    
+                    // Create fallback notification function
+                    window.AuthNotifications = {
+                        showError: function(title, message, options) {
+                            alert('❌ ' + title + ':\n\n' + message);
+                        },
+                        showSuccess: function(title, message, options) {
+                            alert('✅ ' + title + ':\n\n' + message);
+                        },
+                        showWarning: function(title, message, options) {
+                            alert('⚠️ ' + title + ':\n\n' + message);
+                        },
+                        handleRegistrationError: function(errorResponse) {
+                            var errorMsg = '❌ Lỗi đăng ký:\n\n';
+                            if (errorResponse.errors && Array.isArray(errorResponse.errors)) {
+                                errorMsg += errorResponse.errors.join('\n');
+                            } else {
+                                errorMsg += errorResponse.message || 'Vui lòng kiểm tra lại thông tin.';
+                            }
+                            alert(errorMsg);
+                        }
+                    };
+                } else {
+                    console.log('✅ Notification system loaded successfully');
+                }
+            }, 100);
+            
+            // Show any server-side validation errors as popup notifications
+            @if (!ViewData.ModelState.IsValid)
+            {
+                var errors = Html.Raw(Json.Serialize(ViewData.ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(x => x.Key, x => x.Value?.Errors.Select(e => e.ErrorMessage).ToArray() ?? new string[0])));
+                  <text>
+                setTimeout(function() {
+                    if (window.AuthNotifications && window.AuthNotifications.handleApiError) {
+                        window.AuthNotifications.handleApiError({
+                            message: 'Vui lòng kiểm tra và sửa các lỗi trong biểu mẫu',
+                            errors: @errors
+                        }, {
+                            title: 'Lỗi Đăng Ký',
+                            message: 'Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.'
+                        });
+                    } else {
+                        alert('❌ Lỗi Đăng Ký:\n\nThông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại.');
+                    }
+                }, 200);
+                </text>
+            }            // Enhanced form submission with AJAX and popup notifications
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                
+                const form = $(this);
+                const submitBtn = form.find('button[type="submit"]');
+                const originalBtnText = submitBtn.html();
+                
+                // Show loading state
+                submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...');
+                
+                // Clear previous error highlights
+                $('.form-control.error').removeClass('error');
+                
+                // Client-side validation first
+                let isValid = true;
+                let errorMessages = [];
+                
+                // Validate required fields
+                form.find('input[required]').each(function() {
+                    if (!$(this).val().trim()) {
+                        $(this).addClass('error');
+                        isValid = false;
+                        errorMessages.push($(this).attr('name') + ' là bắt buộc');
+                    }
+                });
+                
+                // Validate password requirements
+                const password = $('#Password').val();
+                if (password && password.length < 8) {
+                    $('#Password').addClass('error');
+                    isValid = false;
+                    errorMessages.push('Mật khẩu phải có ít nhất 8 ký tự');
+                }
+                
+                // If client validation fails, show popup immediately
+                if (!isValid) {
+                    submitBtn.prop('disabled', false).html(originalBtnText);
+                    
+                    // Show popup notification for validation errors
+                    if (window.AuthNotifications && window.AuthNotifications.showError) {
+                        window.AuthNotifications.showError(
+                            'Lỗi Thông Tin Đăng Ký',
+                            'Vui lòng kiểm tra và điền đầy đủ thông tin bắt buộc',
+                            {
+                                duration: 5000,
+                                details: errorMessages.join('\n')
+                            }
+                        );
+                    } else {
+                        alert('❌ Lỗi Thông Tin Đăng Ký:\n\n' + errorMessages.join('\n'));
+                    }
+                    return;                }
+                
+                // Collect form data for API
+                const formDataObj = {
+                    firstName: $('#FirstName').val(),
+                    lastName: $('#LastName').val(),
+                    email: $('#Email').val(),
+                    password: $('#Password').val(),
+                    confirmPassword: $('#ConfirmPassword').val(),
+                    phoneNumber: $('#PhoneNumber').val() || '',
+                    dateOfBirth: $('#DateOfBirth').val() || '',
+                    address: $('#Address').val() || ''
+                };
+                
+                // Submit via AJAX to API endpoint
+                $.ajax({
+                    url: '/api/auth/register',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formDataObj),                    success: function(response) {
+                        // Check if API requires email verification
+                        if (response.requiresVerification && response.email) {
+                            // Show verification notification
+                            if (window.AuthNotifications && window.AuthNotifications.showInfo) {
+                                window.AuthNotifications.showInfo(
+                                    'Xác Thực Email',
+                                    'Vui lòng kiểm tra email để nhận mã xác thực.',
+                                    {
+                                        duration: 7000,
+                                        details: 'Một email chứa mã xác thực đã được gửi đến ' + response.email + '. Nếu không thấy email, hãy kiểm tra hộp thư spam.'
+                                    }
+                                );
+                            } else {
+                                alert('📧 Xác Thực Email\n\n' + response.message);
+                            }
+                            
+                            // TODO: Implement email verification modal here
+                            // For now, redirect to login
+                            setTimeout(function() {
+                                window.location.href = '/Account/Login';
+                            }, 3000);
+                        } else {
+                            // Registration completed without verification
+                            if (window.AuthNotifications && window.AuthNotifications.showSuccess) {
+                                window.AuthNotifications.showSuccess(
+                                    'Đăng Ký Thành Công!',
+                                    'Tài khoản của bạn đã được tạo thành công. Chào mừng bạn đến với Sun Movement!',
+                                    {
+                                        duration: 5000,
+                                        onClick: function() {
+                                            window.location.href = '/';
+                                        }
+                                    }
+                                );
+                            } else {
+                                alert('✅ Đăng Ký Thành Công!\n\nTài khoản của bạn đã được tạo thành công. Chào mừng bạn đến với Sun Movement!');
+                            }
+                            
+                            // Redirect after short delay
+                            setTimeout(function() {
+                                window.location.href = '/';
+                            }, 2000);
+                        }
+                    },                    error: function(xhr, status, error) {
+                        console.log('🔍 API Error Response Details:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+                        
+                        let errorResponse = null;
+                        let errorMessage = 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.';
+                        let detailedErrors = [];
+
+                        // Parse JSON error response from API
+                        try {
+                            if (xhr.responseText && xhr.responseText.trim().startsWith('{')) {
+                                errorResponse = JSON.parse(xhr.responseText);
+                                console.log('✅ Parsed API JSON error response:', errorResponse);
+                                
+                                errorMessage = errorResponse.message || errorMessage;
+                                
+                                // Extract detailed validation errors from API response
+                                if (errorResponse.errors && Array.isArray(errorResponse.errors)) {
+                                    // API returns array of error objects: [{ Field: "...", Errors: [...] }, ...]
+                                    errorResponse.errors.forEach(function(errorObj) {
+                                        if (errorObj.Errors && Array.isArray(errorObj.Errors)) {
+                                            errorObj.Errors.forEach(function(errorMsg) {
+                                                detailedErrors.push(errorMsg);
+                                            });
+                                        }
+                                    });
+                                } else if (errorResponse.errors && typeof errorResponse.errors === 'object') {
+                                    // Handle other error formats
+                                    for (var key in errorResponse.errors) {
+                                        if (errorResponse.errors[key] && Array.isArray(errorResponse.errors[key])) {
+                                            errorResponse.errors[key].forEach(function(errorMsg) {
+                                                detailedErrors.push(errorMsg);
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.log('❌ Error parsing API response:', e);
+                            detailedErrors = ['Đã xảy ra lỗi validation. Vui lòng kiểm tra lại thông tin.'];
+                        }
+
+                        // Show detailed error popup
+                        var popupTitle = 'Lỗi Đăng Ký';
+                        var popupMessage = errorMessage;
+                        var popupDetails = detailedErrors.length > 0 ? detailedErrors.join('\n') : '';
+                        
+                        // Determine error type and customize message
+                        if (xhr.status === 400) {
+                            popupTitle = 'Lỗi Thông Tin Đăng Ký';
+                            
+                            // Check for specific error types
+                            var errorText = detailedErrors.join(' ').toLowerCase();
+                            if (errorText.includes('mật khẩu') || errorText.includes('password')) {
+                                popupTitle = 'Lỗi Mật Khẩu';
+                                if (!popupDetails) {
+                                    popupDetails = 'Yêu cầu mật khẩu:\n• Ít nhất 8 ký tự\n• Chữ hoa (A-Z)\n• Chữ thường (a-z)\n• Số (0-9)\n• Ký tự đặc biệt';
+                                }
+                            } else if (errorText.includes('email')) {
+                                popupTitle = 'Lỗi Email';
+                            }
+                        } else if (xhr.status === 409) {
+                            popupTitle = 'Email Đã Tồn Tại';
+                            popupMessage = 'Email này đã được đăng ký. Vui lòng sử dụng email khác hoặc đăng nhập.';
+                        } else if (xhr.status >= 500) {
+                            popupTitle = 'Lỗi Hệ Thống';
+                            popupMessage = 'Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.';
+                        }
+
+                        // PRIMARY: Show detailed popup notification
+                        if (window.AuthNotifications && window.AuthNotifications.showError) {
+                            window.AuthNotifications.showError(popupTitle, popupMessage, {
+                                details: popupDetails,
+                                duration: 8000
+                            });
+                        } else {
+                            // FALLBACK: Browser alert with details
+                            var alertMessage = '❌ ' + popupTitle + ':\n\n' + popupMessage;
+                            if (popupDetails) {
+                                alertMessage += '\n\nChi tiết:\n' + popupDetails;
+                            }
+                            alert(alertMessage);
+                        }
+
+                        // ADDITIONAL FALLBACK: Check if popup was displayed
+                        setTimeout(function() {
+                            if (!document.querySelector('.auth-notification')) {
+                                alert('❌ LỖI ĐĂNG KÝ:\n\n' + popupMessage + 
+                                      (popupDetails ? '\n\n' + popupDetails : ''));
+                            }
+                        }, 500);                        // Re-enable form
+                        submitBtn.prop('disabled', false).html(originalBtnText);
+                        form.find('input').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // Enhanced password strength indicator
+            $('#Password').on('input', function() {
+                var password = $(this).val();
+                var strength = 0;
+                var requirements = {
+                    length: password.length >= 8,
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    digit: /[0-9]/.test(password),
+                    special: /[^A-Za-z0-9]/.test(password)
+                };
+                
+                strength = Object.values(requirements).filter(Boolean).length;
+                
+                var indicator = $('#password-strength');
+                if (indicator.length === 0) {
+                    $(this).parent().parent().append('<div id="password-strength" class="mt-2"></div>');
+                    indicator = $('#password-strength');
+                }
+                
+                var strengthText = '';
+                var strengthClass = '';
+                var progressWidth = '';
+                
+                switch(strength) {
+                    case 0:
+                    case 1:
+                        strengthText = 'Mật khẩu rất yếu';
+                        strengthClass = 'text-danger';
+                        progressWidth = '20%';
+                        break;
+                    case 2:
+                        strengthText = 'Mật khẩu yếu';
+                        strengthClass = 'text-warning';
+                        progressWidth = '40%';
+                        break;
+                    case 3:
+                        strengthText = 'Mật khẩu trung bình';
+                        strengthClass = 'text-info';
+                        progressWidth = '60%';
+                        break;
+                    case 4:
+                        strengthText = 'Mật khẩu mạnh';
+                        strengthClass = 'text-success';
+                        progressWidth = '80%';
+                        break;
+                    case 5:
+                        strengthText = 'Mật khẩu rất mạnh';
+                        strengthClass = 'text-success';
+                        progressWidth = '100%';
+                        break;
+                }
+                  // Create detailed requirements list
+                var requirementsList = 
+                    '<div class="password-requirements mt-2">' +
+                        '<small class="text-muted d-block mb-1">Yêu cầu mật khẩu:</small>' +
+                        '<small class="' + (requirements.length ? 'text-success' : 'text-muted') + '">' +
+                            '<i class="fas ' + (requirements.length ? 'fa-check' : 'fa-circle') + ' me-1"></i>' +
+                            'Ít nhất 8 ký tự' +
+                        '</small><br>' +
+                        '<small class="' + (requirements.uppercase ? 'text-success' : 'text-muted') + '">' +
+                            '<i class="fas ' + (requirements.uppercase ? 'fa-check' : 'fa-circle') + ' me-1"></i>' +
+                            'Chữ hoa (A-Z)' +
+                        '</small><br>' +
+                        '<small class="' + (requirements.lowercase ? 'text-success' : 'text-muted') + '">' +
+                            '<i class="fas ' + (requirements.lowercase ? 'fa-check' : 'fa-circle') + ' me-1"></i>' +
+                            'Chữ thường (a-z)' +
+                        '</small><br>' +
+                        '<small class="' + (requirements.digit ? 'text-success' : 'text-muted') + '">' +
+                            '<i class="fas ' + (requirements.digit ? 'fa-check' : 'fa-circle') + ' me-1"></i>' +
+                            'Số (0-9)' +
+                        '</small><br>' +
+                        '<small class="' + (requirements.special ? 'text-success' : 'text-muted') + '">' +
+                            '<i class="fas ' + (requirements.special ? 'fa-check' : 'fa-circle') + ' me-1"></i>' +
+                            'Ký tự đặc biệt (!@@#$...)' +
+                        '</small>' +
+                    '</div>';
+                
+                indicator.html(
+                    '<div class="password-strength-indicator">' +
+                        '<div class="d-flex justify-content-between align-items-center mb-1">' +
+                            '<small class="' + strengthClass + '">' +
+                                '<i class="fas fa-shield-alt me-1"></i>' + strengthText +
+                            '</small>' +
+                            '<small class="text-muted">' + strength + '/5</small>' +
+                        '</div>' +
+                        '<div class="progress" style="height: 4px;">' +
+                            '<div class="progress-bar bg-' + strengthClass.replace('text-', '') + '" ' +
+                                 'style="width: ' + progressWidth + '; transition: width 0.3s ease;"></div>' +
+                        '</div>' +
+                        requirementsList +
+                    '</div>'
+                );
+            });            // Real-time email validation
+            $('#Email').on('blur', function() {
+                const email = $(this).val();
+                const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                
+                if (email && !emailRegex.test(email)) {
+                    $(this).addClass('error');
+                    if (window.AuthNotifications && window.AuthNotifications.showWarning) {
+                        window.AuthNotifications.showWarning(
+                            'Email Không Hợp Lệ',
+                            'Vui lòng nhập địa chỉ email hợp lệ.',
+                            { duration: 3000 }
+                        );
+                    } else {
+                        alert('⚠️ Email Không Hợp Lệ:\n\nVui lòng nhập địa chỉ email hợp lệ.');
+                    }
+                }
+            });
+            
+            // Real-time password confirmation validation
+            $('#ConfirmPassword').on('input', function() {
+                const password = $('#Password').val();
+                const confirmPassword = $(this).val();
+                
+                if (confirmPassword && password !== confirmPassword) {
+                    $(this).addClass('error');
+                } else {
+                    $(this).removeClass('error');
+                }
+            });
+              // Show welcome notification for new users
+            @if (TempData["Success"] != null)
+            {
+                <text>
+                setTimeout(function() {
+                    if (window.AuthNotifications && window.AuthNotifications.showSuccess) {
+                        window.AuthNotifications.showSuccess(
+                            'Chào Mừng!',
+                            '@TempData["Success"]',
+                            { duration: 5000 }
+                        );
+                    } else {
+                        alert('✅ Chào Mừng!\n\n@TempData["Success"]');
+                    }
+                }, 300);
+                </text>
+            }
+        });
+    </script>
+}
+
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    
+    .input-group .form-control {
+        border-left: none;
+    }
+    
+    .input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #86b7fe;
+    }
+    
+    .btn-lg {
+        padding: 12px;
+        font-weight: 600;
+    }
+</style>

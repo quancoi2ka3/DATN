@@ -43,9 +43,8 @@ export default function StrengthPage() {
       {/* What is Strength Training */}
       <div className="container py-16">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl order-2 md:order-1">
-            <Image 
-              src="/images/strength.jpg" 
+          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl order-2 md:order-1">            <Image 
+              src="https://localhost:5001/images/strength.jpg" 
               alt="Strength training at Sun Movement" 
               fill
               className="object-cover"
@@ -267,9 +266,8 @@ export default function StrengthPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/30">
               <div className="relative h-80">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
-                <Image 
-                  src="/images/strength.jpg" 
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>                <Image 
+                  src="https://localhost:5001/images/strength.jpg" 
                   alt="Huấn luyện viên Strength" 
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -291,9 +289,8 @@ export default function StrengthPage() {
             
             <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/30">
               <div className="relative h-80">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
-                <Image 
-                  src="/images/strength.jpg" 
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>                <Image 
+                  src="https://localhost:5001/images/strength.jpg" 
                   alt="Huấn luyện viên Strength" 
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

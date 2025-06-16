@@ -1,0 +1,265 @@
+@model SunMovement.Web.ViewModels.UserAdminViewModel
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="UsersAdmin" asp-action="Index">Quản lý người dùng</a></li>
+        <li class="breadcrumb-item active">Chi tiết người dùng</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        Thông tin chi tiết
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.UserName)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.UserName)</dd>
+                                
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Email)</dt>
+                                <dd class="col-sm-8">
+                                    @Html.DisplayFor(model => model.Email)
+                                    @if (!Model.EmailConfirmed)
+                                    {
+                                        <span class="badge bg-warning text-dark ms-2">Chưa xác nhận</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success ms-2">Đã xác nhận</span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-4">Họ và tên</dt>
+                                <dd class="col-sm-8">@Model.FullName</dd>
+                                
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                                <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.CreatedAt)</dt>
+                                <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                                
+                                <dt class="col-sm-4">Trạng thái tài khoản</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.IsLockedOut)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-lock"></i> Bị khóa
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">Khóa đến: @Model.LockoutEnd?.ToString("dd/MM/yyyy HH:mm")</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle"></i> Hoạt động
+                                        </span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Roles)</dt>
+                                <dd class="col-sm-8">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        <span class="badge bg-@(role == "Admin" ? "danger" : role == "Staff" ? "warning" : "info") me-1">@role</span>
+                                    }
+                                    @if (!Model.Roles.Any())
+                                    {
+                                        <span class="text-muted">Chưa có vai trò nào</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Thao tác
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>
+                            Chỉnh sửa thông tin
+                        </a>
+                        
+                        @if (Model.IsLockedOut)
+                        {
+                            <button type="button" class="btn btn-success" onclick="unlockUser('@Model.Id')">
+                                <i class="fas fa-unlock me-2"></i>
+                                Mở khóa tài khoản
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-warning" onclick="lockUser('@Model.Id', '@Model.UserName')">
+                                <i class="fas fa-lock me-2"></i>
+                                Khóa tài khoản
+                            </button>
+                        }
+                        
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetPassword('@Model.Id', '@Model.UserName')">
+                            <i class="fas fa-key me-2"></i>
+                            Đặt lại mật khẩu
+                        </button>
+                        
+                        <hr>
+                        
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger" 
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng @Model.UserName không?')">
+                            <i class="fas fa-trash me-2"></i>
+                            Xóa người dùng
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Card (placeholder for future enhancement) -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Hoạt động gần đây
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Tính năng theo dõi hoạt động sẽ được triển khai trong tương lai.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Quay lại danh sách
+        </a>
+    </div>
+</div>
+
+<!-- Lock User Modal -->
+<div class="modal fade" id="lockUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Khóa tài khoản người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="lockUserForm" method="post">
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn khóa tài khoản người dùng <strong id="lockUserName"></strong> không?</p>
+                    <div class="mb-3">
+                        <label for="lockoutDays" class="form-label">Số ngày khóa</label>
+                        <select class="form-select" id="lockoutDays" name="lockoutDays">
+                            <option value="1">1 ngày</option>
+                            <option value="3">3 ngày</option>
+                            <option value="7" selected>7 ngày</option>
+                            <option value="30">30 ngày</option>
+                            <option value="365">1 năm</option>
+                        </select>
+                    </div>
+                    <input type="hidden" id="lockUserId" name="id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">Khóa tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đặt lại mật khẩu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="resetPasswordForm" method="post">
+                <div class="modal-body">
+                    <p>Đặt lại mật khẩu cho người dùng <strong id="resetPasswordUserName"></strong></p>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" required minlength="8">
+                        <div class="form-text">Mật khẩu phải có ít nhất 8 ký tự</div>
+                    </div>
+                    <input type="hidden" id="resetPasswordUserId" name="id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Đặt lại mật khẩu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Lock user functionality
+        function lockUser(userId, userName) {
+            document.getElementById('lockUserId').value = userId;
+            document.getElementById('lockUserName').textContent = userName;
+            document.getElementById('lockUserForm').action = '@Url.Action("LockUser", "UsersAdmin")';
+            
+            const modal = new bootstrap.Modal(document.getElementById('lockUserModal'));
+            modal.show();
+        }
+
+        // Unlock user functionality
+        function unlockUser(userId) {
+            if (confirm('Bạn có chắc chắn muốn mở khóa tài khoản này không?')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '@Url.Action("UnlockUser", "UsersAdmin")';
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = userId;
+                form.appendChild(idInput);
+                
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '__RequestVerificationToken';
+                tokenInput.value = '@Html.AntiForgeryToken()';
+                form.appendChild(tokenInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Reset password functionality
+        function resetPassword(userId, userName) {
+            document.getElementById('resetPasswordUserId').value = userId;
+            document.getElementById('resetPasswordUserName').textContent = userName;
+            document.getElementById('resetPasswordForm').action = '@Url.Action("ResetPassword", "UsersAdmin")';
+            
+            const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            modal.show();
+        }
+    </script>
+}

@@ -2,8 +2,9 @@
 
 import { CartItem, Product } from "./types";
 import { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart } from "./cart-service";
+import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart, apiMergeGuestCart } from "./cart-service";
 import { processCheckout, CheckoutRequest } from "./checkout-service";
+import { useAuth } from "./auth-context";
 
 interface CartContextType {
   items: CartItem[];
@@ -12,6 +13,9 @@ interface CartContextType {
   updateQuantity: (cartItemId: string, quantity: number) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   checkout: (checkoutDetails: CheckoutRequest) => Promise<{ success: boolean; orderId?: string; error?: string }>;
+
+  preserveGuestCart: () => void;
+  syncCartAfterLogin: () => Promise<void>;
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;
@@ -21,6 +25,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -31,14 +36,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       try {
         const response = await getCart();
+        
         if (response.success) {
           setItems(response.items);
         } else {
           setError(response.error);
         }
       } catch (err) {
-        setError('Failed to load cart');
-        console.error('Error loading cart:', err);
+        setError('Failed to fetch cart');
+        console.error('Error fetching cart:', err);
       } finally {
         setIsLoading(false);
       }
@@ -46,6 +52,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     fetchCart();
   }, []);
+
+  // Auto-sync cart when user logs in
+  useEffect(() => {
+    if (isAuthenticated) {
+      syncCartAfterLogin();
+    }
+  }, [isAuthenticated]);
 
   const addToCart = async (product: Product, quantity: number, size?: string, color?: string): Promise<boolean> => {
     setIsLoading(true);
@@ -171,6 +184,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const preserveGuestCart = () => {
+    // Implementation for preserving guest cart, e.g., by saving to localStorage
+    try {
+      const serializedCart = JSON.stringify(items);
+      localStorage.setItem('guestCart', serializedCart);
+    } catch (err) {
+      console.error('Error preserving guest cart:', err);
+    }
+  };
+
+  const syncCartAfterLogin = async () => {
+    // Implementation for syncing cart after user login
+    try {
+      const guestCart = localStorage.getItem('guestCart');
+      if (guestCart) {
+        const parsedCart: CartItem[] = JSON.parse(guestCart);
+        // Assuming the API has a method to merge guest cart with user cart
+        const response = await apiMergeGuestCart(parsedCart);
+        
+        if (response.success) {
+          setItems(response.items);
+          localStorage.removeItem('guestCart'); // Clear guest cart after merging
+        } else {
+          setError(response.error);
+        }
+      }
+    } catch (err) {
+      console.error('Error syncing cart after login:', err);
+    }
+  };
+
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
   const totalPrice = items.reduce(
@@ -185,6 +229,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       updateQuantity,
       clearCart,
       checkout,
+      preserveGuestCart,
+      syncCartAfterLogin,
       totalItems,
       totalPrice,
       isLoading,

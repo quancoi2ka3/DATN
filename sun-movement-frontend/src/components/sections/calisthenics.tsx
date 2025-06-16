@@ -28,9 +28,8 @@ export function CalisthenicsSection() {
               </Button>
             </div>
           </div>
-          <div className="relative h-[400px] overflow-hidden rounded-lg">
-            <Image
-              src="/images/calisthenics.jpg"
+          <div className="relative h-[400px] overflow-hidden rounded-lg">            <Image
+              src="https://localhost:5001/images/calis_home.webp"
               alt="Calisthenics"
               fill
               className="object-cover"

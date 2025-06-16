@@ -31,11 +31,19 @@ namespace SunMovement.Web.Areas.Api.Models
         public Task SendOrderStatusUpdateAsync(Order order)
         {
             return Task.CompletedTask;
-        }
-
-        public Task SendShippingConfirmationAsync(string to, string orderNumber, string trackingNumber)
+        }        public Task SendShippingConfirmationAsync(string to, string orderNumber, string trackingNumber)
         {
             return Task.CompletedTask;
+        }
+
+        public Task<bool> SendVerificationCodeAsync(string email, string verificationCode, string firstName)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendWelcomeEmailAsync(string email, string firstName)
+        {
+            return Task.FromResult(true);
         }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SunMovement.Core.Models
 {
@@ -16,5 +17,10 @@ namespace SunMovement.Core.Models
         
         // Navigation properties
         public virtual ICollection<Order>? Orders { get; set; } = new List<Order>();
+        
+        // Computed properties
+        public int OrderCount => Orders?.Count ?? 0;
+        public decimal TotalSpent => Orders?.Sum(o => o.TotalAmount) ?? 0;
+        public DateTime? LastOrderDate => Orders?.OrderByDescending(o => o.OrderDate).FirstOrDefault()?.OrderDate;
     }
 }

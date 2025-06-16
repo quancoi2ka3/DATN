@@ -8,9 +8,8 @@ export function StrengthSection() {
       <div className="container">
         <h2 className="text-3xl font-semibold text-center mb-2">POWER / STRENGTH TRAINING</h2>
         <div className="grid md:grid-cols-2 gap-8 mt-10">
-          <div className="order-2 md:order-1 relative h-[400px] overflow-hidden rounded-lg">
-            <Image
-              src="/images/strength.jpg"
+          <div className="order-2 md:order-1 relative h-[400px] overflow-hidden rounded-lg">            <Image
+              src="https://localhost:5001/images/strength.jpg"
               alt="Power and Strength Training"
               fill
               className="object-cover"

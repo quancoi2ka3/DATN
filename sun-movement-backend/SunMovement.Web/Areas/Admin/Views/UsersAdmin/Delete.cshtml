@@ -1,0 +1,104 @@
+@model SunMovement.Web.ViewModels.UserAdminViewModel
+@{
+    ViewData["Title"] = "Xóa người dùng";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="UsersAdmin" asp-action="Index">Quản lý người dùng</a></li>
+        <li class="breadcrumb-item active">Xóa người dùng</li>
+    </ol>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Xác nhận xóa người dùng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Cảnh báo!</h6>
+                        <p class="mb-0">Bạn đang chuẩn bị <strong>xóa vĩnh viễn</strong> người dùng này. Hành động này không thể hoàn tác!</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">Tên đăng nhập:</dt>
+                                <dd class="col-sm-7"><strong>@Model.UserName</strong></dd>
+                                
+                                <dt class="col-sm-5">Email:</dt>
+                                <dd class="col-sm-7">@Model.Email</dd>
+                                
+                                <dt class="col-sm-5">Họ và tên:</dt>
+                                <dd class="col-sm-7">@Model.FullName</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-5">Số điện thoại:</dt>
+                                <dd class="col-sm-7">@Model.PhoneNumber</dd>
+                                
+                                <dt class="col-sm-5">Vai trò:</dt>
+                                <dd class="col-sm-7">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        <span class="badge bg-@(role == "Admin" ? "danger" : role == "Staff" ? "warning" : "info") me-1">@role</span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-5">Ngày tạo:</dt>
+                                <dd class="col-sm-7">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Tác động của việc xóa:</h6>
+                        <ul class="mb-0">
+                            <li>Tài khoản người dùng sẽ bị xóa vĩnh viễn</li>
+                            <li>Tất cả dữ liệu liên quan có thể bị ảnh hưởng</li>
+                            <li>Người dùng sẽ không thể đăng nhập được nữa</li>
+                            <li>Hành động này không thể hoàn tác</li>
+                        </ul>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Hủy bỏ
+                            </a>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info me-3">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem chi tiết
+                                </a>
+                                <button type="submit" class="btn btn-danger" onclick="return confirmDelete()">
+                                    <i class="fas fa-trash me-1"></i>
+                                    Xác nhận xóa
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete() {
+            return confirm('Bạn có CHẮC CHẮN muốn xóa người dùng "@Model.UserName" không?\n\nHành động này không thể hoàn tác!');
+        }
+    </script>
+}

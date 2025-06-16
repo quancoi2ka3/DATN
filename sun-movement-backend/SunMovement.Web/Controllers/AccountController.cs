@@ -59,12 +59,64 @@ namespace SunMovement.Web.Controllers
         {  
             await _signInManager.SignOutAsync();  
             return RedirectToAction(nameof(HomeController.Index), "Home");  
-        }
-
-        [HttpGet]
+        }        [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    PhoneNumber = model.PhoneNumber,
+                    DateOfBirth = model.DateOfBirth ?? DateTime.UtcNow,
+                    Address = model.Address ?? string.Empty,
+                    CreatedAt = DateTime.UtcNow,
+                    EmailConfirmed = false // Require email confirmation for public registration
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    // Add user to Customer role by default
+                    await _userManager.AddToRoleAsync(user, "Customer");
+
+                    // Generate email confirmation token
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    
+                    // For now, we'll auto-confirm the email (you can implement email service later)
+                    await _userManager.ConfirmEmailAsync(user, token);
+                    
+                    // Sign in the user
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    
+                    TempData["Success"] = "Đăng ký thành công! Chào mừng bạn đến với Sun Movement.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View(model);
         }
     }  
 }

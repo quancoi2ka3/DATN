@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Backend Connection Test</title>
+</head>
+<body>
+    <h1>Frontend-Backend Connection Test</h1>
+    
+    <button onclick="testConnection()">Test API Connection</button>
+    <button onclick="testCors()">Test CORS</button>
+    <button onclick="testCheckoutEndpoint()">Test Checkout Endpoint</button>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap; max-height: 400px; overflow-y: auto;"></div>
+
+    <script>
+        // Use the same API base URL as frontend
+        const API_BASE_URL = 'https://localhost:5001';
+        
+        function log(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML += message + '\n';
+            resultDiv.scrollTop = resultDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        async function testConnection() {
+            clearLog();
+            log('🔍 Testing API Connection...\n');
+            
+            try {
+                log('Testing GET /api/products/1...');
+                const response = await fetch(`${API_BASE_URL}/api/products/1`);
+                log(`Status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Success: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    log(`❌ Error: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`);
+                log(`Error details: ${error.stack}`);
+            }
+        }
+        
+        async function testCors() {
+            clearLog();
+            log('🔍 Testing CORS with credentials...\n');
+            
+            try {
+                log('Testing with credentials: include...');
+                const response = await fetch(`${API_BASE_URL}/api/products/1`, {
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                log(`Status: ${response.status}`);
+                log(`Headers: ${JSON.stringify([...response.headers], null, 2)}`);
+                
+                if (response.ok) {
+                    log('✅ CORS working with credentials');
+                } else {
+                    log(`❌ CORS Error: ${response.statusText}`);
+                }
+            } catch (error) {
+                log(`❌ CORS Network Error: ${error.message}`);
+            }
+        }
+        
+        async function testCheckoutEndpoint() {
+            clearLog();
+            log('🔍 Testing Checkout Endpoint...\n');
+            
+            // First add item to cart
+            try {
+                log('Step 1: Adding item to cart...');
+                const addResponse = await fetch(`${API_BASE_URL}/api/ShoppingCart/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: 1,
+                        quantity: 1
+                    }),
+                    credentials: 'include'
+                });
+                
+                log(`Add to cart status: ${addResponse.status}`);
+                
+                if (!addResponse.ok) {
+                    log(`❌ Failed to add to cart: ${await addResponse.text()}`);
+                    return;
+                }
+                
+                log('✅ Item added to cart');
+                
+                // Now test checkout
+                log('\nStep 2: Testing checkout...');
+                const checkoutData = {
+                    shippingAddress: {
+                        fullName: "Nguyen Van Test",
+                        addressLine1: "123 Test Street",
+                        city: "Ho Chi Minh",
+                        province: "Ho Chi Minh",
+                        zipCode: "70000"
+                    },
+                    contactInfo: {
+                        email: "test@example.com",
+                        phone: "0123456789"
+                    },
+                    paymentMethod: "cash_on_delivery"
+                };
+                
+                log(`Checkout data: ${JSON.stringify(checkoutData, null, 2)}`);
+                
+                const checkoutResponse = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(checkoutData),
+                    credentials: 'include'
+                });
+                
+                log(`Checkout status: ${checkoutResponse.status}`);
+                
+                if (checkoutResponse.ok) {
+                    const result = await checkoutResponse.json();
+                    log(`✅ Checkout Success: ${JSON.stringify(result, null, 2)}`);
+                } else {
+                    const error = await checkoutResponse.text();
+                    log(`❌ Checkout Failed: ${error}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Checkout Network Error: ${error.message}`);
+                log(`Error stack: ${error.stack}`);
+            }
+        }
+    </script>
+</body>
+</html>

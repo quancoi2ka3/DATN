@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Movement Cart & Checkout Test Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status-success {
+            color: #28a745;
+        }
+        .status-error {
+            color: #dc3545;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Sun Movement Cart & Checkout Test Interface</h1>
+        <p>Backend URL: <strong>https://localhost:5001</strong></p>
+
+        <!-- Health Check -->
+        <div class="test-section">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealth()">Test Backend Health</button>
+            <div id="health-response" class="response"></div>
+        </div>
+
+        <!-- Products -->
+        <div class="test-section">
+            <h2>2. Products</h2>
+            <button onclick="getProducts()">Get Products List</button>
+            <div id="products-response" class="response"></div>
+        </div>
+
+        <!-- Cart Operations -->
+        <div class="test-section">
+            <h2>3. Cart Operations</h2>
+            <button onclick="getCart()">Get Current Cart</button>
+            <button onclick="addToCart()">Add Product ID 1 to Cart</button>
+            <button onclick="updateCart()">Update Cart Item</button>
+            <button onclick="clearCart()">Clear Cart</button>
+            
+            <div class="form-group">
+                <label>Custom Add to Cart:</label>
+                <input type="number" id="productId" placeholder="Product ID" value="1">
+                <input type="number" id="quantity" placeholder="Quantity" value="2">
+                <button onclick="addCustomToCart()">Add Custom Product</button>
+            </div>
+            
+            <div id="cart-response" class="response"></div>
+        </div>
+
+        <!-- Orders -->
+        <div class="test-section">
+            <h2>4. Orders</h2>
+            <button onclick="getOrders()">Get Orders List</button>
+            <button onclick="createSimpleOrder()">Create Simple Order</button>
+            
+            <div class="form-group">
+                <label>Checkout Test:</label>
+                <select id="paymentMethod">
+                    <option value="cash">Cash on Delivery</option>
+                    <option value="vnpay">VNPay</option>
+                </select>
+                <textarea id="shippingAddress" placeholder="Shipping Address">123 Test Street, Test City</textarea>
+                <textarea id="orderNotes" placeholder="Order Notes">Test order from interface</textarea>
+                <button onclick="checkout()">Checkout</button>
+            </div>
+            
+            <div id="orders-response" class="response"></div>
+        </div>
+
+        <!-- VNPay -->
+        <div class="test-section">
+            <h2>5. VNPay Integration</h2>
+            <button onclick="createVNPayPayment()">Create VNPay Payment URL</button>
+            <button onclick="simulateVNPayReturn()">Simulate VNPay Return</button>
+            
+            <div class="form-group">
+                <label>Custom VNPay Payment:</label>
+                <input type="text" id="vnpayOrderId" placeholder="Order ID" value="TEST001">
+                <input type="number" id="vnpayAmount" placeholder="Amount (VND)" value="100000">
+                <input type="text" id="vnpayOrderInfo" placeholder="Order Info" value="Test Payment">
+                <button onclick="createCustomVNPayPayment()">Create Custom Payment</button>
+            </div>
+            
+            <div id="vnpay-response" class="response"></div>
+        </div>
+
+        <!-- User Registration & Login -->
+        <div class="test-section">
+            <h2>6. User Management</h2>
+            <div class="form-group">
+                <label>Test User Registration:</label>
+                <input type="email" id="userEmail" placeholder="Email" value="testuser123@gmail.com">
+                <input type="password" id="userPassword" placeholder="Password" value="Test123456!">
+                <input type="text" id="firstName" placeholder="First Name" value="Test">
+                <input type="text" id="lastName" placeholder="Last Name" value="User">
+                <input type="text" id="phoneNumber" placeholder="Phone Number" value="0123456789">
+                <input type="text" id="address" placeholder="Address" value="123 Test Street">
+                <button onclick="registerUser()">Register User</button>
+                <button onclick="loginUser()">Login User</button>
+            </div>
+            <div id="auth-response" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://localhost:5001';
+        let authToken = null;
+
+        async function makeRequest(url, options = {}) {
+            try {
+                const defaultOptions = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+                    }
+                };
+                
+                const response = await fetch(url, { ...defaultOptions, ...options });
+                const responseText = await response.text();
+                let responseData;
+                
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch {
+                    responseData = responseText;
+                }
+                
+                return {
+                    status: response.status,
+                    ok: response.ok,
+                    data: responseData
+                };
+            } catch (error) {
+                return {
+                    status: 0,
+                    ok: false,
+                    data: `Network Error: ${error.message}`
+                };
+            }
+        }
+
+        function displayResponse(elementId, response) {
+            const element = document.getElementById(elementId);
+            const statusClass = response.ok ? 'status-success' : 'status-error';
+            element.innerHTML = `<span class="${statusClass}">Status: ${response.status}</span>\n${JSON.stringify(response.data, null, 2)}`;
+        }
+
+        async function testHealth() {
+            const response = await makeRequest(`${BASE_URL}/api/health`);
+            displayResponse('health-response', response);
+        }
+
+        async function getProducts() {
+            const response = await makeRequest(`${BASE_URL}/api/products`);
+            displayResponse('products-response', response);
+        }
+
+        async function getCart() {
+            const response = await makeRequest(`${BASE_URL}/api/ShoppingCart/items`);
+            displayResponse('cart-response', response);
+        }
+
+        async function addToCart() {
+            const response = await makeRequest(`${BASE_URL}/api/ShoppingCart/items`, {
+                method: 'POST',
+                body: JSON.stringify({ productId: 1, quantity: 2 })
+            });
+            displayResponse('cart-response', response);
+        }
+
+        async function addCustomToCart() {
+            const productId = parseInt(document.getElementById('productId').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            const response = await makeRequest(`${BASE_URL}/api/ShoppingCart/items`, {
+                method: 'POST',
+                body: JSON.stringify({ productId, quantity })
+            });
+            displayResponse('cart-response', response);
+        }
+
+        async function updateCart() {
+            const response = await makeRequest(`${BASE_URL}/api/ShoppingCart/items`, {
+                method: 'PUT',
+                body: JSON.stringify({ productId: 1, quantity: 3 })
+            });
+            displayResponse('cart-response', response);
+        }
+
+        async function clearCart() {
+            const response = await makeRequest(`${BASE_URL}/api/ShoppingCart/clear`, {
+                method: 'DELETE'
+            });
+            displayResponse('cart-response', response);
+        }
+
+        async function getOrders() {
+            const response = await makeRequest(`${BASE_URL}/api/orders`);
+            displayResponse('orders-response', response);
+        }
+
+        async function createSimpleOrder() {
+            const orderData = {
+                items: [
+                    { productId: 1, quantity: 2, price: 50000 }
+                ],
+                totalAmount: 100000,
+                shippingAddress: "123 Test Street, Test City",
+                paymentMethod: "cash"
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/orders`, {
+                method: 'POST',
+                body: JSON.stringify(orderData)
+            });
+            displayResponse('orders-response', response);
+        }
+
+        async function checkout() {
+            const checkoutData = {
+                paymentMethod: document.getElementById('paymentMethod').value,
+                shippingAddress: document.getElementById('shippingAddress').value,
+                notes: document.getElementById('orderNotes').value
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/orders/checkout`, {
+                method: 'POST',
+                body: JSON.stringify(checkoutData)
+            });
+            displayResponse('orders-response', response);
+        }
+
+        async function createVNPayPayment() {
+            const paymentData = {
+                orderId: "TEST001",
+                amount: 100000,
+                orderInfo: "Test Order"
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/vnpay/create-payment`, {
+                method: 'POST',
+                body: JSON.stringify(paymentData)
+            });
+            displayResponse('vnpay-response', response);
+        }
+
+        async function createCustomVNPayPayment() {
+            const paymentData = {
+                orderId: document.getElementById('vnpayOrderId').value,
+                amount: parseInt(document.getElementById('vnpayAmount').value),
+                orderInfo: document.getElementById('vnpayOrderInfo').value
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/vnpay/create-payment`, {
+                method: 'POST',
+                body: JSON.stringify(paymentData)
+            });
+            displayResponse('vnpay-response', response);
+        }
+
+        async function simulateVNPayReturn() {
+            const returnUrl = `${BASE_URL}/api/vnpay/return?vnp_ResponseCode=00&vnp_TxnRef=TEST001&vnp_TransactionNo=123456&vnp_Amount=10000000`;
+            const response = await makeRequest(returnUrl);
+            displayResponse('vnpay-response', response);
+        }
+
+        async function registerUser() {
+            const userData = {
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value,
+                confirmPassword: document.getElementById('userPassword').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                phoneNumber: document.getElementById('phoneNumber').value,
+                address: document.getElementById('address').value
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/auth/register`, {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+            displayResponse('auth-response', response);
+        }
+
+        async function loginUser() {
+            const loginData = {
+                email: document.getElementById('userEmail').value,
+                password: document.getElementById('userPassword').value
+            };
+            
+            const response = await makeRequest(`${BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                body: JSON.stringify(loginData)
+            });
+            
+            // Store token if login successful
+            if (response.ok && response.data.token) {
+                authToken = response.data.token;
+                alert('Login successful! Token stored for future requests.');
+            }
+            
+            displayResponse('auth-response', response);
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            console.log('Cart & Checkout Test Interface loaded');
+            testHealth();
+        };
+    </script>
+</body>
+</html>

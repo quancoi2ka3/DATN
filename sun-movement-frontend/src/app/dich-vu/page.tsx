@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import AuthModal from "@/components/auth/AuthModal";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dumbbell, Flame, Heart, Users, Zap, Award, Clock, ChevronRight } from "lucide-react";
 
-const services = [  {
+const services = [
+  {
     id: "calisthenics",
     title: "Calisthenics",
     description: "Phát triển sức mạnh, sự linh hoạt và thẩm mỹ cơ thể thông qua các bài tập với trọng lượng cơ thể.",
@@ -120,11 +122,12 @@ export default function ServicesPage() {
             <p className="text-lg text-slate-300 mb-8">
               Từ người mới bắt đầu đến vận động viên chuyên nghiệp, chúng tôi cung cấp các chương trình 
               đào tạo chất lượng cao phù hợp với mọi mục tiêu và trình độ.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký tư vấn miễn phí
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký tư vấn miễn phí
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-slate-600 text-black hover:bg-slate-800 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Xem lịch tập luyện
               </Button>
@@ -245,9 +248,8 @@ export default function ServicesPage() {
             <div 
               key={index} 
               className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative"
-            >
-              <div className="absolute -top-4 left-6">
-                <div className="text-4xl text-red-500">"</div>
+            >              <div className="absolute -top-4 left-6">
+                <div className="text-4xl text-red-500">&ldquo;</div>
               </div>
               <p className="text-slate-300 mb-6 mt-3">{testimonial.comment}</p>
               <div className="flex items-center">
@@ -349,14 +351,16 @@ export default function ServicesPage() {
             </tbody>
           </table>
         </div>
-        
-        <div className="mt-8 text-center">
+          <div className="mt-8 text-center">
           <p className="text-slate-300 mb-6">
             Vẫn chưa chắc chắn loại hình tập luyện nào phù hợp với bạn? Hãy để chúng tôi tư vấn!
           </p>
-          <Button className="bg-gradient-to-r from-red-600 to-amber-500 hover:opacity-90 text-white px-6 py-3 h-auto rounded-lg font-medium">
-            Đăng ký tư vấn miễn phí
-          </Button>
+          
+          <AuthModal defaultMode="register">
+            <Button className="bg-gradient-to-r from-red-600 to-amber-500 hover:opacity-90 text-white px-6 py-3 h-auto rounded-lg font-medium">
+              Đăng ký tư vấn miễn phí
+            </Button>
+          </AuthModal>
         </div>
       </div>
 
@@ -416,12 +420,12 @@ export default function ServicesPage() {
                 </tr>
               </tbody>
             </table>
-          </div>
-
-          <div className="flex justify-center mt-8">
-            <Button className="bg-gradient-to-r from-red-600 to-amber-500 hover:opacity-90 text-white px-6 py-6 h-auto rounded-lg text-lg font-medium">
-              Đăng ký buổi tập miễn phí
-            </Button>
+          </div>          <div className="flex justify-center mt-8">
+            <AuthModal defaultMode="register">
+              <Button className="bg-gradient-to-r from-red-600 to-amber-500 hover:opacity-90 text-white px-6 py-6 h-auto rounded-lg text-lg font-medium">
+                Đăng ký buổi tập miễn phí
+              </Button>
+            </AuthModal>
           </div>
         </div>
       </div>
@@ -435,11 +439,12 @@ export default function ServicesPage() {
             </h2>
             <p className="text-xl text-slate-300 mb-8">
               Trở thành phiên bản tốt nhất của chính mình cùng Sun Movement ngay hôm nay.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-red-600 hover:bg-red-100 px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký thành viên
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-white text-red-600 hover:bg-red-100 px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký thành viên
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-white text-black hover:bg-white/10 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Tìm hiểu thêm
               </Button>

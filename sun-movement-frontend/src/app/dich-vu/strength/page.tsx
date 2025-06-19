@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import AuthModal from "@/components/auth/AuthModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dumbbell, Users, Star, Clock, ChevronRight, CheckCircle2, ArrowRight, Calendar, BarChart3 } from "lucide-react";
 
@@ -26,11 +26,12 @@ export default function StrengthPage() {
             <p className="text-lg text-slate-300 mb-8">
               Nâng cao giới hạn của bản thân thông qua các bài tập kháng lực chuyên sâu. Phát triển sức mạnh tối đa, 
               cơ bắp và sức bền với phương pháp huấn luyện hiệu quả nhất.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký tư vấn miễn phí
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký tư vấn miễn phí
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Xem lịch tập luyện
               </Button>
@@ -42,8 +43,8 @@ export default function StrengthPage() {
 
       {/* What is Strength Training */}
       <div className="container py-16">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl order-2 md:order-1">            <Image 
+        <div className="grid md:grid-cols-2 gap-12 items-center">          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl order-2 md:order-1">
+            <Image 
               src="https://localhost:5001/images/strength.jpg" 
               alt="Strength training at Sun Movement" 
               fill
@@ -267,7 +268,7 @@ export default function StrengthPage() {
             <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/30">
               <div className="relative h-80">
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>                <Image 
-                  src="https://localhost:5001/images/strength.jpg" 
+                  src="http://localhost:5000/images/strength.jpg" 
                   alt="Huấn luyện viên Strength" 
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -286,10 +287,10 @@ export default function StrengthPage() {
                 </div>
               </div>
             </div>
-            
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/30">
+              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/30">
               <div className="relative h-80">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>                <Image 
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
+                <Image 
                   src="https://localhost:5001/images/strength.jpg" 
                   alt="Huấn luyện viên Strength" 
                   fill
@@ -424,11 +425,12 @@ export default function StrengthPage() {
             <p className="text-lg text-slate-300 mb-8">
               Tham gia ngay với Sun Movement để trải nghiệm chương trình huấn luyện sức mạnh 
               chuyên nghiệp, được thiết kế riêng cho mục tiêu của bạn.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký tư vấn ngay
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký tư vấn ngay
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-white text-white hover:bg-white/10 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Xem gói thành viên
               </Button>

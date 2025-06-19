@@ -7,7 +7,7 @@ import { ProductDto } from "./adapters";
 export async function getFeaturedProductsByCategory(category: string): Promise<{products: Product[], error?: string}> {
   try {
     // For development, use HTTPS with SSL verification disabled
-    const backendUrl = process.env.BACKEND_URL || 'https://localhost:5001';
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     const url = `${backendUrl}/api/products/category/${category}`;
     
     console.log(`Attempting to fetch from: ${url}`);

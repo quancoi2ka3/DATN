@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Zap, Users, Star, Clock, ChevronRight, CheckCircle2, ArrowRight, Calendar } from "lucide-react";
+import { Users, Star, Clock, ChevronRight, CheckCircle2, ArrowRight, Calendar } from "lucide-react";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function CalisthenicsPage() {
   return (
@@ -26,11 +26,12 @@ export default function CalisthenicsPage() {
             <p className="text-lg text-slate-300 mb-8">
               Phát triển sức mạnh, linh hoạt và thẩm mỹ cơ thể thông qua các bài tập với trọng lượng cơ thể.
               Không cần thiết bị phức tạp, chỉ cần quyết tâm và kỹ thuật đúng.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký tư vấn miễn phí
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký tư vấn miễn phí
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Xem lịch tập luyện
               </Button>
@@ -76,8 +77,8 @@ export default function CalisthenicsPage() {
             <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded-lg font-medium">
               Khám phá thêm <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          </div>
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl">            <Image 
+          </div>          <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-xl">
+            <Image 
               src="https://localhost:5001/images/calisthenics.jpg" 
               alt="Calisthenics training at Sun Movement" 
               fill
@@ -210,7 +211,7 @@ export default function CalisthenicsPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="https://localhost:5001/images/calisthenics.jpg" 
+                src="http://localhost:5000/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -233,7 +234,7 @@ export default function CalisthenicsPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="https://localhost:5001/images/calisthenics.jpg" 
+                src="http://localhost:5000/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -256,7 +257,7 @@ export default function CalisthenicsPage() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-blue-500/30">            <div className="relative h-80">
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
               <Image 
-                src="https://localhost:5001/images/calisthenics.jpg" 
+                src="http://localhost:5000/images/calisthenics.jpg" 
                 alt="Huấn luyện viên Calisthenics" 
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -358,11 +359,12 @@ export default function CalisthenicsPage() {
               </table>
             </div>
           </div>
-          
-          <div className="mt-8 text-center">
-            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 h-auto rounded-lg font-medium text-lg">
-              <Calendar className="mr-2 h-5 w-5" /> Đặt lịch học thử miễn phí
-            </Button>
+            <div className="mt-8 text-center">
+            <AuthModal defaultMode="register">
+              <Button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 h-auto rounded-lg font-medium text-lg">
+                <Calendar className="mr-2 h-5 w-5" /> Đặt lịch học thử miễn phí
+              </Button>
+            </AuthModal>
           </div>
         </div>
       </div>
@@ -377,11 +379,12 @@ export default function CalisthenicsPage() {
             <p className="text-lg text-slate-300 mb-8">
               Tham gia ngay để khám phá sức mạnh và khả năng tiềm ẩn của cơ thể bạn cùng đội ngũ huấn luyện viên 
               chuyên nghiệp của Sun Movement.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
-                Đăng ký tư vấn ngay
-              </Button>
+            </p>            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AuthModal defaultMode="register">
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 h-auto rounded-lg font-medium text-lg">
+                  Đăng ký tư vấn ngay
+                </Button>
+              </AuthModal>
               <Button variant="outline" className="border-white text-white hover:bg-white/10 px-6 py-3 h-auto rounded-lg font-medium text-lg">
                 Xem gói thành viên
               </Button>

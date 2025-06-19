@@ -1,0 +1,268 @@
+@model SunMovement.Core.DTOs.UpdateArticleDto
+@using SunMovement.Web.Extensions
+
+@{
+    ViewData["Title"] = "Chỉnh sửa bài viết";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Chỉnh sửa bài viết: @Model.Title</h3>
+                    <div class="card-tools">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info btn-sm">
+                            <i class="fas fa-eye"></i> Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <input asp-for="Id" type="hidden" />
+                    
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+                        <div class="row">
+                            <!-- Cột trái - Thông tin chính -->
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                                    <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài viết..." />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Summary" class="form-label">Mô tả ngắn</label>
+                                    <textarea asp-for="Summary" class="form-control" rows="3" placeholder="Nhập mô tả ngắn cho bài viết..."></textarea>
+                                    <span asp-validation-for="Summary" class="text-danger"></span>
+                                    <small class="form-text text-muted">Mô tả này sẽ hiển thị trong danh sách bài viết và SEO.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Content" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                                    <textarea asp-for="Content" class="form-control summernote" rows="10" placeholder="Nhập nội dung bài viết..."></textarea>
+                                    <span asp-validation-for="Content" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Tags" class="form-label">Tags</label>
+                                    <input asp-for="Tags" class="form-control" placeholder="Nhập các tag, phân cách bằng dấu phẩy..." />
+                                    <span asp-validation-for="Tags" class="text-danger"></span>
+                                    <small class="form-text text-muted">Ví dụ: calisthenics, tập luyện, sức khỏe</small>
+                                </div>
+
+                                <!-- SEO Section -->
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Tối ưu SEO</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="MetaTitle" class="form-label">Meta Title</label>
+                                            <input asp-for="MetaTitle" class="form-control" placeholder="Tiêu đề SEO (tối đa 60 ký tự)" />
+                                            <span asp-validation-for="MetaTitle" class="text-danger"></span>
+                                            <small class="form-text text-muted">Để trống để sử dụng tiêu đề chính.</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="MetaDescription" class="form-label">Meta Description</label>
+                                            <textarea asp-for="MetaDescription" class="form-control" rows="2" placeholder="Mô tả SEO (tối đa 160 ký tự)"></textarea>
+                                            <span asp-validation-for="MetaDescription" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="MetaKeywords" class="form-label">Meta Keywords</label>
+                                            <input asp-for="MetaKeywords" class="form-control" placeholder="Từ khóa SEO, phân cách bằng dấu phẩy" />
+                                            <span asp-validation-for="MetaKeywords" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột phải - Cài đặt -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Cài đặt bài viết</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="Type" class="form-label">Loại bài viết <span class="text-danger">*</span></label>
+                                            <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<SunMovement.Core.Models.ArticleType>()">
+                                                <option value="">-- Chọn loại bài viết --</option>
+                                            </select>
+                                            <span asp-validation-for="Type" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Category" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                            <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<SunMovement.Core.Models.ArticleCategory>()">
+                                                <option value="">-- Chọn danh mục --</option>
+                                            </select>
+                                            <span asp-validation-for="Category" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Author" class="form-label">Tác giả</label>
+                                            <input asp-for="Author" class="form-control" placeholder="Tên tác giả" />
+                                            <span asp-validation-for="Author" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="DisplayOrder" class="form-label">Thứ tự hiển thị</label>
+                                            <input asp-for="DisplayOrder" type="number" class="form-control" min="0" />
+                                            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                                            <small class="form-text text-muted">Số càng nhỏ càng ưu tiên hiển thị trước.</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="IsPublished" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsPublished" class="form-check-label">
+                                                    Xuất bản
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                                                <label asp-for="IsFeatured" class="form-check-label">
+                                                    Đánh dấu nổi bật
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Hình ảnh -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">Hình ảnh đại diện</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                        {
+                                            <div class="mb-3">
+                                                <label class="form-label">Hình ảnh hiện tại:</label>
+                                                <div>
+                                                    <img src="@Model.ImageUrl" alt="Current image" class="img-fluid rounded" style="max-height: 200px;" />
+                                                </div>
+                                            </div>
+                                        }
+                                        
+                                        <div class="mb-3">
+                                            <label for="imageFile" class="form-label">Chọn hình ảnh mới (tùy chọn)</label>
+                                            <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
+                                            <small class="form-text text-muted">Chỉ chấp nhận file hình ảnh (JPG, PNG, GIF, WebP). Để trống nếu không muốn thay đổi.</small>
+                                        </div>
+                                        
+                                        <div id="imagePreview" style="display: none;">
+                                            <label class="form-label">Hình ảnh mới:</label>
+                                            <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 200px;" />
+                                        </div>
+                                        
+                                        <input asp-for="ImageUrl" type="hidden" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Cập nhật bài viết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {            // Khởi tạo Summernote cho nội dung
+            $('.summernote').summernote({
+                height: 300,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ],
+                callbacks: {
+                    onImageUpload: function(files) {
+                        for (let i = 0; i < files.length; i++) {
+                            uploadImage(files[i], this);
+                        }
+                    }
+                }
+            });
+
+            // Function to handle image upload
+            function uploadImage(file, editor) {
+                var data = new FormData();
+                data.append("file", file);
+                
+                $.ajax({
+                    url: '/api/uploads/article',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    type: "POST",
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        $(editor).summernote('insertImage', response.url);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Upload failed:', error);
+                        alert('Không thể upload hình ảnh. Vui lòng thử lại!');
+                    }
+                });
+            }
+
+            // Preview hình ảnh
+            $('#imageFile').change(function() {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').show();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#imagePreview').hide();
+                }        });
+        });
+    </script>
+    
+    <!-- Summernote JS -->
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+}

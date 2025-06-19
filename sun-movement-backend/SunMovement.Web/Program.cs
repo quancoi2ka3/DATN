@@ -18,25 +18,27 @@ using SunMovement.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel with explicit HTTPS port
+// Configure Kestrel with explicit HTTPS port as primary
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    // Set up HTTP endpoint
-    serverOptions.ListenAnyIP(5000);
-    
     try {
-        // Set up HTTPS endpoint
+        // Set up HTTPS endpoint as primary (port 5001)
         serverOptions.ListenAnyIP(5001, listenOptions =>
         {
             listenOptions.UseHttps();
         });
+        Console.WriteLine("✅ HTTPS configured successfully on port 5001");
     }
     catch (Exception ex)
     {
-        // Log the exception but continue with HTTP
-        Console.WriteLine($"Failed to configure HTTPS: {ex.Message}");
-        Console.WriteLine("Continuing with HTTP only. To use HTTPS, run 'dotnet dev-certs https --trust' to install the development certificate.");
+        // Log the exception and fallback to HTTP
+        Console.WriteLine($"⚠️ Failed to configure HTTPS: {ex.Message}");
+        Console.WriteLine("🔄 Attempting to set up HTTP on port 5001...");
+        serverOptions.ListenAnyIP(5001);
     }
+    
+    // Also set up HTTP endpoint on port 5000 as backup
+    serverOptions.ListenAnyIP(5000);
 });
 
 // This helps ensure the development certificate is created
@@ -165,6 +167,9 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 // TEMPORARY: Using MockEmailService for testing - verification codes logged to console
 builder.Services.AddScoped<IEmailService, MockEmailService>();
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
@@ -173,14 +178,23 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 // Register AutoMapper profiles
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMovement.Web.Mappings.WebMappingProfile).Assembly);
 
-// Add CORS with very permissive configuration for testing
+// Add CORS with proper configuration for frontend with credentials
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         corsBuilder => corsBuilder
-            .AllowAnyOrigin()   // Allow all origins for testing
+            .WithOrigins(
+                "http://localhost:3000",
+                "http://localhost:5000", 
+                "https://localhost:3000",
+                "https://localhost:5001",
+                "http://127.0.0.1:3000",
+                "https://127.0.0.1:3000",
+                "http://127.0.0.1:5000",
+                "https://127.0.0.1:5001")
             .AllowAnyMethod()
-            .AllowAnyHeader()); // Note: Cannot use AllowCredentials() with AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowCredentials()); // Allow credentials for session management
     
     // Also add a more specific policy for frontend if needed
     options.AddPolicy("AllowSpecificOrigins",
@@ -335,6 +349,12 @@ app.MapControllerRoute(
     pattern: "admin",
     defaults: new { controller = "AdminDashboard", action = "Index", area = "Admin" });
 
+// API area route - IMPORTANT: This must come first to match API requests
+app.MapAreaControllerRoute(
+    name: "api",
+    areaName: "Api",
+    pattern: "api/{controller}/{action=Index}/{id?}");
+
 // Admin area route (only one definition for admin routes)
 app.MapAreaControllerRoute(
     name: "quan-tri",
@@ -347,6 +367,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+// Add health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 // Add SPA routing support - redirect API requests to API controllers,
 // but forward unmatched requests to the frontend

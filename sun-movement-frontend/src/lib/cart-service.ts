@@ -6,14 +6,43 @@ import { CartItem, Product } from "./types";
 interface AddToCartRequest {
   productId: number;
   quantity: number;
-  size?: string;
-  color?: string;
 }
 
 interface UpdateCartItemRequest {
+  cartItemId: number;
   quantity: number;
 }
 
+// Backend response format
+interface BackendCartResponse {
+  id: number;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  items: BackendCartItemDto[];
+  totalAmount: number;
+}
+
+interface BackendCartItemDto {
+  id: number;
+  cartId: number;
+  productId?: number;
+  serviceId?: number;
+  itemName: string;
+  itemImageUrl: string;
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
+  product?: {
+    id: number;
+    name: string;
+    imageUrl?: string;
+    price: number;
+  };
+  service?: any;
+}
+
+// Frontend expected format
 interface CartResponse {
   items: CartItemDto[];
   totalQuantity: number;
@@ -30,6 +59,25 @@ interface CartItemDto {
   size?: string;
   color?: string;
   createdAt: string;
+}
+
+// Function to map backend response to frontend format
+function mapBackendCartResponse(backendResponse: BackendCartResponse): CartResponse {
+  const mappedItems = backendResponse.items.map(item => ({
+    id: item.id.toString(),
+    productId: item.productId || item.serviceId || 0,
+    productName: item.itemName || item.product?.name || 'Unknown Product',
+    productImage: item.itemImageUrl || item.product?.imageUrl || '/images/placeholder.jpg',
+    quantity: item.quantity,
+    price: item.unitPrice || item.product?.price || 0,
+    createdAt: backendResponse.createdAt
+  }));
+
+  return {
+    items: mappedItems,
+    totalQuantity: mappedItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalPrice: backendResponse.totalAmount
+  };
 }
 
 // Function to map backend CartItemDto to frontend CartItem
@@ -60,18 +108,14 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
   try {
     const request: AddToCartRequest = {
       productId: parseInt(product.id),
-      quantity,
-      size,
-      color,
-    };
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/items`, {
+      quantity
+    };    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(request),
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include' // Add credentials for session consistency
     });
 
     if (!response.ok) {
@@ -79,14 +123,8 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
       throw new Error(`Failed to add item to cart: ${errorText}`);
     }
 
-    const data: CartResponse = await response.json();
-
-    return {
-      success: true,
-      items: data.items.map(mapCartItemDtoToCartItem),
-      totalQuantity: data.totalQuantity,
-      totalPrice: data.totalPrice
-    };
+    // After adding, get the updated cart
+    return await getCart();
   } catch (error) {
     console.error('Error adding to cart:', error);
     return {
@@ -105,16 +143,22 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
  */
 export async function getCart(): Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cart`, {
-      credentials: 'include', // Include cookies for authentication
+    console.log('[CART DEBUG] Getting cart...');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
+      credentials: 'include' // Add credentials for session consistency
     });
+
+    console.log('[CART DEBUG] Get cart response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CART DEBUG] Get cart error:', errorText);
       throw new Error(`Failed to get cart: ${errorText}`);
     }
 
-    const data: CartResponse = await response.json();
+    const backendData: BackendCartResponse = await response.json();
+    console.log('[CART DEBUG] Cart data:', backendData);
+    const data = mapBackendCartResponse(backendData);
 
     return {
       success: true,
@@ -143,15 +187,16 @@ export async function getCart(): Promise<{ success: boolean; items: CartItem[]; 
 export async function updateCartItem(cartItemId: string, quantity: number): 
   Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
   try {
-    const request: UpdateCartItemRequest = { quantity };
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/items/${cartItemId}`, {
+    const request: UpdateCartItemRequest = { 
+      cartItemId: parseInt(cartItemId),
+      quantity 
+    };    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(request),
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include' // Add credentials for session consistency
     });
 
     if (!response.ok) {
@@ -159,14 +204,8 @@ export async function updateCartItem(cartItemId: string, quantity: number):
       throw new Error(`Failed to update cart item: ${errorText}`);
     }
 
-    const data: CartResponse = await response.json();
-
-    return {
-      success: true,
-      items: data.items.map(mapCartItemDtoToCartItem),
-      totalQuantity: data.totalQuantity,
-      totalPrice: data.totalPrice
-    };
+    // After updating, get the updated cart
+    return await getCart();
   } catch (error) {
     console.error('Error updating cart item:', error);
     return {
@@ -186,10 +225,9 @@ export async function updateCartItem(cartItemId: string, quantity: number):
  */
 export async function removeCartItem(cartItemId: string): 
   Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/items/${cartItemId}`, {
+  try {    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items/${cartItemId}`, {
       method: 'DELETE',
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include' // Add credentials for session consistency
     });
 
     if (!response.ok) {
@@ -197,14 +235,8 @@ export async function removeCartItem(cartItemId: string):
       throw new Error(`Failed to remove cart item: ${errorText}`);
     }
 
-    const data: CartResponse = await response.json();
-
-    return {
-      success: true,
-      items: data.items.map(mapCartItemDtoToCartItem),
-      totalQuantity: data.totalQuantity,
-      totalPrice: data.totalPrice
-    };
+    // After removing, get the updated cart
+    return await getCart();
   } catch (error) {
     console.error('Error removing cart item:', error);
     return {
@@ -222,10 +254,9 @@ export async function removeCartItem(cartItemId: string):
  * @returns Empty cart data or error
  */
 export async function clearCart(): Promise<{ success: boolean; error?: string }> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cart/clear`, {
+  try {    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/clear`, {
       method: 'DELETE',
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include' // Add credentials for session consistency
     });
 
     if (!response.ok) {

@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  env: {
+  reactStrictMode: true,  env: {
     BACKEND_URL: process.env.BACKEND_URL || 'https://localhost:5001',
   },  images: {
     remotePatterns: [
+      // HTTPS patterns for port 5001
       {
         protocol: 'https',
         hostname: 'localhost',
@@ -12,54 +12,29 @@ const nextConfig = {
         pathname: '/uploads/**',
       },
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/uploads/**',
-      },
-      // Add support for /images/** path
-      {
         protocol: 'https',
         hostname: 'localhost',
         port: '5001',
         pathname: '/images/**',
       },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/images/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/images/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/images/**',
-      },
-      // Add support for all static assets
       {
         protocol: 'https',
         hostname: 'localhost',
         port: '5001',
         pathname: '/**',
+      },
+      // HTTP patterns for port 5001 (fallback)
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5001',
+        pathname: '/images/**',
       },
       {
         protocol: 'http',
@@ -67,11 +42,18 @@ const nextConfig = {
         port: '5001',
         pathname: '/**',
       },
+      // HTTP patterns for port 5000 (legacy support)
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'localhost',
         port: '5000',
-        pathname: '/**',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/images/**',
       },
       {
         protocol: 'http',
@@ -80,8 +62,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  async rewrites() {
+  },async rewrites() {
     return [
       {
         source: '/api/:path*',

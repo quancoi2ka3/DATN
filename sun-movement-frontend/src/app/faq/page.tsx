@@ -7,20 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { 
   Search, 
-  ChevronRight, 
-  Phone, 
+  ChevronRight,   Phone, 
   Mail, 
   Users, 
-  CreditCard, 
-  Calendar, 
-  Clock, 
   MapPin, 
   Dumbbell, 
   Leaf, 
-  Package,
   MessagesSquare
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 // FAQ categories and data

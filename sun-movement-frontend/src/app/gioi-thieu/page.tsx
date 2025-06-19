@@ -465,11 +465,10 @@ export default function AboutPage() {
               <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center text-white text-xl font-bold">
                 N
               </div>
-            </div>
-            <div className="pt-6">
+            </div>            <div className="pt-6">
               <p className="text-slate-300 italic mb-6">
-                "Tôi đã tập luyện tại nhiều phòng gym nhưng chỉ có tại Sun Movement, tôi mới tìm thấy một cộng đồng đam mê và hỗ trợ. 
-                Sau 6 tháng, tôi đã đạt được mục tiêu giảm 15kg và xây dựng cơ bắp."
+                &ldquo;Tôi đã tập luyện tại nhiều phòng gym nhưng chỉ có tại Sun Movement, tôi mới tìm thấy một cộng đồng đam mê và hỗ trợ. 
+                Sau 6 tháng, tôi đã đạt được mục tiêu giảm 15kg và xây dựng cơ bắp.&rdquo;
               </p>
               <div className="flex items-center">
                 <Star className="h-4 w-4 text-yellow-500" />
@@ -492,10 +491,9 @@ export default function AboutPage() {
                 L
               </div>
             </div>
-            <div className="pt-6">
-              <p className="text-slate-300 italic mb-6">
-                "Các lớp yoga tại Sun Movement đã giúp tôi giảm stress đáng kể và cải thiện sự linh hoạt. 
-                Các HLV rất chuyên nghiệp và quan tâm đến từng học viên. Không gian tập luyện rất thoải mái và thư giãn."
+            <div className="pt-6">              <p className="text-slate-300 italic mb-6">
+                &ldquo;Các lớp yoga tại Sun Movement đã giúp tôi giảm stress đáng kể và cải thiện sự linh hoạt. 
+                Các HLV rất chuyên nghiệp và quan tâm đến từng học viên. Không gian tập luyện rất thoải mái và thư giãn.&rdquo;
               </p>
               <div className="flex items-center">
                 <Star className="h-4 w-4 text-yellow-500" />
@@ -518,10 +516,9 @@ export default function AboutPage() {
                 T
               </div>
             </div>
-            <div className="pt-6">
-              <p className="text-slate-300 italic mb-6">
-                "Calisthenics tại Sun Movement đã cho tôi thấy mình có thể làm được những điều tưởng chừng không thể. 
-                HLV Minh Đức đã hướng dẫn tôi từng bước để làm chủ các động tác khó như human flag và muscle up."
+            <div className="pt-6">              <p className="text-slate-300 italic mb-6">
+                &ldquo;Calisthenics tại Sun Movement đã cho tôi thấy mình có thể làm được những điều tưởng chừng không thể. 
+                HLV Minh Đức đã hướng dẫn tôi từng bước để làm chủ các động tác khó như human flag và muscle up.&rdquo;
               </p>
               <div className="flex items-center">
                 <Star className="h-4 w-4 text-yellow-500" />

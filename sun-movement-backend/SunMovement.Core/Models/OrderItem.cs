@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace SunMovement.Core.Models
 {
@@ -14,7 +15,9 @@ namespace SunMovement.Core.Models
         public string? ProductOptions { get; set; }
         
         // Navigation properties
+        [JsonIgnore] // Prevent circular reference
         public virtual Order? Order { get; set; }
+        [JsonIgnore] // Prevent circular reference
         public virtual Product? Product { get; set; }
     }
 }

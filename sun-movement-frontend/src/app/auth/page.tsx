@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import CustomerLogin from '@/components/auth/CustomerLogin';
 import CustomerRegister from '@/components/auth/CustomerRegister';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {

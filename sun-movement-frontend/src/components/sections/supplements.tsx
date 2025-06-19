@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
+import { Product as BackendProduct, productService } from "@/services/productService";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -48,21 +49,72 @@ const mainCategories = [
   { name: "Vitamin & Minerals", icon: "/images/supplements/vitamins.jpg" },
 ];
 
-export function SupplementsSection({ products }: SupplementsSectionProps) {
-  // If products are not provided (e.g., on homepage), use fallback data
-  const [displayProducts, setDisplayProducts] = useState<Product[]>(products || fallbackSupplements);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+// Helper function to convert backend products to frontend format
+const convertBackendToFrontend = (backendProducts: BackendProduct[]): Product[] => {
+  return backendProducts.map(item => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    price: item.price,
+    salePrice: item.discountPrice || null,
+    imageUrl: item.imageUrl,
+    category: item.category,
+    subCategory: item.subCategory || "general",
+    isNew: false,
+    isBestseller: !!item.isBestseller
+  }));
+};
 
-  // Update products when the props change
+export function SupplementsSection({ products }: SupplementsSectionProps) {
+  // State for managing products and loading
+  const [displayProducts, setDisplayProducts] = useState<Product[]>(fallbackSupplements);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch supplements from backend
   useEffect(() => {
+    const fetchSupplements = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log('Fetching supplements from backend...');
+        const supplements = await productService.getSupplementsProducts();
+        
+        if (supplements.length > 0) {
+          console.log('Successfully fetched supplements:', supplements.length);
+          const formattedSupplements = convertBackendToFrontend(supplements);
+          setDisplayProducts(formattedSupplements);
+          
+          // Get featured products
+          const featured = formattedSupplements.filter(p => p.isFeatured);
+          setFeaturedProducts(featured.length > 0 ? featured.slice(0, 3) : formattedSupplements.slice(0, 3));
+        } else {
+          console.log('No supplements found, using fallback data');
+          setDisplayProducts(fallbackSupplements);
+          setFeaturedProducts(fallbackSupplements.slice(0, 3));
+          setError('Không thể tải dữ liệu sản phẩm. Hiển thị dữ liệu mẫu.');
+        }
+      } catch (err) {
+        console.error('Error fetching supplements:', err);
+        setDisplayProducts(fallbackSupplements);
+        setFeaturedProducts(fallbackSupplements.slice(0, 3));
+        setError('Lỗi kết nối đến server. Hiển thị dữ liệu mẫu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // If products are provided via props, use them; otherwise fetch from API
     if (products && products.length > 0) {
+      console.log('Using provided products:', products.length);
       setDisplayProducts(products);
-      
-      // Get featured products (using bestsellers or first 3 if none)
       const bestsellers = products.filter(p => p.isBestseller);
-      setFeaturedProducts(bestsellers.length > 0 
-        ? bestsellers.slice(0, 3) 
-        : products.slice(0, 3));
+      setFeaturedProducts(bestsellers.length > 0 ? bestsellers.slice(0, 3) : products.slice(0, 3));
+      setLoading(false);
+    } else {
+      fetchSupplements();
     }
   }, [products]);
 

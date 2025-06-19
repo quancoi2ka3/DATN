@@ -15,22 +15,23 @@ namespace SunMovement.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly IServiceService _serviceService;
+        private readonly IShoppingCartService _cartService;
         private readonly IMapper _mapper;
         private readonly ILogger<CartController> _logger;
 
         public CartController(
             IProductService productService,
             IServiceService serviceService,
+            IShoppingCartService cartService,
             IMapper mapper,
             ILogger<CartController> logger)
         {
             _productService = productService;
             _serviceService = serviceService;
+            _cartService = cartService;
             _mapper = mapper;
             _logger = logger;
-        }
-
-        private string GetUserId()
+        }        private string? GetUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
@@ -72,7 +73,7 @@ namespace SunMovement.Web.Controllers
                         return RedirectToAction("Index", "Products");
                     }
                     itemName = product.Name;
-                    imageUrl = product.ImageUrl;
+                    imageUrl = product.ImageUrl ?? string.Empty;
                     unitPrice = product.Price;
                 }
                 else if (viewModel.ServiceId.HasValue)
@@ -84,7 +85,7 @@ namespace SunMovement.Web.Controllers
                         return RedirectToAction("Index", "Services");
                     }
                     itemName = service.Name;
-                    imageUrl = service.ImageUrl;
+                    imageUrl = service.ImageUrl ?? string.Empty;
                     unitPrice = service.Price;
                 }
 
@@ -99,9 +100,7 @@ namespace SunMovement.Web.Controllers
                 TempData["ErrorMessage"] = "An error occurred while adding item to cart";
                 return RedirectToAction("Index");
             }
-        }
-
-        [HttpPost]
+        }        [HttpPost]
         public async Task<IActionResult> UpdateCartItem(int itemId, int quantity)
         {
             try
@@ -117,6 +116,8 @@ namespace SunMovement.Web.Controllers
                     quantity = 1;
                 }
 
+                await _cartService.UpdateCartItemQuantityAsync(userId, itemId, quantity);
+                TempData["SuccessMessage"] = "Cart item updated successfully";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -138,6 +139,8 @@ namespace SunMovement.Web.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
+                await _cartService.RemoveItemFromCartAsync(userId, itemId);
+                TempData["SuccessMessage"] = "Item removed from cart successfully";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -159,6 +162,8 @@ namespace SunMovement.Web.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
+                await _cartService.ClearCartAsync(userId);
+                TempData["SuccessMessage"] = "Cart cleared successfully";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)

@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin-enhancements.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/admin-extras.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-extras.css" asp-append-version="true" />    <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
     <style>
         /* Enhanced fixed header and sidebar */
         body {
@@ -202,9 +202,8 @@
                             Quản lý nội dung
                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                         </a>
-                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-controller="BlogAdmin" asp-action="Index">Bài viết</a>
+                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">                        <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link" asp-area="Admin" asp-controller="ArticlesAdmin" asp-action="Index">Bài viết</a>
                                 <a class="nav-link" asp-area="Admin" asp-controller="FAQsAdmin" asp-action="Index">Câu hỏi thường gặp</a>
                                 <a class="nav-link" asp-area="Admin" asp-controller="ContactMessagesAdmin" asp-action="Index">Tin nhắn liên hệ</a>
                             </nav>

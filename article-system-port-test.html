@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article System Port Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-unknown { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Article System Port Connectivity Test</h1>
+        <p>This tool tests API connectivity on both ports to identify the correct backend URL.</p>
+        
+        <div class="test-section">
+            <h2>🌐 Port Connectivity Test</h2>
+            <button onclick="testBothPorts()">Test Both Ports</button>
+            <div id="port-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Article API Tests</h2>
+            <button onclick="testArticleAPIs()">Test Article APIs</button>
+            <div id="api-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 Search Function Test</h2>
+            <input type="text" id="searchQuery" placeholder="Enter search term (e.g., yoga, calisthenics, strength)" style="padding: 8px; width: 300px;">
+            <button onclick="testSearch()">Search Articles</button>
+            <div id="search-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>⚡ Quick Fixes</h2>
+            <button onclick="showQuickFixes()">Show Configuration Fixes</button>
+            <div id="quick-fixes"></div>
+        </div>
+    </div>
+
+    <script>
+        const PORTS = [5000, 5001];
+        const BASE_URLS = {
+            5000: 'http://localhost:5000',
+            5001: 'http://localhost:5001'
+        };
+
+        let workingPort = null;
+        let workingBaseUrl = null;
+
+        async function testBothPorts() {
+            const resultsDiv = document.getElementById('port-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing both ports...</div>';
+            
+            const results = [];
+            
+            for (const port of PORTS) {
+                const baseUrl = BASE_URLS[port];
+                try {
+                    console.log(`Testing ${baseUrl}/api/articles/published`);
+                    const response = await fetch(`${baseUrl}/api/articles/published`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push({
+                            port,
+                            baseUrl,
+                            status: 'success',
+                            data: data,
+                            count: Array.isArray(data) ? data.length : 0
+                        });
+                        workingPort = port;
+                        workingBaseUrl = baseUrl;
+                    } else {
+                        results.push({
+                            port,
+                            baseUrl,
+                            status: 'error',
+                            error: `HTTP ${response.status}: ${response.statusText}`
+                        });
+                    }
+                } catch (error) {
+                    results.push({
+                        port,
+                        baseUrl,
+                        status: 'error',
+                        error: error.message
+                    });
+                }
+            }
+            
+            displayPortResults(results);
+        }
+
+        function displayPortResults(results) {
+            const resultsDiv = document.getElementById('port-results');
+            let html = '<h3>Port Test Results:</h3>';
+            
+            results.forEach(result => {
+                const statusClass = result.status === 'success' ? 'success' : 'error';
+                const statusIndicator = result.status === 'success' ? 'status-online' : 'status-offline';
+                
+                html += `
+                    <div class="${statusClass}" style="margin: 10px 0; padding: 10px;">
+                        <span class="status-indicator ${statusIndicator}"></span>
+                        <strong>Port ${result.port}</strong> (${result.baseUrl})
+                        ${result.status === 'success' ? 
+                            `<br>✅ SUCCESS: Found ${result.count} articles` : 
+                            `<br>❌ ERROR: ${result.error}`
+                        }
+                    </div>
+                `;
+            });
+            
+            if (workingPort) {
+                html += `
+                    <div class="success" style="margin-top: 15px; padding: 10px;">
+                        <strong>🎉 Working Configuration Found!</strong><br>
+                        Use: <code>${workingBaseUrl}</code><br>
+                        Update your frontend to use this URL.
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="error" style="margin-top: 15px; padding: 10px;">
+                        <strong>❌ No Working Port Found</strong><br>
+                        Make sure the backend server is running.
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        async function testArticleAPIs() {
+            if (!workingBaseUrl) {
+                alert('Please run the port connectivity test first!');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing Article APIs...</div>';
+            
+            const endpoints = [
+                { name: 'Published Articles', path: '/api/articles/published' },
+                { name: 'Featured Articles', path: '/api/articles/featured' },
+                { name: 'Search Articles (yoga)', path: '/api/articles/search?q=yoga' },
+                { name: 'Search Articles (calisthenics)', path: '/api/articles/search?q=calisthenics' },
+                { name: 'Search Articles (strength)', path: '/api/articles/search?q=strength' }
+            ];
+            
+            let html = '<h3>Article API Test Results:</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${workingBaseUrl}${endpoint.path}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const count = Array.isArray(data) ? data.length : 0;
+                        html += `
+                            <div class="success" style="margin: 10px 0; padding: 10px;">
+                                <strong>${endpoint.name}</strong><br>
+                                ✅ SUCCESS: Found ${count} articles
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="error" style="margin: 10px 0; padding: 10px;">
+                                <strong>${endpoint.name}</strong><br>
+                                ❌ ERROR: HTTP ${response.status}
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    html += `
+                        <div class="error" style="margin: 10px 0; padding: 10px;">
+                            <strong>${endpoint.name}</strong><br>
+                            ❌ ERROR: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        async function testSearch() {
+            const query = document.getElementById('searchQuery').value;
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+            
+            if (!workingBaseUrl) {
+                alert('Please run the port connectivity test first!');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<div class="loading">Searching...</div>';
+            
+            try {
+                const response = await fetch(`${workingBaseUrl}/api/articles/search?q=${encodeURIComponent(query)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    let html = `<h3>Search Results for "${query}":</h3>`;
+                    if (data.length > 0) {
+                        html += `<div class="success">Found ${data.length} articles:</div>`;
+                        html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    } else {
+                        html += '<div class="error">No articles found matching your search.</div>';
+                    }
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">Search failed: HTTP ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Search error: ${error.message}</div>`;
+            }
+        }
+
+        function showQuickFixes() {
+            const fixesDiv = document.getElementById('quick-fixes');
+            fixesDiv.innerHTML = `
+                <h3>Quick Configuration Fixes:</h3>
+                <div class="success" style="padding: 15px;">
+                    <h4>1. Environment Variables (.env.local):</h4>
+                    <pre>NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+BACKEND_URL=http://localhost:5000</pre>
+                    
+                    <h4>2. Update ArticleService.ts:</h4>
+                    <pre>this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';</pre>
+                    
+                    <h4>3. Update next.config.js:</h4>
+                    <pre>env: {
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
+},
+async rewrites() {
+  return [
+    {
+      source: '/api/:path*',
+      destination: 'http://localhost:5000/api/:path*',
+    },
+  ];
+}</pre>
+                    
+                    <h4>4. Backend Server Startup:</h4>
+                    <pre>cd "d:\\DATN\\DATN\\sun-movement-backend\\SunMovement.Web"
+dotnet run</pre>
+                </div>
+            `;
+        }
+
+        // Auto-run port test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testBothPorts, 1000);
+        });
+    </script>
+</body>
+</html>

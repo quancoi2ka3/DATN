@@ -20,27 +20,46 @@ namespace SunMovement.Web.Areas.Api.Controllers
         public UploadsController(IFileUploadService fileUploadService)
         {
             _fileUploadService = fileUploadService;
-        }
-
-        // POST: api/uploads/product
+        }        // POST: api/uploads/product
         [HttpPost("product")]
         public async Task<ActionResult<UploadResult>> UploadProductImage(IFormFile file)
         {
-            return await UploadFile(file, "products");
-        }
-
-        // POST: api/uploads/service
+            var result = await UploadFile(file, "products");
+            if (result == null)
+            {
+                return BadRequest("No file uploaded or invalid file");
+            }
+            return result;
+        }        // POST: api/uploads/service
         [HttpPost("service")]
         public async Task<ActionResult<UploadResult>> UploadServiceImage(IFormFile file)
         {
-            return await UploadFile(file, "services");
-        }
-
-        // POST: api/uploads/event
+            var result = await UploadFile(file, "services");
+            if (result == null)
+            {
+                return BadRequest("No file uploaded or invalid file");
+            }
+            return result;
+        }        // POST: api/uploads/event
         [HttpPost("event")]
         public async Task<ActionResult<UploadResult>> UploadEventImage(IFormFile file)
         {
-            return await UploadFile(file, "events");
+            var result = await UploadFile(file, "events");
+            if (result == null)
+            {
+                return BadRequest("No file uploaded or invalid file");
+            }
+            return result;
+        }        // POST: api/uploads/article
+        [HttpPost("article")]
+        public async Task<ActionResult<UploadResult>> UploadArticleImage(IFormFile file)
+        {
+            var result = await UploadFile(file, "articles");
+            if (result == null)
+            {
+                return BadRequest("No file uploaded or invalid file");
+            }
+            return result;
         }
 
         // POST: api/uploads/gallery
@@ -83,9 +102,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
             }
             
             return NotFound("File not found or could not be deleted");
-        }
-
-        private async Task<UploadResult> UploadFile(IFormFile file, string folder)
+        }        private async Task<UploadResult?> UploadFile(IFormFile file, string folder)
         {
             if (file == null || file.Length == 0)
             {

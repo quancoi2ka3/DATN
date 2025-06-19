@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNPay Payment Integration Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">VNPay Payment Integration Test</h1>
+        
+        <!-- Test Cart Data -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Cart Data Test</h2>
+            <div id="cart-items" class="space-y-2 mb-4">
+                <!-- Cart items will be populated here -->
+            </div>
+            <div class="text-right">
+                <p class="text-lg font-bold">Total: <span id="total-amount">0</span> VND</p>
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Customer Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="customer-name" placeholder="Họ và tên" class="border rounded px-3 py-2" value="Nguyễn Văn Test">
+                <input type="email" id="customer-email" placeholder="Email" class="border rounded px-3 py-2" value="test@example.com">
+                <input type="tel" id="customer-phone" placeholder="Số điện thoại" class="border rounded px-3 py-2" value="0123456789">
+                <input type="text" id="customer-address" placeholder="Địa chỉ" class="border rounded px-3 py-2" value="123 Test Street">
+            </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Payment Method</h2>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="radio" name="payment-method" value="COD" class="mr-2">
+                    <span>Cash on Delivery (COD)</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" name="payment-method" value="VNPAY" class="mr-2" checked>
+                    <span>VNPay (Online Payment)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="loadCart()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Load Cart Data
+                </button>
+                <button onclick="testCheckout()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Test Checkout
+                </button>
+                <button onclick="clearTest()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                    Clear Test
+                </button>
+            </div>
+        </div>
+
+        <!-- API Response -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Response</h2>
+            <pre id="api-response" class="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-64">No response yet...</pre>
+        </div>
+
+        <!-- VNPay Simulation -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">VNPay Simulation</h2>
+            <p class="text-gray-600 mb-4">After checkout, you'll be redirected to VNPay. Use these test credentials:</p>
+            <div class="bg-yellow-50 p-4 rounded mb-4">
+                <p><strong>Bank:</strong> NCB</p>
+                <p><strong>Card Number:</strong> 9704198526191432198</p>
+                <p><strong>Card Holder:</strong> NGUYEN VAN A</p>
+                <p><strong>Expiry Date:</strong> 07/15</p>
+                <p><strong>OTP:</strong> 123456</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="simulateSuccess()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">
+                    Simulate Success
+                </button>
+                <button onclick="simulateFailure()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    Simulate Failure
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="test-results" class="space-y-2">
+                <p class="text-gray-600">No test results yet...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://localhost:5001/api';
+        let testCartData = [
+            {
+                id: 1,
+                productId: 1,
+                productName: "Test Product 1",
+                quantity: 2,
+                unitPrice: 299000,
+                subtotal: 598000
+            },
+            {
+                id: 2,
+                productId: 2,
+                productName: "Test Product 2",
+                quantity: 1,
+                unitPrice: 199000,
+                subtotal: 199000
+            }
+        ];
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount);
+        }
+
+        function loadCart() {
+            const cartContainer = document.getElementById('cart-items');
+            const totalContainer = document.getElementById('total-amount');
+            
+            cartContainer.innerHTML = '';
+            let total = 0;
+            
+            testCartData.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'flex justify-between items-center border-b pb-2';
+                itemDiv.innerHTML = `
+                    <div>
+                        <p class="font-semibold">${item.productName}</p>
+                        <p class="text-gray-600">${item.quantity} x ${formatCurrency(item.unitPrice)} VND</p>
+                    </div>
+                    <p class="font-bold">${formatCurrency(item.subtotal)} VND</p>
+                `;
+                cartContainer.appendChild(itemDiv);
+                total += item.subtotal;
+            });
+            
+            totalContainer.textContent = formatCurrency(total);
+            
+            logResult('✅ Cart data loaded successfully', 'success');
+        }        async function testCheckout() {
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            const customerName = document.getElementById('customer-name').value;
+            const customerEmail = document.getElementById('customer-email').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const customerAddress = document.getElementById('customer-address').value;
+
+            const checkoutData = {
+                paymentMethod: paymentMethod.toLowerCase(),
+                shippingAddress: {
+                    fullName: customerName,
+                    addressLine1: customerAddress,
+                    addressLine2: "",
+                    city: "Ho Chi Minh City",
+                    province: "Ho Chi Minh",
+                    zipCode: "70000"
+                },
+                contactInfo: {
+                    email: customerEmail,
+                    phone: customerPhone,
+                    notes: "Test order from payment integration test"
+                }
+            };
+
+            logResult('🔄 Starting checkout process...', 'info');
+            document.getElementById('api-response').textContent = 'Sending request...';            try {
+                const response = await fetch(`${API_BASE}/orders/test-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(checkoutData)
+                });
+
+                const responseData = await response.json();
+                document.getElementById('api-response').textContent = JSON.stringify(responseData, null, 2);                if (response.ok) {
+                    if (paymentMethod.toLowerCase() === 'vnpay' && responseData.paymentUrl) {
+                        logResult('✅ VNPay URL generated successfully', 'success');
+                        logResult(`🔗 Payment URL: ${responseData.paymentUrl}`, 'info');
+                        
+                        // Ask user if they want to redirect
+                        if (confirm('Do you want to redirect to VNPay for payment?')) {
+                            window.open(responseData.paymentUrl, '_blank');
+                        }
+                    } else if (paymentMethod.toLowerCase() === 'cod') {
+                        logResult('✅ COD order created successfully', 'success');
+                        logResult(`📦 Order ID: ${responseData.order?.id || 'N/A'}`, 'info');
+                    }
+                } else {
+                    logResult(`❌ Checkout failed: ${responseData.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                document.getElementById('api-response').textContent = `Error: ${error.message}`;
+                logResult(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        function simulateSuccess() {
+            const testParams = new URLSearchParams({
+                vnp_Amount: '79700000',
+                vnp_BankCode: 'NCB',
+                vnp_CardType: 'ATM',
+                vnp_OrderInfo: 'Thanh toan don hang test',
+                vnp_PayDate: '20241219150000',
+                vnp_ResponseCode: '00',
+                vnp_TmnCode: 'VNPAYTEST',
+                vnp_TransactionNo: '14123456',
+                vnp_TransactionStatus: '00',
+                vnp_TxnRef: 'TEST' + Date.now(),
+                vnp_SecureHash: 'test_hash'
+            });
+            
+            const successUrl = `http://localhost:3000/checkout/success?${testParams.toString()}`;
+            logResult('🔄 Simulating successful payment...', 'info');
+            logResult(`🔗 Success URL: ${successUrl}`, 'info');
+            
+            if (confirm('Open success page in new tab?')) {
+                window.open(successUrl, '_blank');
+            }
+        }
+
+        function simulateFailure() {
+            const testParams = new URLSearchParams({
+                vnp_Amount: '79700000',
+                vnp_BankCode: 'NCB',
+                vnp_OrderInfo: 'Thanh toan don hang test',
+                vnp_PayDate: '20241219150000',
+                vnp_ResponseCode: '24',
+                vnp_TmnCode: 'VNPAYTEST',
+                vnp_TransactionStatus: '02',
+                vnp_TxnRef: 'TEST' + Date.now(),
+                error: 'User%20cancelled%20transaction'
+            });
+            
+            const failedUrl = `http://localhost:3000/checkout/failed?${testParams.toString()}`;
+            logResult('🔄 Simulating failed payment...', 'info');
+            logResult(`🔗 Failed URL: ${failedUrl}`, 'info');
+            
+            if (confirm('Open failed page in new tab?')) {
+                window.open(failedUrl, '_blank');
+            }
+        }
+
+        function clearTest() {
+            document.getElementById('api-response').textContent = 'No response yet...';
+            document.getElementById('test-results').innerHTML = '<p class="text-gray-600">No test results yet...</p>';
+            document.getElementById('cart-items').innerHTML = '';
+            document.getElementById('total-amount').textContent = '0';
+            logResult('🧹 Test cleared', 'info');
+        }
+
+        function logResult(message, type = 'info') {
+            const resultsContainer = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            
+            let bgColor = 'bg-blue-50 text-blue-800';
+            if (type === 'success') bgColor = 'bg-green-50 text-green-800';
+            if (type === 'error') bgColor = 'bg-red-50 text-red-800';
+            if (type === 'warning') bgColor = 'bg-yellow-50 text-yellow-800';
+            
+            resultDiv.className = `p-2 rounded ${bgColor}`;
+            resultDiv.innerHTML = `
+                <span class="text-xs text-gray-500">[${new Date().toLocaleTimeString()}]</span>
+                <span class="ml-2">${message}</span>
+            `;
+            
+            resultsContainer.appendChild(resultDiv);
+            resultsContainer.scrollTop = resultsContainer.scrollHeight;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+            logResult('🚀 VNPay Payment Test Interface initialized', 'info');
+        });
+    </script>
+</body>
+</html>

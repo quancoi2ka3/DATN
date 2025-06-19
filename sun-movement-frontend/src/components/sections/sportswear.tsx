@@ -643,8 +643,8 @@ export function SportswearSection({ products }: SportswearSectionProps) {
           </div>
           
           <div className="relative z-10 p-8 flex flex-col md:flex-row items-center gap-8">
-            <div className="w-full md:w-1/3 relative">
-              <div className="aspect-square relative rounded-lg overflow-hidden">                <Image
+            <div className="w-full md:w-1/3 relative">              <div className="aspect-square relative rounded-lg overflow-hidden">
+                <Image
                   src="https://localhost:5001/images/sportswear/premium-set.jpg"
                   alt="Premium Sportswear Set"
                   fill

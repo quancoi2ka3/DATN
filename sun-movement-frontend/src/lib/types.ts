@@ -6,7 +6,7 @@ export interface Product {
   salePrice?: number | null;
   imageUrl: string;
   category: number|string;
-  subCategory :string; // Use number for category ID or string for category slug
+  subCategory?: string; // Use number for category ID or string for category slug
   details?: string;
   colors?: string[];
   sizes?: string[];
@@ -15,6 +15,10 @@ export interface Product {
   reviews?: number;
   isNew?: boolean;
   isBestseller?: boolean;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  stockQuantity?: number;
+  specifications?: string;
 }
 
 export interface CartItem {

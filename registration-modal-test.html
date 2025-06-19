@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Modal System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #dc2626;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #b91c1c;
+        }
+        .test-button.secondary {
+            background: #6b7280;
+        }
+        .test-button.secondary:hover {
+            background: #4b5563;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.working {
+            background: #10b981;
+            color: white;
+        }
+        .status.error {
+            background: #ef4444;
+            color: white;
+        }
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .checklist {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .checklist ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .checklist li {
+            margin: 5px 0;
+        }
+        .test-steps {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .test-steps h4 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        .test-steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .test-steps li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <div class="header">
+            <h1>🎯 Sun Movement Registration Modal Test</h1>
+            <p>Testing unified registration modal system across all pages</p>
+        </div>
+
+        <div class="test-steps">
+            <h4>🔍 Test Instructions</h4>
+            <ol>
+                <li>Start the development server: <code>npm run dev</code></li>
+                <li>Visit each page listed below</li>
+                <li>Click all registration buttons ("Đăng ký") on each page</li>
+                <li>Verify that the SAME registration modal opens every time</li>
+                <li>Check that the modal has consistent styling and functionality</li>
+            </ol>
+        </div>
+
+        <div class="checklist">
+            <h3>✅ System Status</h3>
+            <ul>
+                <li>✅ <strong>Layout.tsx</strong> - Switched to UniversalRegistrationProvider</li>
+                <li>✅ <strong>Header.tsx</strong> - Fixed authentication buttons with useRegistrationModal hook</li>
+                <li>✅ <strong>Footer.tsx</strong> - Updated newsletter button to UniversalRegistrationButton</li>
+                <li>✅ <strong>Services page</strong> - Updated 4 registration buttons</li>
+                <li>✅ <strong>Strength page</strong> - Updated 2 registration buttons</li>
+                <li>✅ <strong>YogaArticleContent</strong> - Updated 2 registration buttons</li>
+                <li>✅ <strong>Unused files</strong> - Removed conflicting components</li>
+                <li>✅ <strong>Compilation errors</strong> - All fixed</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📍 Pages to Test</h2>
+        
+        <h3>1. Homepage (/) <span class="status working">READY</span></h3>
+        <p><strong>Buttons to test:</strong></p>
+        <ul>
+            <li>Header: "Đăng nhập" and "Đăng ký" buttons</li>
+            <li>Footer: Newsletter registration button</li>
+        </ul>
+
+        <h3>2. Services Page (/dich-vu) <span class="status working">READY</span></h3>
+        <p><strong>Buttons to test:</strong></p>
+        <ul>
+            <li>Header: "Đăng nhập" and "Đăng ký" buttons</li>
+            <li>Service cards: 4 "Đăng ký" buttons for different services</li>
+            <li>Footer: Newsletter registration button</li>
+        </ul>
+
+        <h3>3. Strength Page (/dich-vu/strength) <span class="status working">READY</span></h3>
+        <p><strong>Buttons to test:</strong></p>
+        <ul>
+            <li>Header: "Đăng nhập" and "Đăng ký" buttons</li>
+            <li>Page content: 2 "Đăng ký" buttons for strength training</li>
+            <li>Footer: Newsletter registration button</li>
+        </ul>
+
+        <h3>4. Other Pages with YogaArticleContent <span class="status working">READY</span></h3>
+        <p><strong>Buttons to test:</strong></p>
+        <ul>
+            <li>Header: "Đăng nhập" and "Đăng ký" buttons</li>
+            <li>Article content: 2 "Đăng ký" buttons</li>
+            <li>Footer: Newsletter registration button</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Expected Behavior</h2>
+        <div class="checklist">
+            <h4>All registration buttons should:</h4>
+            <ul>
+                <li>Open the SAME registration modal</li>
+                <li>Have consistent styling and animation</li>
+                <li>Show the registration form with all required fields</li>
+                <li>Handle form submission properly</li>
+                <li>Display validation errors consistently</li>
+                <li>Close properly when clicking outside or pressing ESC</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Implementation Summary</h2>
+        <p><strong>What was changed:</strong></p>
+        <ul>
+            <li><strong>Unified System:</strong> All buttons now use the existing UniversalRegistrationModal system</li>
+            <li><strong>Provider Setup:</strong> Layout.tsx uses UniversalRegistrationProvider</li>
+            <li><strong>Button Components:</strong> Replaced custom AuthButton with UniversalRegistrationButton</li>
+            <li><strong>Header Fix:</strong> Added useRegistrationModal hook to AuthSection and MobileAuthSection</li>
+            <li><strong>Cleanup:</strong> Removed conflicting custom components</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Next Steps</h2>
+        <ol>
+            <li>Start the development server</li>
+            <li>Test all registration buttons on different pages</li>
+            <li>Verify modal consistency and functionality</li>
+            <li>Check responsive design on mobile devices</li>
+            <li>Test form validation and submission</li>
+        </ol>
+        
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin-top: 15px;">
+            <h4 style="margin-top: 0; color: #92400e;">⚠️ Important</h4>
+            <p>If any registration button doesn't work, check the browser console for errors and verify that the UniversalRegistrationModal system is properly imported and used.</p>
+        </div>
+    </div>
+</body>
+</html>

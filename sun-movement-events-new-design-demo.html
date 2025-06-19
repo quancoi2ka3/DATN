@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sun Movement - Sự kiện mới</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+        }
+        
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            overflow: hidden;
+        }
+        
+        .event-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .event-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .bg-rose-50 {
+            background-color: #fdf2f8;
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-rose-50">
+    <!-- Events Section -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    SỰ KIỆN
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Không chỉ đơn thuần là kiến thức mà Sun Movement muốn chia sẻ,
+                    đây còn là những gì mà cuộc sống của bạn thực sự cần.
+                </p>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <!-- Event Card 1 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/4ade80/ffffff?text=Handstand+Workshop"
+                            alt="Giải thi đấu handstand max hold"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>27 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Handstand</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            Giải thi đấu handstand max hold
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Workshop chuyên sâu về kỹ thuật Handstand từ cơ bản đến nâng cao với huấn luyện viên quốc tế. 
+                            Tìm hiểu các phương pháp tập luyện hiệu quả nhất.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>200 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi Sun Movement</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Card 2 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/06b6d4/ffffff?text=Handstand+Intensive"
+                            alt="Handstand Intensive"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>02 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Calisthenics</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            Handstand Intensive
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Handstand Intensive workshop với Nicólás Montes de Oca - huấn luyện viên 
+                            quốc tế từ Argentina. Kỹ thuật nâng cao cho practitioners.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>150 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi Nicólás</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Card 3 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/8b5cf6/ffffff?text=Mobility+Workshop"
+                            alt="Kèm riêng hoạt khớp vai"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>18 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Mobility</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            Kèm riêng hoạt khớp vai
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Session kèm riêng tập trung vào việc cải thiện độ linh hoạt và sức mạnh của khớp vai 
+                            cho calisthenics. Phù hợp cho mọi trình độ.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>85 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi Trainer Pro</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Card 4 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/f97316/ffffff?text=Lower+Back+Pain"
+                            alt="ĐAU | MỎI lưng dưới"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>15 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Sức khỏe</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            ĐAU | MỎI lưng dưới
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Workshop chuyên biệt về cách điều trị và phòng ngừa đau lưng dưới thông qua 
+                            các bài tập calisthenics an toàn và hiệu quả.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>320 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi Physio Expert</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Card 5 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/10b981/ffffff?text=ATC+Squat"
+                            alt="ATC Squat - Squat sâu và toàn"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>12 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Kỹ thuật</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            ATC Squat - Squat sâu và toàn
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Hướng dẫn chi tiết về kỹ thuật squat hoàn hảo, từ cơ bản đến nâng cao 
+                            với các biến thể khác nhau. Phát triển sức mạnh chân hiệu quả.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>95 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi ATC Trainer</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Event Card 6 -->
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                    <div class="relative h-48 overflow-hidden">
+                        <div class="absolute top-3 left-3 z-10">
+                            <span class="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                SỰ KIỆN
+                            </span>
+                        </div>
+                        <div class="absolute top-3 right-3 z-10">
+                            <span class="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                                Đã diễn ra
+                            </span>
+                        </div>
+                        <img
+                            src="https://via.placeholder.com/400x300/dc2626/ffffff?text=Deadlift+Workshop"
+                            alt="Deadlift/Hip Hinge"
+                            class="w-full h-full object-cover hover-scale"
+                        />
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>08 cập nhật mới</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-blue-600 font-medium">Sức mạnh</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                            Deadlift/Hip Hinge
+                        </h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            Workshop về động tác hip hinge và deadlift - nền tảng cho sức mạnh và sự an toàn 
+                            trong tập luyện. Học cách thực hiện đúng technique.
+                        </p>
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>145 lượt xem</span>
+                            </div>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span>Bởi Strength Coach</span>
+                            </div>
+                        </div>
+                        <button class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded transition-colors">
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 text-base font-medium rounded-lg transition-colors">
+                    Xem thêm
+                </button>
+                <button class="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 text-base font-medium rounded-lg transition-colors">
+                    Câu hỏi thường gặp
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts for interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.event-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px)';
+                    this.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                });
+            });
+
+            // Add click handlers to buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (this.textContent.includes('Xem chi tiết')) {
+                        alert('Sẽ chuyển hướng đến trang chi tiết sự kiện');
+                    } else if (this.textContent.includes('Xem thêm')) {
+                        alert('Sẽ chuyển hướng đến trang danh sách đầy đủ các sự kiện');
+                    } else if (this.textContent.includes('Câu hỏi thường gặp')) {
+                        alert('Sẽ chuyển hướng đến trang FAQ');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

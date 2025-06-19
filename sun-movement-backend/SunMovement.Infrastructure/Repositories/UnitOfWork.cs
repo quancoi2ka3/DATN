@@ -10,14 +10,14 @@ namespace SunMovement.Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private bool _disposed = false;
-
-        private IProductRepository _productRepository;
-        private IServiceRepository _serviceRepository;
-        private IRepository<Event> _eventRepository;
-        private IRepository<FAQ> _faqRepository;        private IRepository<ContactMessage> _contactMessageRepository;
-        private IRepository<Order> _orderRepository;
-        private IRepository<OrderItem> _orderItemRepository;
+        private bool _disposed = false;        private IProductRepository? _productRepository;
+        private IServiceRepository? _serviceRepository;
+        private IRepository<Event>? _eventRepository;
+        private IRepository<FAQ>? _faqRepository;
+        private IRepository<ContactMessage>? _contactMessageRepository;
+        private OrderRepository? _orderRepository;
+        private IRepository<OrderItem>? _orderItemRepository;
+        private IArticleRepository? _articleRepository;
         private readonly ICacheService _cacheService;
 
         public UnitOfWork(ApplicationDbContext context, ICacheService cacheService)
@@ -39,11 +39,12 @@ namespace SunMovement.Infrastructure.Repositories
             _faqRepository ??= new Repository<FAQ>(_context);
 
         public IRepository<ContactMessage> ContactMessages => 
-            _contactMessageRepository ??= new Repository<ContactMessage>(_context);
-
-        public IRepository<Order> Orders => 
-            _orderRepository ??= new Repository<Order>(_context);        public IRepository<OrderItem> OrderItems => 
+            _contactMessageRepository ??= new Repository<ContactMessage>(_context);        public IRepository<Order> Orders => 
+            _orderRepository ??= new OrderRepository(_context);public IRepository<OrderItem> OrderItems => 
             _orderItemRepository ??= new Repository<OrderItem>(_context);
+
+        public IArticleRepository Articles => 
+            _articleRepository ??= new ArticleRepository(_context);
             
        
 

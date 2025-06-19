@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Testimonials Section - YouTube Videos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f3f3fb 0%, #e8e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #eb4d3c 0%, #d63384 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .demo-section {
+            padding: 40px;
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .testimonial-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: #000;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .testimonial-card:hover .video-thumbnail img {
+            transform: scale(1.05);
+        }
+        
+        .play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+        
+        .testimonial-card:hover .play-overlay {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .play-button {
+            width: 70px;
+            height: 70px;
+            background: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .testimonial-card:hover .play-button {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.6);
+        }
+        
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 20px solid white;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 5px;
+        }
+        
+        .duration-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #eb4d3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .youtube-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .card-content {
+            padding: 25px;
+        }
+        
+        .video-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .member-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .member-avatar {
+            width: 45px;
+            height: 45px;
+            background: #eb4d3c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+        
+        .member-details h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .member-details p {
+            margin: 2px 0 0 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .quote {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .watch-button {
+            width: 100%;
+            background: #eb4d3c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .watch-button:hover {
+            background: #d63384;
+            transform: translateY(-1px);
+        }
+        
+        .hashtag {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 1.2rem;
+            color: #eb4d3c;
+            font-weight: 600;
+        }
+        
+        .demo-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #eb4d3c;
+        }
+        
+        .demo-info h3 {
+            margin: 0 0 10px 0;
+            color: #eb4d3c;
+        }
+        
+        .demo-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        
+        .feature-list {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .feature-list h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+        }
+        
+        .feature-list ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .feature-list li {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        .feature-list li::marker {
+            color: #eb4d3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Testimonials Section Demo</h1>
+            <p>Hành trình của thành viên với YouTube Videos</p>
+        </div>
+        
+        <div class="demo-section">
+            <div class="demo-info">
+                <h3>📋 Thông tin Demo</h3>
+                <p><strong>Chức năng:</strong> Hiển thị video testimonials từ YouTube</p>
+                <p><strong>Nguồn dữ liệu:</strong> Backend API (CustomerReviews category) + Default fallback</p>
+                <p><strong>YouTube Integration:</strong> Tự động extract URL từ article content</p>
+                <p><strong>Responsive:</strong> Grid layout thích ứng màn hình</p>
+            </div>
+            
+            <div class="feature-list">
+                <h3>✨ Tính năng chính</h3>
+                <ul>
+                    <li>Tự động parse YouTube URL từ nội dung bài viết</li>
+                    <li>Hiển thị thumbnail video từ YouTube API</li>
+                    <li>Play button overlay với hiệu ứng hover</li>
+                    <li>Badge hiển thị thời gian và YouTube logo</li>
+                    <li>Thông tin thành viên với avatar và service</li>
+                    <li>Responsive grid layout (1-3 columns)</li>
+                    <li>Loading state với skeleton animation</li>
+                    <li>Fallback content khi không có API data</li>
+                </ul>
+            </div>
+            
+            <h2 style="text-align: center; margin: 40px 0 20px 0; color: #333;">
+                Hành trình của <span style="color: #eb4d3c;">THÀNH VIÊN</span>
+            </h2>
+            
+            <div class="testimonials-grid">
+                <!-- Testimonial 1 - Minh Hiếu -->
+                <div class="testimonial-card">
+                    <div class="video-thumbnail" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                        <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Tập 10 Muscle ups trong 3 tháng">
+                        <div class="play-overlay">
+                            <div class="play-button">
+                                <div class="play-icon"></div>
+                            </div>
+                        </div>
+                        <div class="duration-badge">03 tháng</div>
+                        <div class="youtube-badge">YouTube</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="video-title">Tập 10 Muscle ups trong 3 tháng từ 0 | hít xà</h3>
+                        <div class="member-info">
+                            <div class="member-avatar">M</div>
+                            <div class="member-details">
+                                <h4>Minh Hiếu</h4>
+                                <p>Calisthenics & Yoga</p>
+                            </div>
+                        </div>
+                        <p class="quote">
+                            Xuất phát từ 1 chàng trai có thân hình khá nặng nề và không thể kéo được xà (Pull up). Nhưng chỉ cần 3 tháng tập luyện nghiêm túc, kỷ luật và cố gắng, Hiếu có thể làm được 10 Muscle Up. Một điều tưởng chừng không thể...
+                        </p>
+                        <button class="watch-button" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                            Xem hành trình →
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 - Duy Anh -->
+                <div class="testimonial-card">
+                    <div class="video-thumbnail" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                        <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Chàng trai kém may mắn">
+                        <div class="play-overlay">
+                            <div class="play-button">
+                                <div class="play-icon"></div>
+                            </div>
+                        </div>
+                        <div class="duration-badge">Hành trình</div>
+                        <div class="youtube-badge">YouTube</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="video-title">Chàng trai "kém may mắn" và cơ duyên với Calisthenics</h3>
+                        <div class="member-info">
+                            <div class="member-avatar">D</div>
+                            <div class="member-details">
+                                <h4>Duy Anh</h4>
+                                <p>Calisthenics</p>
+                            </div>
+                        </div>
+                        <p class="quote">
+                            Chàng trai "kém may mắn" và cơ duyên với Calisthenics. Là 1 anh chàng gặp phải nhiều biến cố về sức khỏe nhưng luôn lạc quan, Duy Anh tìm thấy niềm vui, đam mê và ý do để cố gắng với Calisthenics...
+                        </p>
+                        <button class="watch-button" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                            Xem hành trình →
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 - Nam Phạm -->
+                <div class="testimonial-card">
+                    <div class="video-thumbnail" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                        <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" alt="Hành trình vượt lên chính mình">
+                        <div class="play-overlay">
+                            <div class="play-button">
+                                <div class="play-icon"></div>
+                            </div>
+                        </div>
+                        <div class="duration-badge">Vượt lên chính mình</div>
+                        <div class="youtube-badge">YouTube</div>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="video-title">Hành trình vượt lên chính mình</h3>
+                        <div class="member-info">
+                            <div class="member-avatar">N</div>
+                            <div class="member-details">
+                                <h4>Nam Phạm</h4>
+                                <p>Strength Training</p>
+                            </div>
+                        </div>
+                        <p class="quote">
+                            Là 1 anh chàng thực sự nghiêm túc trong tập luyện nhưng gặp phải chấn thương do còn thiếu kiến thức. Không chịu đựng lại, Nam đã viết lên hành trình vượt lên chính mình sau sự cố chấn thương dai dẳng...
+                        </p>
+                        <button class="watch-button" onclick="window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')">
+                            Xem hành trình →
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hashtag">
+                #MemberOfSunMovement
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add some interactive effects
+        document.querySelectorAll('.testimonial-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Simulate loading effect
+        setTimeout(() => {
+            document.querySelectorAll('.testimonial-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                card.style.transition = 'all 0.6s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }, 100);
+    </script>
+</body>
+</html>

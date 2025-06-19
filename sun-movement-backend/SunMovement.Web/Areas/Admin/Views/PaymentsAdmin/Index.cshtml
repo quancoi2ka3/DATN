@@ -16,10 +16,9 @@
         <div class="col-xl-3 col-md-6">
             <div class="card bg-success text-white mb-4">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
+                    <div class="d-flex justify-content-between">                        <div>
                             <div class="small text-white-50">Total Revenue</div>
-                            <div class="h4">$@ViewBag.TotalRevenue.ToString("N2")</div>
+                            <div class="h4">@ViewBag.TotalRevenue.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
                         </div>
                         <div>
                             <i class="fas fa-dollar-sign fa-2x"></i>
@@ -63,8 +62,7 @@
         
         <div class="col-xl-3 col-md-6">
             <div class="card bg-danger text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                <div class="card-body">                    <div class="d-flex justify-content-between">
                         <div>
                             <div class="small text-white-50">Failed</div>
                             <div class="h4">@ViewBag.FailedPayments</div>
@@ -78,6 +76,34 @@
         </div>
     </div>
 
+    <!-- Payment Methods Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-info mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-info">VNPay</h5>
+                    <h3 class="card-text">@ViewBag.VNPayPayments</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-warning mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-warning">COD</h5>
+                    <h3 class="card-text">@ViewBag.CODPayments</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-secondary mb-3">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-secondary">Bank Transfer</h5>
+                    <h3 class="card-text">@ViewBag.BankTransferPayments</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Orders/Payments Table -->
     <div class="card mb-4">
         <div class="card-header">
@@ -85,30 +111,65 @@
             Payment Transactions
         </div>
         <div class="card-body">
-            <table id="paymentsTable" class="table table-striped table-hover datatable">
-                <thead>
+            <table id="paymentsTable" class="table table-striped table-hover datatable">                <thead>
                     <tr>
                         <th>Order ID</th>
                         <th>Customer</th>
                         <th>Amount</th>
-                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Payment Status</th>
+                        <th>Order Status</th>
+                        <th>Transaction ID</th>
                         <th>Order Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var order in Model)
-                    {
-                        <tr>
+                    {                        <tr>
                             <td>#@order.Id</td>
-                            <td>@order.UserId</td>
-                            <td>$@order.TotalAmount.ToString("F2")</td>
+                            <td>@order.Email</td>
+                            <td>@order.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                            <td>
+                                @switch (order.PaymentMethod)
+                                {
+                                    case "vnpay":
+                                        <span class="badge bg-info">VNPay</span>
+                                        break;
+                                    case "cash_on_delivery":
+                                        <span class="badge bg-warning">COD</span>
+                                        break;
+                                    case "bank_transfer":
+                                        <span class="badge bg-secondary">Bank Transfer</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-light text-dark">@(order.PaymentMethod ?? "N/A")</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (order.IsPaid)
+                                {
+                                    <span class="badge bg-success">Paid</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Unpaid</span>
+                                }
+                            </td>
                             <td>
                                 @switch (order.Status)
                                 {
                                     case SunMovement.Core.Models.OrderStatus.Pending:
                                         <span class="badge bg-warning">Pending</span>
-                                        break;                                    case SunMovement.Core.Models.OrderStatus.Delivered:
+                                        break;
+                                    case SunMovement.Core.Models.OrderStatus.Processing:
+                                        <span class="badge bg-info">Processing</span>
+                                        break;
+                                    case SunMovement.Core.Models.OrderStatus.Shipped:
+                                        <span class="badge bg-primary">Shipped</span>
+                                        break;
+                                    case SunMovement.Core.Models.OrderStatus.Delivered:
                                         <span class="badge bg-success">Delivered</span>
                                         break;
                                     case SunMovement.Core.Models.OrderStatus.Cancelled:
@@ -119,7 +180,17 @@
                                         break;
                                 }
                             </td>
-                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(order.PaymentTransactionId))
+                                {
+                                    <small class="text-muted">@order.PaymentTransactionId</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
                                 <div class="btn-group table-actions">
                                     <a href="/admin/payments/details/@order.Id" class="btn btn-sm btn-info">

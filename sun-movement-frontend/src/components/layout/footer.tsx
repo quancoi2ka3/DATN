@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Youtube, MapPin, Phone, Mail, Clock, ChevronRight, ArrowRight, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AuthModal from "@/components/auth/AuthModal";
 import { useEffect, useState } from "react";
 
 export function Footer() {
@@ -40,17 +41,19 @@ export function Footer() {
                   <p className="text-slate-300 max-w-xl">Luôn cập nhật các thông tin mới nhất về chương trình tập luyện, khuyến mãi đặc biệt, và các sự kiện sắp diễn ra tại SUN MOVEMENT.</p>
                 </div>
                 
-                <div className="w-full md:w-auto">
-                  <div className="flex flex-col sm:flex-row gap-3">
+                <div className="w-full md:w-auto">                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="email"
                       placeholder="Email của bạn"
                       className="px-4 py-3 bg-slate-800 text-white border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent min-w-[250px]"
                     />
-                    <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6">
-                      <span>Đăng ký</span>
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
+                    
+                    <AuthModal defaultMode="register">
+                      <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6">
+                        <span>Đăng ký</span>
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </AuthModal>
                   </div>
                   <p className="text-sm text-slate-400 mt-3">Chúng tôi cam kết bảo mật thông tin của bạn.</p>
                 </div>
@@ -102,9 +105,8 @@ export function Footer() {
               </li>
             </ul>
             
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://facebook.com"
+            <div className="flex items-center gap-3 pt-2">              <a
+                href="https://www.facebook.com/SUNMovementVN"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 hover:bg-red-500 transition-colors"
@@ -113,7 +115,7 @@ export function Footer() {
                 <span className="sr-only">Facebook</span>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/sun.movement/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 hover:bg-red-500 transition-colors"
@@ -122,7 +124,7 @@ export function Footer() {
                 <span className="sr-only">Instagram</span>
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@SUNMovementVN"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-800 hover:bg-red-500 transition-colors"

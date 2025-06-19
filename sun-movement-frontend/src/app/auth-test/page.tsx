@@ -3,7 +3,6 @@
 import CustomerLogin from '@/components/auth/CustomerLogin';
 import CustomerRegister from '@/components/auth/CustomerRegister';
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function AuthTestPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login');

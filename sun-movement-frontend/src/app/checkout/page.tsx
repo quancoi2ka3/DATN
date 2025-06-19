@@ -231,14 +231,17 @@ export default function CheckoutPage() {
                     value={paymentMethod} 
                     onValueChange={setPaymentMethod}
                     className="space-y-3"
-                  >
-                    <div className="flex items-center space-x-2">
+                  >                    <div className="flex items-center space-x-2">
                       <RadioGroupItem value="cash_on_delivery" id="cash_on_delivery" />
                       <Label htmlFor="cash_on_delivery">Thanh toán khi nhận hàng (COD)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="bank_transfer" id="bank_transfer" />
                       <Label htmlFor="bank_transfer">Chuyển khoản ngân hàng</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="vnpay" id="vnpay" />
+                      <Label htmlFor="vnpay">Thanh toán qua VNPay</Label>
                     </div>
                   </RadioGroup>
                 </div>

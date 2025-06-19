@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Test</title>
+</head>
+<body>    <h1>Complete Checkout Flow Test</h1>
+    
+    <button onclick="testAddToCart()">1. Add Item to Cart</button>
+    <button onclick="testGetCart()">2. Get Cart</button>
+    <button onclick="testCheckout()">3. Test Checkout</button>
+    <button onclick="testCompleteFlow()">🚀 Test Complete Flow</button>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; white-space: pre-wrap;"></div>
+
+    <script>
+        const API_BASE_URL = 'https://localhost:5001';
+        
+        async function testAddToCart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ShoppingCart/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: 1,
+                        quantity: 1
+                    }),
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Add to Cart: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Add to Cart Error: ${error.message}`;
+            }
+        }
+        
+        async function testGetCart() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ShoppingCart/items`, {
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Get Cart: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Get Cart Error: ${error.message}`;
+            }
+        }
+        
+        async function testCheckout() {
+            try {
+                const checkoutData = {
+                    shippingAddress: {
+                        fullName: "Test User",
+                        addressLine1: "123 Test St",
+                        city: "Ho Chi Minh",
+                        province: "Ho Chi Minh",
+                        zipCode: "70000"
+                    },
+                    contactInfo: {
+                        email: "test@example.com",
+                        phone: "0123456789"
+                    },
+                    paymentMethod: "cash_on_delivery"
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(checkoutData),
+                    credentials: 'include'
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Checkout: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Checkout Error: ${error.message}`;
+            }
+        }
+        
+        async function testCompleteFlow() {
+            let log = "🚀 Starting Complete Checkout Flow Test...\n\n";
+            document.getElementById('result').innerHTML = log;
+            
+            try {
+                // Step 1: Add to cart
+                log += "Step 1: Adding item to cart...\n";
+                document.getElementById('result').innerHTML = log;
+                
+                const addResponse = await fetch(`${API_BASE_URL}/api/ShoppingCart/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: 1,
+                        quantity: 1
+                    }),
+                    credentials: 'include'
+                });
+                
+                log += `✅ Add to cart: ${addResponse.status}\n\n`;
+                document.getElementById('result').innerHTML = log;
+                
+                // Step 2: Get cart
+                log += "Step 2: Getting cart...\n";
+                document.getElementById('result').innerHTML = log;
+                
+                const cartResponse = await fetch(`${API_BASE_URL}/api/ShoppingCart/items`, {
+                    credentials: 'include'
+                });
+                
+                const cartData = await cartResponse.json();
+                log += `✅ Cart data: ${JSON.stringify(cartData, null, 2)}\n\n`;
+                document.getElementById('result').innerHTML = log;
+                
+                // Step 3: Checkout
+                log += "Step 3: Processing checkout...\n";
+                document.getElementById('result').innerHTML = log;
+                
+                const checkoutData = {
+                    shippingAddress: {
+                        fullName: "Test User",
+                        addressLine1: "123 Test St",
+                        city: "Ho Chi Minh",
+                        province: "Ho Chi Minh",
+                        zipCode: "70000"
+                    },
+                    contactInfo: {
+                        email: "test@example.com",
+                        phone: "0123456789"
+                    },
+                    paymentMethod: "cash_on_delivery"
+                };
+                
+                const checkoutResponse = await fetch(`${API_BASE_URL}/api/orders/checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(checkoutData),
+                    credentials: 'include'
+                });
+                
+                const checkoutResult = await checkoutResponse.text();
+                
+                if (checkoutResponse.ok) {
+                    log += `🎉 CHECKOUT SUCCESS: ${checkoutResult}\n\n`;
+                    log += "✅ Complete checkout flow working!\n";
+                } else {
+                    log += `❌ Checkout failed: ${checkoutResponse.status} - ${checkoutResult}\n`;
+                }
+                
+                document.getElementById('result').innerHTML = log;
+                
+            } catch (error) {
+                log += `❌ Error: ${error.message}\n`;
+                document.getElementById('result').innerHTML = log;
+            }
+        }
+    </script>
+</body>
+</html>

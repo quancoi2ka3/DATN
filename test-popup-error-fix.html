@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup Error Fix - Sun Movement Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Notification Styles */
+        .auth-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            z-index: 10000;
+            transform: translateX(450px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+        
+        .auth-notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .auth-notification.error {
+            border-left-color: #dc3545;
+        }
+        
+        .auth-notification.warning {
+            border-left-color: #ffc107;
+        }
+        
+        .auth-notification.success {
+            border-left-color: #198754;
+        }
+        
+        .notification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-icon {
+            font-size: 18px;
+            margin-right: 12px;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .notification-message {
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .notification-details {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #555;
+            white-space: pre-line;
+        }
+        
+        .notification-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #999;
+            cursor: pointer;
+        }
+        
+        .form-control.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="text-center mb-0">
+                            <i class="fas fa-bug me-2"></i>Test Popup Error Fix
+                        </h3>
+                        <p class="text-center mb-0 mt-2">Kiểm tra popup notification hiển thị lỗi thay vì chỉ console</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Test Controls -->
+                        <div class="mb-4">
+                            <h5><i class="fas fa-vial me-2"></i>Test Scenarios</h5>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-danger" onclick="testPasswordError()">
+                                    <i class="fas fa-lock me-2"></i>Test Password Validation Error
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="testEmailError()">
+                                    <i class="fas fa-envelope me-2"></i>Test Email Validation Error
+                                </button>
+                                <button class="btn btn-outline-info" onclick="testServerError()">
+                                    <i class="fas fa-server me-2"></i>Test Server Error (400)
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="testGenericError()">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Test Generic Error
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Registration Form -->
+                        <form id="testForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="FirstName" class="form-control" placeholder="Nhập họ của bạn" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="LastName" class="form-control" placeholder="Nhập tên của bạn" required />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="Email" id="Email" class="form-control" placeholder="Nhập email của bạn" required />
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Password <span class="text-danger">*</span></label>
+                                    <input type="password" name="Password" id="Password" class="form-control" placeholder="Nhập mật khẩu" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                    <input type="password" name="ConfirmPassword" class="form-control" placeholder="Xác nhận mật khẩu" required />
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i>Test Registration
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Console Output -->
+                        <div class="mt-4">
+                            <h5><i class="fas fa-terminal me-2"></i>Debug Console</h5>
+                            <div id="debugOutput" class="bg-dark text-light p-3 rounded" style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+                                Ready for testing...<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Enhanced Notification System
+        window.AuthNotifications = {
+            container: null,
+            
+            init: function() {
+                this.container = document.getElementById('notification-container');
+                if (!this.container) {
+                    this.container = document.createElement('div');
+                    this.container.id = 'notification-container';
+                    document.body.appendChild(this.container);
+                }
+                this.log('✅ Notification system initialized');
+            },
+            
+            showError: function(title, message, options = {}) {
+                this.log(`❌ ERROR POPUP: ${title} - ${message}`);
+                this.showNotification('error', title, message, options);
+            },
+            
+            showWarning: function(title, message, options = {}) {
+                this.log(`⚠️ WARNING POPUP: ${title} - ${message}`);
+                this.showNotification('warning', title, message, options);
+            },
+            
+            showSuccess: function(title, message, options = {}) {
+                this.log(`✅ SUCCESS POPUP: ${title} - ${message}`);
+                this.showNotification('success', title, message, options);
+            },
+            
+            showNotification: function(type, title, message, options = {}) {
+                const notification = document.createElement('div');
+                notification.className = `auth-notification ${type}`;
+                
+                const iconMap = {
+                    error: 'fa-exclamation-circle',
+                    warning: 'fa-exclamation-triangle', 
+                    success: 'fa-check-circle'
+                };
+                
+                notification.innerHTML = `
+                    <button class="notification-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="notification-header">
+                        <i class="fas ${iconMap[type]} notification-icon"></i>
+                        <h6 class="notification-title">${title}</h6>
+                    </div>
+                    <div class="notification-message">${message}</div>
+                    ${options.details ? `<div class="notification-details">${options.details}</div>` : ''}
+                `;
+                
+                this.container.appendChild(notification);
+                
+                // Show animation
+                setTimeout(() => notification.classList.add('show'), 100);
+                
+                // Auto remove
+                const duration = options.duration || 5000;
+                if (duration > 0) {
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 300);
+                    }, duration);
+                }
+                
+                // Click handler
+                if (options.onClick) {
+                    notification.style.cursor = 'pointer';
+                    notification.addEventListener('click', options.onClick);
+                }
+            },
+            
+            handleRegistrationError: function(errorResponse) {
+                this.log('🔥 HANDLING REGISTRATION ERROR:', errorResponse);
+                
+                let title = 'Lỗi Đăng Ký';
+                let message = 'Vui lòng kiểm tra thông tin đăng ký';
+                let details = '';
+                
+                if (errorResponse.errors) {
+                    if (Array.isArray(errorResponse.errors)) {
+                        details = errorResponse.errors.join('\n');
+                    } else if (typeof errorResponse.errors === 'object') {
+                        // Handle ModelState errors
+                        const errorList = [];
+                        for (const key in errorResponse.errors) {
+                            if (errorResponse.errors[key] && Array.isArray(errorResponse.errors[key])) {
+                                errorList.push(...errorResponse.errors[key]);
+                            }
+                        }
+                        details = errorList.join('\n');
+                    }
+                }
+                
+                if (errorResponse.message) {
+                    message = errorResponse.message;
+                }
+                
+                this.showError(title, message, {
+                    details: details,
+                    duration: 8000
+                });
+            },
+            
+            log: function(message, data = null) {
+                const timestamp = new Date().toLocaleTimeString();
+                const debugOutput = document.getElementById('debugOutput');
+                if (debugOutput) {
+                    const logEntry = `[${timestamp}] ${message}`;
+                    debugOutput.innerHTML += logEntry + '<br>';
+                    if (data) {
+                        debugOutput.innerHTML += `Data: ${JSON.stringify(data, null, 2)}<br>`;
+                    }
+                    debugOutput.scrollTop = debugOutput.scrollHeight;
+                }
+                console.log(message, data);
+            }
+        };
+        
+        // Initialize when DOM is ready
+        $(document).ready(function() {
+            window.AuthNotifications.init();
+            
+            // Enhanced form submission with popup notifications
+            $('#testForm').on('submit', function(e) {
+                e.preventDefault();
+                window.AuthNotifications.log('📝 Form submitted, testing error handling...');
+                
+                // Simulate different types of errors
+                simulateRegistrationError();
+            });
+        });
+        
+        // Test Functions
+        function testPasswordError() {
+            window.AuthNotifications.log('🧪 Testing password error...');
+            
+            const errorResponse = {
+                message: 'Mật khẩu không đáp ứng yêu cầu bảo mật',
+                errors: [
+                    'Mật khẩu phải có ít nhất 8 ký tự',
+                    'Mật khẩu phải chứa ít nhất một chữ hoa',
+                    'Mật khẩu phải chứa ít nhất một chữ thường', 
+                    'Mật khẩu phải chứa ít nhất một số',
+                    'Mật khẩu phải chứa ít nhất một ký tự đặc biệt'
+                ]
+            };
+            
+            // Test both methods
+            if (window.AuthNotifications.handleRegistrationError) {
+                window.AuthNotifications.handleRegistrationError(errorResponse);
+            } else {
+                window.AuthNotifications.showError(
+                    'Lỗi Mật Khẩu',
+                    errorResponse.message,
+                    { details: errorResponse.errors.join('\n'), duration: 8000 }
+                );
+            }
+        }
+        
+        function testEmailError() {
+            window.AuthNotifications.log('🧪 Testing email error...');
+            
+            window.AuthNotifications.showError(
+                'Email Không Hợp Lệ',
+                'Email đã được sử dụng hoặc không đúng định dạng',
+                { 
+                    details: 'Vui lòng kiểm tra lại địa chỉ email và thử lại',
+                    duration: 6000
+                }
+            );
+        }
+        
+        function testServerError() {
+            window.AuthNotifications.log('🧪 Testing server error...');
+            
+            const serverErrorResponse = {
+                message: 'Đã xảy ra lỗi máy chủ',
+                status: 500,
+                errors: ['Internal server error', 'Database connection failed']
+            };
+            
+            window.AuthNotifications.showError(
+                'Lỗi Máy Chủ',
+                'Không thể kết nối với máy chủ. Vui lòng thử lại sau.',
+                { 
+                    details: 'Mã lỗi: 500\nChi tiết: ' + serverErrorResponse.errors.join(', '),
+                    duration: 10000
+                }
+            );
+        }
+        
+        function testGenericError() {
+            window.AuthNotifications.log('🧪 Testing generic error...');
+            
+            window.AuthNotifications.showError(
+                'Lỗi Không Xác Định',
+                'Đã xảy ra lỗi trong quá trình xử lý',
+                { 
+                    details: 'Vui lòng tải lại trang và thử lại',
+                    duration: 5000
+                }
+            );
+        }
+        
+        function simulateRegistrationError() {
+            window.AuthNotifications.log('🎭 Simulating real registration error...');
+            
+            // Simulate AJAX error like the real registration
+            const xhr = {
+                status: 400,
+                statusText: 'Bad Request',
+                responseText: JSON.stringify({
+                    message: 'Validation failed',
+                    errors: {
+                        'Password': ['Password must be at least 8 characters', 'Password must contain uppercase letter'],
+                        'Email': ['Email is already taken']
+                    }
+                })
+            };
+            
+            // Parse error like in real code
+            try {
+                const errorResponse = JSON.parse(xhr.responseText);
+                window.AuthNotifications.log('📊 Parsed error response:', errorResponse);
+                
+                // Handle like real registration
+                if (xhr.status === 400) {
+                    let popupTitle = 'Lỗi Thông Tin Đăng Ký';
+                    let popupMessage = errorResponse.message || 'Thông tin đăng ký không hợp lệ';
+                    let popupDetails = '';
+                    
+                    if (errorResponse.errors && typeof errorResponse.errors === 'object') {
+                        const errorList = [];
+                        for (const key in errorResponse.errors) {
+                            if (errorResponse.errors[key] && Array.isArray(errorResponse.errors[key])) {
+                                errorList.push(...errorResponse.errors[key]);
+                            }
+                        }
+                        popupDetails = errorList.join('\n');
+                    }
+                    
+                    // ALWAYS show popup - this is the key fix!
+                    window.AuthNotifications.showError(
+                        popupTitle,
+                        popupMessage,
+                        {
+                            duration: 10000,
+                            details: popupDetails ? popupDetails : 'Vui lòng kiểm tra lại tất cả các trường.'
+                        }
+                    );
+                }
+                
+            } catch (e) {
+                window.AuthNotifications.log('❌ Error parsing response:', e);
+                
+                // Fallback error handling
+                window.AuthNotifications.showError(
+                    'Lỗi Đăng Ký',
+                    'Đã xảy ra lỗi trong quá trình đăng ký',  
+                    {
+                        details: 'Mã lỗi: ' + xhr.status,
+                        duration: 8000
+                    }
+                );
+            }
+        }
+    </script>
+</body>
+</html>

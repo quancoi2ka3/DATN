@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Article Management API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .warning {
+            color: #ffc107;
+        }
+        .status {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🗞️ Hệ thống Test Article Management API</h1>
+    <p>Công cụ test toàn diện cho Article Management System</p>
+
+    <!-- Test API Endpoints -->
+    <div class="container">
+        <h2>📡 Test API Endpoints</h2>
+        
+        <div class="test-section">
+            <h3>1. Lấy tất cả bài viết (GET /api/articles)</h3>
+            <button onclick="testGetAllArticles()">Test Get All Articles</button>
+            <div id="getAllResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Lấy bài viết đã xuất bản (GET /api/articles/published)</h3>
+            <button onclick="testGetPublishedArticles()">Test Get Published Articles</button>
+            <div id="getPublishedResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Lấy bài viết nổi bật (GET /api/articles/featured)</h3>
+            <button onclick="testGetFeaturedArticles()">Test Get Featured Articles</button>
+            <div id="getFeaturedResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Tìm kiếm bài viết (GET /api/articles/search)</h3>
+            <input type="text" id="searchQuery" placeholder="Nhập từ khóa tìm kiếm..." value="yoga">
+            <button onclick="testSearchArticles()">Search Articles</button>
+            <div id="searchResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Lấy bài viết theo loại (GET /api/articles/type/{type})</h3>
+            <select id="articleType">
+                <option value="1">News</option>
+                <option value="2">Blog</option>
+                <option value="3">Guide</option>
+                <option value="4">HeroBanner</option>
+            </select>
+            <button onclick="testGetArticlesByType()">Get By Type</button>
+            <div id="getByTypeResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>6. Lấy bài viết theo category (GET /api/articles/category/{category})</h3>
+            <select id="articleCategory">
+                <option value="1">Homepage</option>
+                <option value="3">Services</option>
+                <option value="7">WorkoutGuides</option>
+                <option value="9">Calisthenics</option>
+                <option value="10">Yoga</option>
+            </select>
+            <button onclick="testGetArticlesByCategory()">Get By Category</button>
+            <div id="getByCategoryResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>7. Lấy chi tiết bài viết (GET /api/articles/{id})</h3>
+            <input type="number" id="articleId" placeholder="Nhập ID bài viết..." value="1">
+            <button onclick="testGetArticleById()">Get Article Details</button>
+            <div id="getByIdResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Test Admin Access -->
+    <div class="container">
+        <h2>🔐 Test Admin Access</h2>
+        
+        <div class="test-section">
+            <h3>8. Test Admin Article Page</h3>
+            <button onclick="testAdminAccess()">Open Admin Articles Page</button>
+            <div id="adminAccessResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="container">
+        <h2>⚙️ System Status</h2>
+        <div id="systemStatus" class="test-section">
+            <button onclick="checkSystemStatus()">Check System Status</button>
+            <div id="statusResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'https://localhost:7199'; // Adjust if different
+        const apiUrl = `${baseUrl}/api`;
+
+        function logResult(elementId, result, isError = false) {
+            const element = document.getElementById(elementId);
+            const statusClass = isError ? 'error' : 'success';
+            const timestamp = new Date().toLocaleTimeString();
+            
+            element.innerHTML = `
+                <div class="status ${statusClass}">
+                    [${timestamp}] ${isError ? '❌ ERROR' : '✅ SUCCESS'}
+                </div>
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+            `;
+        }
+
+        async function makeApiCall(url, options = {}) {
+            try {
+                console.log(`Making API call to: ${url}`);
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${data.message || 'Unknown error'}`);
+                }
+
+                return { success: true, data, status: response.status };
+            } catch (error) {
+                console.error('API call failed:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Test Functions
+        async function testGetAllArticles() {
+            const result = await makeApiCall(`${apiUrl}/articles`);
+            logResult('getAllResult', result, !result.success);
+        }
+
+        async function testGetPublishedArticles() {
+            const result = await makeApiCall(`${apiUrl}/articles/published`);
+            logResult('getPublishedResult', result, !result.success);
+        }
+
+        async function testGetFeaturedArticles() {
+            const result = await makeApiCall(`${apiUrl}/articles/featured`);
+            logResult('getFeaturedResult', result, !result.success);
+        }
+
+        async function testSearchArticles() {
+            const query = document.getElementById('searchQuery').value;
+            const result = await makeApiCall(`${apiUrl}/articles/search?q=${encodeURIComponent(query)}`);
+            logResult('searchResult', result, !result.success);
+        }
+
+        async function testGetArticlesByType() {
+            const type = document.getElementById('articleType').value;
+            const result = await makeApiCall(`${apiUrl}/articles/type/${type}`);
+            logResult('getByTypeResult', result, !result.success);
+        }
+
+        async function testGetArticlesByCategory() {
+            const category = document.getElementById('articleCategory').value;
+            const result = await makeApiCall(`${apiUrl}/articles/category/${category}`);
+            logResult('getByCategoryResult', result, !result.success);
+        }
+
+        async function testGetArticleById() {
+            const id = document.getElementById('articleId').value;
+            const result = await makeApiCall(`${apiUrl}/articles/${id}`);
+            logResult('getByIdResult', result, !result.success);
+        }
+
+        async function testAdminAccess() {
+            const adminUrl = `${baseUrl}/admin/articlesadmin`;
+            try {
+                // Open admin page in new tab
+                window.open(adminUrl, '_blank');
+                logResult('adminAccessResult', { 
+                    message: 'Admin page opened in new tab', 
+                    url: adminUrl,
+                    note: 'Check if you can access the admin interface'
+                });
+            } catch (error) {
+                logResult('adminAccessResult', { error: error.message }, true);
+            }
+        }
+
+        async function checkSystemStatus() {
+            const checks = [];
+            
+            // Check if API is accessible
+            try {
+                const apiCheck = await fetch(`${apiUrl}/articles`, { method: 'HEAD' });
+                checks.push({
+                    component: 'Articles API',
+                    status: apiCheck.ok ? 'OK' : 'ERROR',
+                    details: `HTTP ${apiCheck.status}`
+                });
+            } catch (error) {
+                checks.push({
+                    component: 'Articles API',
+                    status: 'ERROR',
+                    details: error.message
+                });
+            }
+
+            // Check if admin interface is accessible
+            try {
+                const adminCheck = await fetch(`${baseUrl}/admin`, { method: 'HEAD' });
+                checks.push({
+                    component: 'Admin Interface',
+                    status: adminCheck.ok ? 'OK' : 'ERROR',
+                    details: `HTTP ${adminCheck.status}`
+                });
+            } catch (error) {
+                checks.push({
+                    component: 'Admin Interface',
+                    status: 'ERROR',
+                    details: error.message
+                });
+            }
+
+            logResult('statusResult', {
+                timestamp: new Date().toISOString(),
+                baseUrl: baseUrl,
+                checks: checks
+            });
+        }
+
+        // Auto-check system status on load
+        window.addEventListener('load', () => {
+            setTimeout(checkSystemStatus, 1000);
+        });
+    </script>
+</body>
+</html>

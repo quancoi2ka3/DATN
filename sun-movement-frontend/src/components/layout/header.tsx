@@ -233,12 +233,11 @@ export function Header() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <span>Giờ mở cửa: 6:00 - 22:00, T2-CN</span>
-              <div className="flex items-center gap-2">
-                <Link href="https://instagram.com" className="hover:text-slate-200 transition-colors">
+              <span>Giờ mở cửa: 6:00 - 22:00, T2-CN</span>              <div className="flex items-center gap-2">
+                <Link href="https://www.instagram.com/sun.movement/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition-colors">
                   <Instagram className="h-3 w-3" />
                 </Link>
-                <Link href="https://facebook.com" className="hover:text-slate-200 transition-colors">
+                <Link href="https://www.facebook.com/SUNMovementVN" target="_blank" rel="noopener noreferrer" className="hover:text-slate-200 transition-colors">
                   <Facebook className="h-3 w-3" />
                 </Link>
               </div>

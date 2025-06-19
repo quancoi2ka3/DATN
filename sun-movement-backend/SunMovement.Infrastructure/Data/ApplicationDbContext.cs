@@ -23,6 +23,7 @@ namespace SunMovement.Infrastructure.Data
         public DbSet<CustomerSearchStatistic> CustomerSearchStatistics { get; set; }
         public DbSet<CustomerActivity> CustomerActivities { get; set; }
         public DbSet<PendingUserRegistration> PendingUserRegistrations { get; set; }
+        public DbSet<Article> Articles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -33,13 +34,12 @@ namespace SunMovement.Infrastructure.Data
                 .HasMany(s => s.Schedules)
                 .WithOne(ss => ss.Service)
                 .HasForeignKey(ss => ss.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<ApplicationUser>()
+                .OnDelete(DeleteBehavior.Cascade);            builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Orders)
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false); // Allow orders without user for anonymous checkouts
 
             builder.Entity<Order>()
                 .HasMany(o => o.Items)

@@ -9,17 +9,16 @@ import { ChevronRight, Play, Flame, Dumbbell, Timer } from "lucide-react";
 const heroSlides = [
   {
     id: 1,
-    image: "/images/home-slide-2.jpg",
+    image: "../images/home-slide-3.webp",
     subtitle: "UNLOCK YOUR FULL POTENTIAL",
     title: "Cân bằng hơn, linh hoạt hơn",
-    description: "Phương pháp luyện tập khoa học giúp bạn đạt được thể trạng tốt nhất và sức khỏe bền vững.",
-    cta: "ĐĂNG KÝ NGAY",
-    link: "/dang-ky-ngay",
+    description: "Phương pháp luyện tập khoa học giúp bạn đạt được thể trạng tốt nhất và sức khỏe bền vững.",    cta: "ĐĂNG KÝ NGAY",
+    link: "/dich-vu",
     icon: <Flame className="h-5 w-5" />
   },
   {
     id: 2,
-    image: "/images/strength.jpg",
+    image: "../images/home-slide-1.webp",
     subtitle: "STRENGTH TRAINING",
     title: "Xây dựng sức mạnh từng ngày",
     description: "Các bài tập sức mạnh được thiết kế riêng biệt cho từng cấp độ và mục tiêu của bạn.",
@@ -29,7 +28,7 @@ const heroSlides = [
   },
   {
     id: 3,
-    image: "/images/yoga.jpg",
+    image: "../images/home-slide-2.webp",
     subtitle: "MIND & BODY BALANCE",
     title: "Tìm lại sự cân bằng bên trong",
     description: "Các lớp học yoga và thiền định giúp bạn cải thiện sức khỏe tinh thần và thể chất.",
@@ -217,14 +216,16 @@ export function HeroSection() {
                 <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
-            
-            <Button 
+              <Button 
               variant="outline" 
               size="lg" 
               className="border-2 border-white hover-lift bg-transparent text-white hover:bg-white/10"
+              asChild
             >
-              <Play className="mr-2 h-4 w-4 fill-white" />
-              Xem video
+              <Link href="https://www.youtube.com/@SUNMovementVN" target="_blank" rel="noopener noreferrer">
+                <Play className="mr-2 h-4 w-4 fill-white" />
+                Xem video
+              </Link>
             </Button>
           </div>
           

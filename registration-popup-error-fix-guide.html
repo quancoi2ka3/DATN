@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Error Popup Fix - Sun Movement</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .error-fix {
+            background-color: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-danger text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-bug-slash me-2"></i>Sửa Lỗi Popup Notification - Registration Form
+                        </h3>
+                        <p class="mb-0 mt-2">Giải pháp để hiển thị popup error thay vì chỉ console log</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Vấn đề:</strong> Lỗi validation chỉ hiển thị trong console thay vì popup notification cho người dùng.
+                        </div>
+
+                        <h4><i class="fas fa-wrench me-2"></i>Nguyên nhân và Giải pháp</h4>
+
+                        <div class="error-fix">
+                            <h5>1. Vấn đề Client-side Validation</h5>
+                            <p>Form validation không được xử lý đúng cách trước khi gửi AJAX request.</p>
+                            
+                            <strong>Giải pháp:</strong>
+                            <div class="code-block">
+// Thêm validation ngay trong event handler form submit:
+$('form').on('submit', function(e) {
+    e.preventDefault();
+    
+    // <span class="highlight">CLIENT-SIDE VALIDATION FIRST</span>
+    let isValid = true;
+    let errorMessages = [];
+    
+    // Validate required fields
+    form.find('input[required]').each(function() {
+        if (!$(this).val().trim()) {
+            $(this).addClass('error');
+            isValid = false;
+            errorMessages.push($(this).attr('name') + ' là bắt buộc');
+        }
+    });
+    
+    // <span class="highlight">SHOW POPUP IMMEDIATELY if validation fails</span>
+    if (!isValid) {
+        if (window.AuthNotifications && window.AuthNotifications.showError) {
+            window.AuthNotifications.showError(
+                'Lỗi Thông Tin Đăng Ký',
+                'Vui lòng kiểm tra và điền đầy đủ thông tin bắt buộc',
+                {
+                    duration: 5000,
+                    details: errorMessages.join('\n')
+                }
+            );
+        } else {
+            alert('❌ Lỗi Thông Tin Đăng Ký:\n\n' + errorMessages.join('\n'));
+        }
+        return; // <span class="highlight">STOP here - don't send AJAX</span>
+    }
+    
+    // Continue with AJAX only if validation passes...
+});
+                            </div>
+                        </div>
+
+                        <div class="error-fix">
+                            <h5>2. Vấn đề Server Error Handling</h5>
+                            <p>Server response errors không được parse và hiển thị popup đúng cách.</p>
+                            
+                            <strong>Giải pháp:</strong>
+                            <div class="code-block">
+error: function(xhr, status, error) {
+    // <span class="highlight">ENHANCED ERROR LOGGING</span>
+    console.log('❌ AJAX Error occurred:');
+    console.log('Status:', xhr.status);
+    console.log('Response Text:', xhr.responseText);
+    
+    let errorResponse = null;
+    let showPopup = true; // <span class="highlight">FORCE popup display</span>
+    
+    // <span class="highlight">IMPROVED ERROR PARSING</span>
+    try {
+        if (xhr.responseText && xhr.responseText.trim().startsWith('{')) {
+            errorResponse = JSON.parse(xhr.responseText);
+        } else {
+            // Handle HTML error responses
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = xhr.responseText;
+            var errorText = tempDiv.textContent || tempDiv.innerText || '';
+            
+            // Extract specific error messages
+            if (errorText.includes('Password') || errorText.includes('password')) {
+                errorMessage = 'Mật khẩu không đáp ứng yêu cầu bảo mật:\n• Ít nhất 8 ký tự\n• Có chữ hoa và chữ thường\n• Có số và ký tự đặc biệt';
+            }
+            // ... other error extractions
+            
+            errorResponse = {
+                message: errorMessage,
+                status: xhr.status,
+                errors: [errorMessage]
+            };
+        }
+    } catch (e) {
+        // <span class="highlight">FALLBACK ERROR HANDLING</span>
+        errorResponse = {
+            message: 'Đã xảy ra lỗi trong quá trình đăng ký',
+            status: xhr.status,
+            errors: ['Vui lòng thử lại sau']
+        };
+    }
+    
+    // <span class="highlight">ALWAYS SHOW POPUP - KEY FIX!</span>
+    if (xhr.status === 400) {
+        var popupTitle = 'Lỗi Thông Tin Đăng Ký';
+        var popupMessage = errorResponse.message;
+        var popupDetails = '';
+        
+        if (errorResponse.errors) {
+            if (Array.isArray(errorResponse.errors)) {
+                popupDetails = errorResponse.errors.join('\n• ');
+            } else if (typeof errorResponse.errors === 'object') {
+                // Handle ModelState errors
+                var errorList = [];
+                for (var key in errorResponse.errors) {
+                    if (errorResponse.errors[key] && Array.isArray(errorResponse.errors[key])) {
+                        errorList = errorList.concat(errorResponse.errors[key]);
+                    }
+                }
+                popupDetails = errorList.join('\n• ');
+            }
+        }
+        
+        // <span class="highlight">SHOW POPUP WITH FALLBACK</span>
+        if (window.AuthNotifications && window.AuthNotifications.showError) {
+            window.AuthNotifications.showError(
+                popupTitle,
+                popupMessage,
+                {
+                    duration: 10000,
+                    details: popupDetails ? '• ' + popupDetails : 'Vui lòng kiểm tra lại tất cả các trường.'
+                }
+            );
+        } else {
+            // <span class="highlight">FALLBACK ALERT if notification system fails</span>
+            var alertMsg = '❌ ' + popupTitle + ':\n\n' + popupMessage;
+            if (popupDetails) {
+                alertMsg += '\n\nChi tiết:\n• ' + popupDetails;
+            }
+            alert(alertMsg);
+        }
+    }
+    // ... handle other error codes
+}
+                            </div>
+                        </div>
+
+                        <div class="error-fix">
+                            <h5>3. Vấn đề Notification System Loading</h5>
+                            <p>AuthNotifications có thể chưa được load khi form được submit.</p>
+                            
+                            <strong>Giải pháp:</strong>
+                            <div class="code-block">
+// <span class="highlight">ENSURE NOTIFICATION SYSTEM IS LOADED</span>
+$(document).ready(function() {
+    setTimeout(function() {
+        if (!window.AuthNotifications) {
+            console.error('⚠️ Notification system not loaded! Creating fallback...');
+            
+            // <span class="highlight">CREATE FALLBACK NOTIFICATION SYSTEM</span>
+            window.AuthNotifications = {
+                showError: function(title, message, options) {
+                    alert('❌ ' + title + ':\n\n' + message + 
+                          (options && options.details ? '\n\n' + options.details : ''));
+                },
+                showSuccess: function(title, message, options) {
+                    alert('✅ ' + title + ':\n\n' + message);
+                },
+                showWarning: function(title, message, options) {
+                    alert('⚠️ ' + title + ':\n\n' + message);
+                }
+            };
+        } else {
+            console.log('✅ Notification system loaded successfully');
+        }
+    }, 100);
+});
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Kết quả:</strong> Sau khi áp dụng các fix này, mọi lỗi sẽ hiển thị popup notification 
+                            thay vì chỉ trong console, cải thiện trải nghiệm người dùng đáng kể.
+                        </div>
+
+                        <h4><i class="fas fa-play me-2"></i>Test lại hệ thống</h4>
+                        <p>Sau khi áp dụng các fix, test lại các trường hợp sau:</p>
+                        <ul>
+                            <li>Bỏ trống các trường required → Phải hiện popup ngay lập tức</li>
+                            <li>Nhập password không đủ mạnh → Phải hiện popup chi tiết requirements</li>
+                            <li>Nhập email đã tồn tại → Phải hiện popup conflict error</li>
+                            <li>Server error → Phải hiện popup server error</li>
+                        </ul>
+
+                        <div class="mt-4">
+                            <button class="btn btn-primary me-2" onclick="window.open('test-popup-error-fix.html', '_blank')">
+                                <i class="fas fa-play me-2"></i>Mở Test Page
+                            </button>
+                            <button class="btn btn-success" onclick="copyFixCode()">
+                                <i class="fas fa-copy me-2"></i>Copy Fix Code
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        function copyFixCode() {
+            const fixCode = `
+// FIXED AJAX ERROR HANDLER - Replace in Register.cshtml
+error: function(xhr, status, error) {
+    console.log('❌ AJAX Error occurred:', {
+        status: xhr.status,
+        statusText: xhr.statusText,
+        responseText: xhr.responseText,
+        error: error
+    });
+    
+    let errorResponse = null;
+    let errorMessage = 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.';
+    
+    // Parse error response
+    try {
+        if (xhr.responseText && xhr.responseText.trim().startsWith('{')) {
+            errorResponse = JSON.parse(xhr.responseText);
+        } else {
+            // Handle non-JSON responses
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = xhr.responseText;
+            var errorText = tempDiv.textContent || tempDiv.innerText || '';
+            
+            if (errorText.includes('Password') || errorText.includes('password')) {
+                errorMessage = 'Mật khẩu không đáp ứng yêu cầu bảo mật:\\n• Ít nhất 8 ký tự\\n• Có chữ hoa và chữ thường\\n• Có số và ký tự đặc biệt';
+            } else if (errorText.includes('Email') || errorText.includes('email')) {
+                errorMessage = 'Email không hợp lệ hoặc đã được sử dụng.';
+            }
+            
+            errorResponse = {
+                message: errorMessage,
+                status: xhr.status,
+                errors: [errorMessage]
+            };
+        }
+    } catch (e) {
+        errorResponse = {
+            message: errorMessage,
+            status: xhr.status,
+            errors: [errorMessage]
+        };
+    }
+    
+    // ALWAYS show popup notification
+    if (xhr.status === 400) {
+        var popupTitle = 'Lỗi Thông Tin Đăng Ký';
+        var popupMessage = errorResponse.message || errorMessage;
+        var popupDetails = '';
+        
+        if (errorResponse && errorResponse.errors) {
+            if (Array.isArray(errorResponse.errors)) {
+                popupDetails = errorResponse.errors.join('\\n• ');
+            } else if (typeof errorResponse.errors === 'object') {
+                var errorList = [];
+                for (var key in errorResponse.errors) {
+                    if (errorResponse.errors[key] && Array.isArray(errorResponse.errors[key])) {
+                        errorList = errorList.concat(errorResponse.errors[key]);
+                    }
+                }
+                popupDetails = errorList.join('\\n• ');
+            }
+        }
+        
+        // Show popup with fallback
+        if (window.AuthNotifications && window.AuthNotifications.showError) {
+            window.AuthNotifications.showError(
+                popupTitle,
+                popupMessage,
+                {
+                    duration: 10000,
+                    details: popupDetails ? '• ' + popupDetails : 'Vui lòng kiểm tra lại tất cả các trường.'
+                }
+            );
+        } else {
+            var alertMsg = '❌ ' + popupTitle + ':\\n\\n' + popupMessage;
+            if (popupDetails) {
+                alertMsg += '\\n\\nChi tiết:\\n• ' + popupDetails;
+            }
+            alert(alertMsg);
+        }
+    } else {
+        // Handle other error codes similarly
+        if (window.AuthNotifications && window.AuthNotifications.showError) {
+            window.AuthNotifications.showError(
+                'Lỗi Đăng Ký',
+                errorResponse.message || errorMessage,
+                {
+                    duration: 8000,
+                    details: xhr.status ? 'Mã lỗi: ' + xhr.status : 'Vui lòng thử lại sau.'
+                }
+            );
+        } else {
+            alert('❌ Lỗi Đăng Ký:\\n\\n' + (errorResponse.message || errorMessage));
+        }
+    }
+    
+    // Re-enable submit button
+    submitBtn.prop('disabled', false).html(originalBtnText);
+}`;
+            
+            navigator.clipboard.writeText(fixCode).then(function() {
+                alert('✅ Fix code đã được copy vào clipboard!\\n\\nBạn có thể paste vào Register.cshtml để thay thế error handler hiện tại.');
+            });
+        }
+    </script>
+</body>
+</html>

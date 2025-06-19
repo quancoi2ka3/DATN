@@ -1,115 +1,209 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, Clock, Users } from "lucide-react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Calendar, Clock, MapPin, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-type EventProps = {
-  id: string;
-  title: string;
-  type: "WORKSHOP" | "GIẢI ĐẤU";
-  date: string;
-  time: string;
-  image: string;
-  instructor: string;
-  capacity: number;
-  status: "Đã diễn ra" | "Sắp diễn ra";
-};
-
-const events: EventProps[] = [
-  {
-    id: "1",
-    title: "Handstand Intensive",
-    type: "WORKSHOP",
-    date: "27-28/05/2023",
-    time: "10:00-13:00",
-    image: "/images/event1.jpg",
-    instructor: "Nicólás Montes de Oca",
-    capacity: 10,
-    status: "Đã diễn ra",
-  },
-  {
-    id: "2",
-    title: "Kìm linh hoạt khớp vai",
-    type: "WORKSHOP",
-    date: "10/07/2022",
-    time: "15:00",
-    image: "/images/event2.jpg",
-    instructor: "Đinh Hưng",
-    capacity: 15,
-    status: "Đã diễn ra",
-  },
-  {
-    id: "3",
-    title: "ATG Squat - Squat sâu & an toàn",
-    type: "GIẢI ĐẤU",
-    date: "05/06/2022",
-    time: "15:00",
-    image: "/images/event3.jpg",
-    instructor: "Trung Lê",
-    capacity: 20,
-    status: "Đã diễn ra",
-  },
-];
+import { useEffect, useState } from "react";
+import { articleService, Article } from "@/services/articleService";
 
 export function EventsSection() {
-  return (
-    <section className="py-16">
-      <div className="container">
-        <h2 className="text-3xl font-semibold text-center mb-12">SỰ KIỆN</h2>
+  const [events, setEvents] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <Card key={event.id} className="overflow-hidden">
-              <div className="relative h-56 w-full">
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        // Fetch events articles from category 5 (Events)
+        const eventsArticles = await articleService.getEventsArticles();
+        // Filter featured and published articles, limit to 6 for grid layout
+        const featuredEvents = eventsArticles
+          .filter(article => article.isPublished && article.isFeatured)
+          .slice(0, 6);
+        setEvents(featuredEvents);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return 'Đã cập nhật';
+    }
+  };
+
+  const getEventPreviewText = (article: Article) => {
+    return articleService.getPreviewText(article, 120);
+  };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-rose-50">
+        <div className="container max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 mx-auto animate-pulse"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-200 animate-pulse"></div>
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 bg-rose-50">
+      <div className="container max-w-7xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            SỰ KIỆN
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Khám phá các sự kiện nổi bật được tổ chức bởi Sun Movement - 
+            đây chỉ là những gì đã thực sự diễn ra với mục đích quảng bá.
+          </p>
+        </div>
+
+        {/* Events Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {events.length > 0 ? events.map((event) => (
+            <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              {/* Event Image */}
+              <div className="relative h-48 overflow-hidden">
                 <div className="absolute top-3 left-3 z-10">
-                  <span className="bg-sunred text-white text-xs font-semibold px-2 py-1 rounded">
-                    {event.status}
+                  <span className="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
+                    SỰ KIỆN
                   </span>
                 </div>
                 <div className="absolute top-3 right-3 z-10">
-                  <span className="bg-black/70 text-white text-xs font-semibold px-2 py-1 rounded">
-                    {event.type}
+                  <span className="bg-blue-500 text-white text-xs font-medium px-2 py-1 rounded">
+                    Đã diễn ra
                   </span>
                 </div>
                 <Image
-                  src={event.image}
+                  src={event.imageUrl || "/images/event-default.jpg"}
                   alt={event.title}
                   fill
-                  className="object-cover"
+                  className="object-cover hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <CardContent className="pt-4">
-                <h3 className="text-xl font-semibold mb-3">{event.title}</h3>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>{event.date}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2" />
-                    <span>{event.time}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span>Giới hạn: {event.capacity} người</span>
-                  </div>
+
+              {/* Event Content */}
+              <div className="p-4">
+                {/* Date and Category */}
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  <span>{formatDate(event.publishedAt)}</span>
+                  {event.tags && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <span className="text-blue-600 font-medium">{event.tags}</span>
+                    </>
+                  )}
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" variant="outline" asChild>
-                  <Link href={`/su-kien/${event.id}`}>Xem chi tiết</Link>
+
+                {/* Title */}
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 leading-tight">
+                  {event.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  {getEventPreviewText(event)}
+                </p>
+
+                {/* Stats */}
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <div className="flex items-center">
+                    <Eye className="h-4 w-4 mr-1" />
+                    <span>{event.viewCount} lượt xem</span>
+                  </div>
+                  {event.author && (
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>Bởi {event.author}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* View Details Button */}
+                <Button 
+                  variant="outline" 
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                  asChild
+                >
+                  <Link href={`/su-kien/${event.slug || event.id}`}>
+                    Xem chi tiết
+                  </Link>
                 </Button>
-              </CardFooter>
-            </Card>
-          ))}
+              </div>
+            </div>
+          )) : (
+            // Fallback content when no events available
+            <div className="col-span-full text-center py-12">
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-12 w-12 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có sự kiện nào</h3>
+                <p className="text-gray-500 mb-4">
+                  Hiện tại chưa có sự kiện nào được đăng tải. 
+                  Hãy quay lại sau để cập nhật thông tin mới nhất.
+                </p>
+                <Button className="bg-red-500 hover:bg-red-600 text-white" asChild>
+                  <Link href="/su-kien">Xem tất cả sự kiện</Link>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="mt-10 text-center">
-          <Button className="bg-sunred hover:bg-sunred/90" asChild>
-            <Link href="/su-kien">Xem tất cả sự kiện</Link>
-          </Button>
-        </div>
+        {/* Action Buttons */}
+        {events.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 text-base font-medium"
+              asChild
+            >
+              <Link href="/su-kien">Xem thêm</Link>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 text-base font-medium"
+              asChild
+            >
+              <Link href="/faq">Câu hỏi thường gặp</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

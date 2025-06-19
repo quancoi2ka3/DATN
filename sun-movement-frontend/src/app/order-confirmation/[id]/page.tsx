@@ -8,16 +8,28 @@ import { Card } from "@/components/ui/card";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-export default function OrderConfirmationPage({ params }: { params: { id: string } }) {
+export default function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [order, setOrder] = useState<CheckoutResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
+  const [orderId, setOrderId] = useState<string>("");
   
   useEffect(() => {
+    const initializeParams = async () => {
+      const resolvedParams = await params;
+      setOrderId(resolvedParams.id);
+    };
+    
+    initializeParams();
+  }, [params]);
+  
+  useEffect(() => {
+    if (!orderId) return;
+    
     const fetchOrder = async () => {
       setLoading(true);
-      const response = await getOrderById(params.id);
+      const response = await getOrderById(orderId);
       
       if (response.success && response.order) {
         setOrder(response.order);
@@ -25,11 +37,10 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
         setError(response.error || "Failed to load order details");
       }
       
-      setLoading(false);
-    };
+      setLoading(false);    };
     
     fetchOrder();
-  }, [params.id]);
+  }, [orderId]);
   
   if (loading) {
     return (

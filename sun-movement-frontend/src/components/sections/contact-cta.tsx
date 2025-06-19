@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AuthButton } from "@/components/auth/AuthButton";
 import { useState } from "react";
 import { Mail, MapPin, Phone, Send, ArrowRight, CheckCircle } from "lucide-react";
 
@@ -138,9 +139,8 @@ export function ContactCTASection() {
             
             <div className="mt-8 pt-6 border-t border-slate-700">
               <h4 className="text-white font-medium mb-4">Theo dõi chúng tôi</h4>
-              <div className="flex gap-4">
-                <a 
-                  href="https://facebook.com" 
+              <div className="flex gap-4">                <a 
+                  href="https://www.facebook.com/SUNMovementVN" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center hover:bg-red-500 transition-colors"
@@ -148,15 +148,14 @@ export function ContactCTASection() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                 </a>
                 <a 
-                  href="https://instagram.com" 
+                  href="https://www.instagram.com/sun.movement/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center hover:bg-red-500 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                </a>
-                <a 
-                  href="https://youtube.com" 
+                </a>                <a 
+                  href="https://www.youtube.com/@SUNMovementVN" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center hover:bg-red-500 transition-colors"

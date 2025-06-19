@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .loading { color: blue; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Article System Connection Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Published Articles API</h2>
+        <button onclick="testPublishedArticles()">Test Published Articles</button>
+        <div id="published-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Search Articles API</h2>
+        <input type="text" id="search-query" placeholder="Enter search term (e.g., yoga)" value="yoga">
+        <button onclick="testSearchArticles()">Test Search</button>
+        <div id="search-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Featured Articles API</h2>
+        <button onclick="testFeaturedArticles()">Test Featured Articles</button>
+        <div id="featured-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Create Sample Article (Admin)</h2>
+        <button onclick="createSampleArticle()">Create Sample Yoga Article</button>
+        <div id="create-result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+        
+        async function testAPI(endpoint, resultElementId, options = {}) {
+            const resultDiv = document.getElementById(resultElementId);
+            resultDiv.innerHTML = '<span class="loading">Testing...</span>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: options.method || 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    body: options.body ? JSON.stringify(options.body) : undefined
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Success!</div>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Data count:</strong> ${Array.isArray(data) ? data.length : 'N/A'}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const errorData = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="error">❌ Error: ${response.status}</div>
+                        <p><strong>Status Text:</strong> ${response.statusText}</p>
+                        <pre>${errorData}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">❌ Network Error:</div>
+                    <p>${error.message}</p>
+                    <p><strong>Possible causes:</strong></p>
+                    <ul>
+                        <li>Backend server not running on port 5000</li>
+                        <li>CORS configuration issue</li>
+                        <li>Network connectivity problem</li>
+                    </ul>
+                `;
+            }
+        }
+        
+        async function testPublishedArticles() {
+            await testAPI('/api/articles/published', 'published-result');
+        }
+        
+        async function testSearchArticles() {
+            const query = document.getElementById('search-query').value;
+            await testAPI(`/api/articles/search?q=${encodeURIComponent(query)}`, 'search-result');
+        }
+        
+        async function testFeaturedArticles() {
+            await testAPI('/api/articles/featured', 'featured-result');
+        }
+        
+        async function createSampleArticle() {
+            const sampleArticle = {
+                title: "Modern Yoga Practice",
+                content: "<p>Yoga is an ancient practice that combines physical postures, breathing techniques, and meditation to promote physical and mental well-being.</p>",
+                summary: "Learn about modern yoga practices and their benefits.",
+                slug: "modern-yoga-practice",
+                imageUrl: "/uploads/articles/yoga-sample.jpg",
+                type: 1, // Blog
+                category: 1, // Homepage
+                tags: "yoga,wellness,meditation,health",
+                author: "Yoga Instructor",
+                isPublished: true,
+                isFeatured: true,
+                displayOrder: 1,
+                metaTitle: "Modern Yoga Practice - Wellness Guide",
+                metaDescription: "Discover the benefits of modern yoga practice for physical and mental wellness.",
+                metaKeywords: "yoga, wellness, meditation, health, fitness"
+            };
+            
+            await testAPI('/api/articles', 'create-result', {
+                method: 'POST',
+                body: sampleArticle,
+                headers: {
+                    'Authorization': 'Bearer YOUR_TOKEN_HERE' // This will fail without proper auth
+                }
+            });
+        }
+        
+        // Auto-run tests on page load
+        window.onload = function() {
+            setTimeout(testPublishedArticles, 500);
+        };
+    </script>
+</body>
+</html>

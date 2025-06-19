@@ -18,7 +18,7 @@ import { ProductDto } from "@/lib/adapters";
 async function getSupplementsProducts(): Promise<{products: Product[], error?: string}> {
   try {
     // For development, use HTTPS with custom agent to handle self-signed certificates
-    const backendUrl = process.env.BACKEND_URL || 'https://localhost:5001';
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     
     // Create a custom fetch with SSL verification disabled for development
     const fetchOptions: RequestInit = {

@@ -13,9 +13,8 @@ export interface ShippingAddress {
   addressLine1: string;
   addressLine2?: string;
   city: string;
-  district: string;
-  zipCode?: string;
   province: string;
+  zipCode?: string;
 }
 
 export interface ContactInfo {
@@ -30,6 +29,7 @@ export interface CheckoutResponse {
   createdAt: string;
   totalAmount: number;
   status: string;
+  paymentUrl?: string; // For VNPay redirect
 }
 
 /**
@@ -38,9 +38,12 @@ export interface CheckoutResponse {
  * @returns The checkout response with order details or error
  */
 export async function processCheckout(checkoutDetails: CheckoutRequest): 
-  Promise<{ success: boolean; order?: CheckoutResponse; error?: string }> {
+  Promise<{ success: boolean; order?: CheckoutResponse; error?: string }> {  
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders/checkout`, {
+    console.log('[CHECKOUT DEBUG] Starting checkout with data:', checkoutDetails);
+    console.log('[CHECKOUT DEBUG] API URL:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/checkout`);
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,17 +51,51 @@ export async function processCheckout(checkoutDetails: CheckoutRequest):
       body: JSON.stringify(checkoutDetails),
       credentials: 'include', // Include cookies for authentication
     });
-
+    
+    console.log('[CHECKOUT DEBUG] Response status:', response.status);
+    console.log('[CHECKOUT DEBUG] Response ok:', response.ok);
+    
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CHECKOUT DEBUG] Error response:', errorText);
       throw new Error(`Checkout failed: ${errorText}`);
+    }    const data = await response.json();
+    console.log('[CHECKOUT DEBUG] Parsed data:', data);
+
+    // Ensure data has the expected structure
+    if (!data.success || !data.order) {
+      throw new Error('Invalid response format from server');
     }
 
-    const data: CheckoutResponse = await response.json();
+    // Handle VNPay redirect
+    if (data.paymentUrl) {
+      // Redirect to VNPay
+      window.location.href = data.paymentUrl;
+      return {
+        success: true,
+        order: {
+          orderId: data.order?.id?.toString() || '',
+          orderNumber: data.order?.id?.toString() || '',
+          createdAt: data.order?.orderDate || new Date().toISOString(),
+          totalAmount: data.order?.totalAmount || 0,
+          status: data.order?.status || 'Pending',
+          paymentUrl: data.paymentUrl
+        }
+      };
+    }
+
+    // Map backend order response to frontend format
+    const mappedOrder: CheckoutResponse = {
+      orderId: data.order?.id?.toString() || '',
+      orderNumber: data.order?.id?.toString() || '',
+      createdAt: data.order?.orderDate || new Date().toISOString(),
+      totalAmount: data.order?.totalAmount || 0,
+      status: data.order?.status || 'Pending'
+    };
 
     return {
       success: true,
-      order: data
+      order: mappedOrder
     };
   } catch (error) {
     console.error('Error processing checkout:', error);

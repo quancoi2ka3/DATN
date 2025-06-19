@@ -1,0 +1,319 @@
+@model SunMovement.Core.Models.Article
+@using SunMovement.Web.Extensions
+
+@{
+    ViewData["Title"] = "Chi tiết bài viết";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Chi tiết bài viết</h3>
+                    <div class="card-tools">
+                        <a asp-action="Index" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Chỉnh sửa
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Xóa
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Cột trái - Nội dung chính -->
+                        <div class="col-md-8">
+                            <div class="mb-4">
+                                <h1 class="display-6">@Model.Title</h1>
+                                
+                                <div class="mb-3">
+                                    <span class="badge bg-info me-2">@Model.Type.GetDisplayName()</span>
+                                    <span class="badge bg-secondary me-2">@Model.Category.GetDisplayName()</span>
+                                    @if (Model.IsPublished)
+                                    {
+                                        <span class="badge bg-success me-2">Đã xuất bản</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning me-2">Chưa xuất bản</span>
+                                    }
+                                    @if (Model.IsFeatured)
+                                    {
+                                        <span class="badge bg-warning me-2"><i class="fas fa-star"></i> Nổi bật</span>
+                                    }
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Summary))
+                                {
+                                    <div class="alert alert-light border-start border-primary border-4 mb-4">
+                                        <h6 class="fw-bold mb-2">Mô tả ngắn:</h6>
+                                        <p class="mb-0">@Model.Summary</p>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="mb-4">
+                                    <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded shadow-sm" style="max-height: 400px; width: 100%; object-fit: cover;">
+                                </div>
+                            }
+
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">Nội dung bài viết</h5>
+                                <div class="article-content">
+                                    @Html.Raw(Model.Content)
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Tags))
+                            {
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-2">Tags:</h6>
+                                    @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        <span class="badge bg-light text-dark border me-1 mb-1">#@tag.Trim()</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Cột phải - Thông tin meta -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Thông tin bài viết</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td class="fw-bold">ID:</td>
+                                            <td>@Model.Id</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Slug:</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(Model.Slug))
+                                                {
+                                                    <code>@Model.Slug</code>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Chưa có</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Tác giả:</td>
+                                            <td>@(Model.Author ?? "Không có")</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Lượt xem:</td>
+                                            <td>@Model.ViewCount</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Thứ tự hiển thị:</td>
+                                            <td>@Model.DisplayOrder</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Ngày tạo:</td>
+                                            <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        @if (Model.UpdatedAt.HasValue)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">Cập nhật lần cuối:</td>
+                                                <td>@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                        @if (Model.PublishedAt.HasValue)
+                                        {
+                                            <tr>
+                                                <td class="fw-bold">Ngày xuất bản:</td>
+                                                <td>@Model.PublishedAt.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- SEO Information -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Thông tin SEO</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Meta Title:</label>
+                                        <p class="text-muted mb-0">
+                                            @if (!string.IsNullOrEmpty(Model.MetaTitle))
+                                            {
+                                                @Model.MetaTitle
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sử dụng tiêu đề chính</span>
+                                            }
+                                        </p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Meta Description:</label>
+                                        <p class="text-muted mb-0">
+                                            @if (!string.IsNullOrEmpty(Model.MetaDescription))
+                                            {
+                                                @Model.MetaDescription
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa có</span>
+                                            }
+                                        </p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Meta Keywords:</label>
+                                        <p class="text-muted mb-0">
+                                            @if (!string.IsNullOrEmpty(Model.MetaKeywords))
+                                            {
+                                                @Model.MetaKeywords
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa có</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Thao tác nhanh</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        @if (Model.IsPublished)
+                                        {
+                                            <button class="btn btn-warning btn-unpublish" data-id="@Model.Id">
+                                                <i class="fas fa-eye-slash"></i> Hủy xuất bản
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-success btn-publish" data-id="@Model.Id">
+                                                <i class="fas fa-globe"></i> Xuất bản ngay
+                                            </button>
+                                        }
+                                        
+                                        <button class="btn btn-outline-warning btn-toggle-featured" data-id="@Model.Id">
+                                            <i class="fas fa-star"></i> 
+                                            @if (Model.IsFeatured)
+                                            {
+                                                <span>Bỏ đánh dấu nổi bật</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Đánh dấu nổi bật</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xuất bản bài viết
+            $('.btn-publish').click(function() {
+                var articleId = $(this).data('id');
+                
+                $.post('@Url.Action("Publish")', { id: articleId }, function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                });
+            });
+
+            // Hủy xuất bản bài viết
+            $('.btn-unpublish').click(function() {
+                var articleId = $(this).data('id');
+                
+                $.post('@Url.Action("Unpublish")', { id: articleId }, function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                });
+            });
+
+            // Toggle nổi bật
+            $('.btn-toggle-featured').click(function() {
+                var articleId = $(this).data('id');
+                
+                $.post('@Url.Action("ToggleFeatured")', { id: articleId }, function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .article-content {
+            line-height: 1.6;
+        }
+        
+        .article-content h1, .article-content h2, .article-content h3,
+        .article-content h4, .article-content h5, .article-content h6 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .article-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .article-content blockquote {
+            border-left: 4px solid #007bff;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.375rem;
+        }
+    </style>
+}

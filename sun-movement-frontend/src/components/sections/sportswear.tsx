@@ -100,6 +100,7 @@ const SportswearProductCard = ({ product }: SportswearProductCardProps) => {  co
                 src={product.imageUrl}
                 alt={product.name}
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className={`object-cover transition-transform duration-700 ${isHovering ? 'scale-110' : 'scale-100'}`}
               />
               
@@ -148,6 +149,7 @@ const SportswearProductCard = ({ product }: SportswearProductCardProps) => {  co
                       src={product.imageUrl}
                       alt={`${product.name} view ${idx + 1}`}
                       fill
+                      sizes="(max-width: 768px) 25vw, 100px"
                       className="object-cover"
                     />
                   </div>
@@ -648,6 +650,7 @@ export function SportswearSection({ products }: SportswearSectionProps) {
                   src="https://localhost:5001/images/sportswear/premium-set.jpg"
                   alt="Premium Sportswear Set"
                   fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover"
                 />
                 

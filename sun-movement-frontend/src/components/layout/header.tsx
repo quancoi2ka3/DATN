@@ -254,6 +254,7 @@ export function Header() {
               src="/images/logo-white.svg"
               alt="Sun Movement"
               fill
+              sizes="(max-width: 768px) 144px, 144px"
               className="object-contain"
               priority
             />
@@ -332,12 +333,16 @@ export function Header() {
             )}
             asChild
           >
-            <Link href="/lien-he">
+            <a 
+              href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
                 <span>Liên Hệ</span>
               </span>
-            </Link>
+            </a>
           </Button>
           
           {/* Mobile Menu Trigger */}
@@ -421,10 +426,14 @@ export function Header() {
                   <MobileAuthSection />
                   
                   <Button className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white" asChild>
-                    <Link href="/lien-he">
+                    <a 
+                      href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Phone className="mr-2 h-4 w-4" />
                       Liên Hệ Ngay
-                    </Link>
+                    </a>
                   </Button>
                   
                   <div className="mt-4 grid grid-cols-2 gap-2">

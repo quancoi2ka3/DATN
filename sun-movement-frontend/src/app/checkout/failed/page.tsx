@@ -94,12 +94,14 @@ export default function CheckoutFailedPage() {
               Quay lại cửa hàng
             </Link>
             
-            <Link
-              href="/lien-he"
+            <a
+              href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors inline-block"
             >
               Liên hệ hỗ trợ
-            </Link>
+            </a>
           </div>
         </div>
       </div>

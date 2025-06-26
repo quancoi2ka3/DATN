@@ -159,6 +159,23 @@ namespace SunMovement.Infrastructure.Services
             }
         }
 
+        public async Task<bool> SendPasswordResetEmailAsync(string email, string resetUrl, string firstName)
+        {
+            try
+            {
+                var subject = "Đặt lại mật khẩu - Sun Movement";
+                var body = GeneratePasswordResetEmailBody(firstName, resetUrl);
+
+                await SendEmailAsync(email, subject, body);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
+                return false;
+            }
+        }
+
         private string GenerateVerificationEmailBody(string firstName, string verificationCode)
         {
             return $@"
@@ -252,6 +269,53 @@ namespace SunMovement.Infrastructure.Services
         </div>
         <div class='footer'>
             <p>© 2025 Sun Movement. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        private string GeneratePasswordResetEmailBody(string firstName, string resetUrl)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #e74c3c; color: white; padding: 20px; text-align: center; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; }}
+        .button {{ display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #27ae60; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }}
+        .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>🔒 Sun Movement</h1>
+        </div>
+        <div class='content'>
+            <h2>Xin chào {firstName}!</h2>
+            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào nút bên dưới để đặt lại mật khẩu:</p>
+            
+            <div style='text-align: center;'>
+                <a href='{resetUrl}' class='button'>Đặt lại mật khẩu</a>
+            </div>
+            
+            <p><strong>Lưu ý quan trọng:</strong></p>
+            <ul>
+                <li>Liên kết này có hiệu lực trong <strong>30 phút</strong></li>
+                <li>Nếu nút không hoạt động, copy link sau vào trình duyệt: {resetUrl}</li>
+                <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này</li>
+            </ul>
+            
+            <p>Trân trọng,<br>Đội ngũ Sun Movement</p>
+        </div>
+        <div class='footer'>
+            <p>© 2025 Sun Movement. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
         </div>
     </div>
 </body>

@@ -54,6 +54,7 @@ export function StrengthSection() {
               src={strengthArticle?.imageUrl || "https://localhost:5001/images/strength.jpg"}
               alt={strengthArticle?.metaTitle || "Power and Strength Training"}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

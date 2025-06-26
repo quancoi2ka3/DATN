@@ -87,4 +87,56 @@ namespace SunMovement.Web.Areas.Api.Models
         [Required]
         public required string Password { get; set; }
     }
+
+    public class UpdateProfileModel
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Address { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+    }
+
+    public class ChangePasswordModel
+    {
+        [Required(ErrorMessage = "Mật khẩu hiện tại là bắt buộc")]
+        public required string CurrentPassword { get; set; }
+        
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", 
+            ErrorMessage = "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt")]
+        public required string NewPassword { get; set; }
+        
+        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public required string ConfirmPassword { get; set; }
+    }
+
+    public class ForgotPasswordModel
+    {
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public required string Email { get; set; }
+    }
+
+    public class ResetPasswordModel
+    {
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public required string Email { get; set; }
+        
+        [Required(ErrorMessage = "Token là bắt buộc")]
+        public required string Token { get; set; }
+        
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", 
+            ErrorMessage = "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt")]
+        public required string NewPassword { get; set; }
+        
+        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public required string ConfirmPassword { get; set; }
+    }
 }

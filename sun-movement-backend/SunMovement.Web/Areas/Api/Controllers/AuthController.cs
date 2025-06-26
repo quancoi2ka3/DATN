@@ -460,5 +460,100 @@ namespace SunMovement.Web.Areas.Api.Controllers
             
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        /// <summary>
+        /// Forgot password - Send reset password email
+        /// </summary>
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .Select(x => new { Field = x.Key, Errors = x.Value?.Errors.Select(e => e.ErrorMessage) ?? new List<string>() })
+                        .ToArray();
+                    
+                    return BadRequest(new { message = "Dữ liệu không hợp lệ", errors = errors });
+                }
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    // Don't reveal that the user does not exist
+                    return Ok(new { message = "Nếu email này tồn tại trong hệ thống, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu." });
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetUrl = $"{_configuration["Frontend:BaseUrl"]}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(model.Email)}";
+
+                try
+                {
+                    await _emailService.SendPasswordResetEmailAsync(user.Email!, resetUrl, user.FirstName);
+                    _logger.LogInformation("Password reset email sent successfully to {Email}", model.Email);
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "Failed to send password reset email to {Email}", model.Email);
+                    // Continue without failing the request
+                }
+
+                return Ok(new { message = "Nếu email này tồn tại trong hệ thống, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during forgot password for {Email}", model?.Email ?? "unknown");
+                return StatusCode(500, new { message = "An error occurred while processing forgot password request", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Reset password with token
+        /// </summary>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value?.Errors.Count > 0)
+                        .Select(x => new { Field = x.Key, Errors = x.Value?.Errors.Select(e => e.ErrorMessage) ?? new List<string>() })
+                        .ToArray();
+                    
+                    return BadRequest(new { message = "Dữ liệu không hợp lệ", errors = errors });
+                }
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return BadRequest(new { message = "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." });
+                }
+
+                var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Password reset successfully for {Email}", model.Email);
+                    return Ok(new { message = "Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập với mật khẩu mới." });
+                }
+
+                var errorMessages = result.Errors.Select(e => e.Description).ToArray();
+                _logger.LogWarning("Failed to reset password for {Email}: {Errors}", model.Email, string.Join(", ", errorMessages));
+                
+                return BadRequest(new { 
+                    message = "Không thể đặt lại mật khẩu. Token có thể đã hết hạn hoặc không hợp lệ.", 
+                    errors = errorMessages 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during reset password for {Email}", model?.Email ?? "unknown");
+                return StatusCode(500, new { message = "An error occurred while resetting password", error = ex.Message });
+            }
+        }
     }
 }

@@ -456,10 +456,14 @@ export default function FAQPage() {
                     </Link>
                   </Button>
                   <Button className="bg-red-500 hover:bg-red-600 text-white" asChild>
-                    <Link href="/lien-he">
+                    <a 
+                      href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Mail className="mr-2 h-4 w-4" />
                       Liên hệ ngay
-                    </Link>
+                    </a>
                   </Button>
                 </div>
               </div>

@@ -170,8 +170,10 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
-// TEMPORARY: Using MockEmailService for testing - verification codes logged to console
-builder.Services.AddScoped<IEmailService, MockEmailService>();
+
+// Configure Email Service based on provider and environment
+EmailServiceFactory.ConfigureEmailService(builder.Services, builder.Configuration);
+
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
@@ -180,21 +182,32 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMoveme
 
 // Add CORS with proper configuration for frontend with credentials
 builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
+{    options.AddPolicy("AllowFrontend",
         corsBuilder => corsBuilder
             .WithOrigins(
                 "http://localhost:3000",
                 "http://localhost:5000", 
+                "http://localhost:5500",  // Add Live Server default port
+                "http://localhost:8080",  // Add HTTP server port
                 "https://localhost:3000",
                 "https://localhost:5001",
                 "http://127.0.0.1:3000",
-                "https://127.0.0.1:3000",
                 "http://127.0.0.1:5000",
-                "https://127.0.0.1:5001")
+                "http://127.0.0.1:5500",   // Add 127.0.0.1 with port 5500
+                "http://127.0.0.1:8080",   // Add 127.0.0.1 with port 8080
+                "https://127.0.0.1:3000",
+                "https://127.0.0.1:5001",
+                "file://") // Add file:// protocol for local HTML files
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()); // Allow credentials for session management
+    
+    // Add a permissive policy for development/testing
+    options.AddPolicy("AllowAll",
+        corsBuilder => corsBuilder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
     
     // Also add a more specific policy for frontend if needed
     options.AddPolicy("AllowSpecificOrigins",
@@ -291,43 +304,25 @@ else
     app.UseHsts();
 }
 
-// Safe HTTPS redirection that first checks if development environment 
+// Skip HTTPS redirection in development to avoid CORS preflight issues
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-else
-{
-    // In development, handle HTTPS redirection manually
-    // to prevent errors if developer certificate isn't set up
-    app.Use(async (context, next) =>
-    {
-        if (context.Request.IsHttps || context.Request.Headers["X-Forwarded-Proto"] == "https")
-        {
-            // Already HTTPS
-            await next();
-            return;
-        }
-
-        // Try HTTPS redirect, but gracefully handle if not available
-        try
-        {
-            var httpsPort = 5001;
-            var httpsUrl = $"https://{context.Request.Host.Host}:{httpsPort}{context.Request.Path}{context.Request.QueryString}";
-            context.Response.Redirect(httpsUrl);
-        }
-        catch
-        {
-            // If redirection fails, continue with HTTP
-            await next();
-        }
-    });
-}
+// In development, allow HTTP requests without redirection
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCors("AllowFrontend");
+// Use more permissive CORS in development for testing
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowAll");
+}
+else
+{
+    app.UseCors("AllowFrontend");
+}
 
 app.UseApiResponseHeaders();
 

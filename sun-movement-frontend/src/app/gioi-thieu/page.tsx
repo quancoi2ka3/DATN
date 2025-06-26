@@ -11,8 +11,8 @@ export default function AboutPage() {
       <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
         <Image 
-          src="/images/strength.jpg" 
-          alt="Sun Movement - Gym" 
+          src="/images/gioithieu/aboutus.webp" 
+          alt="Sun Movement - About Us" 
           fill
           className="object-cover"
           priority
@@ -33,25 +33,129 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* Welcome Message with parallax effect */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-amber-600/20"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-red-500/10 blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="container relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-red-500/10 backdrop-blur-sm rounded-full px-6 py-3 mb-8 border border-red-500/20">
+              <Heart className="h-5 w-5 text-red-500 animate-pulse" />
+              <span className="text-red-400 font-semibold uppercase tracking-wide text-sm">Welcome to Sun Movement</span>
+              <Heart className="h-5 w-5 text-red-500 animate-pulse" />
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
+              Chào Mừng Bạn Đến Với 
+              <span className="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent block mt-2">
+                Gia Đình Sun Movement
+              </span>
+            </h2>
+            
+            <p className="text-xl text-slate-300 leading-relaxed mb-8 max-w-3xl mx-auto">
+              Tại đây, chúng tôi không chỉ giúp bạn tập luyện thể chất mà còn đồng hành cùng bạn trong hành trình 
+              phát triển toàn diện - <strong className="text-white">từ cơ thể đến tinh thần, từ sức mạnh đến sự linh hoạt</strong>.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <div className="group p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 hover:border-red-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-red-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Dumbbell className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Tập Luyện Hiệu Quả</h3>
+                <p className="text-slate-300 text-sm">
+                  Các bài tập được thiết kế khoa học, phù hợp với mọi trình độ
+                </p>
+              </div>
+              
+              <div className="group p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 hover:border-amber-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-amber-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Cộng Đồng Tích Cực</h3>
+                <p className="text-slate-300 text-sm">
+                  Kết nối với những người bạn cùng chí hướng và mục tiêu
+                </p>
+              </div>
+              
+              <div className="group p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-all duration-300 hover:transform hover:scale-105">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Heart className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Chăm Sóc Toàn Diện</h3>
+                <p className="text-slate-300 text-sm">
+                  Hỗ trợ dinh dưỡng, tư vấn tâm lý và theo dõi tiến bộ
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none shadow-lg hover:shadow-xl transition-all duration-300" asChild>
+                <a 
+                  href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    <span>Tư Vấn Miễn Phí Ngay</span>
+                  </span>
+                </a>
+              </Button>
+              <Button size="lg" variant="outline" className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300" asChild>
+                <Link href="/dich-vu">
+                  <span className="flex items-center gap-2">
+                    <Star className="h-5 w-5" />
+                    <span>Khám Phá Dịch Vụ</span>
+                  </span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Quick Stats */}
-      <section className="py-12 bg-red-600">
-        <div className="container">
+      <section className="py-12 bg-gradient-to-r from-red-600 to-amber-500 relative overflow-hidden">
+        {/* Animated background effects */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-white blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="container relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="p-4">
+            <div className="group p-4 hover:scale-105 transition-transform duration-300">
+              <div className="mb-2">
+                <Clock className="h-8 w-8 text-white mx-auto group-hover:animate-spin" />
+              </div>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-1">5+</h3>
-              <p className="text-white/80">Năm kinh nghiệm</p>
+              <p className="text-white/90 font-medium">Năm kinh nghiệm</p>
             </div>
-            <div className="p-4">
+            <div className="group p-4 hover:scale-105 transition-transform duration-300">
+              <div className="mb-2">
+                <Users className="h-8 w-8 text-white mx-auto group-hover:animate-bounce" />
+              </div>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-1">15+</h3>
-              <p className="text-white/80">Huấn luyện viên</p>
+              <p className="text-white/90 font-medium">Huấn luyện viên</p>
             </div>
-            <div className="p-4">
+            <div className="group p-4 hover:scale-105 transition-transform duration-300">
+              <div className="mb-2">
+                <Heart className="h-8 w-8 text-white mx-auto group-hover:animate-pulse" />
+              </div>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-1">1000+</h3>
-              <p className="text-white/80">Học viên</p>
+              <p className="text-white/90 font-medium">Học viên hài lòng</p>
             </div>
-            <div className="p-4">
+            <div className="group p-4 hover:scale-105 transition-transform duration-300">
+              <div className="mb-2">
+                <Award className="h-8 w-8 text-white mx-auto group-hover:animate-pulse" />
+              </div>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-1">3</h3>
-              <p className="text-white/80">Cơ sở hiện đại</p>
+              <p className="text-white/90 font-medium">Cơ sở hiện đại</p>
             </div>
           </div>
         </div>
@@ -60,56 +164,75 @@ export default function AboutPage() {
       {/* Our Story Section */}
       <section className="py-20 container">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Câu Chuyện Của Chúng Tôi</h2>
-            <div className="w-20 h-1 bg-red-500 mb-8"></div>
+          <div className="group">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center">
+                <Heart className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <span className="text-red-500 text-sm font-semibold uppercase tracking-wide">Our Story</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-white">Câu Chuyện Của Chúng Tôi</h2>
+              </div>
+            </div>
+            <div className="w-20 h-1 bg-gradient-to-r from-red-500 to-amber-500 mb-8"></div>
             <div className="space-y-6 text-slate-300">
-              <p>
-                Sun Movement được thành lập vào năm 2020 với ước mơ tạo nên một không gian thể thao đa năng, 
-                kết hợp giữa sức mạnh, sự dẻo dai, và tâm trí trong một môi trường hiện đại và thân thiện.
-              </p>
-              <p>
-                Từ một cơ sở nhỏ tại Hai Bà Trưng, chúng tôi đã phát triển thành một trung tâm thể thao 
-                được yêu thích tại Hà Nội, thu hút hàng nghìn học viên mỗi năm nhờ chất lượng huấn luyện 
-                chuyên nghiệp và sự đa dạng trong các chương trình tập luyện.
-              </p>
-              <p>
-                Đội ngũ sáng lập Sun Movement đều là những người trẻ có niềm đam mê mãnh liệt với thể thao 
-                và mong muốn lan tỏa lối sống tích cực, khỏe mạnh đến cộng đồng. Chúng tôi tin rằng thể thao không chỉ 
-                là về thể chất mà còn là hành trình phát triển toàn diện của mỗi cá nhân.
-              </p>
+              <div className="group/text">
+                <p className="group-hover/text:text-white transition-colors duration-300 leading-relaxed">
+                  Sun Movement được thành lập vào năm 2020 với ước mơ tạo nên một không gian thể thao đa năng, 
+                  kết hợp giữa sức mạnh, sự dẻo dai, và tâm trí trong một môi trường hiện đại và thân thiện.
+                </p>
+              </div>
+              <div className="group/text">
+                <p className="group-hover/text:text-white transition-colors duration-300 leading-relaxed">
+                  Từ một cơ sở nhỏ tại Hai Bà Trưng, chúng tôi đã phát triển thành một trung tâm thể thao 
+                  được yêu thích tại Hà Nội, thu hút hàng nghìn học viên mỗi năm nhờ chất lượng huấn luyện 
+                  chuyên nghiệp và sự đa dạng trong các chương trình tập luyện.
+                </p>
+              </div>
+              <div className="group/text">
+                <p className="group-hover/text:text-white transition-colors duration-300 leading-relaxed">
+                  Đội ngũ sáng lập Sun Movement đều là những người trẻ có niềm đam mê mãnh liệt với thể thao 
+                  và mong muốn lan tỏa lối sống tích cực, khỏe mạnh đến cộng đồng. Chúng tôi tin rằng thể thao không chỉ 
+                  là về thể chất mà còn là hành trình phát triển toàn diện của mỗi cá nhân.
+                </p>
+              </div>
             </div>
             
             <div className="mt-8 flex flex-wrap gap-4">
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+              <div className="flex items-center group/item hover:scale-105 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3 group-hover/item:bg-red-500/30 transition-colors">
                   <Check className="h-5 w-5 text-red-500" />
                 </div>
-                <span className="text-white">Không gian hiện đại</span>
+                <span className="text-white group-hover/item:text-red-300 transition-colors">Không gian hiện đại</span>
               </div>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+              <div className="flex items-center group/item hover:scale-105 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3 group-hover/item:bg-red-500/30 transition-colors">
                   <Check className="h-5 w-5 text-red-500" />
                 </div>
-                <span className="text-white">HLV chuyên nghiệp</span>
+                <span className="text-white group-hover/item:text-red-300 transition-colors">HLV chuyên nghiệp</span>
               </div>
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3">
+              <div className="flex items-center group/item hover:scale-105 transition-transform duration-300">
+                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-3 group-hover/item:bg-red-500/30 transition-colors">
                   <Check className="h-5 w-5 text-red-500" />
                 </div>
-                <span className="text-white">Trang thiết bị cao cấp</span>
+                <span className="text-white group-hover/item:text-red-300 transition-colors">Trang thiết bị cao cấp</span>
               </div>
             </div>
           </div>
-          <div className="relative h-[500px] rounded-lg overflow-hidden shadow-xl">
+          <div className="relative h-[500px] rounded-xl overflow-hidden shadow-2xl group">
+            <div className="absolute inset-0 bg-gradient-to-tr from-red-500/20 to-transparent z-10"></div>
             <Image 
-              src="/images/calisthenics.jpg" 
-              alt="Đội ngũ sáng lập Sun Movement" 
+              src="/images/gioithieu/khonggiancalis.webp" 
+              alt="Không gian luyện tập Calisthenics tại Sun Movement" 
               fill
-              className="object-cover"
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <span className="text-white text-lg font-medium">Không gian luyện tập Calisthenics tại Sun Movement</span>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 z-20">
+              <div className="flex items-center gap-2 mb-2">
+                <Dumbbell className="h-5 w-5 text-red-500" />
+                <span className="text-red-400 text-sm font-semibold uppercase tracking-wide">Sun Movement</span>
+              </div>
+              <span className="text-white text-lg font-medium block">Không gian luyện tập Calisthenics hiện đại</span>
             </div>
           </div>
         </div>
@@ -242,409 +365,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Achievements */}
-      <section className="py-20 container">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Thành Tựu</h2>
-          <div className="w-20 h-1 bg-red-500 mx-auto mb-8"></div>
-          <p className="text-slate-300 text-lg">
-            Những dấu mốc quan trọng trong hành trình phát triển của Sun Movement
-          </p>
-        </div>
-        
-        <div className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-red-500/30"></div>
-          
-          {/* Timeline Items */}
-          <div className="space-y-12">
-            {/* Item 1 */}
-            <div className="relative flex justify-between items-center">
-              <div className="w-5/12 pr-8 text-right">
-                <h3 className="text-xl font-bold text-white mb-2">2020</h3>
-                <p className="text-slate-300">Thành lập cơ sở đầu tiên tại Hai Bà Trưng với diện tích 500m²</p>
-              </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-red-500 z-10"></div>
-              <div className="w-5/12 pl-8">
-                <div className="w-full h-40 relative rounded-lg overflow-hidden">
-                  <Image 
-                    src="/images/event1.jpg" 
-                    alt="Thành lập cơ sở đầu tiên" 
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Item 2 */}
-            <div className="relative flex justify-between items-center">
-              <div className="w-5/12 pr-8">
-                <div className="w-full h-40 relative rounded-lg overflow-hidden">
-                  <Image 
-                    src="/images/event2.jpg" 
-                    alt="Mở rộng cơ sở thứ hai" 
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-red-500 z-10"></div>
-              <div className="w-5/12 pl-8 text-left">
-                <h3 className="text-xl font-bold text-white mb-2">2022</h3>
-                <p className="text-slate-300">Mở rộng cơ sở thứ hai tại Cầu Giấy và ra mắt dịch vụ Sun Sportswear</p>
-              </div>
-            </div>
-            
-            {/* Item 3 */}
-            <div className="relative flex justify-between items-center">
-              <div className="w-5/12 pr-8 text-right">
-                <h3 className="text-xl font-bold text-white mb-2">2023</h3>
-                <p className="text-slate-300">Đạt mốc 1000+ học viên và mở cơ sở thứ ba tại Tây Hồ</p>
-              </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-red-500 z-10"></div>
-              <div className="w-5/12 pl-8">
-                <div className="w-full h-40 relative rounded-lg overflow-hidden">
-                  <Image 
-                    src="/images/event3.jpg" 
-                    alt="Mở cơ sở thứ ba" 
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            {/* Item 4 */}
-            <div className="relative flex justify-between items-center">
-              <div className="w-5/12 pr-8">
-                <div className="w-full h-40 relative rounded-lg overflow-hidden">
-                  <Image 
-                    src="/images/supplements/1.jpg" 
-                    alt="Ra mắt Sun Supplements" 
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="absolute left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full bg-red-500 z-10"></div>
-              <div className="w-5/12 pl-8 text-left">
-                <h3 className="text-xl font-bold text-white mb-2">2024</h3>
-                <p className="text-slate-300">Ra mắt dòng sản phẩm dinh dưỡng Sun Supplements và mở rộng quy mô đào tạo HLV</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Team */}
-      <section className="py-20 bg-slate-800/30">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Đội Ngũ Huấn Luyện Viên</h2>
-            <div className="w-20 h-1 bg-red-500 mx-auto mb-8"></div>
-            <p className="text-slate-300 text-lg">
-              Những chuyên gia tận tâm, nhiệt huyết sẽ đồng hành cùng bạn trong hành trình chinh phục các mục tiêu thể chất
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Trainer 1 */}
-            <div className="group">
-              <div className="relative h-96 rounded-lg overflow-hidden">
-                <Image 
-                  src="/images/event1.jpg" 
-                  alt="HLV Minh Đức" 
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-xl font-bold text-white">Minh Đức</h3>
-                  <p className="text-red-400">Head Coach Calisthenics</p>
-                </div>
-              </div>
-              <div className="mt-4 p-4 bg-slate-800 rounded-lg">
-                <p className="text-slate-300 text-sm">
-                  Với hơn 8 năm kinh nghiệm, HLV Minh Đức đã giúp hàng trăm học viên làm chủ các kỹ thuật Calisthenics nâng cao. 
-                  Anh sở hữu các chứng chỉ ISSA và là vận động viên Calisthenics chuyên nghiệp.
-                </p>
-                <div className="flex items-center mt-3">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Trainer 2 */}
-            <div className="group">
-              <div className="relative h-96 rounded-lg overflow-hidden">
-                <Image 
-                  src="/images/event2.jpg" 
-                  alt="HLV Thu Trang" 
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-xl font-bold text-white">Thu Trang</h3>
-                  <p className="text-red-400">Head Coach Yoga</p>
-                </div>
-              </div>
-              <div className="mt-4 p-4 bg-slate-800 rounded-lg">
-                <p className="text-slate-300 text-sm">
-                  HLV Thu Trang là người sáng lập chương trình Modern Yoga tại Sun Movement với hơn 10 năm kinh nghiệm. 
-                  Cô sở hữu chứng chỉ RYT-500 và Yoga Alliance, đã đào tạo nhiều thế hệ giáo viên yoga.
-                </p>
-                <div className="flex items-center mt-3">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Trainer 3 */}
-            <div className="group">
-              <div className="relative h-96 rounded-lg overflow-hidden">
-                <Image 
-                  src="/images/event3.jpg" 
-                  alt="HLV Quang Huy" 
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-xl font-bold text-white">Quang Huy</h3>
-                  <p className="text-red-400">Head Coach Strength</p>
-                </div>
-              </div>
-              <div className="mt-4 p-4 bg-slate-800 rounded-lg">
-                <p className="text-slate-300 text-sm">
-                  HLV Quang Huy là chuyên gia về Strength Training với chứng chỉ NSCA-CSCS và hơn 7 năm kinh nghiệm. 
-                  Anh từng là vận động viên powerlifting chuyên nghiệp và hiện đang huấn luyện cho nhiều vận động viên cấp cao.
-                </p>
-                <div className="flex items-center mt-3">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  <Star className="h-4 w-4 text-yellow-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-12">
-            <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none" asChild>
-              <Link href="/dich-vu">Khám Phá Các Dịch Vụ</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 container">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Học Viên Nói Gì Về Chúng Tôi</h2>
-          <div className="w-20 h-1 bg-red-500 mx-auto mb-8"></div>
-          <p className="text-slate-300 text-lg">
-            Hàng nghìn học viên đã tin tưởng và đạt được kết quả cùng Sun Movement
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Testimonial 1 */}
-          <div className="bg-slate-800 rounded-lg p-8 shadow-lg border border-slate-700 relative">
-            <div className="absolute -top-6 left-8">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center text-white text-xl font-bold">
-                N
-              </div>
-            </div>            <div className="pt-6">
-              <p className="text-slate-300 italic mb-6">
-                &ldquo;Tôi đã tập luyện tại nhiều phòng gym nhưng chỉ có tại Sun Movement, tôi mới tìm thấy một cộng đồng đam mê và hỗ trợ. 
-                Sau 6 tháng, tôi đã đạt được mục tiêu giảm 15kg và xây dựng cơ bắp.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-              </div>
-              <div className="mt-3">
-                <h4 className="text-white font-semibold">Nguyễn Văn Nam</h4>
-                <p className="text-slate-400 text-sm">Học viên Strength Training, 32 tuổi</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Testimonial 2 */}
-          <div className="bg-slate-800 rounded-lg p-8 shadow-lg border border-slate-700 relative">
-            <div className="absolute -top-6 left-8">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center text-white text-xl font-bold">
-                L
-              </div>
-            </div>
-            <div className="pt-6">              <p className="text-slate-300 italic mb-6">
-                &ldquo;Các lớp yoga tại Sun Movement đã giúp tôi giảm stress đáng kể và cải thiện sự linh hoạt. 
-                Các HLV rất chuyên nghiệp và quan tâm đến từng học viên. Không gian tập luyện rất thoải mái và thư giãn.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-              </div>
-              <div className="mt-3">
-                <h4 className="text-white font-semibold">Lê Thị Minh Anh</h4>
-                <p className="text-slate-400 text-sm">Học viên Yoga, 28 tuổi</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Testimonial 3 */}
-          <div className="bg-slate-800 rounded-lg p-8 shadow-lg border border-slate-700 relative">
-            <div className="absolute -top-6 left-8">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center text-white text-xl font-bold">
-                T
-              </div>
-            </div>
-            <div className="pt-6">              <p className="text-slate-300 italic mb-6">
-                &ldquo;Calisthenics tại Sun Movement đã cho tôi thấy mình có thể làm được những điều tưởng chừng không thể. 
-                HLV Minh Đức đã hướng dẫn tôi từng bước để làm chủ các động tác khó như human flag và muscle up.&rdquo;
-              </p>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-                <Star className="h-4 w-4 text-yellow-500" />
-              </div>
-              <div className="mt-3">
-                <h4 className="text-white font-semibold">Trần Hoàng Long</h4>
-                <p className="text-slate-400 text-sm">Học viên Calisthenics, 25 tuổi</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Facilities */}
-      <section className="py-20 bg-slate-800/30">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Cơ Sở Vật Chất</h2>
-            <div className="w-20 h-1 bg-red-500 mx-auto mb-8"></div>
-            <p className="text-slate-300 text-lg">
-              Không gian tập luyện hiện đại, thoáng đãng với đầy đủ trang thiết bị chuyên nghiệp
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="relative h-80 rounded-lg overflow-hidden group">
-              <Image 
-                src="/images/strength.jpg" 
-                alt="Khu vực tập Strength" 
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold text-white">Khu vực Strength Training</h3>
-                <p className="text-slate-300">
-                  Trang bị đầy đủ máy móc, tạ đơn, tạ đòn và các thiết bị hiện đại
-                </p>
-              </div>
-            </div>
-            
-            <div className="relative h-80 rounded-lg overflow-hidden group">
-              <Image 
-                src="/images/yoga.jpg" 
-                alt="Khu vực tập Yoga" 
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold text-white">Không gian Yoga</h3>
-                <p className="text-slate-300">
-                  Không gian yên tĩnh, thoáng đãng với đầy đủ props hỗ trợ tập luyện
-                </p>
-              </div>
-            </div>
-            
-            <div className="relative h-80 rounded-lg overflow-hidden group">
-              <Image 
-                src="/images/calisthenics.jpg" 
-                alt="Khu vực tập Calisthenics" 
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-xl font-bold text-white">Khu vực Calisthenics</h3>
-                <p className="text-slate-300">
-                  Không gian rộng rãi với các thiết bị chuyên dụng, thanh xà và không gian vận động
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-bold text-white mb-3">Tiện Ích Bổ Sung</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Phòng thay đồ, tủ khóa và nhà tắm riêng tư</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Quầy nước và khu vực thư giãn sau tập</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Cửa hàng Sun Sportswear và Sun Supplements</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Khu vực tư vấn dinh dưỡng và lên lịch tập</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-bold text-white mb-3">Cam Kết Dịch Vụ</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Vệ sinh, khử trùng thiết bị sau mỗi buổi tập</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Số lượng học viên mỗi lớp được giới hạn để đảm bảo chất lượng</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Wifi miễn phí và dịch vụ đặt lịch online</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-red-500" />
-                  <span>Bảo hiểm tai nạn trong quá trình tập luyện</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA */}
       <section className="py-16 bg-gradient-to-r from-red-600 to-red-500">
         <div className="container text-center">
@@ -654,14 +374,18 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-white text-red-600 hover:bg-white/90" asChild>
-              <Link href="/lien-he">
+              <a 
+                href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
                   <span>Đăng Ký Tập Thử</span>
                 </span>
-              </Link>
+              </a>
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10" asChild>
+            <Button size="lg" className="bg-white text-red-600 hover:bg-white/90" asChild>
               <Link href="/dich-vu">
                 <span>Xem Các Dịch Vụ</span>
               </Link>

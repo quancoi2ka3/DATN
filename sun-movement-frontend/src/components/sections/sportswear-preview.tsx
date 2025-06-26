@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { OptimizedProductCard } from "@/components/ui/optimized-product-card";
 import { Product } from "@/lib/types";
-import { useState, useEffect } from "react";
 
 interface SportswearSectionProps {
   products?: Product[];
@@ -13,6 +13,23 @@ export function SportswearSection({ products = [] }: SportswearSectionProps) {
     <section className="py-16 bg-gray-50">
       <div className="container">
         <h2 className="text-3xl font-semibold text-center mb-2">SPORTSWEAR</h2>
+        
+        {/* Featured Products Grid */}
+        {products.length > 0 && (
+          <div className="mt-8 mb-10">
+            <h3 className="text-xl font-medium mb-6 text-center">Sản phẩm nổi bật</h3>
+            <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {products.slice(0, 4).map((product) => (
+                <OptimizedProductCard 
+                  key={product.id} 
+                  product={product} 
+                  variant="compact"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
         <div className="grid md:grid-cols-2 gap-8 mt-10">
           <div className="order-2 md:order-1 space-y-4">
             <p>
@@ -29,16 +46,17 @@ export function SportswearSection({ products = [] }: SportswearSectionProps) {
             </p>
             <div className="pt-4">
               <Button variant="link" className="text-sunred p-0 font-medium" asChild>
-                <Link href="/store/sportswear">Khám phá →</Link>
+                <Link href="/store/sportswear">Khám phá toàn bộ bộ sưu tập →</Link>
               </Button>
             </div>
           </div>
           <div className="order-1 md:order-2 relative h-[400px] overflow-hidden rounded-lg">
-            <Image
+            <OptimizedImage
               src="/images/sportswear.jpg"
               alt="Sun Movement Sportswear"
               fill
               className="object-cover"
+              priority
             />
           </div>
         </div>

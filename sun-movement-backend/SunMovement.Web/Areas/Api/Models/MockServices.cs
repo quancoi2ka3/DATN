@@ -39,9 +39,12 @@ namespace SunMovement.Web.Areas.Api.Models
         public Task<bool> SendVerificationCodeAsync(string email, string verificationCode, string firstName)
         {
             return Task.FromResult(true);
+        }        public Task<bool> SendWelcomeEmailAsync(string email, string firstName)
+        {
+            return Task.FromResult(true);
         }
 
-        public Task<bool> SendWelcomeEmailAsync(string email, string firstName)
+        public Task<bool> SendPasswordResetEmailAsync(string email, string resetUrl, string firstName)
         {
             return Task.FromResult(true);
         }

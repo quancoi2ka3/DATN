@@ -39,6 +39,7 @@ export function CartIcon({ className }: CartIconProps) {
           src={item.imageUrl}
           alt={item.name}
           fill
+          sizes="96px"
           className="object-cover"
         />
       </div>

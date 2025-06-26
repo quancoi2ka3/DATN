@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { SportswearSection } from "@/components/sections/sportswear";
+import { OptimizedProductCard } from "@/components/ui/optimized-product-card";
 import { Product } from "@/lib/types";
 import { ProductDto } from "@/lib/adapters";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Suspense } from "react";
 
 // For development only - handle self-signed certificates
 // This should be removed in production

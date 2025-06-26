@@ -37,6 +37,7 @@ export default function StorePage() {
             src="/images/store-banner.jpg"
             alt="Sun Movement Store"
             fill
+            sizes="100vw"
             className="object-cover brightness-75"
           />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-4">
@@ -60,6 +61,7 @@ export default function StorePage() {
                     src={category.image}
                     alt={category.name}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                   />
                 </div>

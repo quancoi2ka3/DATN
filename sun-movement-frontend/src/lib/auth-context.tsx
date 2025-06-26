@@ -24,6 +24,8 @@ interface AuthContextType extends AuthState {
   redirectAfterLogin: (defaultPath?: string) => void;
   setReturnUrl: (url: string) => void;
   preserveShoppingSession: () => void;
+  // User profile methods
+  refreshUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -186,6 +188,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/';
   };
 
+  const refreshUserProfile = async (): Promise<void> => {
+    if (!authState.token) {
+      return;
+    }
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/user/profile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authState.token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        const updatedUser = {
+          id: userData.id,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          roles: userData.roles
+        };
+        
+        setAuthState(prev => ({
+          ...prev,
+          user: updatedUser
+        }));
+        
+        // Update localStorage
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       ...authState,
@@ -195,6 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       redirectAfterLogin,
       setReturnUrl,
       preserveShoppingSession,
+      refreshUserProfile,
     }}>
       {children}
     </AuthContext.Provider>

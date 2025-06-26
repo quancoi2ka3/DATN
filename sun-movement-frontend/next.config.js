@@ -1,8 +1,30 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,  env: {
+  reactStrictMode: true,
+  
+  // Performance optimizations
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog'],
+  },
+  
+  // Compression
+  compress: true,
+  
+  // Environment variables
+  env: {
     BACKEND_URL: process.env.BACKEND_URL || 'https://localhost:5001',
-  },  images: {
+  },
+  
+  // Image optimization
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    
     remotePatterns: [
       // HTTPS patterns for port 5001
       {

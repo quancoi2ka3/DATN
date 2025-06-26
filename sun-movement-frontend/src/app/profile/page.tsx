@@ -161,12 +161,16 @@ export default function ProfilePage() {
                 </Button>
                 
                 <Button variant="outline" asChild>
-                  <Link href="/lien-he">
+                  <a 
+                    href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <div className="text-center">
                       <div className="text-sm font-medium">Liên hệ</div>
                       <div className="text-xs text-gray-500">Hỗ trợ</div>
                     </div>
-                  </Link>
+                  </a>
                 </Button>
               </div>
             </CardContent>

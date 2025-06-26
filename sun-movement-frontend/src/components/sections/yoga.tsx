@@ -93,6 +93,7 @@ export function YogaSection() {
               src={yogaArticle?.imageUrl || "/images/yoga.jpg"}
               alt={yogaArticle?.metaTitle || "Modern Yoga"}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

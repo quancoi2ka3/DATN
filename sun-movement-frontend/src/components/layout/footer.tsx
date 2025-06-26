@@ -240,23 +240,102 @@ export function Footer() {
               Hình ảnh
             </h3>
             <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3, 4, 5, 6].map((i, index) => (
-                <Link 
-                  key={`gallery-${index}`} 
-                  href={`/images/event${(i > 3 ? i - 3 : i)}.jpg`}
-                  className="block relative aspect-square rounded-md overflow-hidden group"
-                >
-                  <Image
-                    src={`/images/event${(i > 3 ? i - 3 : i)}.jpg`}
-                    alt={`Gallery image ${i}`}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
-                    <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </Link>
-              ))}
+              {/* Gallery với hình ảnh thực tế */}
+              <Link 
+                href="/images/home-slide-1.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/home-slide-1.webp"
+                  alt="Sun Movement - Không gian tập luyện"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+              
+              <Link 
+                href="/images/gioithieu/khuvucstrength.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/gioithieu/khuvucstrength.webp"
+                  alt="Sun Movement - Khu vực Strength Training"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+              
+              <Link 
+                href="/images/gioithieu/khuvucyoga.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/gioithieu/khuvucyoga.webp"
+                  alt="Sun Movement - Khu vực Yoga"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+              
+              <Link 
+                href="/images/gioithieu/khuvuccalis.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/gioithieu/khuvuccalis.webp"
+                  alt="Sun Movement - Khu vực Calisthenics"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+              
+              <Link 
+                href="/images/Event_handstand.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/Event_handstand.webp"
+                  alt="Sun Movement - Event Handstand"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
+              
+              <Link 
+                href="/images/home-slide-3.webp"
+                className="block relative aspect-square rounded-md overflow-hidden group"
+              >
+                <Image
+                  src="/images/home-slide-3.webp"
+                  alt="Sun Movement - Không gian hiện đại"
+                  fill
+                  sizes="(max-width: 640px) 50vw, 120px"
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/40 transition-colors duration-300 flex items-center justify-center">
+                  <Instagram className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </Link>
             </div>
             <Link 
               href="/hinh-anh" 

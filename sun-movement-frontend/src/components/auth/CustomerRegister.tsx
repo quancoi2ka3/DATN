@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, User, Mail, Lock, Phone, MapPin, Calendar } from 'lucide-react';
+import { Loader2, User, Mail, Lock, Phone, MapPin, Calendar, Eye, EyeOff } from 'lucide-react';
 import { EmailVerificationModal } from './EmailVerificationModal';
 
 interface RegisterFormData {
@@ -41,6 +41,8 @@ export default function CustomerRegister({ onSuccess, onSwitchToLogin }: Custome
   const [success, setSuccess] = useState('');
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,6 +51,17 @@ export default function CustomerRegister({ onSuccess, onSwitchToLogin }: Custome
       [name]: value
     }));
     setError(''); // Clear error when user types
+  };
+
+  // Helper function to check password requirements (for display only)
+  const getPasswordRequirements = (password: string) => {
+    return {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password)
+    };
   };
 
   const validateForm = (): boolean => {
@@ -68,10 +81,13 @@ export default function CustomerRegister({ onSuccess, onSwitchToLogin }: Custome
       setError('Email không hợp lệ');
       return false;
     }
-    if (formData.password.length < 8) {
-      setError('Mật khẩu phải có ít nhất 8 ký tự');
+    
+    // Basic password validation - let backend handle detailed validation
+    if (!formData.password.trim()) {
+      setError('Vui lòng nhập mật khẩu');
       return false;
     }
+    
     if (formData.password !== formData.confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
       return false;
@@ -335,14 +351,56 @@ export default function CustomerRegister({ onSuccess, onSwitchToLogin }: Custome
                 <Input
                   id="password"
                   name="password"
-                  type="password"
-                  placeholder="Tối thiểu 8 ký tự"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Mật khẩu mạnh"
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10 h-9"
+                  className="pl-10 pr-10 h-9"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+              {/* Password requirements display */}
+              {formData.password && (
+                <div className="text-xs space-y-1 mt-2">
+                  <p className="text-gray-600 font-medium">Yêu cầu mật khẩu:</p>
+                  <div className="space-y-1">
+                    {(() => {
+                      const requirements = getPasswordRequirements(formData.password);
+                      return (
+                        <>
+                          <div className={`flex items-center ${requirements.length ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className="mr-1">{requirements.length ? '✓' : '✗'}</span>
+                            Ít nhất 8 ký tự
+                          </div>
+                          <div className={`flex items-center ${requirements.uppercase ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className="mr-1">{requirements.uppercase ? '✓' : '✗'}</span>
+                            Một chữ hoa
+                          </div>
+                          <div className={`flex items-center ${requirements.lowercase ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className="mr-1">{requirements.lowercase ? '✓' : '✗'}</span>
+                            Một chữ thường
+                          </div>
+                          <div className={`flex items-center ${requirements.number ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className="mr-1">{requirements.number ? '✓' : '✗'}</span>
+                            Một số
+                          </div>
+                          <div className={`flex items-center ${requirements.special ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className="mr-1">{requirements.special ? '✓' : '✗'}</span>
+                            Một ký tự đặc biệt
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -352,14 +410,29 @@ export default function CustomerRegister({ onSuccess, onSwitchToLogin }: Custome
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Nhập lại mật khẩu"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="pl-10 h-9"
+                  className="pl-10 pr-10 h-9"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+              {/* Password match indicator */}
+              {formData.confirmPassword && (
+                <div className={`text-xs mt-1 ${
+                  formData.password === formData.confirmPassword ? 'text-green-600' : 'text-red-500'
+                }`}>
+                  {formData.password === formData.confirmPassword ? '✓ Mật khẩu khớp' : '✗ Mật khẩu không khớp'}
+                </div>
+              )}
             </div>
           </div>
 

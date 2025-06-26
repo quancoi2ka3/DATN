@@ -51,6 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
             src={product.imageUrl}
             alt={product.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover"
           />
         </div>
@@ -76,6 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 src={product.imageUrl}
                 alt={product.name}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover rounded-md"
               />
             </div>

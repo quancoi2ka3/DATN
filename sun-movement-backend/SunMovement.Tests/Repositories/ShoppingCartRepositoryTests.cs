@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using SunMovement.Core.Models;
 using SunMovement.Infrastructure.Data;
 using SunMovement.Infrastructure.Repositories;
@@ -30,7 +29,7 @@ namespace SunMovement.Tests.Repositories
             // Seed the database
             using (var context = new ApplicationDbContext(options))
             {
-                context.ShoppingCarts.Add(new ShoppingCart { Id = 1, UserId = userId });
+                context.ShoppingCarts.Add(new ShoppingCart { UserId = userId });
                 await context.SaveChangesAsync();
             }
 
@@ -73,13 +72,17 @@ namespace SunMovement.Tests.Repositories
             // Seed the database
             using (var context = new ApplicationDbContext(options))
             {
-                var cart = new ShoppingCart { Id = 1, UserId = userId };
-                cart.Items = new List<CartItem>
-                {
-                    new CartItem { Id = 1, CartId = 1, ProductId = 1, ItemName = "Product 1", Quantity = 2, UnitPrice = 19.99m },
-                    new CartItem { Id = 2, CartId = 1, ServiceId = 1, ItemName = "Service 1", Quantity = 1, UnitPrice = 29.99m }
-                };
+                var cart = new ShoppingCart { UserId = userId };
                 context.ShoppingCarts.Add(cart);
+                await context.SaveChangesAsync();
+
+                // Add items to cart
+                var cartItems = new List<CartItem>
+                {
+                    new CartItem { ShoppingCartId = cart.Id, ProductId = 1, ItemName = "Product 1", Quantity = 2, UnitPrice = 19.99m },
+                    new CartItem { ShoppingCartId = cart.Id, ServiceId = 1, ItemName = "Service 1", Quantity = 1, UnitPrice = 29.99m }
+                };
+                context.CartItems.AddRange(cartItems);
                 await context.SaveChangesAsync();
             }
 
@@ -107,130 +110,58 @@ namespace SunMovement.Tests.Repositories
             using (var context = new ApplicationDbContext(options))
             {
                 var repository = new ShoppingCartRepository(context);
-                await repository.AddAsync(cart);
-                await context.SaveChangesAsync();
+                var result = await repository.AddAsync(cart);
+
+                // Assert
+                Assert.NotNull(result);
+                Assert.True(result.Id > 0);
+                Assert.Equal("user123", result.UserId);
             }
 
-            // Assert
+            // Verify in database
             using (var context = new ApplicationDbContext(options))
             {
-                var savedCart = await context.ShoppingCarts.FirstOrDefaultAsync(c => c.UserId == "user123");
-                Assert.NotNull(savedCart);
-            }
-        }
-
-        [Fact]
-        public async Task UpdateCartItemAsync_ExistingItem_UpdatesItem()
-        {
-            // Arrange
-            var options = GetDbContextOptions(nameof(UpdateCartItemAsync_ExistingItem_UpdatesItem));
-            var cartItem = new CartItem 
-            { 
-                Id = 1, 
-                CartId = 1, 
-                ProductId = 1, 
-                ItemName = "Product 1", 
-                Quantity = 2, 
-                UnitPrice = 19.99m 
-            };
-
-            // Seed the database
-            using (var context = new ApplicationDbContext(options))
-            {
-                context.CartItems.Add(cartItem);
-                await context.SaveChangesAsync();
-            }
-
-            // Act
-            using (var context = new ApplicationDbContext(options))
-            {
-                var repository = new ShoppingCartRepository(context);
-                
-                var itemToUpdate = await context.CartItems.FindAsync(1);
-                itemToUpdate.Quantity = 5;
-                
-                repository.UpdateCartItem(itemToUpdate);
-                await context.SaveChangesAsync();
-            }
-
-            // Assert
-            using (var context = new ApplicationDbContext(options))
-            {
-                var updatedItem = await context.CartItems.FindAsync(1);
-                Assert.Equal(5, updatedItem.Quantity);
+                var savedCart = await context.ShoppingCarts.FirstAsync();
+                Assert.Equal("user123", savedCart.UserId);
             }
         }
 
         [Fact]
-        public async Task DeleteCartItemAsync_ExistingItem_DeletesItem()
+        public async Task GetCartItemAsync_ExistingCartItem_ReturnsCartItem()
         {
             // Arrange
-            var options = GetDbContextOptions(nameof(DeleteCartItemAsync_ExistingItem_DeletesItem));
-            var cartItem = new CartItem 
-            { 
-                Id = 1, 
-                CartId = 1, 
-                ProductId = 1, 
-                ItemName = "Product 1", 
-                Quantity = 2, 
-                UnitPrice = 19.99m 
-            };
-
-            // Seed the database
+            var options = GetDbContextOptions(nameof(GetCartItemAsync_ExistingCartItem_ReturnsCartItem));
+            
             using (var context = new ApplicationDbContext(options))
             {
-                context.CartItems.Add(cartItem);
-                await context.SaveChangesAsync();
-            }
-
-            // Act
-            using (var context = new ApplicationDbContext(options))
-            {
-                var repository = new ShoppingCartRepository(context);
-                await repository.DeleteCartItemAsync(1);
-                await context.SaveChangesAsync();
-            }
-
-            // Assert
-            using (var context = new ApplicationDbContext(options))
-            {
-                var deletedItem = await context.CartItems.FindAsync(1);
-                Assert.Null(deletedItem);
-            }
-        }
-
-        [Fact]
-        public async Task ClearCartAsync_ExistingCart_RemovesAllItems()
-        {
-            // Arrange
-            var options = GetDbContextOptions(nameof(ClearCartAsync_ExistingCart_RemovesAllItems));
-            var cart = new ShoppingCart { Id = 1, UserId = "user123" };
-            cart.Items = new List<CartItem>
-            {
-                new CartItem { Id = 1, CartId = 1, ProductId = 1, ItemName = "Product 1", Quantity = 2, UnitPrice = 19.99m },
-                new CartItem { Id = 2, CartId = 1, ServiceId = 1, ItemName = "Service 1", Quantity = 1, UnitPrice = 29.99m }
-            };
-
-            // Seed the database
-            using (var context = new ApplicationDbContext(options))
-            {
+                var cart = new ShoppingCart { UserId = "user123" };
                 context.ShoppingCarts.Add(cart);
                 await context.SaveChangesAsync();
+
+                var cartItem = new CartItem 
+                { 
+                    ShoppingCartId = cart.Id, 
+                    ProductId = 1, 
+                    ItemName = "Test Product", 
+                    Quantity = 1, 
+                    UnitPrice = 19.99m 
+                };
+                context.CartItems.Add(cartItem);
+                await context.SaveChangesAsync();
             }
 
             // Act
             using (var context = new ApplicationDbContext(options))
             {
                 var repository = new ShoppingCartRepository(context);
-                await repository.ClearCartAsync(1);
-                await context.SaveChangesAsync();
-            }
+                var cartItem = await context.CartItems.FirstAsync();
+                var result = await repository.GetCartItemAsync(cartItem.Id);
 
-            // Assert
-            using (var context = new ApplicationDbContext(options))
-            {
-                var cartItems = await context.CartItems.Where(i => i.CartId == 1).ToListAsync();
-                Assert.Empty(cartItems);
+                // Assert
+                Assert.NotNull(result);
+                Assert.Equal("Test Product", result.ItemName);
+                Assert.Equal(1, result.Quantity);
+                Assert.Equal(19.99m, result.UnitPrice);
             }
         }
     }

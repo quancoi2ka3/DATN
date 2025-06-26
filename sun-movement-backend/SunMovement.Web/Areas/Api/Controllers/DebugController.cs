@@ -122,6 +122,81 @@ namespace SunMovement.Web.Areas.Api.Controllers
             }
         }
 
+        [HttpGet("smtp-config")]
+        public IActionResult GetSmtpConfig()
+        {
+            try
+            {
+                var config = new
+                {
+                    SmtpServer = _configuration["Email:SmtpServer"],
+                    SmtpPort = _configuration["Email:SmtpPort"],
+                    Username = _configuration["Email:Username"],
+                    Sender = _configuration["Email:Sender"],
+                    SenderName = _configuration["Email:SenderName"],
+                    HasPassword = !string.IsNullOrEmpty(_configuration["Email:Password"]),
+                    PasswordLength = _configuration["Email:Password"]?.Length ?? 0,
+                    IsConfigured = !string.IsNullOrEmpty(_configuration["Email:SmtpServer"]) &&
+                                  !string.IsNullOrEmpty(_configuration["Email:Username"]) &&
+                                  !string.IsNullOrEmpty(_configuration["Email:Password"]),
+                    HasPlaceholders = _configuration["Email:Password"]?.Contains("YOUR_") == true ||
+                                     _configuration["Email:Username"]?.Contains("YOUR_") == true
+                };
+
+                _logger.LogInformation("SMTP configuration requested - Server: {Server}, Port: {Port}", 
+                    config.SmtpServer, config.SmtpPort);
+
+                return Ok(config);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting SMTP configuration");
+                return StatusCode(500, new { error = "Unable to retrieve SMTP configuration" });
+            }
+        }
+
+        [HttpPost("test-email")]
+        public async Task<IActionResult> TestEmail([FromBody] TestEmailRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Test email requested to: {Email}", request.Email);
+
+                var success = await _emailService.SendVerificationCodeAsync(
+                    request.Email, 
+                    "123456", 
+                    "Test User"
+                );
+
+                if (success)
+                {
+                    _logger.LogInformation("Test email sent successfully to: {Email}", request.Email);
+                    return Ok(new { 
+                        success = true, 
+                        message = "Test email sent successfully",
+                        email = request.Email 
+                    });
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to send test email to: {Email}", request.Email);
+                    return BadRequest(new { 
+                        success = false, 
+                        message = "Failed to send test email. Check SMTP configuration." 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception sending test email to: {Email}", request.Email);
+                return StatusCode(500, new { 
+                    success = false, 
+                    message = "Exception occurred while sending test email",
+                    error = ex.Message 
+                });
+            }
+        }
+
         [HttpPost("test-email-send")]
         public async Task<IActionResult> TestEmailSend([FromBody] TestEmailModel model)
         {
@@ -302,5 +377,10 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 return StatusCode(500, new { message = "Error checking verification data", error = ex.Message });
             }
         }
+    }
+
+    public class TestEmailRequest
+    {
+        public string Email { get; set; } = string.Empty;
     }
 }

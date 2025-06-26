@@ -85,6 +85,7 @@ export function CalisthenicsSection() {
               src={calisthenicsArticle?.imageUrl || "https://localhost:5001/images/calis_home.webp"}
               alt={calisthenicsArticle?.metaTitle || "Calisthenics"}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>

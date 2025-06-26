@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { AuthButton } from "@/components/auth/AuthButton";
 import { useState } from "react";
 import { Mail, MapPin, Phone, Send, ArrowRight, CheckCircle } from "lucide-react";
 
@@ -64,7 +63,7 @@ export function ContactCTASection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-1">Hotline</h3>
-                  <p className="text-slate-300">0123 456 789</p>
+                  <p className="text-slate-300">08999139393</p>
                 </div>
               </div>
               
@@ -80,12 +79,16 @@ export function ContactCTASection() {
             </div>
             
             <Button size="lg" className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none" asChild>
-              <Link href="/lien-he">
+              <a 
+                href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span className="flex items-center gap-2">
                   Liên Hệ Ngay
                   <ArrowRight className="h-4 w-4" />
                 </span>
-              </Link>
+              </a>
             </Button>
           </div>
           

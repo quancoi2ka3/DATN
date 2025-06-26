@@ -13,53 +13,53 @@ export function WhyChooseSection() {
   const features = [
     {
       id: "facilities",
-      title: "Không gian & Thiết bị hiện đại",
-      description: "Không gian tập luyện rộng rãi với các thiết bị hiện đại nhất, được thiết kế tối ưu cho cả mục tiêu tăng cơ và đốt mỡ.",
+      title: "Đa dạng hoạt động tập luyện",
+      description: "Cung cấp đầy đủ các bộ môn: Calisthenics, Strength Training, Yoga, Conditioning, Mobility cùng các hoạt động ngoại khóa và retreat.",
       icon: Dumbbell,
       color: "from-red-600 to-red-500",
-      stats: "1500m²",
-      statLabel: "Diện tích"
+      stats: "5+",
+      statLabel: "Bộ môn chính"
     },
     {
       id: "coaches",
-      title: "Huấn luyện viên chuyên nghiệp",
-      description: "Đội ngũ HLV giàu kinh nghiệm, được đào tạo chuyên sâu về khoa học thể thao và dinh dưỡng, luôn đồng hành cùng bạn.",
+      title: "Đội ngũ sáng lập chuyên nghiệp",
+      description: "3 Co-founder chuyên sâu từng lĩnh vực: Lê Hoàng Trung (Nutrition), Nguyễn Đình Hưng (Calisthenics), Nguyễn Đức Bình (Yoga).",
       icon: PersonStanding,
       color: "from-amber-500 to-orange-500",
-      stats: "10+",
-      statLabel: "HLV chuyên nghiệp"
+      stats: "3",
+      statLabel: "Co-founder"
     },
     {
       id: "programs",
-      title: "Chương trình cá nhân hóa",
-      description: "Lịch trình tập luyện và dinh dưỡng được thiết kế riêng theo thể trạng, mục tiêu và khả năng của từng người.",
+      title: "Triết lý 'Kỷ luật - Tự do - Sáng tạo'",
+      description: "Xây dựng nền tảng đạo đức vững chắc, phát triển kỷ luật bản thân, tự do trong thể hiện và sáng tạo trong tập luyện.",
       icon: Scroll,
       color: "from-cyan-500 to-blue-500",
-      stats: "100%",
-      statLabel: "Cá nhân hóa"
+      stats: "3",
+      statLabel: "Giá trị cốt lõi"
     },
     {
       id: "community",
-      title: "Cộng đồng năng động",
-      description: "Trở thành thành viên SUN MOVEMENT, bạn sẽ gia nhập vào một cộng đồng đam mê tập luyện, luôn truyền cảm hứng và động lực.",
+      title: "Cộng đồng 'Vì sức khỏe cộng đồng'",
+      description: "Sứ mệnh 'Vì sức khỏe cộng đồng, vì Việt Nam văn minh sống!' - xây dựng cộng đồng tập luyện tích cực và ý thức cao.",
       icon: Users,
       color: "from-emerald-500 to-green-500",
-      stats: "500+",
-      statLabel: "Thành viên"
+      stats: "1",
+      statLabel: "Sứ mệnh"
     },
   ];
 
   const benefits = [
     {
       id: "results",
-      title: "Kết quả nhanh chóng",
-      description: "Phương pháp tập luyện khoa học giúp bạn đạt được kết quả nhanh hơn và bền vững hơn.",
+      title: "Tầm nhìn phát triển hàng đầu",
+      description: "Sun Movement định hướng phát triển thành một tổ chức hàng đầu cung cấp các dịch vụ về giáo dục thể dục, sinh luyện, dinh dưỡng, thẩm mỹ.",
       icon: Clock,
     },
     {
       id: "health",
-      title: "Sức khỏe toàn diện",
-      description: "Chúng tôi không chỉ chú trọng vẻ ngoài mà còn cân bằng sức khỏe cả về thể chất và tinh thần.",
+      title: "Nền tảng đạo đức vững chắc",
+      description: "Xây dựng trên những giá trị cốt lõi về kỷ luật, tự do và sáng tạo, tạo nền tảng đạo đức vững chắc cho mọi hoạt động.",
       icon: Heart,
     },
   ];
@@ -111,6 +111,7 @@ export function WhyChooseSection() {
           src="/images/pattern-grid.png" 
           alt="Background pattern" 
           fill 
+          sizes="100vw"
           className="object-cover"
         />
         <div className="streak-effect"></div>
@@ -132,8 +133,9 @@ export function WhyChooseSection() {
           <div className="w-20 h-1 fire-gradient mx-auto my-6"></div>
           
           <p className="text-gray-300 text-lg">
-            Chúng tôi không chỉ là nơi tập luyện, mà còn là nơi định hình lối sống khoẻ mạnh và cân bằng. 
-            Với môi trường chuyên nghiệp, trang thiết bị hiện đại, cùng đội ngũ huấn luyện viên tận tâm.
+            Sun Movement được xây dựng bởi 3 co-founder chuyên nghiệp với sứ mệnh "Vì sức khỏe cộng đồng, vì Việt Nam văn minh sống!". 
+            Chúng tôi kết hợp đa dạng bộ môn từ Calisthenics, Strength Training, Yoga, Conditioning đến Mobility, 
+            cùng các hoạt động ngoại khóa và retreat để tạo nên một cộng đồng tập luyện toàn diện.
           </p>
         </div>
 
@@ -218,8 +220,8 @@ export function WhyChooseSection() {
         {/* Statistics with fire effects */}
         <div className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-6 bg-slate-800/50 rounded-xl p-6 max-w-5xl mx-auto backdrop-blur-sm border border-slate-700 streak-container">
           <div className="text-center p-4 relative">
-            <div className="text-3xl md:text-4xl font-bold fire-text energy-burst">5+</div>
-            <div className="text-gray-400 mt-1">Năm kinh nghiệm</div>
+            <div className="text-3xl text-sunred md:text-4xl font-bold fire-text energy-burst">3</div>
+            <div className="text-gray-400 mt-1">Co-founder</div>
             
             {/* Small flame effect */}
             <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-10 h-10 pointer-events-none opacity-70">
@@ -227,8 +229,8 @@ export function WhyChooseSection() {
             </div>
           </div>
           <div className="text-center p-4 relative">
-            <div className="text-3xl md:text-4xl font-bold fire-text energy-burst">1500+</div>
-            <div className="text-gray-400 mt-1">Khách hàng</div>
+            <div className="text-3xl text-sunred md:text-4xl font-bold fire-text energy-burst">5+</div>
+            <div className="text-gray-400 mt-1">Bộ môn chính</div>
             
             {/* Small flame effect */}
             <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-10 h-10 pointer-events-none opacity-70">
@@ -236,8 +238,8 @@ export function WhyChooseSection() {
             </div>
           </div>
           <div className="text-center p-4 relative">
-            <div className="text-3xl md:text-4xl font-bold fire-text energy-burst">15+</div>
-            <div className="text-gray-400 mt-1">Chương trình</div>
+            <div className="text-3xl text-sunred md:text-4xl font-bold fire-text energy-burst">1</div>
+            <div className="text-gray-400 mt-1">Sứ mệnh lớn</div>
             
             {/* Small flame effect */}
             <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-10 h-10 pointer-events-none opacity-70">
@@ -245,8 +247,8 @@ export function WhyChooseSection() {
             </div>
           </div>
           <div className="text-center p-4 relative">
-            <div className="text-3xl md:text-4xl font-bold fire-text energy-burst">98%</div>
-            <div className="text-gray-400 mt-1">Khách hàng hài lòng</div>
+            <div className="text-3xl text-sunred md:text-4xl font-bold fire-text energy-burst">100%</div>
+            <div className="text-gray-400 mt-1">Tận tâm</div>
             
             {/* Small flame effect */}
             <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-10 h-10 pointer-events-none opacity-70">

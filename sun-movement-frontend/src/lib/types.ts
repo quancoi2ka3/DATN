@@ -4,6 +4,8 @@ export interface Product {
   description: string;
   price: number;
   salePrice?: number | null;
+  originalPrice?: number; // Add this field
+  discount?: number; // Add this field
   imageUrl: string;
   category: number|string;
   subCategory?: string; // Use number for category ID or string for category slug

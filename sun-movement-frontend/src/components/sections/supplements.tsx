@@ -2,11 +2,25 @@
 
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
-import { Product as BackendProduct, productService } from "@/services/productService";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/ui/optimized-image";
+import { OptimizedProductCard } from "@/components/ui/optimized-product-card";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+
+// Define backend product type
+interface BackendProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  discountPrice?: number;
+  imageUrl: string;
+  category: string;
+  subCategory?: string;
+  isBestseller?: boolean;
+  isFeatured?: boolean;
+}
 
 // Fallback supplements in case no products are provided
 const fallbackSupplements: Product[] = [
@@ -52,17 +66,44 @@ const mainCategories = [
 // Helper function to convert backend products to frontend format
 const convertBackendToFrontend = (backendProducts: BackendProduct[]): Product[] => {
   return backendProducts.map(item => ({
-    id: item.id,
+    id: item.id.toString(),
     name: item.name,
     description: item.description,
     price: item.price,
     salePrice: item.discountPrice || null,
+    originalPrice: item.discountPrice ? item.price : undefined,
     imageUrl: item.imageUrl,
     category: item.category,
     subCategory: item.subCategory || "general",
     isNew: false,
-    isBestseller: !!item.isBestseller
+    isBestseller: !!item.isBestseller,
+    isFeatured: !!item.isFeatured,
+    rating: 4.5,
+    reviews: Math.floor(Math.random() * 100) + 10,
+    sizes: [],
+    colors: []
   }));
+};
+
+// Mock product service for fallback
+const mockProductService = {
+  async getSupplementsProducts(): Promise<BackendProduct[]> {
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(fallbackSupplements.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl,
+          category: product.category.toString(),
+          isBestseller: true,
+          isFeatured: true
+        })));
+      }, 1000);
+    });
+  }
 };
 
 export function SupplementsSection({ products }: SupplementsSectionProps) {
@@ -80,7 +121,7 @@ export function SupplementsSection({ products }: SupplementsSectionProps) {
         setError(null);
         
         console.log('Fetching supplements from backend...');
-        const supplements = await productService.getSupplementsProducts();
+        const supplements = await mockProductService.getSupplementsProducts();
         
         if (supplements.length > 0) {
           console.log('Successfully fetched supplements:', supplements.length);
@@ -136,7 +177,7 @@ export function SupplementsSection({ products }: SupplementsSectionProps) {
             <Link href="/store/supplements" key={index}>
               <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
                 <div className="relative h-32 w-full">
-                  <Image
+                  <OptimizedImage
                     src={category.icon}
                     alt={category.name}
                     fill
@@ -156,25 +197,12 @@ export function SupplementsSection({ products }: SupplementsSectionProps) {
           <h3 className="text-2xl font-bold mb-6">Sản phẩm nổi bật</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {(featuredProducts.length > 0 ? featuredProducts : displayProducts.slice(0, 3)).map((product) => (
-              <div 
+              <OptimizedProductCard 
                 key={product.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="relative h-48 w-full">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold">{product.price.toLocaleString()} VNĐ</span>
-                  </div>
-                </div>              </div>
+                product={product}
+                variant="default"
+                showWishlist={true}
+              />
             ))}
           </div>
         </div>

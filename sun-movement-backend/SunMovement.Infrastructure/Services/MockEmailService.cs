@@ -93,5 +93,15 @@ namespace SunMovement.Infrastructure.Services
             // Always return true for mock service
             return Task.FromResult(true);
         }
+
+        public Task<bool> SendPasswordResetEmailAsync(string email, string resetUrl, string firstName)
+        {
+            _logger.LogInformation("📧 MOCK EMAIL: Password reset email sent to {Email}", email);
+            _logger.LogInformation("🔒 Reset link for {FirstName}: {ResetUrl}", firstName, resetUrl);
+            _logger.LogInformation("📝 Subject: 🔑 Đặt lại mật khẩu - Sun Movement");
+            
+            // Always return true for mock service
+            return Task.FromResult(true);
+        }
     }
 }

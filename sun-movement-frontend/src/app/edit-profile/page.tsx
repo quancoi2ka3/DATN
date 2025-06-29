@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, User, CheckCircle, AlertCircle, Save } from 'lucide-react';
 import Link from 'next/link';
+import TokenDebugInfo from '@/components/debug/TokenDebugInfo';
 
 export default function EditProfilePage() {
   const { isAuthenticated, user, token, refreshUserProfile } = useAuth();
@@ -36,8 +37,12 @@ export default function EditProfilePage() {
     // Load current user profile
     loadUserProfile();
   }, [isAuthenticated, router]);  const loadUserProfile = async () => {
-    if (!token) return;    try {
+    if (!token) return;
+
+    try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      console.log('Loading profile from:', `${apiUrl}/api/user/profile`);
+      
       const response = await fetch(`${apiUrl}/api/user/profile`, {
         method: 'GET',
         headers: {
@@ -46,8 +51,11 @@ export default function EditProfilePage() {
         },
       });
 
+      console.log('Profile response status:', response.status);
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('Profile data loaded:', userData);
         setFormData({
           firstName: userData.firstName || '',
           lastName: userData.lastName || '',
@@ -55,20 +63,61 @@ export default function EditProfilePage() {
           address: userData.address || '',
           dateOfBirth: userData.dateOfBirth || ''
         });
+      } else if (response.status === 401) {
+        console.error('Token expired or invalid');
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        // Redirect to login page after a delay
+        setTimeout(() => {
+          router.push('/auth');
+        }, 2000);
       } else {
-        console.error('Failed to load user profile');
+        const errorData = await response.text();
+        console.error('Failed to load user profile:', response.status, errorData);
+        setError('Không thể tải thông tin người dùng. Vui lòng thử lại.');
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
+      setError('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
     }
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.firstName.trim()) {
+      setError('Họ không được để trống');
+      return false;
+    }
+    if (!formData.lastName.trim()) {
+      setError('Tên không được để trống');
+      return false;
+    }
+    if (formData.phoneNumber && !/^[0-9+\-\s()]{8,15}$/.test(formData.phoneNumber.trim())) {
+      setError('Số điện thoại không hợp lệ');
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    setMessage('');    try {
+    setMessage('');
+
+    // Validate form
+    if (!validateForm()) {
+      setIsLoading(false);
+      return;
+    }    try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+      console.log('Updating profile to:', `${apiUrl}/api/user/profile`);
+      console.log('Profile data being sent:', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+        dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null
+      });
+      
       const response = await fetch(`${apiUrl}/api/user/profile`, {
         method: 'PUT',
         headers: {
@@ -84,13 +133,31 @@ export default function EditProfilePage() {
         }),
       });
 
-      const data = await response.json();      if (response.ok) {
+      console.log('Update response status:', response.status);
+      
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const textResponse = await response.text();
+        console.log('Non-JSON response:', textResponse);
+        data = { message: textResponse || 'Có lỗi xảy ra' };
+      }
+      
+      console.log('Update response data:', data);      if (response.ok) {
         setMessage(data.message || 'Thông tin cá nhân đã được cập nhật thành công!');
         // Refresh user data in auth context
         await refreshUserProfile();
         // Redirect after success
         setTimeout(() => {
           router.push('/profile');
+        }, 2000);
+      } else if (response.status === 401) {
+        console.error('Token expired or invalid');
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        setTimeout(() => {
+          router.push('/auth');
         }, 2000);
       } else {
         setError(data.message || 'Có lỗi xảy ra khi cập nhật thông tin.');
@@ -257,6 +324,9 @@ export default function EditProfilePage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Debug info - remove in production */}
+      <TokenDebugInfo />
     </div>
   );
 }

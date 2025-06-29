@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Web.ViewModels;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,18 +21,35 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileUploadService _fileUploadService;
         private readonly ICacheService _cacheService;
+        private readonly IProductService _productService;
+        private readonly IInventoryService _inventoryService;
+        private readonly ICouponService _couponService;
+        private readonly ILogger<ProductsAdminController> _logger;
 
-        public ProductsAdminController(IUnitOfWork unitOfWork, IFileUploadService fileUploadService, ICacheService cacheService)
+        public ProductsAdminController(
+            IUnitOfWork unitOfWork, 
+            IFileUploadService fileUploadService, 
+            ICacheService cacheService,
+            IProductService productService,
+            IInventoryService inventoryService,
+            ICouponService couponService,
+            ILogger<ProductsAdminController> logger)
         {
             _unitOfWork = unitOfWork;
             _fileUploadService = fileUploadService;
             _cacheService = cacheService;
-        }// GET: Admin/ProductsAdmin
-        public async Task<IActionResult> Index(string searchString)
+            _productService = productService;
+            _inventoryService = inventoryService;
+            _couponService = couponService;
+            _logger = logger;
+        }
+
+        // GET: Admin/ProductsAdmin
+        public async Task<IActionResult> Index(string searchString, ProductCategory? category, bool? isActive)
         {
             try
             {
-                Console.WriteLine("Loading ProductsAdmin Index page");
+                _logger.LogInformation("Loading ProductsAdmin Index page");
                 var products = await _unitOfWork.Products.GetAllAsync();
                 
                 if (!string.IsNullOrEmpty(searchString))
@@ -38,19 +57,30 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     products = products.Where(p => 
                         p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
                         p.Description.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                        p.Category.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                        p.SubCategory.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+                        p.Sku != null && p.Sku.Contains(searchString, StringComparison.OrdinalIgnoreCase));
                 }
 
-                Console.WriteLine($"Found {products.Count()} products");
+                if (category.HasValue)
+                {
+                    products = products.Where(p => p.Category == category.Value);
+                }
+
+                if (isActive.HasValue)
+                {
+                    products = products.Where(p => p.IsActive == isActive.Value);
+                }
+
+                _logger.LogInformation($"Found {products.Count()} products");
                 ViewBag.SearchString = searchString;
+                ViewBag.Category = category;
+                ViewBag.IsActive = isActive;
+                
                 return View(products.OrderByDescending(p => p.CreatedAt));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading products: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                TempData["Error"] = "Error loading products: " + ex.Message;
+                _logger.LogError(ex, "Error loading products");
+                TempData["ErrorMessage"] = "Có lỗi khi tải danh sách sản phẩm: " + ex.Message;
                 return View(new List<Product>());
             }
         }
@@ -71,28 +101,74 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     return NotFound();
                 }
 
+                // Load related coupons
+                ViewBag.ProductCoupons = await _couponService.GetProductCouponsAsync(id.Value);
+                
                 return View(product);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error loading product details: " + ex.Message;
+                _logger.LogError(ex, "Error loading product details for ID: {ProductId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi tải thông tin sản phẩm: " + ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
 
         // GET: Admin/ProductsAdmin/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
-        }        // POST: Admin/ProductsAdmin/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Price,DiscountPrice,StockQuantity,Category,SubCategory,Specifications,IsFeatured,IsActive")] Product product, IFormFile? imageFile)
+            try
+            {
+                // Lấy danh sách hàng tồn kho có sẵn
+                var inventoryItems = await _inventoryService.GetAvailableInventoryItemsAsync();
+                if (!inventoryItems.Any())
+                {
+                    TempData["ErrorMessage"] = "Không có hàng trong kho. Vui lòng nhập kho trước khi tạo sản phẩm.";
+                    return RedirectToAction("StockIn", "InventoryAdmin");
+                }
+                
+                // Lấy danh sách mã giảm giá đang hoạt động
+                var activeCoupons = await _couponService.GetActiveCouponsAsync();
+                
+                ViewBag.InventoryItems = new SelectList(
+                    inventoryItems.Select(i => new { 
+                        Id = i.Id, 
+                        Text = $"{i.Name} - SL: {i.Quantity} - Giá: {i.CostPrice:N0} VNĐ" 
+                    }), "Id", "Text");
+                    
+                ViewBag.Coupons = new MultiSelectList(activeCoupons, "Id", "Name");
+                ViewBag.Categories = new SelectList(Enum.GetValues(typeof(ProductCategory))
+                    .Cast<ProductCategory>()
+                    .Select(c => new { Value = (int)c, Text = GetCategoryDisplayName(c) }), "Value", "Text");
+                
+                return View(new ProductViewModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading create product page");
+                TempData["ErrorMessage"] = "Có lỗi khi tải trang tạo sản phẩm: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        public async Task<IActionResult> Create([Bind("Name,Description,Price,DiscountPrice,StockQuantity,Category,SubCategory,Specifications,IsFeatured,IsActive,CostPrice,SupplierId")] Product product, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
+                    // Kiểm tra tồn kho trước khi tạo sản phẩm mới
+                    if (product.StockQuantity <= 0)
+                    {
+                        ModelState.AddModelError("StockQuantity", "Không thể tạo sản phẩm khi không có tồn kho. Vui lòng nhập kho trước.");
+                        var suppliers = await _unitOfWork.Suppliers.GetAllAsync();
+                        ViewBag.Suppliers = suppliers.Select(s => new SelectListItem
+                        {
+                            Value = s.Id.ToString(),
+                            Text = s.Name
+                        });
+                        return View(product);
+                    }
+
                     // Handle image upload
                     if (imageFile != null && imageFile.Length > 0)
                     {
@@ -192,6 +268,81 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             return View(product);
         }
 
+        // POST: Admin/ProductsAdmin/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProductViewModel model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    // Kiểm tra xem có thể tạo sản phẩm từ hàng tồn kho không
+                    if (!await _inventoryService.CanCreateProductFromInventoryAsync(model.InventoryItemId))
+                    {
+                        ModelState.AddModelError("InventoryItemId", "Không thể tạo sản phẩm từ hàng tồn kho này.");
+                        await LoadCreatePageData(model);
+                        return View(model);
+                    }
+
+                    // Tạo sản phẩm từ hàng tồn kho
+                    var product = await _productService.CreateProductFromInventoryAsync(
+                        model.InventoryItemId,
+                        model.Name,
+                        model.Price,
+                        model.Description,
+                        model.Category,
+                        model.SubCategory,
+                        model.DiscountPrice,
+                        model.Sku,
+                        model.Barcode,
+                        model.Weight,
+                        model.Dimensions,
+                        model.MinimumStockLevel,
+                        model.OptimalStockLevel,
+                        model.IsFeatured,
+                        model.TrackInventory,
+                        model.AllowBackorder);
+
+                    // Áp dụng mã giảm giá nếu có
+                    if (model.SelectedCouponIds != null && model.SelectedCouponIds.Any())
+                    {
+                        await _couponService.ApplyCouponsToProductAsync(product.Id, model.SelectedCouponIds);
+                    }
+
+                    // Xử lý upload hình ảnh nếu có
+                    if (model.ImageFile != null)
+                    {
+                        try
+                        {
+                            var imagePath = await _fileUploadService.UploadFileAsync(model.ImageFile, "products");
+                            product.ImageUrl = imagePath;
+                            await _unitOfWork.Products.UpdateAsync(product);
+                            await _unitOfWork.CompleteAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to upload image for product {ProductId}", product.Id);
+                            // Không fail toàn bộ process vì hình ảnh
+                        }
+                    }
+
+                    TempData["SuccessMessage"] = "Đã tạo sản phẩm thành công từ hàng tồn kho!";
+                    return RedirectToAction(nameof(Details), new { id = product.Id });
+                }
+
+                await LoadCreatePageData(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating product from inventory");
+                ModelState.AddModelError("", "Có lỗi khi tạo sản phẩm: " + ex.Message);
+                await LoadCreatePageData(model);
+                return View(model);
+            }
+        }
+
         // GET: Admin/ProductsAdmin/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -208,11 +359,40 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     return NotFound();
                 }
 
-                return View(product);
+                var model = new ProductViewModel
+                {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    Price = product.Price,
+                    DiscountPrice = product.DiscountPrice,
+                    Category = product.Category,
+                    SubCategory = product.SubCategory,
+                    Sku = product.Sku,
+                    Barcode = product.Barcode,
+                    Weight = product.Weight,
+                    Dimensions = product.Dimensions,
+                    MinimumStockLevel = product.MinimumStockLevel,
+                    OptimalStockLevel = product.OptimalStockLevel,
+                    IsFeatured = product.IsFeatured,
+                    TrackInventory = product.TrackInventory,
+                    AllowBackorder = product.AllowBackorder,
+                    IsActive = product.IsActive,
+                    ImageUrl = product.ImageUrl,
+                    CostPrice = product.CostPrice
+                };
+
+                // Load current coupons
+                var productCoupons = await _couponService.GetProductCouponsAsync(id.Value);
+                model.SelectedCouponIds = productCoupons.Select(c => c.Id).ToList();
+
+                await LoadEditPageData(model);
+                return View(model);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error loading product for editing: " + ex.Message;
+                _logger.LogError(ex, "Error loading edit page for product {ProductId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi tải thông tin sản phẩm để chỉnh sửa.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -220,41 +400,93 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         // POST: Admin/ProductsAdmin/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,DiscountPrice,StockQuantity,Category,SubCategory,Specifications,IsFeatured,IsActive,CreatedAt,ImageUrl")] Product product, IFormFile? imageFile)
+        public async Task<IActionResult> Edit(int id, ProductViewModel model)
         {
-            if (id != product.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (ModelState.IsValid)
                 {
-                    // Handle image upload
-                    if (imageFile != null && imageFile.Length > 0)
+                    var product = await _unitOfWork.Products.GetByIdAsync(id);
+                    if (product == null)
                     {
-                        var imagePath = await _fileUploadService.UploadFileAsync(imageFile, "products");
-                        product.ImageUrl = imagePath;
+                        return NotFound();
                     }
-                    
+
+                    // Update product properties
+                    product.Name = model.Name;
+                    product.Description = model.Description;
+                    product.Price = model.Price;
+                    product.DiscountPrice = model.DiscountPrice;
+                    product.Category = model.Category;
+                    product.SubCategory = model.SubCategory;
+                    product.Sku = model.Sku;
+                    product.Barcode = model.Barcode;
+                    product.Weight = model.Weight;
+                    product.Dimensions = model.Dimensions;
+                    product.MinimumStockLevel = model.MinimumStockLevel;
+                    product.OptimalStockLevel = model.OptimalStockLevel;
+                    product.IsFeatured = model.IsFeatured;
+                    product.TrackInventory = model.TrackInventory;
+                    product.AllowBackorder = model.AllowBackorder;
+                    product.IsActive = model.IsActive;
                     product.UpdatedAt = DateTime.UtcNow;
+
+                    // Handle image upload
+                    if (model.ImageFile != null)
+                    {
+                        try
+                        {
+                            var imagePath = await _fileUploadService.UploadFileAsync(model.ImageFile, "products");
+                            product.ImageUrl = imagePath;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to upload image for product {ProductId}", product.Id);
+                        }
+                    }
+
                     await _unitOfWork.Products.UpdateAsync(product);
+
+                    // Update coupon associations
+                    var currentCoupons = await _couponService.GetProductCouponsAsync(id);
+                    var currentCouponIds = currentCoupons.Select(c => c.Id).ToList();
+                    var newCouponIds = model.SelectedCouponIds ?? new List<int>();
+
+                    // Remove coupons that are no longer selected
+                    var couponsToRemove = currentCouponIds.Except(newCouponIds).ToList();
+                    if (couponsToRemove.Any())
+                    {
+                        await _couponService.RemoveCouponsFromProductAsync(id, couponsToRemove);
+                    }
+
+                    // Add new coupons
+                    var couponsToAdd = newCouponIds.Except(currentCouponIds).ToList();
+                    if (couponsToAdd.Any())
+                    {
+                        await _couponService.ApplyCouponsToProductAsync(id, couponsToAdd);
+                    }
+
                     await _unitOfWork.CompleteAsync();
-                    
-                    // Clear cache to ensure frontend gets updated data
-                    _cacheService.Clear();
 
-                    TempData["Success"] = "Sản phẩm đã được cập nhật thành công!";
-                    return RedirectToAction(nameof(Index));
+                    TempData["SuccessMessage"] = "Đã cập nhật sản phẩm thành công!";
+                    return RedirectToAction(nameof(Details), new { id = product.Id });
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "Lỗi khi cập nhật sản phẩm: " + ex.Message);
-                }
+
+                await LoadEditPageData(model);
+                return View(model);
             }
-
-            return View(product);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product {ProductId}", id);
+                ModelState.AddModelError("", "Có lỗi khi cập nhật sản phẩm: " + ex.Message);
+                await LoadEditPageData(model);
+                return View(model);
+            }
         }
 
         // GET: Admin/ProductsAdmin/Delete/5
@@ -277,7 +509,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error loading product for deletion: " + ex.Message;
+                _logger.LogError(ex, "Error loading delete confirmation for product {ProductId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi tải thông tin sản phẩm.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -289,28 +522,16 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(id);
-                if (product != null)
-                {
-                    await _unitOfWork.Products.DeleteAsync(product);
-                    await _unitOfWork.CompleteAsync();
-                    
-                    // Clear cache to ensure frontend updates
-                    _cacheService.Clear();
-                    
-                    TempData["Success"] = "Sản phẩm đã được xóa thành công!";
-                }
-                else
-                {
-                    TempData["Error"] = "Không tìm thấy sản phẩm.";
-                }
+                await _productService.DeleteProductAsync(id);
+                TempData["SuccessMessage"] = "Đã xóa sản phẩm thành công!";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Lỗi khi xóa sản phẩm: " + ex.Message;
+                _logger.LogError(ex, "Error deleting product {ProductId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi xóa sản phẩm: " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
-
-            return RedirectToAction(nameof(Index));
         }
 
         // POST: Admin/ProductsAdmin/ToggleFeatured/5
@@ -441,6 +662,60 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 }
                 return false;
             }
+        }
+
+        // Helper Methods
+        private async Task LoadCreatePageData(ProductViewModel model)
+        {
+            var inventoryItems = await _inventoryService.GetAvailableInventoryItemsAsync();
+            var activeCoupons = await _couponService.GetActiveCouponsAsync();
+
+            ViewBag.InventoryItems = new SelectList(
+                inventoryItems.Select(i => new { 
+                    Id = i.Id, 
+                    Text = $"{i.Name} - SL: {i.Quantity} - Giá: {i.CostPrice:N0} VNĐ" 
+                }), "Id", "Text", model.InventoryItemId);
+                
+            ViewBag.Coupons = new MultiSelectList(activeCoupons, "Id", "Name", model.SelectedCouponIds);
+            ViewBag.Categories = new SelectList(Enum.GetValues(typeof(ProductCategory))
+                .Cast<ProductCategory>()
+                .Select(c => new { Value = (int)c, Text = GetCategoryDisplayName(c) }), "Value", "Text", (int)model.Category);
+        }
+
+        private async Task LoadEditPageData(ProductViewModel model)
+        {
+            var activeCoupons = await _couponService.GetActiveCouponsAsync();
+
+            ViewBag.Coupons = new MultiSelectList(activeCoupons, "Id", "Name", model.SelectedCouponIds);
+            ViewBag.Categories = new SelectList(Enum.GetValues(typeof(ProductCategory))
+                .Cast<ProductCategory>()
+                .Select(c => new { Value = (int)c, Text = GetCategoryDisplayName(c) }), "Value", "Text", (int)model.Category);
+        }
+
+        private string GetCategoryDisplayName(ProductCategory category)
+        {
+            return category switch
+            {
+                ProductCategory.Sportswear => "Đồ thể thao",
+                ProductCategory.Supplements => "Thực phẩm bổ sung",
+                ProductCategory.Equipment => "Thiết bị",
+                ProductCategory.Accessories => "Phụ kiện",
+                ProductCategory.Nutrition => "Dinh dưỡng",
+                _ => category.ToString()
+            };
+        }
+
+        private List<string> GetSubCategoriesForCategory(ProductCategory category)
+        {
+            return category switch
+            {
+                ProductCategory.Sportswear => new List<string> { "Áo thun", "Quần short", "Giày thể thao", "Áo khoác" },
+                ProductCategory.Supplements => new List<string> { "Protein", "Vitamin", "Khoáng chất", "Pre-workout" },
+                ProductCategory.Equipment => new List<string> { "Tạ", "Máy tập", "Dây nhảy", "Thảm yoga" },
+                ProductCategory.Accessories => new List<string> { "Găng tay", "Đai lưng", "Bình nước", "Túi tập" },
+                ProductCategory.Nutrition => new List<string> { "Thức ăn năng lượng", "Đồ uống thể thao", "Protein bar" },
+                _ => new List<string>()
+            };
         }
     }
 }

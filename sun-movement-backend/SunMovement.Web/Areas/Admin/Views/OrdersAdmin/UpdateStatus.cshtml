@@ -1,0 +1,224 @@
+@model SunMovement.Core.Models.Order
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Cập nhật trạng thái đơn hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Cập nhật trạng thái đơn hàng #@Model.Id</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "OrdersAdmin")">Quản lý đơn hàng</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })">Chi tiết đơn hàng #@Model.Id</a></li>
+        <li class="breadcrumb-item active">Cập nhật trạng thái</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-sync-alt me-1"></i> Cập nhật trạng thái đơn hàng
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5>Thông tin quan trọng</h5>
+                                <p class="mb-0">
+                                    Khi bạn cập nhật đơn hàng sang trạng thái <strong>Đã giao hàng</strong>, 
+                                    <strong>Đã thanh toán</strong> hoặc <strong>Hoàn thành</strong>, hệ thống sẽ tự động 
+                                    giảm tồn kho tương ứng với số lượng sản phẩm trong đơn hàng.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="updateStatusForm" action="@Url.Action("UpdateStatus", "OrdersAdmin", new { id = Model.Id })" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái hiện tại:</label>
+                            <div>
+                                @{
+                                    string currentStatusClass = Model.Status switch
+                                    {
+                                        OrderStatus.Pending => "bg-secondary text-white",
+                                        OrderStatus.AwaitingPayment => "bg-warning",
+                                        OrderStatus.Paid => "bg-info",
+                                        OrderStatus.Processing => "bg-info",
+                                        OrderStatus.Shipped => "bg-primary text-white",
+                                        OrderStatus.Delivered => "bg-success text-white",
+                                        OrderStatus.Completed => "bg-success text-white",
+                                        OrderStatus.Cancelled => "bg-danger text-white",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @currentStatusClass p-2">@Model.Status</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Cập nhật thành:</label>
+                            <select class="form-select form-select-lg" id="status" name="status">
+                                @foreach (var status in Enum.GetValues<OrderStatus>())
+                                {
+                                    if (status == Model.Status)
+                                    {
+                                        <option value="@status" selected>@status.ToString()</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status.ToString()</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="statusWarningBoxDelivered" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Cảnh báo:</strong> Chuyển sang trạng thái <strong>Đã giao hàng</strong> sẽ tự động đánh dấu thời gian giao hàng và giảm tồn kho. Đảm bảo sản phẩm đã thực sự giao cho khách hàng.
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="statusWarningBoxPaid" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Cảnh báo:</strong> Chuyển sang trạng thái <strong>Đã thanh toán</strong> sẽ tự động đánh dấu đơn hàng đã được thanh toán và giảm tồn kho. Đảm bảo đã nhận được tiền từ khách hàng.
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="statusWarningBoxCompleted" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Cảnh báo:</strong> Chuyển sang trạng thái <strong>Hoàn thành</strong> sẽ đánh dấu đơn hàng đã hoàn tất hoàn toàn và giảm tồn kho. Đơn hàng sẽ không thể thay đổi sau đó.
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="statusWarningBoxCancelled" style="display: none;">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Cảnh báo:</strong> Chuyển sang trạng thái <strong>Đã hủy</strong> sẽ hủy đơn hàng này. Nếu đơn hàng đã giảm tồn kho, hãy thực hiện điều chỉnh tồn kho theo cách thủ công sau đó.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cập nhật trạng thái
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i> Thông tin đơn hàng
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-muted">Mã đơn hàng</div>
+                        <div class="h5">#@Model.Id</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Khách hàng</div>
+                        <div>@Model.DisplayCustomerName</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Ngày đặt hàng</div>
+                        <div>@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Tổng tiền</div>
+                        <div class="h5 text-primary">@Model.TotalAmount.ToString("N0") VNĐ</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Phương thức thanh toán</div>
+                        <div>@Model.PaymentMethod</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Trạng thái thanh toán</div>
+                        <div>
+                            @if (Model.IsPaid)
+                            {
+                                <span class="badge bg-success">Đã thanh toán</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Chưa thanh toán</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Hiển thị cảnh báo phù hợp khi thay đổi trạng thái
+            function updateStatusWarnings() {
+                // Ẩn tất cả cảnh báo
+                $("#statusWarningBoxDelivered").hide();
+                $("#statusWarningBoxPaid").hide();
+                $("#statusWarningBoxCompleted").hide();
+                $("#statusWarningBoxCancelled").hide();
+                
+                // Hiển thị cảnh báo phù hợp
+                var selectedStatus = $("#status").val();
+                if (selectedStatus === "Delivered") {
+                    $("#statusWarningBoxDelivered").show();
+                } else if (selectedStatus === "Paid") {
+                    $("#statusWarningBoxPaid").show();
+                } else if (selectedStatus === "Completed") {
+                    $("#statusWarningBoxCompleted").show();
+                } else if (selectedStatus === "Cancelled") {
+                    $("#statusWarningBoxCancelled").show();
+                }
+            }
+            
+            // Xử lý khi thay đổi trạng thái
+            $("#status").on("change", function() {
+                updateStatusWarnings();
+            });
+            
+            // Kiểm tra ban đầu
+            updateStatusWarnings();
+            
+            // Xác nhận trước khi gửi form
+            $("#updateStatusForm").on("submit", function(e) {
+                var selectedStatus = $("#status").val();
+                var currentStatus = "@Model.Status";
+                
+                // Nếu chọn hủy đơn hàng, yêu cầu xác nhận
+                if (selectedStatus === "Cancelled" && currentStatus !== "Cancelled") {
+                    if (!confirm("Bạn có chắc chắn muốn HỦY đơn hàng này? Hành động này không thể hoàn tác.")) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                
+                // Nếu chọn hoàn thành, yêu cầu xác nhận
+                if (selectedStatus === "Completed" && currentStatus !== "Completed") {
+                    if (!confirm("Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái HOÀN THÀNH? Hành động này sẽ giảm tồn kho và không thể thay đổi sau đó.")) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+        });
+    </script>
+}

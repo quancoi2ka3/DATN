@@ -206,7 +206,93 @@ namespace SunMovement.Infrastructure.Services
                 _logger.LogError(ex, "Error marking verification as completed for {Email}", email);
                 return false;
             }
-        }private string GenerateRandomCode()
+        }
+
+        public async Task<string> GenerateOtpCodeAsync(string email, string purpose = "general")
+        {
+            try
+            {
+                // Remove any existing OTP for this email and purpose
+                var existingOtps = await _context.OtpVerifications
+                    .Where(otp => otp.Email == email && otp.Purpose == purpose)
+                    .ToListAsync();
+
+                if (existingOtps.Any())
+                {
+                    _context.OtpVerifications.RemoveRange(existingOtps);
+                }
+
+                // Generate a 6-digit OTP code
+                var otpCode = GenerateRandomCode();
+
+                // Create new OTP record
+                var otpVerification = new OtpVerification
+                {
+                    Email = email,
+                    OtpCode = otpCode,
+                    Purpose = purpose,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(10) // 10 minutes expiration
+                };
+
+                _context.OtpVerifications.Add(otpVerification);
+                await _context.SaveChangesAsync();
+
+                // Send OTP email
+                try
+                {
+                    await _emailService.SendOtpEmailAsync(email, otpCode, purpose);
+                    _logger.LogInformation("OTP sent successfully to {Email} for purpose {Purpose}", email, purpose);
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, "Failed to send OTP email to {Email} for purpose {Purpose}", email, purpose);
+                    // Continue without failing the OTP generation
+                }
+
+                return otpCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error generating OTP for {Email} with purpose {Purpose}", email, purpose);
+                throw;
+            }
+        }
+
+        public async Task<bool> VerifyOtpCodeAsync(string email, string code, string purpose = "general")
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                var otpVerification = await _context.OtpVerifications
+                    .FirstOrDefaultAsync(otp => otp.Email == email && 
+                                               otp.OtpCode == code && 
+                                               otp.Purpose == purpose &&
+                                               !otp.IsUsed && 
+                                               otp.ExpiresAt > currentTime);
+
+                if (otpVerification != null)
+                {
+                    // Mark OTP as used
+                    otpVerification.IsUsed = true;
+                    otpVerification.UsedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("OTP verified successfully for {Email} with purpose {Purpose}", email, purpose);
+                    return true;
+                }
+
+                _logger.LogWarning("Invalid or expired OTP code for {Email} with purpose {Purpose}", email, purpose);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying OTP for {Email} with purpose {Purpose}", email, purpose);
+                return false;
+            }
+        }
+
+        private string GenerateRandomCode()
         {
             var random = new Random();
             return random.Next(100000, 999999).ToString();

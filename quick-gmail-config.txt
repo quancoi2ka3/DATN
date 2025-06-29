@@ -1,0 +1,17 @@
+# QUICK GMAIL SMTP TEST CONFIG
+# Copy these lines to your .env.local file and update with your credentials:
+
+# Gmail SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=nguyenmanhquan17072003@gmail.com
+SMTP_PASSWORD=your-16-character-app-password-here
+SMTP_FROM=nguyenmanhquan17072003@gmail.com
+EMAIL_TO=nguyenmanhquan17072003@gmail.com
+EMAIL_SERVICE=smtp
+
+# Instructions:
+# 1. Replace "your-16-character-app-password-here" with your Gmail App Password
+# 2. Save the .env.local file
+# 3. Restart your dev server: npm run dev
+# 4. Test the contact form again

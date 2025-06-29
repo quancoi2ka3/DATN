@@ -1,0 +1,233 @@
+@model SunMovement.Core.Models.Coupon
+
+@{
+    ViewData["Title"] = "Chi tiết mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chi tiết mã giảm giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">@Model.Code</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tag me-2"></i>
+                        @Model.Name
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success ms-2">Đang hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger ms-2">Không hoạt động</span>
+                        }
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Thông tin cơ bản</h6>
+                            <dl class="row">
+                                <dt class="col-sm-5">Mã giảm giá:</dt>
+                                <dd class="col-sm-7"><strong class="text-primary">@Model.Code</strong></dd>
+                                
+                                <dt class="col-sm-5">Tên mã:</dt>
+                                <dd class="col-sm-7">@Model.Name</dd>
+                                
+                                <dt class="col-sm-5">Mô tả:</dt>
+                                <dd class="col-sm-7">@(Model.Description ?? "Không có mô tả")</dd>
+                                
+                                <dt class="col-sm-5">Loại giảm giá:</dt>
+                                <dd class="col-sm-7">
+                                    @switch (Model.Type)
+                                    {
+                                        case SunMovement.Core.Models.CouponType.Percentage:
+                                            <span class="badge bg-info">Phần trăm</span>
+                                            break;
+                                        case SunMovement.Core.Models.CouponType.FixedAmount:
+                                            <span class="badge bg-warning">Số tiền cố định</span>
+                                            break;
+                                        case SunMovement.Core.Models.CouponType.FreeShipping:
+                                            <span class="badge bg-success">Miễn phí vận chuyển</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@Model.Type</span>
+                                            break;
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-5">Giá trị:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.Type == SunMovement.Core.Models.CouponType.Percentage)
+                                    {
+                                        <strong class="text-success">@Model.Value%</strong>
+                                    }
+                                    else if (Model.Type == SunMovement.Core.Models.CouponType.FixedAmount)
+                                    {
+                                        <strong class="text-success">@Model.Value.ToString("N0") VNĐ</strong>
+                                    }
+                                    else
+                                    {
+                                        <strong class="text-success">@Model.Value</strong>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">Điều kiện áp dụng</h6>
+                            <dl class="row">
+                                <dt class="col-sm-5">Đơn tối thiểu:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.MinimumOrderAmount > 0)
+                                    {
+                                        <strong>@Model.MinimumOrderAmount.ToString("N0") VNĐ</strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có</span>
+                                    }
+                                </dd>
+                                
+                                <dt class="col-sm-5">Thời gian:</dt>
+                                <dd class="col-sm-7">
+                                    <div><strong>Từ:</strong> @Model.StartDate.ToString("dd/MM/yyyy HH:mm")</div>
+                                    <div><strong>Đến:</strong> @Model.EndDate.ToString("dd/MM/yyyy HH:mm")</div>
+                                </dd>
+                                
+                                <dt class="col-sm-5">Giới hạn sử dụng:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.UsageLimit > 0)
+                                    {
+                                        <div><strong>@Model.UsageLimit</strong> lần</div>
+                                        <div class="text-muted small">Đã sử dụng: @Model.CurrentUsageCount lần</div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không giới hạn</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Thống kê sử dụng -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Thống kê sử dụng</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded">
+                                <h4 class="text-primary mb-1">@Model.CurrentUsageCount</h4>
+                                <small class="text-muted">Đã sử dụng</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light p-3 rounded">
+                                <h4 class="text-success mb-1">
+                                    @if (Model.UsageLimit > 0)
+                                    {
+                                        @(Model.UsageLimit - Model.CurrentUsageCount)
+                                    }
+                                    else
+                                    {
+                                        <span>∞</span>
+                                    }
+                                </h4>
+                                <small class="text-muted">Còn lại</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (Model.UsageLimit > 0)
+                    {
+                        var usagePercentage = (double)Model.CurrentUsageCount / Model.UsageLimit * 100;
+                        <div class="mt-3">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: @usagePercentage%"
+                                     aria-valuenow="@Model.CurrentUsageCount" aria-valuemin="0" aria-valuemax="@Model.UsageLimit">
+                                    @usagePercentage.ToString("F1")%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                @Model.CurrentUsageCount / @Model.UsageLimit lần sử dụng
+                            </small>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Trạng thái -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Trạng thái</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.IsValid)
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Mã giảm giá đang có hiệu lực
+                        </div>
+                    }
+                    else if (Model.IsExpired)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Mã giảm giá đã hết hạn
+                        </div>
+                    }
+                    else if (Model.IsUsageLimitReached)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Đã đạt giới hạn sử dụng
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">
+                            <i class="fas fa-pause-circle me-2"></i>
+                            Mã giảm giá chưa có hiệu lực
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Thao tác -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Thao tác</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Chỉnh sửa
+                        </a>
+                        
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger"
+                           onclick="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')">
+                            <i class="fas fa-trash me-2"></i>Xóa
+                        </a>
+                        
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

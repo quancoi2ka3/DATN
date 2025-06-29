@@ -1,0 +1,184 @@
+@model SunMovement.Core.Models.Coupon
+
+@{
+    ViewData["Title"] = "Xóa Mã Giảm Giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Xóa Mã Giảm Giá</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Dashboard")">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "CouponsAdmin")">Mã Giảm Giá</a></li>
+                        <li class="breadcrumb-item active">Xóa</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-danger">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-trash mr-1"></i>
+                                Xác Nhận Xóa Mã Giảm Giá
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <h5><i class="icon fas fa-exclamation-triangle"></i> Cảnh báo!</h5>
+                                Bạn có chắc chắn muốn xóa mã giảm giá này? Hành động này không thể hoàn tác.
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th width="150">Mã giảm giá:</th>
+                                            <td><strong class="text-primary">@Model.Code</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tên:</th>
+                                            <td>@Model.Name</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Mô tả:</th>
+                                            <td>@Model.Description</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Loại giảm giá:</th>
+                                            <td>
+                                                @switch (Model.Type)
+                                                {
+                                                    case SunMovement.Core.Models.CouponType.Percentage:
+                                                        <span class="badge badge-info">Phần trăm</span>
+                                                        break;
+                                                    case SunMovement.Core.Models.CouponType.FixedAmount:
+                                                        <span class="badge badge-primary">Số tiền cố định</span>
+                                                        break;
+                                                    case SunMovement.Core.Models.CouponType.FreeShipping:
+                                                        <span class="badge badge-success">Miễn phí vận chuyển</span>
+                                                        break;
+                                                    case SunMovement.Core.Models.CouponType.BuyOneGetOne:
+                                                        <span class="badge badge-warning">Mua 1 tặng 1</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge badge-secondary">@Model.Type</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Giá trị:</th>
+                                            <td>
+                                                @if (Model.Type == SunMovement.Core.Models.CouponType.Percentage)
+                                                {
+                                                    <strong>@Model.Value.ToString("0.##")%</strong>
+                                                }
+                                                else if (Model.Type == SunMovement.Core.Models.CouponType.FixedAmount)
+                                                {
+                                                    <strong>@Model.Value.ToString("N0") VNĐ</strong>
+                                                }
+                                                else
+                                                {
+                                                    <strong>@Model.Value.ToString("N0")</strong>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th width="150">Ngày bắt đầu:</th>
+                                            <td>@Model.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ngày kết thúc:</th>
+                                            <td>@Model.EndDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Trạng thái:</th>
+                                            <td>
+                                                @if (Model.IsActive)
+                                                {
+                                                    <span class="badge badge-success">Đang hoạt động</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-secondary">Không hoạt động</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Giới hạn sử dụng:</th>
+                                            <td>
+                                                @if (Model.UsageLimit > 0)
+                                                {
+                                                    @(Model.UsageLimit.ToString("N0") + " lần")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Không giới hạn</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Đã sử dụng:</th>
+                                            <td><strong>@Model.CurrentUsageCount.ToString("N0") lần</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Ngày tạo:</th>
+                                            <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <form asp-action="Delete" method="post" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" asp-for="Id" />
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash mr-1"></i>
+                                    Xác Nhận Xóa
+                                </button>
+                            </form>
+                            <a class="btn btn-secondary ml-2" asp-action="Index">
+                                <i class="fas fa-arrow-left mr-1"></i>
+                                Quay Lại
+                            </a>
+                            <a class="btn btn-info ml-2" asp-action="Details" asp-route-id="@Model.Id">
+                                <i class="fas fa-eye mr-1"></i>
+                                Xem Chi Tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Confirm before delete
+            $('form').on('submit', function(e) {
+                if (!confirm('Bạn có chắc chắn muốn xóa mã giảm giá này? Hành động này không thể hoàn tác.')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

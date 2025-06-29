@@ -38,14 +38,8 @@ const mainNavItems = [
     //   { label: "Yoga", href: "/dich-vu/yoga" },
     // ]
   },
-  { 
-    label: "Shop", 
-    href: "#",
-    children: [
-      { label: "Supplements", href: "/store/supplements" },
-      { label: "Sportswear", href: "/store/sportswear" },
-    ]
-  },
+  { label: "Supplements", href: "/store/supplements" },
+  { label: "Sportswear", href: "/store/sportswear" },
   { label: "Sự Kiện", href: "/su-kien" },
   { label: "FAQ", href: "/faq" },
 ];
@@ -196,7 +190,6 @@ function MobileAuthSection() {
 export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   
   // Handle scroll effect
   useEffect(() => {
@@ -212,9 +205,9 @@ export function Header() {
   return (
     <header 
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300 backdrop-blur-md border-b",
+        "sticky top-0 z-50 w-full transition-all duration-500 backdrop-blur-md border-b will-change-transform",
         scrolled
-          ? "bg-slate-900/95 border-slate-800 py-2 shadow-lg"
+          ? "bg-slate-900/95 border-slate-800 py-2 shadow-xl shadow-slate-900/20"
           : "bg-gradient-to-r from-slate-900 to-slate-800 border-slate-800/50 py-4"
       )}
     >
@@ -265,54 +258,17 @@ export function Header() {
         <NavigationMenu className="hidden lg:flex">
           <NavigationMenuList className="flex gap-1">
             {mainNavItems.map((item) => (
-              <NavigationMenuItem key={item.href}>
-                {item.children ? (
-                  <div className="relative">
-                    <button
-                      onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
-                      className={cn(
-                        "group inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-red-500 focus:bg-red-500 focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-white",
-                        openDropdown === item.label && "bg-red-500",
-                        pathname.startsWith(item.href) && "bg-red-500/20"
-                      )}
-                    >
-                      {item.label}
-                      <ChevronDown className={cn(
-                        "ml-1 h-3 w-3 transition-transform duration-200",
-                        openDropdown === item.label && "transform rotate-180"
-                      )} />
-                    </button>
-                    
-                    {openDropdown === item.label && (
-                      <div className="absolute left-0 mt-2 w-48 origin-top-left rounded-md bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-slate-700">
-                        <div className="py-1">
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.href}
-                              href={child.href}
-                              className="block px-4 py-2 text-sm text-white hover:bg-red-500"
-                              onClick={() => setOpenDropdown(null)}
-                            >
-                              {child.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <NavigationMenuLink asChild>
+              <NavigationMenuItem key={item.href}>                  <NavigationMenuLink asChild>
                     <Link
                       href={item.href}
                       className={cn(
-                        "group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-red-500 focus:bg-red-500 focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-white",
-                        pathname === item.href && "bg-red-500"
+                        "group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-red-500 hover:scale-105 hover:shadow-lg focus:bg-red-500 focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-white hover-lift",
+                        pathname === item.href && "bg-red-500 shadow-lg"
                       )}
                     >
                       {item.label}
                     </Link>
                   </NavigationMenuLink>
-                )}
               </NavigationMenuItem>
             ))}
           </NavigationMenuList>
@@ -328,7 +284,7 @@ export function Header() {
           <Button
             size={scrolled ? "default" : "lg"}
             className={cn(
-              "hidden md:flex bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none transition-all duration-300",
+              "hidden md:flex btn-primary-enhanced text-white border-none transition-all duration-300 hover-lift",
               scrolled ? "h-9 px-4" : "h-10 px-6"
             )}
             asChild
@@ -377,46 +333,17 @@ export function Header() {
                   <nav className="flex flex-col space-y-1">
                     {mainNavItems.map((item) => (
                       <div key={item.href}>
-                        {item.children ? (
-                          <>
-                            <button
-                              onClick={() => setOpenDropdown(openDropdown === item.label ? null : item.label)}
-                              className="flex items-center justify-between px-4 py-3 text-white hover:bg-slate-800 w-full text-left"
-                            >
-                              <span>{item.label}</span>
-                              <ChevronDown className={cn(
-                                "h-4 w-4 transition-transform duration-200",
-                                openDropdown === item.label && "transform rotate-180"
-                              )} />
-                            </button>
-                            
-                            {openDropdown === item.label && (
-                              <div className="pl-4 border-l-2 border-red-500 ml-4 my-2 space-y-1">
-                                {item.children.map((child) => (
-                                  <Link
-                                    key={child.href}
-                                    href={child.href}
-                                    className="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-md"
-                                  >
-                                    {child.label}
-                                  </Link>
-                                ))}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <Link
-                            href={item.href}
-                            className={cn(
-                              "block px-4 py-3 hover:bg-slate-800",
-                              pathname === item.href 
-                                ? "text-red-500 font-medium border-l-2 border-red-500 pl-3" 
-                                : "text-white"
-                            )}
-                          >
-                            {item.label}
-                          </Link>
-                        )}
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "block px-4 py-3 hover:bg-slate-800",
+                            pathname === item.href 
+                              ? "text-red-500 font-medium border-l-2 border-red-500 pl-3" 
+                              : "text-white"
+                          )}
+                        >
+                          {item.label}
+                        </Link>
                       </div>
                     ))}
                   </nav>

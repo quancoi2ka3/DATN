@@ -2,22 +2,33 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { useState } from "react";
 import { Mail, MapPin, Phone, Send, ArrowRight, CheckCircle } from "lucide-react";
 
 export function ContactCTASection() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this to your backend
-    console.log("Submitted email:", email);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setEmail("");
-    }, 3000);
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log("Submitted email:", email);
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setEmail("");
+      }, 3000);
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,7 +64,7 @@ export function ContactCTASection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-1">Địa Chỉ</h3>
-                  <p className="text-slate-300">65 Nguyễn Du, Hai Bà Trưng, Hà Nội</p>
+                  <p className="text-slate-300">Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội</p>
                 </div>
               </div>
               
@@ -73,7 +84,7 @@ export function ContactCTASection() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-1">Email</h3>
-                  <p className="text-slate-300">info@sunmovement.vn</p>
+                  <p className="text-slate-300">contact@sunmovement.vn</p>
                 </div>
               </div>
             </div>
@@ -103,36 +114,36 @@ export function ContactCTASection() {
             </p>
             
             {submitted ? (
-              <div className="bg-green-500/20 border border-green-500 rounded-lg p-4 flex items-center">
-                <CheckCircle className="h-6 w-6 text-green-500 mr-3" />
-                <p className="text-white">Cảm ơn bạn đã đăng ký! Chúng tôi sẽ liên hệ sớm.</p>
+              <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-6 text-center">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <h4 className="text-green-400 font-semibold mb-2">Đăng ký thành công!</h4>
+                <p className="text-green-300 text-sm">Cảm ơn bạn đã đăng ký. Chúng tôi sẽ gửi thông tin mới nhất đến email của bạn.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1">
-                    Email của bạn
-                  </label>
                   <input
                     type="email"
-                    id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Nhập email của bạn"
                     required
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-white"
-                    placeholder="example@email.com"
+                    disabled={isLoading}
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                   />
                 </div>
                 
-                <Button 
+                <LoadingButton 
                   type="submit" 
-                  className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none"
+                  isLoading={isLoading}
+                  loadingText="Đang đăng ký..."
+                  className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-none transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25"
                 >
                   <span className="flex items-center justify-center gap-2">
                     <Send className="h-4 w-4" />
                     Đăng Ký
                   </span>
-                </Button>
+                </LoadingButton>
                 
                 <p className="text-xs text-slate-400 mt-4">
                   Bằng cách đăng ký, bạn đồng ý với <Link href="/privacy-policy" className="text-red-400 hover:underline">Chính sách bảo mật</Link> của chúng tôi.
@@ -164,14 +175,6 @@ export function ContactCTASection() {
                   className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center hover:bg-red-500 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
-                </a>
-                <a 
-                  href="https://tiktok.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center hover:bg-red-500 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path><path d="M15 8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"></path><path d="M17 15h2a2 2 0 0 0 2-2v-2h-4v4z"></path><path d="M21 11V7a2 2 0 0 0-2-2h-4v4h4v2z"></path></svg>
                 </a>
               </div>
             </div>

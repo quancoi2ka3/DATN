@@ -176,6 +176,94 @@ namespace SunMovement.Infrastructure.Services
             }
         }
 
+        public async Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose)
+        {
+            try
+            {
+                var subject = GetOtpEmailSubject(purpose);
+                var body = GenerateOtpEmailBody(otpCode, purpose);
+
+                await SendEmailAsync(email, subject, body);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send OTP email to {Email} for purpose {Purpose}", email, purpose);
+                return false;
+            }
+        }
+
+        private string GetOtpEmailSubject(string purpose)
+        {
+            return purpose switch
+            {
+                "change-password" => "Mã xác thực đổi mật khẩu - Sun Movement",
+                _ => "Mã xác thực OTP - Sun Movement"
+            };
+        }
+
+        private string GenerateOtpEmailBody(string otpCode, string purpose)
+        {
+            var title = purpose switch
+            {
+                "change-password" => "Xác thực đổi mật khẩu",
+                _ => "Xác thực OTP"
+            };
+
+            var message = purpose switch
+            {
+                "change-password" => "Bạn đã yêu cầu đổi mật khẩu. Để tiếp tục, vui lòng sử dụng mã xác thực bên dưới:",
+                _ => "Bạn đã yêu cầu mã xác thực OTP. Vui lòng sử dụng mã bên dưới:"
+            };
+
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #f39c12; color: white; padding: 20px; text-align: center; }}
+        .content {{ padding: 20px; background-color: #f9f9f9; }}
+        .code {{ font-size: 28px; font-weight: bold; color: #e74c3c; text-align: center; margin: 20px 0; padding: 20px; background-color: #fff; border: 2px dashed #e74c3c; border-radius: 8px; }}
+        .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+        .warning {{ background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>🌟 Sun Movement</h1>
+        </div>
+        <div class='content'>
+            <h2>{title}</h2>
+            <p>{message}</p>
+            
+            <div class='code'>{otpCode}</div>
+            
+            <div class='warning'>
+                <p><strong>⚠️ Lưu ý quan trọng:</strong></p>
+                <ul>
+                    <li>Mã xác thực này có hiệu lực trong <strong>10 phút</strong></li>
+                    <li>Không chia sẻ mã này với bất kỳ ai</li>
+                    <li>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này</li>
+                </ul>
+            </div>
+            
+            <p>Nếu bạn gặp bất kỳ khó khăn nào, vui lòng liên hệ với chúng tôi qua email hỗ trợ.</p>
+            
+            <p>Trân trọng,<br>Đội ngũ Sun Movement</p>
+        </div>
+        <div class='footer'>
+            <p>© 2025 Sun Movement. All rights reserved.</p>
+            <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
         private string GenerateVerificationEmailBody(string firstName, string verificationCode)
         {
             return $@"

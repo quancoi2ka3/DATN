@@ -1,28 +1,28 @@
 @model SunMovement.Core.Models.Order
 @using SunMovement.Core.Models
 @{
-    ViewData["Title"] = "Update Tracking Information";
+    ViewData["Title"] = "Cập nhật thông tin vận chuyển";
     Layout = "_AdminLayout";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Update Tracking Information</h1>
+    <h1 class="mt-4">Cập nhật thông tin vận chuyển</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="/admin/orders">Orders</a></li>
-        <li class="breadcrumb-item"><a href="/admin/orders/details/@Model.Id">Order #@Model.Id</a></li>
-        <li class="breadcrumb-item active">Update Tracking</li>
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "OrdersAdmin")">Quản lý đơn hàng</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })">Đơn hàng #@Model.Id</a></li>
+        <li class="breadcrumb-item active">Cập nhật vận chuyển</li>
     </ol>
     
     <div class="row">
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-truck me-1"></i> Shipping Tracking
+                    <i class="fas fa-truck me-1"></i> Thông tin vận chuyển
                 </div>
                 <div class="card-body">
                     <div class="mb-4">
-                        <h5>Current Tracking Number</h5>
+                        <h5>Mã vận đơn hiện tại</h5>
                         <div class="p-3 bg-light rounded">
                             @if (!string.IsNullOrEmpty(Model.TrackingNumber))
                             {
@@ -30,22 +30,32 @@
                             }
                             else
                             {
-                                <span class="text-muted">No tracking number provided</span>
+                                <span class="text-muted">Chưa có mã vận đơn</span>
                             }
                         </div>
                     </div>
                     
                     <form asp-action="UpdateTracking" asp-route-id="@Model.Id" method="post">
-                        <div class="form-group mb-3">
-                            <label for="trackingNumber" class="form-label">Tracking Number</label>
+                        <div class="mb-3">
+                            <label for="trackingNumber" class="form-label">Mã vận đơn</label>
                             <input type="text" id="trackingNumber" name="trackingNumber" class="form-control" 
-                                   value="@Model.TrackingNumber" placeholder="Enter shipping tracking number">
-                            <small class="form-text text-muted">Leave empty to remove tracking information</small>
+                                   value="@Model.TrackingNumber" placeholder="Nhập mã vận đơn">
+                            <small class="form-text text-muted">Để trống nếu muốn xóa thông tin vận đơn</small>
                         </div>
                         
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Update Tracking</button>
-                            <a href="/admin/orders/details/@Model.Id" class="btn btn-secondary">Cancel</a>
+                        <div class="mb-3">
+                            <label for="shippingMethod" class="form-label">Đơn vị vận chuyển</label>
+                            <input type="text" id="shippingMethod" name="shippingMethod" class="form-control" 
+                                   value="@Model.ShippingMethod" placeholder="VD: Giao hàng nhanh, GHTK, J&T...">
+                        </div>
+                        
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Cập nhật thông tin
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -55,49 +65,46 @@
         <div class="col-xl-6">
             <div class="card mb-4">
                 <div class="card-header">
-                    <i class="fas fa-info-circle me-1"></i> Order Information
+                    <i class="fas fa-info-circle me-1"></i> Thông tin đơn hàng
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-4">Order #</dt>
-                        <dd class="col-sm-8">@Model.Id</dd>
+                        <dt class="col-sm-4">Mã đơn hàng</dt>
+                        <dd class="col-sm-8">#@Model.Id</dd>
                         
-                        <dt class="col-sm-4">Status</dt>
+                        <dt class="col-sm-4">Trạng thái</dt>
                         <dd class="col-sm-8">
-                            @switch (Model.Status)
-                            {
-                                case OrderStatus.Pending:
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                    break;
-                                case OrderStatus.Processing:
-                                    <span class="badge bg-info">Processing</span>
-                                    break;
-                                case OrderStatus.Shipped:
-                                    <span class="badge bg-primary">Shipped</span>
-                                    break;
-                                case OrderStatus.Delivered:
-                                    <span class="badge bg-success">Delivered</span>
-                                    break;
-                                case OrderStatus.Cancelled:
-                                    <span class="badge bg-danger">Cancelled</span>
-                                    break;
-                                default:
-                                    <span class="badge bg-secondary">@Model.Status</span>
-                                    break;
+                            @{
+                                string statusClass = Model.Status switch
+                                {
+                                    OrderStatus.Pending => "bg-secondary text-white",
+                                    OrderStatus.AwaitingPayment => "bg-warning",
+                                    OrderStatus.Paid => "bg-info",
+                                    OrderStatus.Processing => "bg-info",
+                                    OrderStatus.Shipped => "bg-primary text-white",
+                                    OrderStatus.Delivered => "bg-success text-white",
+                                    OrderStatus.Completed => "bg-success text-white",
+                                    OrderStatus.Cancelled => "bg-danger text-white",
+                                    _ => "bg-secondary"
+                                };
                             }
+                            <span class="badge @statusClass">@Model.Status</span>
                         </dd>
                         
-                        <dt class="col-sm-4">Customer</dt>
-                        <dd class="col-sm-8">@Model.CustomerName</dd>
+                        <dt class="col-sm-4">Khách hàng</dt>
+                        <dd class="col-sm-8">@Model.DisplayCustomerName</dd>
                         
-                        <dt class="col-sm-4">Date</dt>
-                        <dd class="col-sm-8">@Model.CreatedAt.ToString("MM/dd/yyyy HH:mm")</dd>
+                        <dt class="col-sm-4">Ngày đặt hàng</dt>
+                        <dd class="col-sm-8">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</dd>
+                        
+                        <dt class="col-sm-4">Tổng tiền</dt>
+                        <dd class="col-sm-8">@Model.TotalAmount.ToString("N0") VNĐ</dd>
                     </dl>
                     
-                    <h5 class="mt-4">Shipping Address</h5>
-                    <address>
+                    <h5 class="mt-4">Địa chỉ giao hàng</h5>
+                    <div class="p-3 bg-light rounded">
                         @Model.ShippingAddress
-                    </address>
+                    </div>
                 </div>
             </div>
         </div>

@@ -26,6 +26,20 @@ const sortOptions = [
   { value: "name-desc", label: "Tên: Z-A" },
 ];
 
+// Pre-generated flame positions to avoid hydration mismatch
+const FLAME_POSITIONS = [
+  { left: 25.01, width: 10.19, height: 73.09, opacity: 0.71, duration: 1.76, delay: 1.88 },
+  { left: 40.00, width: 13.18, height: 54.11, opacity: 0.55, duration: 2.95, delay: 1.98 },
+  { left: 43.71, width: 24.12, height: 68.49, opacity: 0.59, duration: 3.20, delay: 0.99 },
+  { left: 60.39, width: 10.78, height: 59.62, opacity: 0.56, duration: 3.30, delay: 1.47 },
+  { left: 15.25, width: 22.91, height: 53.10, opacity: 0.97, duration: 1.98, delay: 0.98 },
+  { left: 53.07, width: 25.48, height: 27.38, opacity: 0.83, duration: 3.97, delay: 0.83 },
+  { left: 34.33, width: 25.50, height: 41.78, opacity: 0.91, duration: 3.25, delay: 1.53 },
+  { left: 66.55, width: 34.07, height: 27.97, opacity: 0.89, duration: 3.34, delay: 1.27 },
+  { left: 3.49, width: 39.72, height: 36.75, opacity: 0.54, duration: 1.48, delay: 1.85 },
+  { left: 32.28, width: 32.76, height: 21.13, opacity: 0.88, duration: 3.40, delay: 1.30 }
+];
+
 // Enhanced SportwearProductCard component with fire and energy effects
 interface SportswearProductCardProps {
   product: Product & {
@@ -34,6 +48,20 @@ interface SportswearProductCardProps {
     sizes?: string[];
   };
 }
+
+// Pre-generated flame positions for product cards
+const PRODUCT_FLAME_POSITIONS = [
+  { left: 15.2, width: 8.5, height: 45.3, opacity: 0.85, duration: 1.25 },
+  { left: 35.7, width: 12.3, height: 52.8, opacity: 0.92, duration: 1.75 },
+  { left: 55.4, width: 9.8, height: 38.9, opacity: 0.78, duration: 1.42 },
+  { left: 75.1, width: 14.2, height: 48.7, opacity: 0.88, duration: 1.68 },
+  { left: 25.9, width: 10.7, height: 41.5, opacity: 0.83, duration: 1.34 },
+  { left: 45.6, width: 13.8, height: 55.2, opacity: 0.95, duration: 1.89 },
+  { left: 65.3, width: 11.4, height: 43.1, opacity: 0.81, duration: 1.56 },
+  { left: 85.0, width: 9.2, height: 39.8, opacity: 0.76, duration: 1.23 },
+  { left: 5.8, width: 15.1, height: 49.6, opacity: 0.89, duration: 1.72 },
+  { left: 95.2, width: 8.9, height: 37.4, opacity: 0.74, duration: 1.18 }
+];
 
 const SportswearProductCard = ({ product }: SportswearProductCardProps) => {  const { addToCart, isLoading } = useCart();
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
@@ -107,16 +135,16 @@ const SportswearProductCard = ({ product }: SportswearProductCardProps) => {  co
               {/* Fire effect on image hover */}
               {showFireEffect && (
                 <div className="absolute bottom-0 left-0 w-full h-20 overflow-hidden pointer-events-none z-20">
-                  {[...Array(10)].map((_, i) => (
+                  {PRODUCT_FLAME_POSITIONS.map((flame, i) => (
                     <div 
                       key={i}
                       className="absolute bottom-0 rounded-full bg-gradient-to-t from-orange-500 to-red-500 flame-effect"
                       style={{
-                        left: `${Math.random() * 100}%`,
-                        width: `${Math.random() * 15 + 5}px`,
-                        height: `${Math.random() * 50 + 20}px`,
-                        opacity: 0.7 + Math.random() * 0.3,
-                        animationDuration: `${Math.random() * 2 + 0.5}s`,
+                        left: `${flame.left}%`,
+                        width: `${flame.width}px`,
+                        height: `${flame.height}px`,
+                        opacity: flame.opacity,
+                        animationDuration: `${flame.duration}s`,
                         filter: 'blur(3px)',
                       }}
                     />
@@ -300,52 +328,43 @@ export function SportswearSection({ products }: SportswearSectionProps) {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [backgroundParticles, setBackgroundParticles] = useState<Array<{ id: number; style: React.CSSProperties }>>([]);
-  const [modalBackgroundParticles, setModalBackgroundParticles] = useState<Array<{ id: number; style: React.CSSProperties }>>([]);
-  const [productBackgroundParticles, setProductBackgroundParticles] = useState<Array<{ id: number; style: React.CSSProperties }>>([]);
-  
-  // Generate all random particles on client-side only
-  useEffect(() => {
-    // Generate background particles
-    const newBackgroundParticles = Array.from({ length: 15 }, (_, i) => ({
-      id: i,
-      style: {
-        left: `${Math.random() * 100}%`,
-        width: `${Math.random() * 30 + 10}px`,
-        height: `${Math.random() * 60 + 20}px`,
-        opacity: 0.5 + Math.random() * 0.5,
-        animationDuration: `${Math.random() * 3 + 1}s`,
-        animationDelay: `${Math.random() * 2}s`,
-      }
-    }));
-    setBackgroundParticles(newBackgroundParticles);
-    
-    // Generate modal background particles
-    const newModalParticles = Array.from({ length: 5 }, (_, i) => ({
-      id: i,
-      style: {
-        left: `${Math.random() * 100}%`,
-        width: `${Math.random() * 15 + 5}px`,
-        height: `${Math.random() * 50 + 20}px`,
-        opacity: 0.7 + Math.random() * 0.3,
-        animationDuration: `${Math.random() * 2 + 0.5}s`,
-      }
-    }));
-    setModalBackgroundParticles(newModalParticles);
-    
-    // Generate product background particles
-    const newProductParticles = Array.from({ length: 8 }, (_, i) => ({
-      id: i,
-      style: {
-        left: `${Math.random() * 100}%`,
-        width: `${Math.random() * 20 + 5}px`,
-        height: `${Math.random() * 40 + 20}px`,
-        opacity: 0.7 + Math.random() * 0.3,
-        animationDuration: `${Math.random() * 2 + 1}s`,
-      }
-    }));
-    setProductBackgroundParticles(newProductParticles);
-  }, []);
+  // Pre-generated particles to avoid hydration mismatch
+  const [backgroundParticles] = useState(() => [
+    { id: 0, style: { left: '25.01%', width: '25px', height: '45px', opacity: 0.8, animationDuration: '2.5s', animationDelay: '0.2s' } },
+    { id: 1, style: { left: '45.33%', width: '18px', height: '38px', opacity: 0.7, animationDuration: '3.2s', animationDelay: '0.8s' } },
+    { id: 2, style: { left: '65.78%', width: '32px', height: '52px', opacity: 0.9, animationDuration: '1.8s', animationDelay: '1.5s' } },
+    { id: 3, style: { left: '15.42%', width: '22px', height: '41px', opacity: 0.6, animationDuration: '2.9s', animationDelay: '0.5s' } },
+    { id: 4, style: { left: '85.67%', width: '28px', height: '48px', opacity: 0.8, animationDuration: '2.1s', animationDelay: '1.2s' } },
+    { id: 5, style: { left: '35.89%', width: '20px', height: '36px', opacity: 0.7, animationDuration: '3.5s', animationDelay: '0.3s' } },
+    { id: 6, style: { left: '55.12%', width: '26px', height: '44px', opacity: 0.9, animationDuration: '2.3s', animationDelay: '1.8s' } },
+    { id: 7, style: { left: '75.45%', width: '24px', height: '39px', opacity: 0.8, animationDuration: '2.7s', animationDelay: '0.7s' } },
+    { id: 8, style: { left: '5.23%', width: '30px', height: '50px', opacity: 0.6, animationDuration: '1.9s', animationDelay: '1.1s' } },
+    { id: 9, style: { left: '95.78%', width: '19px', height: '42px', opacity: 0.7, animationDuration: '3.1s', animationDelay: '0.4s' } },
+    { id: 10, style: { left: '12.34%', width: '27px', height: '46px', opacity: 0.8, animationDuration: '2.6s', animationDelay: '1.6s' } },
+    { id: 11, style: { left: '42.67%', width: '21px', height: '37px', opacity: 0.9, animationDuration: '2.4s', animationDelay: '0.9s' } },
+    { id: 12, style: { left: '72.90%', width: '29px', height: '49px', opacity: 0.7, animationDuration: '3.3s', animationDelay: '1.3s' } },
+    { id: 13, style: { left: '82.45%', width: '23px', height: '43px', opacity: 0.8, animationDuration: '2.0s', animationDelay: '0.6s' } },
+    { id: 14, style: { left: '92.11%', width: '25px', height: '40px', opacity: 0.6, animationDuration: '2.8s', animationDelay: '1.4s' } }
+  ]);
+
+  const [modalBackgroundParticles] = useState(() => [
+    { id: 0, style: { left: '20%', width: '12px', height: '35px', opacity: 0.8, animationDuration: '1.5s' } },
+    { id: 1, style: { left: '40%', width: '15px', height: '42px', opacity: 0.9, animationDuration: '2.0s' } },
+    { id: 2, style: { left: '60%', width: '10px', height: '38px', opacity: 0.7, animationDuration: '1.8s' } },
+    { id: 3, style: { left: '80%', width: '18px', height: '45px', opacity: 0.8, animationDuration: '2.2s' } },
+    { id: 4, style: { left: '10%', width: '14px', height: '40px', opacity: 0.75, animationDuration: '1.7s' } }
+  ]);
+
+  const [productBackgroundParticles] = useState(() => [
+    { id: 0, style: { left: '15%', width: '15px', height: '35px', opacity: 0.8, animationDuration: '2.5s' } },
+    { id: 1, style: { left: '35%', width: '12px', height: '42px', opacity: 0.9, animationDuration: '2.8s' } },
+    { id: 2, style: { left: '55%', width: '18px', height: '38px', opacity: 0.7, animationDuration: '2.2s' } },
+    { id: 3, style: { left: '75%', width: '20px', height: '45px', opacity: 0.8, animationDuration: '3.0s' } },
+    { id: 4, style: { left: '25%', width: '16px', height: '40px', opacity: 0.75, animationDuration: '2.6s' } },
+    { id: 5, style: { left: '65%', width: '14px', height: '37px', opacity: 0.85, animationDuration: '2.4s' } },
+    { id: 6, style: { left: '85%', width: '17px', height: '43px', opacity: 0.9, animationDuration: '2.9s' } },
+    { id: 7, style: { left: '5%', width: '19px', height: '41px', opacity: 0.8, animationDuration: '2.1s' } }
+  ]);
   
   // Update filtered products when products prop changes
   useEffect(() => {
@@ -431,17 +450,17 @@ export function SportswearSection({ products }: SportswearSectionProps) {
       
       {/* Fire Effect on Top */}
       <div className="absolute top-0 left-0 w-full h-20 overflow-hidden pointer-events-none">
-        {[...Array(10)].map((_, i) => (
+        {FLAME_POSITIONS.map((flame, i) => (
           <div 
             key={i}
             className="absolute top-0 rounded-full bg-gradient-to-b from-orange-500 to-red-500 on-scroll-flame"
             style={{
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 30 + 10}px`,
-              height: `${Math.random() * 60 + 20}px`,
-              opacity: 0.5 + Math.random() * 0.5,
-              animationDuration: `${Math.random() * 3 + 1}s`,
-              animationDelay: `${Math.random() * 2}s`,
+              left: `${flame.left}%`,
+              width: `${flame.width}px`,
+              height: `${flame.height}px`,
+              opacity: flame.opacity,
+              animationDuration: `${flame.duration}s`,
+              animationDelay: `${flame.delay}s`,
               filter: 'blur(8px)',
             }}
           />

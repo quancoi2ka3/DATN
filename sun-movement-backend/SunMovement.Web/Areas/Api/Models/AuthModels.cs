@@ -139,4 +139,29 @@ namespace SunMovement.Web.Areas.Api.Models
         [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
         public required string ConfirmPassword { get; set; }
     }
+
+    public class SendOtpModel
+    {
+        [Required(ErrorMessage = "Mục đích OTP là bắt buộc")]
+        public required string Purpose { get; set; } // "change-password"
+    }
+
+    public class ChangePasswordWithOtpModel
+    {
+        [Required(ErrorMessage = "Mật khẩu hiện tại là bắt buộc")]
+        public required string CurrentPassword { get; set; }
+        
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", 
+            ErrorMessage = "Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt")]
+        public required string NewPassword { get; set; }
+        
+        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public required string ConfirmPassword { get; set; }
+        
+        [Required(ErrorMessage = "Mã OTP là bắt buộc")]
+        public required string OtpCode { get; set; }
+    }
 }

@@ -1,0 +1,113 @@
+@model SunMovement.Core.Models.InventoryTransaction
+
+@{
+    ViewData["Title"] = "Điều chỉnh kho";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Điều chỉnh kho</h1>
+    <p class="mb-4">Điều chỉnh số lượng tồn kho cho sản phẩm (tăng hoặc giảm).</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin điều chỉnh</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Adjustment" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group">
+                            <label asp-for="ProductId" class="control-label">Sản phẩm</label>
+                            <select asp-for="ProductId" class="form-control" 
+                                    asp-items="ViewBag.Products" required id="productSelect">
+                                <option value="">-- Chọn sản phẩm --</option>
+                            </select>
+                            <span asp-validation-for="ProductId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="control-label">Tồn kho hiện tại</label>
+                            <div class="form-control-plaintext" id="currentStock">Chọn sản phẩm để xem tồn kho</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Quantity" class="control-label">Số lượng điều chỉnh</label>
+                            <input asp-for="Quantity" class="form-control" required />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Nhập số dương để tăng tồn kho, số âm để giảm tồn kho
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" 
+                                      placeholder="Lý do điều chỉnh kho..." required></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Điều chỉnh kho
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <h6>Điều chỉnh kho</h6>
+                    <p class="text-muted small">
+                        • Nhập số dương (+) để tăng tồn kho<br>
+                        • Nhập số âm (-) để giảm tồn kho<br>
+                        • Ghi chú là bắt buộc để theo dõi lý do điều chỉnh
+                    </p>
+                    
+                    <h6 class="mt-4">Ví dụ</h6>
+                    <p class="text-muted small">
+                        • +10: Tăng 10 sản phẩm<br>
+                        • -5: Giảm 5 sản phẩm<br>
+                        • Luôn ghi rõ lý do trong phần ghi chú
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Get stock when product changes
+            $('#productSelect').change(function() {
+                var productId = $(this).val();
+                if (productId) {
+                    $.get('@Url.Action("GetProductStock", "InventoryAdmin")', { productId: productId })
+                        .done(function(data) {
+                            if (data.success) {
+                                $('#currentStock').text(data.stock + ' sản phẩm');
+                            } else {
+                                $('#currentStock').text('Không thể lấy thông tin tồn kho');
+                            }
+                        })
+                        .fail(function() {
+                            $('#currentStock').text('Lỗi khi lấy thông tin tồn kho');
+                        });
+                } else {
+                    $('#currentStock').text('Chọn sản phẩm để xem tồn kho');
+                }
+            });
+        });
+    </script>
+}

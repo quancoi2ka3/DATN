@@ -217,16 +217,12 @@ export default function CustomerLogin({ onSuccess, onSwitchToRegister }: Custome
               </Label>
             </div>
             
-            <button
-              type="button"
+            <a 
+              href="/forgot-password" 
               className="text-sm text-blue-600 hover:text-blue-500"
-              onClick={() => {
-                // TODO: Implement forgot password functionality
-                alert('Tính năng quên mật khẩu sẽ được triển khai sau');
-              }}
             >
               Quên mật khẩu?
-            </button>
+            </a>
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

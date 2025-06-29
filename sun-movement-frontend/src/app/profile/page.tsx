@@ -77,6 +77,32 @@ export default function ProfilePage() {
                   <span className="font-medium">{user.email}</span>
                 </div>
 
+                {user.phoneNumber && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-600">Số điện thoại:</span>
+                    <span className="font-medium">{user.phoneNumber}</span>
+                  </div>
+                )}
+
+                {user.address && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-600">Địa chỉ:</span>
+                    <span className="font-medium">{user.address}</span>
+                  </div>
+                )}
+
+                {user.dateOfBirth && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-600">Ngày sinh:</span>
+                    <span className="font-medium">
+                      {new Date(user.dateOfBirth).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-3 text-sm">
                   <Shield className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600">Vai trò:</span>
@@ -90,6 +116,16 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 </div>
+
+                {user.createdAt && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <span className="text-gray-600">Thành viên từ:</span>
+                    <span className="font-medium">
+                      {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -106,19 +142,25 @@ export default function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full justify-start">
-                <User className="mr-2 h-4 w-4" />
-                Chỉnh sửa thông tin cá nhân
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/edit-profile">
+                  <User className="mr-2 h-4 w-4" />
+                  Chỉnh sửa thông tin cá nhân
+                </Link>
               </Button>
               
-              <Button variant="outline" className="w-full justify-start">
-                <Shield className="mr-2 h-4 w-4" />
-                Đổi mật khẩu
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/change-password-otp">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Đổi mật khẩu (Xác thực OTP)
+                </Link>
               </Button>
               
-              <Button variant="outline" className="w-full justify-start">
-                <Mail className="mr-2 h-4 w-4" />
-                Cài đặt thông báo
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link href="/notification-settings">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Cài đặt thông báo
+                </Link>
               </Button>
             </CardContent>
           </Card>

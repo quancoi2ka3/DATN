@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/footer";
 import { FloatingContactButton } from "@/components/ui/messenger-button";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
+import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
 import { Suspense } from "react";
 
 export const viewport: Viewport = {
@@ -98,8 +99,19 @@ export default function RootLayout({
         {/* Performance hints */}
         <link rel="preload" href="/fonts/SF-Pro-Display/SF-Pro-Display-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/SF-Pro-Display/SF-Pro-Display-Medium.otf" as="font" type="font/otf" crossOrigin="anonymous" />
+        
+        {/* Simple scroll progress script */}
+        <script src="/scroll-progress.js" defer></script>
       </head>
       <body className="min-h-screen bg-sunbg flex flex-col optimize-text smooth-scroll">
+        {/* Enhanced scroll progress bar */}
+        <div className="scroll-progress">
+          <div className="scroll-progress-bar" id="scroll-progress"></div>
+        </div>
+        
+        <ResourcePreloader />
+        <PerformanceMonitor />
+        <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
           <AuthProvider>
             <CartProvider>

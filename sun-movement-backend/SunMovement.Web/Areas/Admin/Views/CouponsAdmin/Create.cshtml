@@ -1,0 +1,290 @@
+@model SunMovement.Core.Models.Coupon
+
+@{
+    ViewData["Title"] = "Tạo mã giảm giá";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Tạo mã giảm giá mới</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">Tạo mới</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-tags me-1"></i> Thông tin mã giảm giá
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Code" class="form-label">
+                                Mã giảm giá <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Code" class="form-control" placeholder="VD: SUMMER2025" />
+                            <span asp-validation-for="Code" class="text-danger"></span>
+                            <div class="form-text">Mã phải là duy nhất và chỉ chứa chữ cái, số, dấu gạch ngang</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="form-label">
+                                Tên mã giảm giá <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="VD: Giảm giá mùa hè" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="form-label">Mô tả</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" 
+                              placeholder="Mô tả chi tiết về mã giảm giá"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="Type" class="form-label">
+                                Loại giảm giá <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Type" class="form-select" id="couponType">
+                                <option value="">Chọn loại giảm giá</option>
+                                <option value="@CouponType.Percentage">Giảm theo phần trăm (%)</option>
+                                <option value="@CouponType.FixedAmount">Giảm số tiền cố định (VNĐ)</option>
+                                <option value="@CouponType.FreeShipping">Miễn phí vận chuyển</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="Value" class="form-label" id="valueLabel">
+                                Giá trị <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Value" type="number" step="0.01" class="form-control" id="couponValue" />
+                            <span asp-validation-for="Value" class="text-danger"></span>
+                            <div class="form-text" id="valueHint">Chọn loại giảm giá để xem hướng dẫn</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="MinimumOrderAmount" class="form-label">Đơn hàng tối thiểu (VNĐ)</label>
+                            <input asp-for="MinimumOrderAmount" type="number" step="1000" class="form-control" 
+                                   placeholder="0" />
+                            <span asp-validation-for="MinimumOrderAmount" class="text-danger"></span>
+                            <div class="form-text">Để trống nếu không có yêu cầu tối thiểu</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="StartDate" class="form-label">
+                                Ngày bắt đầu <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="StartDate" type="datetime-local" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="EndDate" class="form-label">
+                                Ngày kết thúc <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="EndDate" type="datetime-local" class="form-control" value="@DateTime.Now.AddMonths(1).ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label asp-for="UsageLimit" class="form-label">Giới hạn sử dụng</label>
+                            <input asp-for="UsageLimit" type="number" min="1" class="form-control" 
+                                   placeholder="Không giới hạn" />
+                            <span asp-validation-for="UsageLimit" class="text-danger"></span>
+                            <div class="form-text">Để trống nếu không giới hạn số lần sử dụng</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" checked />
+                                <label class="form-check-label" asp-for="IsActive">
+                                    Kích hoạt mã giảm giá
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Tạo mã giảm giá
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Debug toastr availability
+            console.log('jQuery loaded:', typeof $ !== 'undefined');
+            console.log('Toastr loaded:', typeof toastr !== 'undefined');
+            
+            // Safe toastr function with fallback
+            function showToastr(message, type) {
+                if (typeof toastr !== 'undefined') {
+                    toastr[type](message);
+                } else {
+                    // Fallback to alert if toastr not available
+                    alert(type.toUpperCase() + ': ' + message);
+                    console.error('Toastr not available, falling back to alert');
+                }
+            }
+
+            // Format date for input
+            function formatDateForInput(date) {
+                var year = date.getFullYear();
+                var month = ('0' + (date.getMonth() + 1)).slice(-2);
+                var day = ('0' + date.getDate()).slice(-2);
+                var hours = ('0' + date.getHours()).slice(-2);
+                var minutes = ('0' + date.getMinutes()).slice(-2);
+                return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            }
+
+            // Set default dates if not already set
+            var startDateInput = $('#StartDate');
+            var endDateInput = $('#EndDate');
+
+            if (!startDateInput.val()) {
+                var now = new Date();
+                startDateInput.val(formatDateForInput(now));
+            }
+
+            if (!endDateInput.val()) {
+                var futureDate = new Date();
+                futureDate.setMonth(futureDate.getMonth() + 1);
+                endDateInput.val(formatDateForInput(futureDate));
+            }
+
+            // Handle coupon type change
+            $('#Type').change(function() {
+                var type = $(this).val();
+                var valueLabel = $('label[for="Value"]');
+                var valueInput = $('#Value');
+                var valueHint = $('#Value').siblings('.form-text');
+                
+                switch(type) {
+                    case '@CouponType.Percentage':
+                        valueLabel.html('Phần trăm giảm (%) <span class="text-danger">*</span>');
+                        valueInput.attr('max', '100').attr('min', '0.01').attr('step', '0.01').removeAttr('readonly');
+                        valueHint.text('Nhập phần trăm giảm từ 0.01% đến 100%');
+                        break;
+                    case '@CouponType.FixedAmount':
+                        valueLabel.html('Số tiền giảm (VNĐ) <span class="text-danger">*</span>');
+                        valueInput.removeAttr('max').attr('min', '1000').attr('step', '1000').removeAttr('readonly');
+                        valueHint.text('Nhập số tiền giảm tối thiểu 1,000 VNĐ');
+                        break;
+                    case '@CouponType.FreeShipping':
+                        valueLabel.text('Giá trị');
+                        valueInput.val('0').attr('readonly', true).removeAttr('max min step');
+                        valueHint.text('Mã miễn phí vận chuyển không cần nhập giá trị');
+                        break;
+                    default:
+                        valueLabel.html('Giá trị <span class="text-danger">*</span>');
+                        valueInput.removeAttr('max min readonly step');
+                        valueHint.text('Chọn loại giảm giá để xem hướng dẫn');
+                        break;
+                }
+            });
+
+            // Auto generate coupon code
+            $('#Description').on('blur', function() {
+                var description = $(this).val();
+                var code = $('#Code').val();
+                
+                if (description && !code) {
+                    var generatedCode = description.toUpperCase()
+                        .replace(/[^A-Z0-9]/g, '')
+                        .substring(0, 8) + Math.floor(Math.random() * 100);
+                    $('#Code').val(generatedCode);
+                }
+            });
+
+            // Validate dates on change
+            startDateInput.on('change', function() {
+                var startDate = new Date($(this).val());
+                var endDate = new Date(endDateInput.val());
+                
+                if (endDate <= startDate) {
+                    var newEndDate = new Date(startDate);
+                    newEndDate.setDate(newEndDate.getDate() + 7); // Add 7 days
+                    endDateInput.val(formatDateForInput(newEndDate));
+                    
+                    showToastr('Ngày kết thúc đã được tự động điều chỉnh để sau ngày bắt đầu 7 ngày.', 'info');
+                }
+            });
+
+            endDateInput.on('change', function() {
+                var startDate = new Date(startDateInput.val());
+                var endDate = new Date($(this).val());
+                
+                if (endDate <= startDate) {
+                    showToastr('Ngày kết thúc phải sau ngày bắt đầu.', 'error');
+                    $(this).focus();
+                }
+            });
+
+            // Trigger coupon type change on page load
+            $('#Type').trigger('change');
+
+            // Form submission validation
+            $('form').on('submit', function(e) {
+                var isValid = true;
+                var startDate = new Date(startDateInput.val());
+                var endDate = new Date(endDateInput.val());
+                
+                if (endDate <= startDate) {
+                    e.preventDefault();
+                    showToastr('Ngày kết thúc phải sau ngày bắt đầu.', 'error');
+                    isValid = false;
+                }
+
+                var type = $('#Type').val();
+                var value = parseFloat($('#Value').val());
+                
+                if (type === '@CouponType.Percentage' && value > 100) {
+                    e.preventDefault();
+                    showToastr('Phần trăm giảm giá không được vượt quá 100%.', 'error');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    showToastr('Đang tạo mã giảm giá...', 'info');
+                }
+
+                return isValid;
+            });
+        });
+    </script>
+}

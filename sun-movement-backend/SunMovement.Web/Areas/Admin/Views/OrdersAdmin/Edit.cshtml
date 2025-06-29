@@ -1,0 +1,143 @@
+@model SunMovement.Core.Models.Order
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Chỉnh sửa đơn hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Chỉnh sửa đơn hàng #@Model.Id</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "OrdersAdmin")">Quản lý đơn hàng</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa đơn hàng #@Model.Id</li>
+    </ol>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <h4>Có lỗi xảy ra</h4>
+            <div asp-validation-summary="All" class="text-danger"></div>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i>
+            Thông tin đơn hàng
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="OrderDate" />
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="UpdatedAt" />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="CustomerName" class="form-label">Họ và tên khách hàng</label>
+                            <input asp-for="CustomerName" class="form-control" />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ShippingAddress" class="form-label">Địa chỉ giao hàng</label>
+                    <textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="PaymentMethod" class="form-label">Phương thức thanh toán</label>
+                            <select asp-for="PaymentMethod" class="form-select">
+                                <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                                <option value="BankTransfer">Chuyển khoản ngân hàng</option>
+                                <option value="VNPay">Thanh toán VNPay</option>
+                                <option value="Momo">Ví MoMo</option>
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label">Trạng thái đơn hàng</label>
+                            <select asp-for="Status" class="form-select">
+                                @foreach (var status in ViewBag.OrderStatuses)
+                                {
+                                    <option value="@status">@status.ToString()</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> Cảnh báo: Thay đổi trạng thái thành "Đã giao" hoặc "Hoàn thành" sẽ tự động giảm tồn kho.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input asp-for="IsPaid" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsPaid" class="form-check-label">Đã thanh toán</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TrackingNumber" class="form-label">Mã vận đơn</label>
+                            <input asp-for="TrackingNumber" class="form-control" />
+                            <span asp-validation-for="TrackingNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="ShippingMethod" class="form-label">Phương thức vận chuyển</label>
+                            <input asp-for="ShippingMethod" class="form-control" />
+                            <span asp-validation-for="ShippingMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Notes" class="form-label">Ghi chú</label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

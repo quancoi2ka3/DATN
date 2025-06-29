@@ -1,0 +1,17 @@
+  Determining projects to restore...
+d:\DATN\DATN\sun-movement-backend\SunMovement.Core\SunMovement.Core.csproj : warning NU1904: Package 'System.Text.Encodings.Web' 4.5.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-ghhp-997w-qr28 [d:\DATN\DATN\sun-movement-backend\SunMovement.sln]
+  All projects are up-to-date for restore.
+d:\DATN\DATN\sun-movement-backend\SunMovement.Core\SunMovement.Core.csproj : warning NU1904: Package 'System.Text.Encodings.Web' 4.5.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-ghhp-997w-qr28
+  SunMovement.Core -> d:\DATN\DATN\sun-movement-backend\SunMovement.Core\bin\Debug\net9.0\SunMovement.Core.dll
+  SunMovement.Infrastructure -> d:\DATN\DATN\sun-movement-backend\SunMovement.Infrastructure\bin\Debug\net9.0\SunMovement.Infrastructure.dll
+  SunMovement.Web -> d:\DATN\DATN\sun-movement-backend\SunMovement.Web\bin\Debug\net9.0\SunMovement.Web.dll
+  SunMovement.Tests -> d:\DATN\DATN\sun-movement-backend\SunMovement.Tests\bin\Debug\net9.0\SunMovement.Tests.dll
+
+Build succeeded.
+
+d:\DATN\DATN\sun-movement-backend\SunMovement.Core\SunMovement.Core.csproj : warning NU1904: Package 'System.Text.Encodings.Web' 4.5.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-ghhp-997w-qr28 [d:\DATN\DATN\sun-movement-backend\SunMovement.sln]
+d:\DATN\DATN\sun-movement-backend\SunMovement.Core\SunMovement.Core.csproj : warning NU1904: Package 'System.Text.Encodings.Web' 4.5.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-ghhp-997w-qr28
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:03.87

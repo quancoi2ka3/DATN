@@ -224,7 +224,7 @@ const faqData = [
         • Hotline: 08999 139 393 (7:00 - 21:00 hàng ngày)
         • Email: contact@sunmovement.vn
         • Fanpage: facebook.com/sunmovementvn
-        • Trực tiếp: Tầng 11, số 300 Đê La Thành Đính, Thổ Quan, Đống Đa, Hà Nội
+        • Trực tiếp: Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội
         
         Đội ngũ chăm sóc khách hàng của chúng tôi sẽ phản hồi trong vòng 24 giờ.`
       }

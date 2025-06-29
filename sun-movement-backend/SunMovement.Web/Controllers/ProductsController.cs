@@ -92,8 +92,7 @@ namespace SunMovement.Web.Controllers
                         Description = p.Description,
                         Price = p.Price,
                         ImageUrl = p.ImageUrl,
-                        Category = GetCategoryDisplayName(p.Category),
-                        IsAvailable = p.StockQuantity > 0,
+                        Category = p.Category,
                         StockQuantity = p.StockQuantity,
                         Brand = p.SubCategory,
                         DiscountPrice = p.DiscountPrice ?? 0
@@ -149,12 +148,11 @@ namespace SunMovement.Web.Controllers
                     Description = product.Description,
                     Price = product.Price,
                     ImageUrl = product.ImageUrl,
-                    Category = GetCategoryDisplayName(product.Category),
-                    IsAvailable = product.StockQuantity > 0,
+                    Category = product.Category,
                     StockQuantity = product.StockQuantity,
                     Brand = product.SubCategory,
                     DiscountPrice = product.DiscountPrice ?? 0,
-                    SKU = product.Id.ToString("D6")
+                    Sku = product.Sku ?? product.Id.ToString("D6")
                 };
 
                 return View(viewModel);
@@ -174,13 +172,16 @@ namespace SunMovement.Web.Controllers
             return $"W/\"products-{latestUpdate.Ticks}-{products.Count()}\"";
         }
 
-        // Helper method to convert enum to display name
+        // Helper method to convert enum to display name - used for view display
         private string GetCategoryDisplayName(ProductCategory category)
         {
             return category switch
             {
                 ProductCategory.Sportswear => "Sportwear",
                 ProductCategory.Supplements => "Supplement",
+                ProductCategory.Equipment => "Equipment",
+                ProductCategory.Accessories => "Accessories",
+                ProductCategory.Nutrition => "Nutrition",
                 _ => "Unknown" // Handle unexpected values
             };
         }

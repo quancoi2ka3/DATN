@@ -1,0 +1,117 @@
+@model SunMovement.Core.Models.InventoryTransaction
+
+@{
+    ViewData["Title"] = "Nhập kho";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Nhập kho</h1>
+    <p class="mb-4">Thêm sản phẩm mới vào kho hoặc nhập thêm số lượng cho sản phẩm đã có.</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin nhập kho</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="StockIn" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group">
+                            <label asp-for="ProductId" class="control-label">Sản phẩm</label>
+                            <select asp-for="ProductId" class="form-control" 
+                                    asp-items="ViewBag.Products" required>
+                                <option value="">-- Chọn sản phẩm --</option>
+                            </select>
+                            <span asp-validation-for="ProductId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Quantity" class="control-label">Số lượng nhập</label>
+                            <input asp-for="Quantity" class="form-control" min="1" required />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="UnitPrice" class="control-label">Đơn giá nhập (VNĐ)</label>
+                            <input asp-for="UnitPrice" class="form-control" required />
+                            <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="SupplierId" class="control-label">Nhà cung cấp</label>
+                            <select asp-for="SupplierId" class="form-control"
+                                    asp-items="ViewBag.Suppliers">
+                                <option value="">-- Chọn nhà cung cấp (nếu có) --</option>
+                            </select>
+                            <span asp-validation-for="SupplierId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="ReferenceNumber" class="control-label">Số tham chiếu</label>
+                            <input asp-for="ReferenceNumber" class="form-control" placeholder="Phiếu nhập, hóa đơn, v.v." />
+                            <span asp-validation-for="ReferenceNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                        
+                        <input type="hidden" asp-for="TransactionType" value="@SunMovement.Core.Models.InventoryTransactionType.Purchase" />
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Lưu nhập kho
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <p>Việc nhập kho sẽ:</p>
+                    <ul>
+                        <li>Tăng số lượng tồn kho của sản phẩm</li>
+                        <li>Tính lại giá vốn trung bình theo phương pháp bình quân gia quyền</li>
+                        <li>Ghi nhận thời điểm nhập/xuất gần nhất</li>
+                    </ul>
+                    <p>Khi nhập kho, bạn nên ghi rõ:</p>
+                    <ul>
+                        <li>Số lượng chính xác</li>
+                        <li>Đơn giá nhập thực tế</li>
+                        <li>Nhà cung cấp (nếu có)</li>
+                        <li>Tham chiếu đến phiếu nhập hoặc hóa đơn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Tự động tính tổng giá trị khi nhập số lượng hoặc đơn giá
+            $("#Quantity, #UnitPrice").on("change keyup", function() {
+                var quantity = parseFloat($("#Quantity").val()) || 0;
+                var unitPrice = parseFloat($("#UnitPrice").val()) || 0;
+                var total = quantity * unitPrice;
+                $("#TotalCost").val(total.toFixed(0));
+            });
+        });
+    </script>
+}

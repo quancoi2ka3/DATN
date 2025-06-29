@@ -1,0 +1,290 @@
+@model SunMovement.Web.Areas.Admin.Controllers.InventoryDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard Kho Hàng";
+    Layout = "_AdminLayout";
+    var lowStockClass = Model.LowStockCount > 0 ? "text-danger" : "text-success";
+    var outOfStockClass = Model.OutOfStockCount > 0 ? "text-danger" : "text-success";
+    var agedInventoryClass = Model.AgedInventoryCount > 0 ? "text-warning" : "text-success";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Dashboard Kho Hàng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item active">Dashboard Kho Hàng</li>
+    </ol>
+
+    <!-- Thẻ tổng quan -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Tổng sản phẩm</div>
+                            <div class="font-weight-bold h4">@Model.TotalProducts</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-box fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="@Url.Action("Index", "ProductsAdmin")">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Giá trị kho hàng</div>
+                            <div class="font-weight-bold h4">@Model.TotalInventoryValue.ToString("N0") VNĐ</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-money-bill-wave fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="@Url.Action("Index", "InventoryAdmin")">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Cảnh báo tồn kho thấp</div>
+                            <div class="font-weight-bold h4">@Model.LowStockCount</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-exclamation-triangle fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#lowStockSection">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Hàng tồn kho lâu</div>
+                            <div class="font-weight-bold h4">@Model.AgedInventoryCount</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-clock fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#agedInventorySection">Xem chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo quan trọng -->
+    @if (Model.LowStockCount > 0 || Model.OutOfStockCount > 0 || Model.AgedInventoryCount > 0)
+    {
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Thông báo quan trọng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger mb-2 @(Model.OutOfStockCount > 0 ? "" : "d-none")">
+                            <strong><i class="fas fa-exclamation-circle me-1"></i> Cảnh báo!</strong> Có <strong>@Model.OutOfStockCount</strong> sản phẩm đã hết hàng. Vui lòng nhập thêm để đáp ứng đơn hàng.
+                        </div>
+                        <div class="alert alert-warning mb-2 @(Model.LowStockCount > 0 ? "" : "d-none")">
+                            <strong><i class="fas fa-exclamation-triangle me-1"></i> Cảnh báo!</strong> Có <strong>@Model.LowStockCount</strong> sản phẩm sắp hết hàng. Cần nhập thêm để đảm bảo kinh doanh.
+                        </div>
+                        <div class="alert alert-info @(Model.AgedInventoryCount > 0 ? "" : "d-none")">
+                            <strong><i class="fas fa-clock me-1"></i> Lưu ý!</strong> Có <strong>@Model.AgedInventoryCount</strong> sản phẩm tồn kho trên 90 ngày. Hãy xem xét tạo mã giảm giá để đẩy hàng tồn.
+                            <a href="@Url.Action("GenerateAgedInventoryCoupons", "CouponsAdmin")" class="btn btn-sm btn-primary mt-2">Tạo mã giảm giá cho hàng tồn</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Phần hàng sắp hết -->
+    <div class="row" id="lowStockSection">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Sản phẩm tồn kho thấp
+                    </div>
+                    <div>
+                        <a href="@Url.Action("StockIn", "InventoryAdmin")" class="btn btn-sm btn-primary">Nhập kho</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.LowStockCount > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Tồn kho hiện tại</th>
+                                        <th>Mức tối thiểu</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.LowStockProducts)
+                                    {
+                                        <tr>
+                                            <td>@product.Name</td>
+                                            <td class="text-danger font-weight-bold">@product.StockQuantity</td>
+                                            <td>@product.MinimumStockLevel</td>
+                                            <td>
+                                                <a href="@Url.Action("StockIn", "InventoryAdmin", new { productId = product.Id })" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-plus-circle"></i> Nhập kho
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-1"></i> Tất cả sản phẩm đều có tồn kho ở mức an toàn.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phần hàng tồn kho lâu -->
+    <div class="row" id="agedInventorySection">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-clock me-1"></i>
+                        Sản phẩm tồn kho lâu ngày
+                    </div>
+                    <div>
+                        <a href="@Url.Action("GenerateAgedInventoryCoupons", "CouponsAdmin")" class="btn btn-sm btn-warning">
+                            <i class="fas fa-tag"></i> Tạo mã giảm giá
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.AgedInventoryCount > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Tồn kho</th>
+                                        <th>Ngày cập nhật cuối</th>
+                                        <th>Số ngày tồn kho</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.AgedInventoryProducts)
+                                    {
+                                        <tr>
+                                            <td>@product.Name</td>
+                                            <td>@product.StockQuantity</td>
+                                            <td>@product.LastStockUpdateDate.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-warning font-weight-bold">@Math.Round(product.DaysInStock) ngày</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning create-coupon" data-product-id="@product.Id" data-product-name="@product.Name">
+                                                    <i class="fas fa-tag"></i> Tạo mã giảm giá
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-1"></i> Không có sản phẩm tồn kho lâu ngày.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Các giao dịch gần đây -->
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-history me-1"></i>
+                    Giao dịch kho gần đây
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Ngày</th>
+                                    <th>Loại giao dịch</th>
+                                    <th>Số lượng</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.RecentTransactionsList)
+                                {
+                                    var transactionClass = transaction.Quantity > 0 ? "text-success" : "text-danger";
+                                    <tr>
+                                        <td>@transaction.TransactionDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@transaction.TransactionType</td>
+                                        <td class="@transactionClass">@transaction.Quantity</td>
+                                        <td>@transaction.Notes</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý tạo mã giảm giá cho sản phẩm tồn kho lâu
+            $('.create-coupon').click(function() {
+                var productId = $(this).data('product-id');
+                var productName = $(this).data('product-name');
+                
+                if (confirm('Bạn có muốn tạo mã giảm giá cho sản phẩm "' + productName + '" không?')) {
+                    window.location.href = '@Url.Action("CreateCouponForProduct", "CouponsAdmin")?productId=' + productId;
+                }
+            });
+        });
+    </script>
+}

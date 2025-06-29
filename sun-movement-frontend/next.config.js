@@ -8,8 +8,42 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog'],
   },
   
+  // Tối ưu cho lazy loading
+  serverExternalPackages: [],
+  
   // Compression
   compress: true,
+  
+  // Bundle optimization cho lazy loading
+  webpack: (config, { dev, isServer }) => {
+    // Tối ưu chunk splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          sections: {
+            test: /[\\/]src[\\/]components[\\/]sections[\\/]/,
+            name: 'sections',
+            chunks: 'async',
+            minSize: 10000,
+          },
+          ui: {
+            test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
+            name: 'ui-components',
+            chunks: 'async',
+            minSize: 5000,
+          },
+        },
+      };
+    }
+    
+    return config;
+  },
   
   // Environment variables
   env: {

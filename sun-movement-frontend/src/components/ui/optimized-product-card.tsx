@@ -47,7 +47,7 @@ const QuickAddButton = memo(({
       onClick={handleQuickAdd}
       disabled={isAdding}
       size="sm"
-      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/90 text-black hover:bg-white shadow-lg"
+      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all-smooth bg-white/90 text-black hover:bg-white shadow-lg hover-lift button-press"
     >
       {isAdding ? (
         <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -147,34 +147,48 @@ export const OptimizedProductCard = memo(({
 
   return (
     <>
-      {/* Success Toast */}
+      {/* Enhanced Success Toast */}
       {showSuccessToast && (
-        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-in slide-in-from-right">
-          ✅ Đã thêm {product.name} vào giỏ hàng!
+        <div className="fixed top-4 right-4 z-50 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg shadow-xl animate-in slide-in-from-right bounce-in">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">✅</span>
+            <span className="font-medium">Đã thêm {product.name} vào giỏ hàng!</span>
+          </div>
         </div>
       )}
 
       <div 
         className={cn(
-          "group relative bg-white rounded-xl overflow-hidden transition-all duration-300 cursor-pointer",
-          "hover:shadow-xl hover:-translate-y-1",
-          "border border-gray-100 hover:border-gray-200",
+          "product-card-enhanced force-enhanced-hover group relative bg-white rounded-xl overflow-hidden cursor-pointer border border-gray-100 hover:border-gray-200",
           isCompact ? "shadow-sm" : "shadow-md"
         )}
+        style={{
+          transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-12px) scale(1.03)';
+          e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0px) scale(1)';
+          e.currentTarget.style.boxShadow = '';
+        }}
         onClick={() => setIsOpen(true)}
       >
         {/* Image Container */}
-        <div className={cn("relative overflow-hidden", isCompact ? "h-48" : "h-64")}>
+        <div className={cn("relative overflow-hidden group", isCompact ? "h-48" : "h-64")}>
           <OptimizedImage
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
-          {/* Overlay on hover */}
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Enhanced overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
           
           {/* Quick actions */}
           <QuickAddButton 
@@ -186,9 +200,9 @@ export const OptimizedProductCard = memo(({
           />
           {showWishlist && <WishlistButton productId={product.id} />}
           
-          {/* Discount badge */}
+          {/* Enhanced discount badge with animation */}
           {product.discount && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+            <div className="wiggle-discount absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
               -{product.discount}%
             </div>
           )}
@@ -247,9 +261,29 @@ export const OptimizedProductCard = memo(({
 
           {/* Action button */}
           <Button 
-            className="w-full group-hover:bg-primary group-hover:text-white transition-all duration-300"
-            variant="outline"
-            size={isCompact ? "sm" : "default"}
+            className="btn-enhanced-ux force-gradient-btn w-full"
+            style={{
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              border: 'none',
+              color: 'white',
+              fontWeight: '600',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 8px 25px rgba(239, 68, 68, 0.4)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+              e.currentTarget.style.boxShadow = '0 15px 35px rgba(239, 68, 68, 0.6)';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0px) scale(1)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(239, 68, 68, 0.4)';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen(true);
+            }}
           >
             Xem chi tiết
           </Button>

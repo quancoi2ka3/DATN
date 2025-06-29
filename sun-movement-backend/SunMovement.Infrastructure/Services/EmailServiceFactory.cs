@@ -9,7 +9,7 @@ namespace SunMovement.Infrastructure.Services
     /// <summary>
     /// Factory pattern để chọn Email Service phù hợp cho từng environment
     /// - Development: EmailService (SMTP Gmail) hoặc MockEmailService
-    /// - Production: SendGridEmailService, MailgunEmailService, hoặc ZohoEmailService
+    /// - Production: EmailService (SMTP Gmail)
     /// </summary>
     public class EmailServiceFactory
     {
@@ -22,24 +22,6 @@ namespace SunMovement.Infrastructure.Services
             
             switch (emailProvider)
             {
-                case "sendgrid":
-                    services.AddSingleton<HttpClient>();
-                    services.AddScoped<IEmailService, SendGridEmailService>();
-                    Console.WriteLine("✅ Configured SendGrid Email Service for production");
-                    break;
-
-                case "mailgun":
-                    services.AddSingleton<HttpClient>();
-                    services.AddScoped<IEmailService, MailgunEmailService>();
-                    Console.WriteLine("✅ Configured Mailgun Email Service for production");
-                    break;
-
-                case "zoho":
-                    services.AddSingleton<HttpClient>();
-                    services.AddScoped<IEmailService, ZohoEmailService>();
-                    Console.WriteLine("✅ Configured Zoho Mail API Service for business");
-                    break;
-
                 case "smtp":
                     services.AddScoped<IEmailService, EmailService>();
                     Console.WriteLine("✅ Configured SMTP Email Service (Gmail/Outlook)");
@@ -54,29 +36,8 @@ namespace SunMovement.Infrastructure.Services
                     // Auto-detect based on environment and available configuration
                     if (environment == "development")
                     {
-                        // Check if SendGrid is configured
-                        if (!string.IsNullOrEmpty(configuration["SendGrid:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, SendGridEmailService>();
-                            Console.WriteLine("🔄 Auto-configured SendGrid for development");
-                        }
-                        // Check if Mailgun is configured
-                        else if (!string.IsNullOrEmpty(configuration["Mailgun:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, MailgunEmailService>();
-                            Console.WriteLine("🔄 Auto-configured Mailgun for development");
-                        }
-                        // Check if Zoho is configured
-                        else if (!string.IsNullOrEmpty(configuration["Zoho:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, ZohoEmailService>();
-                            Console.WriteLine("🔄 Auto-configured Zoho Mail for development");
-                        }
                         // Check if SMTP is configured
-                        else if (!string.IsNullOrEmpty(configuration["Email:SmtpServer"]))
+                        if (!string.IsNullOrEmpty(configuration["Email:SmtpServer"]))
                         {
                             services.AddScoped<IEmailService, EmailService>();
                             Console.WriteLine("🔄 Auto-configured SMTP for development");
@@ -89,34 +50,16 @@ namespace SunMovement.Infrastructure.Services
                     }
                     else // Production
                     {
-                        // Production prioritizes professional email services
-                        if (!string.IsNullOrEmpty(configuration["SendGrid:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, SendGridEmailService>();
-                            Console.WriteLine("🚀 Auto-configured SendGrid for production");
-                        }
-                        else if (!string.IsNullOrEmpty(configuration["Mailgun:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, MailgunEmailService>();
-                            Console.WriteLine("🚀 Auto-configured Mailgun for production");
-                        }
-                        else if (!string.IsNullOrEmpty(configuration["Zoho:ApiKey"]))
-                        {
-                            services.AddSingleton<HttpClient>();
-                            services.AddScoped<IEmailService, ZohoEmailService>();
-                            Console.WriteLine("🚀 Auto-configured Zoho Mail for production");
-                        }
-                        else if (!string.IsNullOrEmpty(configuration["Email:SmtpServer"]))
+                        // Production prioritizes SMTP
+                        if (!string.IsNullOrEmpty(configuration["Email:SmtpServer"]))
                         {
                             services.AddScoped<IEmailService, EmailService>();
-                            Console.WriteLine("⚠️ Using SMTP in production (consider SendGrid/Mailgun/Zoho for better deliverability)");
+                            Console.WriteLine("🚀 Auto-configured SMTP for production");
                         }
                         else
                         {
                             throw new InvalidOperationException(
-                                "No email service configured for production. Please configure SendGrid, Mailgun, Zoho, or SMTP settings.");
+                                "No email service configured for production. Please configure SMTP settings.");
                         }
                     }
                     break;
@@ -133,41 +76,6 @@ namespace SunMovement.Infrastructure.Services
 
             switch (emailProvider)
             {
-                case "sendgrid":
-                    if (string.IsNullOrEmpty(configuration["SendGrid:ApiKey"]))
-                        issues.Add("SendGrid:ApiKey is missing");
-                    else if (!configuration["SendGrid:ApiKey"]!.StartsWith("SG."))
-                        issues.Add("SendGrid:ApiKey format is invalid (should start with 'SG.')");
-                    
-                    if (string.IsNullOrEmpty(configuration["SendGrid:FromEmail"]))
-                        issues.Add("SendGrid:FromEmail is missing");
-                    break;
-
-                case "mailgun":
-                    if (string.IsNullOrEmpty(configuration["Mailgun:ApiKey"]))
-                        issues.Add("Mailgun:ApiKey is missing");
-                    
-                    if (string.IsNullOrEmpty(configuration["Mailgun:Domain"]))
-                        issues.Add("Mailgun:Domain is missing");
-                    
-                    if (string.IsNullOrEmpty(configuration["Mailgun:FromEmail"]))
-                        issues.Add("Mailgun:FromEmail is missing");
-                    break;                case "zoho":
-                    if (string.IsNullOrEmpty(configuration["Zoho:ApiKey"]))
-                        issues.Add("Zoho:ApiKey is missing");
-                    
-                    if (string.IsNullOrEmpty(configuration["Zoho:FromEmail"]))
-                        issues.Add("Zoho:FromEmail is missing");
-                    
-                    if (string.IsNullOrEmpty(configuration["Zoho:AccountId"]))
-                        issues.Add("Zoho:AccountId is missing");
-                    
-                    // Optional: Validate OAuth token format
-                    var zohoToken = configuration["Zoho:ApiKey"];
-                    if (!string.IsNullOrEmpty(zohoToken) && zohoToken.Length < 50)
-                        issues.Add("Zoho:ApiKey appears to be too short (should be OAuth token)");
-                    break;
-
                 case "smtp":
                     if (string.IsNullOrEmpty(configuration["Email:SmtpServer"]))
                         issues.Add("Email:SmtpServer is missing");
@@ -179,6 +87,10 @@ namespace SunMovement.Infrastructure.Services
                         issues.Add("Email:Password is missing");
                     else if (configuration["Email:Password"]!.Contains("YOUR_"))
                         issues.Add("Email:Password contains placeholder value");
+                    break;
+                    
+                case "mock":
+                    // Mock service doesn't need configuration validation
                     break;
             }
 

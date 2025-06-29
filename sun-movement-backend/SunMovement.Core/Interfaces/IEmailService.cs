@@ -14,5 +14,6 @@ namespace SunMovement.Core.Interfaces
         Task<bool> SendVerificationCodeAsync(string email, string verificationCode, string firstName);
         Task<bool> SendWelcomeEmailAsync(string email, string firstName);
         Task<bool> SendPasswordResetEmailAsync(string email, string resetUrl, string firstName);
+        Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose);
     }
 }

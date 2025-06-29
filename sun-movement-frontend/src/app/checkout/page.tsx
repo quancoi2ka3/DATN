@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,6 @@ export default function CheckoutPage() {
     fullName: "",
     addressLine1: "",
     city: "",
-    district: "",
     province: "",
   });
   
@@ -150,15 +150,6 @@ export default function CheckoutPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="district">Quận / Huyện</Label>
-                        <Input 
-                          id="district" 
-                          value={shippingAddress.district} 
-                          onChange={(e) => updateShippingAddress('district', e.target.value)} 
-                          required 
-                        />
-                      </div>
-                      <div>
                         <Label htmlFor="city">Thành phố</Label>
                         <Input 
                           id="city" 
@@ -167,10 +158,8 @@ export default function CheckoutPage() {
                           required 
                         />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="province">Tỉnh</Label>
+                        <Label htmlFor="province">Tỉnh / Thành phố</Label>
                         <Input 
                           id="province" 
                           value={shippingAddress.province} 
@@ -178,6 +167,8 @@ export default function CheckoutPage() {
                           required 
                         />
                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="zipCode">Mã bưu điện (tùy chọn)</Label>
                         <Input 
@@ -247,20 +238,14 @@ export default function CheckoutPage() {
                 </div>
               </div>
               
-              <Button 
+              <LoadingButton 
                 type="submit" 
                 className="mt-6 w-full" 
-                disabled={isLoading}
+                isLoading={isLoading}
+                loadingText="Đang xử lý..."
               >
-                {isLoading ? (
-                  <>
-                    <span className="animate-spin mr-2">⟳</span>
-                    Đang xử lý...
-                  </>
-                ) : (
-                  'Hoàn tất đơn hàng'
-                )}
-              </Button>
+                Hoàn tất đơn hàng
+              </LoadingButton>
             </form>
           </div>
           

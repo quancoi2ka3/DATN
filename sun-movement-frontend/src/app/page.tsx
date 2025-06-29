@@ -1,18 +1,24 @@
 import { OptimizedHeroSection } from "@/components/sections/optimized-hero";
-import { CalisthenicsSection } from "@/components/sections/calisthenics";
-import { StrengthSection } from "@/components/sections/strength";
-import { YogaSection } from "@/components/sections/yoga";
-import { WhyChooseSection } from "@/components/sections/why-choose";
-import { TestimonialsSection } from "@/components/sections/testimonials";
-import { EventsSection } from "@/components/sections/events";
-import { SportswearSection as SportswearPreviewSection } from "@/components/sections/sportswear-preview";
-import { SupplementsSection } from "@/components/sections/supplements";
 import { ContactCTASection } from "@/components/sections/contact-cta";
 import { getHomePageData } from "@/lib/home-page-service";
 import { AlertCircle } from "lucide-react";
 import { SocialProof, FloatingCTA, ExitIntentPopup } from "@/components/ui/conversion-optimized";
 import { PerformanceMonitor } from "@/components/ui/performance-monitor";
+import { ScrollAnimation } from "@/components/ui/enhanced-animations";
+import { RealtimeNotifications } from "@/components/ui/engagement-boosters";
 import { Suspense } from "react";
+
+// Lazy loaded components
+import { 
+  CalisthenicsLazy, 
+  StrengthLazy, 
+  YogaLazy, 
+  WhyChooseLazy, 
+  TestimonialsLazy, 
+  EventsLazy 
+} from "@/components/ui/lazy-sections";
+import { LazyOnScroll } from "@/components/ui/lazy-skeleton";
+import { ComponentPreloader } from "@/components/ui/lazy-preloader";
 
 export default async function Home() {
   // Fetch data for all the product sections
@@ -21,23 +27,59 @@ export default async function Home() {
   return (
     <>
       <PerformanceMonitor />
+      <ComponentPreloader />
       <OptimizedHeroSection />
       
-      {/* Social Proof Section */}
-      <section className="py-8 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <SocialProof />
-        </div>
-      </section>
+      {/* Lazy loaded Social Proof Section */}
+      <LazyOnScroll fallback={<div className="py-8 bg-gray-50 animate-pulse"><div className="container mx-auto px-4 h-16"></div></div>}>
+        <ScrollAnimation animation="fade-in-up" delay={0.2}>
+          <section className="py-8 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <Suspense fallback={<div className="h-16 animate-pulse bg-gray-200 rounded"></div>}>
+                <SocialProof />
+              </Suspense>
+            </div>
+          </section>
+        </ScrollAnimation>
+      </LazyOnScroll>
       
-      <Suspense fallback={<div className="py-16 text-center">Đang tải...</div>}>
-        <CalisthenicsSection />
-        <StrengthSection />
-        <YogaSection />
-        <WhyChooseSection />
-        <TestimonialsSection />
-        <EventsSection />
-      </Suspense>
+      
+      {/* Lazy loaded sections with IntersectionObserver */}
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-up" delay={0.3}>
+          <CalisthenicsLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
+        
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-left" delay={0.1}>
+          <StrengthLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
+        
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-right" delay={0.1}>
+          <YogaLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
+        
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-up" delay={0.2}>
+          <WhyChooseLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
+        
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-up" delay={0.3}>
+          <TestimonialsLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
+        
+      <LazyOnScroll>
+        <ScrollAnimation animation="fade-in-up" delay={0.1}>
+          <EventsLazy />
+        </ScrollAnimation>
+      </LazyOnScroll>
 
       {/* Display API error messages if any */}
       {(homeData.sportswear.error || homeData.supplements.error) && (
@@ -62,6 +104,10 @@ export default async function Home() {
       {/* Conversion Optimization Components */}
       <FloatingCTA />
       <ExitIntentPopup />
+      
+      {/* Real-time Engagement Components */}
+      <RealtimeNotifications />
+      {/* Removed FloatingActionButton to avoid conflict with existing FloatingContactButton */}
     </>
   );
 }

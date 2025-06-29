@@ -171,6 +171,10 @@ builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 
+// Register new inventory and coupon services
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
+
 // Configure Email Service based on provider and environment
 EmailServiceFactory.ConfigureEmailService(builder.Services, builder.Configuration);
 

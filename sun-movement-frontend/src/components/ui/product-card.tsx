@@ -43,24 +43,38 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <div 
-        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+        className="card-enhanced rounded-lg shadow-md overflow-hidden hover-lift transition-smooth cursor-pointer will-change-transform group"
         onClick={() => setIsOpen(true)}
       >
-        <div className="relative h-64 w-full">
+        <div className="relative h-64 w-full overflow-hidden">
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          {product.salePrice && (
+            <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+              -{Math.round(((product.price - product.salePrice) / product.price) * 100)}%
+            </div>
+          )}
         </div>
         <div className="p-5">
-          <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-          <p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+          <h3 className="text-xl font-semibold mb-2 text-shadow-soft group-hover:text-gradient transition-smooth">{product.name}</h3>
+          <p className="text-gray-600 mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
           <div className="flex justify-between items-center">
-            <span className="text-xl font-bold">{product.price.toLocaleString()} VNĐ</span>
-            <Button size="sm">Xem chi tiết</Button>
+            <div className="flex flex-col">
+              {product.salePrice ? (
+                <>
+                  <span className="text-lg line-through text-gray-400">{product.price.toLocaleString()} VNĐ</span>
+                  <span className="text-xl font-bold text-red-500">{product.salePrice.toLocaleString()} VNĐ</span>
+                </>
+              ) : (
+                <span className="text-xl font-bold">{product.price.toLocaleString()} VNĐ</span>
+              )}
+            </div>
+            <Button size="sm" className="btn-primary-enhanced hover-scale">Xem chi tiết</Button>
           </div>
         </div>
       </div>

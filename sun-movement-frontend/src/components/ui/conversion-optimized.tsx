@@ -37,10 +37,10 @@ export function SocialProof() {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-primary">
+    <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-primary hover-lift transition-all-smooth">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="bg-primary/10 p-3 rounded-full">
+          <div className="bg-primary/10 p-3 rounded-full pulse-glow">
             <Users className="w-6 h-6 text-primary" />
           </div>
           <div>
@@ -96,8 +96,8 @@ export function UrgencyTimer({ endDate }: { endDate: Date }) {
   }, [endDate]);
 
   return (
-    <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl p-6">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="bg-gradient-to-r from-red-500 via-red-600 to-pink-500 text-white rounded-xl p-6 shadow-lg hover-lift transition-all-smooth">
+      <div className="flex items-center gap-2 mb-4 animate-in fade-in-up">
         <Clock className="w-5 h-5" />
         <h3 className="font-semibold">Ưu đái có thời hạn!</h3>
       </div>

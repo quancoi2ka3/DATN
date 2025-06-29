@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -10,10 +11,17 @@ namespace SunMovement.Web.Areas.Admin.Controllers
     public class OrdersAdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IInventoryService _inventoryService;
+        private readonly ILogger<OrdersAdminController> _logger;
 
-        public OrdersAdminController(IUnitOfWork unitOfWork)
+        public OrdersAdminController(
+            IUnitOfWork unitOfWork, 
+            IInventoryService inventoryService,
+            ILogger<OrdersAdminController> logger)
         {
             _unitOfWork = unitOfWork;
+            _inventoryService = inventoryService;
+            _logger = logger;
         }
 
         // GET: Admin/Orders
@@ -92,36 +100,53 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         return NotFound();
                     }
 
+                    // Kiểm tra thay đổi trạng thái đơn hàng
+                    var oldStatus = existingOrder.Status;
+                    var newStatus = order.Status;
+                    
                     // Update properties
                     existingOrder.Status = order.Status;
                     existingOrder.ShippingAddress = order.ShippingAddress;
                     existingOrder.PhoneNumber = order.PhoneNumber;
                     existingOrder.Email = order.Email;
                     existingOrder.PaymentMethod = order.PaymentMethod;
-                    existingOrder.IsPaid = order.IsPaid;
-                    existingOrder.TrackingNumber = order.TrackingNumber;
-                    existingOrder.Notes = order.Notes;
-                    existingOrder.UpdatedAt = DateTime.UtcNow;
-
-                    // Update status-specific dates
-                    if (order.Status == OrderStatus.Shipped && existingOrder.ShippedDate == null)
-                    {
-                        existingOrder.ShippedDate = DateTime.UtcNow;
-                    }
-                    else if (order.Status == OrderStatus.Delivered && existingOrder.DeliveredDate == null)
-                    {
-                        existingOrder.DeliveredDate = DateTime.UtcNow;
-                    }
 
                     await _unitOfWork.Orders.UpdateAsync(existingOrder);
                     await _unitOfWork.CompleteAsync();
 
-                    TempData["SuccessMessage"] = "Order updated successfully!";
-                    return RedirectToAction(nameof(Index));
+                    // Nếu chuyển sang trạng thái Đã giao, Đã thanh toán hoặc Hoàn thành, tự động giảm tồn kho
+                    if ((newStatus == OrderStatus.Delivered || newStatus == OrderStatus.Completed || newStatus == OrderStatus.Paid) 
+                        && oldStatus != OrderStatus.Delivered && oldStatus != OrderStatus.Completed && oldStatus != OrderStatus.Paid)
+                    {
+                        try
+                        {
+                            var inventoryResult = await _inventoryService.AdjustStockAfterOrderAsync(existingOrder.Id);
+                            if (inventoryResult)
+                            {
+                                TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công và đã điều chỉnh tồn kho.";
+                            }
+                            else
+                            {
+                                TempData["WarningMessage"] = "Cập nhật đơn hàng thành công nhưng có lỗi khi điều chỉnh tồn kho.";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Lỗi khi điều chỉnh tồn kho cho đơn hàng {OrderId}", id);
+                            TempData["WarningMessage"] = "Cập nhật đơn hàng thành công nhưng có lỗi khi điều chỉnh tồn kho.";
+                        }
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
+                    }
+
+                    return RedirectToAction(nameof(Details), new { id = order.Id });
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while updating the order: " + ex.Message);
+                    _logger.LogError(ex, "Lỗi khi cập nhật đơn hàng {OrderId}", id);
+                    ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật đơn hàng. " + ex.Message);
                 }
             }
 
@@ -287,6 +312,90 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
 
             return Json(new { success = false, message = "Order not found" });
+        }
+
+        // GET: Admin/Orders/UpdateTracking/5
+        public async Task<IActionResult> UpdateTracking(int id)
+        {
+            var order = await _unitOfWork.Orders.GetByIdAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        // POST: Admin/Orders/UpdateTracking/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateTracking(int id, string trackingNumber, string shippingMethod)
+        {
+            var order = await _unitOfWork.Orders.GetByIdAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật thông tin vận chuyển
+            order.TrackingNumber = trackingNumber;
+            order.ShippingMethod = shippingMethod;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            // Nếu thêm mã vận đơn và đơn hàng chưa ở trạng thái vận chuyển, cập nhật trạng thái
+            if (!string.IsNullOrEmpty(trackingNumber) && order.Status == OrderStatus.Processing)
+            {
+                order.Status = OrderStatus.Shipped;
+                order.ShippedDate = DateTime.UtcNow;
+            }
+
+            await _unitOfWork.Orders.UpdateAsync(order);
+            await _unitOfWork.CompleteAsync();
+
+            TempData["SuccessMessage"] = "Cập nhật thông tin vận chuyển thành công.";
+            return RedirectToAction(nameof(Details), new { id = order.Id });
+        }
+
+        // GET: Admin/Orders/SendOrderNotification/5
+        public async Task<IActionResult> SendOrderNotification(int id)
+        {
+            var order = await _unitOfWork.Orders.GetByIdAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        // POST: Admin/Orders/SendOrderNotification
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendOrderNotification(int orderId, string emailSubject, string emailContent)
+        {
+            var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                // Xử lý gửi email thông báo (giả định có IEmailService được inject)
+                // await _emailService.SendEmailAsync(order.Email, emailSubject, emailContent);
+
+                // Nếu không có email service, hiển thị thông báo giả lập
+                TempData["SuccessMessage"] = "Email thông báo đã được gửi đến khách hàng. (DEMO - Email chưa được gửi thực tế)";
+                _logger.LogInformation("Email notification for order {OrderId} would be sent to {Email}", orderId, order.Email);
+
+                return RedirectToAction(nameof(Details), new { id = orderId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi gửi email thông báo cho đơn hàng {OrderId}", orderId);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi email thông báo: " + ex.Message;
+                return RedirectToAction(nameof(SendOrderNotification), new { id = orderId });
+            }
         }
     }
 }

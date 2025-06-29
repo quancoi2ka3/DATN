@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
+import { EventSkeletonGrid } from "@/components/ui/event-skeleton";
 import { 
   Calendar, 
   Clock, 
@@ -85,24 +86,13 @@ export default function EventsPage() {
         <div className="relative bg-gradient-to-br from-slate-900 via-slate-950 to-black py-24">
           <div className="container relative z-10">
             <div className="text-center">
-              <div className="h-12 bg-gray-200 rounded w-64 mx-auto mb-6 animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-96 mx-auto animate-pulse"></div>
+              <div className="h-12 bg-slate-700/50 rounded w-64 mx-auto mb-6 animate-pulse"></div>
+              <div className="h-6 bg-slate-700/50 rounded w-96 mx-auto animate-pulse"></div>
             </div>
           </div>
         </div>
         <div className="container py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="bg-slate-900 rounded-xl overflow-hidden animate-pulse">
-                <div className="h-48 bg-gray-300"></div>
-                <div className="p-6 space-y-3">
-                  <div className="h-4 bg-gray-300 rounded"></div>
-                  <div className="h-6 bg-gray-300 rounded"></div>
-                  <div className="h-3 bg-gray-300 rounded w-2/3"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <EventSkeletonGrid count={6} />
         </div>
       </div>
     );
@@ -236,7 +226,10 @@ export default function EventsPage() {
                           className="bg-red-500 hover:bg-red-600 text-white"
                           asChild
                         >
-                          <Link href={`/su-kien/${event.slug || event.id}`}>
+                          <Link 
+                            href={`/su-kien/${event.slug || event.id}`}
+                            prefetch={true}
+                          >
                             Xem chi tiết
                           </Link>
                         </Button>
@@ -315,7 +308,10 @@ export default function EventsPage() {
                       className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-red-500"
                       asChild
                     >
-                      <Link href={`/su-kien/${event.slug || event.id}`}>
+                      <Link 
+                        href={`/su-kien/${event.slug || event.id}`}
+                        prefetch={true}
+                      >
                         Xem chi tiết
                       </Link>
                     </Button>
@@ -353,26 +349,7 @@ export default function EventsPage() {
           </div>
         )}
 
-        {/* Newsletter */}
-        <div className="mt-16 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5"></div>
-          <div className="relative z-10 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Đăng ký nhận thông báo</h3>
-            <p className="text-slate-300 mb-6">
-              Để không bỏ lỡ các sự kiện và workshop mới nhất từ Sun Movement
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input 
-                type="email" 
-                placeholder="Nhập email của bạn"
-                className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder:text-slate-400 focus:border-red-500 focus:ring-red-500"
-              />
-              <Button className="bg-red-500 hover:bg-red-600 text-white px-6">
-                Đăng ký
-              </Button>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   );

@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef, memo, Suspense } from "react";
 import { ChevronRight, Play, ArrowRight } from "lucide-react";
 import { OptimizedImage } from "@/components/ui/optimized-image";
+import { ParallaxSection, FloatingElement, MouseTracking, StaggerContainer } from "@/components/ui/parallax-effects";
+import { ScrollAnimation } from "@/components/ui/enhanced-animations";
 
-// Slides data - simplified for better performance
+// Slides data - using correct image paths from original
 const heroSlides = [
   {
     id: 1,
-    image: "/images/home-slide-3.webp",
+    image: "../images/home-slide-3.webp",
     subtitle: "UNLOCK YOUR POTENTIAL",
     title: "Cân bằng hơn, linh hoạt hơn",
     description: "Phương pháp luyện tập khoa học giúp bạn đạt được thể trạng tốt nhất.",
@@ -20,7 +22,7 @@ const heroSlides = [
   },
   {
     id: 2,
-    image: "/images/home-slide-1.webp",
+    image: "../images/home-slide-1.webp",
     subtitle: "STRENGTH TRAINING",
     title: "Xây dựng sức mạnh từng ngày",
     description: "Các bài tập sức mạnh được thiết kế riêng biệt cho từng cấp độ.",
@@ -30,7 +32,7 @@ const heroSlides = [
   },
   {
     id: 3,
-    image: "/images/home-slide-2.webp",
+    image: "../images/home-slide-2.webp",
     subtitle: "MIND & BODY BALANCE",
     title: "Tìm lại sự cân bằng bên trong",
     description: "Các lớp học yoga và thiền định giúp cải thiện sức khỏe toàn diện.",
@@ -153,19 +155,22 @@ export function OptimizedHeroSection() {
       role="banner"
       aria-label="Hero carousel"
     >
-      {/* Background Images */}
+      {/* Background Images - Simple but effective */}
       <div className="absolute inset-0">
         {heroSlides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === activeSlide ? 'opacity-100' : 'opacity-0'
+            className={`absolute inset-0 transition-all duration-1000 ease-out ${
+              index === activeSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
             <div
               className="hero-background absolute inset-0 hero-image-loaded"
               style={{
-                backgroundImage: `url('${slide.image}')`
+                backgroundImage: `url('${slide.image}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
               }}
             />
             <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgGradient}`} />
@@ -176,7 +181,11 @@ export function OptimizedHeroSection() {
       {/* Dark overlay for text readability */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Content */}
+      {/* Subtle floating elements - reduced complexity */}
+      <div className="absolute top-20 right-20 w-32 h-32 bg-white/5 rounded-full blur-sm opacity-30 animate-pulse" />
+      <div className="absolute bottom-32 left-20 w-20 h-20 bg-red-500/10 rounded-full blur-sm opacity-20 animate-pulse" style={{animationDelay: '1s'}} />
+
+      {/* Content with improved animations */}
       <div className="relative z-10 h-full flex items-center">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
@@ -185,38 +194,49 @@ export function OptimizedHeroSection() {
                 isTransitioning ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
               }`}
             >
-              <p className="hero-text text-sm font-medium text-white/95 mb-2 tracking-wider uppercase">
-                {currentSlide.subtitle}
-              </p>
-              <h1 className="hero-text text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-                {currentSlide.title}
-              </h1>
-              <p className="hero-text text-xl text-white/95 mb-8 leading-relaxed">
-                {currentSlide.description}
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="hero-button bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105"
-                >
-                  <Link href={currentSlide.link}>
-                    {currentSlide.cta}
-                    <ChevronRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-2 bg-red-600 border-white text-white hover:bg-black hover:text-sunred px-8 py-3 text-lg rounded-full transition-all duration-300 backdrop-blur-sm"
-                  asChild
-                >
-                  <Link href="https://www.youtube.com/@SUNMovementVN">
-                    <Play className="mr-2 h-5 w-5" />
-                    Xem Video
-                  </Link>
-                </Button>
-              </div>
+              <ScrollAnimation animation="fade-in" delay={0.1}>
+                <p className="hero-text text-sm font-medium text-white/95 mb-2 tracking-wider uppercase">
+                  {currentSlide.subtitle}
+                </p>
+              </ScrollAnimation>
+              
+              <ScrollAnimation animation="fade-in-up" delay={0.3}>
+                <h1 className="hero-text text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+                  {currentSlide.title}
+                </h1>
+              </ScrollAnimation>
+              
+              <ScrollAnimation animation="fade-in-up" delay={0.5}>
+                <p className="hero-text text-xl text-white/95 mb-8 leading-relaxed">
+                  {currentSlide.description}
+                </p>
+              </ScrollAnimation>
+              
+              <ScrollAnimation animation="scale-up" delay={0.7}>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    asChild 
+                    size="lg" 
+                    className="hero-button bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                  >
+                    <Link href={currentSlide.link}>
+                      {currentSlide.cta}
+                      <ChevronRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="border-2 bg-red-600 border-white text-white hover:bg-black hover:text-sunred px-8 py-3 text-lg rounded-full transition-all duration-300 backdrop-blur-sm hover:scale-105"
+                    asChild
+                  >
+                    <Link href="https://www.youtube.com/@SUNMovementVN">
+                      <Play className="mr-2 h-5 w-5" />
+                      Xem Video
+                    </Link>
+                  </Button>
+                </div>
+              </ScrollAnimation>
             </div>
           </div>
         </div>
@@ -225,7 +245,7 @@ export function OptimizedHeroSection() {
       {/* Navigation Controls */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300"
+        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 hover:scale-110"
         aria-label="Previous slide"
       >
         <ChevronRight className="w-6 h-6 rotate-180" />
@@ -233,7 +253,7 @@ export function OptimizedHeroSection() {
       
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300"
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 hover:scale-110"
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />
@@ -246,9 +266,9 @@ export function OptimizedHeroSection() {
         onSlideChange={changeSlide}
       />
 
-      {/* Scroll down indicator */}
+      {/* Scroll down indicator with simple animation */}
       <div className="absolute bottom-8 right-8 z-20 animate-bounce">
-        <div className="flex flex-col items-center text-white/70">
+        <div className="flex flex-col items-center text-white/70 hover:text-white transition-colors cursor-pointer">
           <span className="text-sm mb-2">Cuộn xuống</span>
           <ArrowRight className="w-4 h-4 rotate-90" />
         </div>

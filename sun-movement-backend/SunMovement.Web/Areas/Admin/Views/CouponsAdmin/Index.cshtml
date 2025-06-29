@@ -1,0 +1,377 @@
+@model IEnumerable<SunMovement.Core.Models.Coupon>
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Quản lý mã giảm giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Quản lý mã giảm giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item active">Mã giảm giá</li>
+    </ol>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i> @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    <!-- Các tùy chọn tạo mã giảm giá -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tạo mã giảm giá mới</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="@Url.Action("Create", "CouponsAdmin")" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Tạo mới
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tạo mã giảm giá theo mùa</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#seasonalCouponModal">
+                                    <i class="fas fa-calendar"></i> Tạo theo mùa
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Giảm giá hàng tồn kho lâu</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="@Url.Action("GenerateAgedInventoryCoupons", "CouponsAdmin")" class="btn btn-warning">
+                                    <i class="fas fa-clock"></i> Tạo tự động
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Báo cáo hiệu quả</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <a href="@Url.Action("CouponStatistics", "CouponsAdmin")" class="btn btn-info">
+                                    <i class="fas fa-chart-pie"></i> Xem báo cáo
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bộ lọc và tìm kiếm -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách mã giảm giá</h6>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <form method="get" class="form-inline">
+                        <div class="input-group mb-2 mr-sm-2">
+                            <input type="text" class="form-control" name="searchTerm" placeholder="Tìm mã giảm giá..." value="@ViewBag.SearchTerm">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <select class="form-control mb-2 mr-sm-2" name="isActive" onchange="this.form.submit()">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            @if (ViewBag.IsActiveFilter == true)
+                            {
+                                <option value="true" selected>Đang kích hoạt</option>
+                            }
+                            else
+                            {
+                                <option value="true">Đang kích hoạt</option>
+                            }
+                            
+                            @if (ViewBag.IsActiveFilter == false)
+                            {
+                                <option value="false" selected>Không kích hoạt</option>
+                            }
+                            else
+                            {
+                                <option value="false">Không kích hoạt</option>
+                            }
+                        </select>
+                    </form>
+                </div>
+                <div class="col-md-4 text-right">
+                    <a href="@Url.Action("Create", "CouponsAdmin")" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Tạo mã giảm giá mới
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Bảng danh sách mã giảm giá -->
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Tên</th>
+                            <th>Loại</th>
+                            <th>Giá trị</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var coupon in Model)
+                        {
+                            var isActive = coupon.IsActive && DateTime.Now >= coupon.StartDate && DateTime.Now <= coupon.EndDate;
+                            var statusClass = isActive ? "badge bg-success" : "badge bg-danger";
+                            var statusText = isActive ? "Đang kích hoạt" : "Không kích hoạt";
+                            
+                            <tr>
+                                <td><strong>@coupon.Code</strong></td>
+                                <td>@coupon.Name</td>
+                                <td>
+                                    @switch (coupon.Type)
+                                    {
+                                        case CouponType.Percentage:
+                                            <span class="badge bg-info">Giảm %</span>
+                                            break;
+                                        case CouponType.FixedAmount:
+                                            <span class="badge bg-primary">Giảm tiền</span>
+                                            break;
+                                        case CouponType.FreeShipping:
+                                            <span class="badge bg-success">Miễn phí ship</span>
+                                            break;
+                                        case CouponType.BuyOneGetOne:
+                                            <span class="badge bg-warning">Mua 1 tặng 1</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Khác</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (coupon.Type == CouponType.Percentage)
+                                    {
+                                        @($"{coupon.Value}%")
+                                    }
+                                    else if (coupon.Type == CouponType.FixedAmount)
+                                    {
+                                        @($"{coupon.Value:N0} VNĐ")
+                                    }
+                                    else
+                                    {
+                                        @coupon.Value
+                                    }
+                                </td>
+                                <td>@coupon.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td>@coupon.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td><span class="@statusClass">@statusText</span></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Details", "CouponsAdmin", new { id = coupon.Id })" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="@Url.Action("Edit", "CouponsAdmin", new { id = coupon.Id })" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        @if (coupon.IsActive)
+                                        {
+                                            <a href="@Url.Action("Deactivate", "CouponsAdmin", new { id = coupon.Id })" class="btn btn-warning btn-sm"
+                                               onclick="return confirm('Bạn có chắc chắn muốn vô hiệu hóa mã giảm giá này?')">
+                                                <i class="fas fa-power-off"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Activate", "CouponsAdmin", new { id = coupon.Id })" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        }
+                                        <a href="@Url.Action("Delete", "CouponsAdmin", new { id = coupon.Id })" class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này? Hành động này không thể hoàn tác.')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Phân trang -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, searchTerm = ViewBag.SearchTerm, isActive = ViewBag.IsActiveFilter })">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        }
+                        
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, searchTerm = ViewBag.SearchTerm, isActive = ViewBag.IsActiveFilter })">@i</a>
+                            </li>
+                        }
+                        
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, searchTerm = ViewBag.SearchTerm, isActive = ViewBag.IsActiveFilter })">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo mã giảm giá theo mùa -->
+<div class="modal fade" id="seasonalCouponModal" tabindex="-1" aria-labelledby="seasonalCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="GenerateSeasonalCoupon" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="seasonalCouponModalLabel">Tạo mã giảm giá theo mùa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="occasion" class="form-label">Dịp lễ/Sự kiện</label>
+                        <select class="form-select" id="occasion" name="occasion">
+                            <option value="TET">Tết Nguyên Đán</option>
+                            <option value="SUMMER">Hè</option>
+                            <option value="FALL">Thu</option>
+                            <option value="WINTER">Đông</option>
+                            <option value="CHRISTMAS">Giáng Sinh</option>
+                            <option value="NEWYEAR">Năm Mới</option>
+                            <option value="WOMENSDAY">Ngày Phụ Nữ</option>
+                            <option value="BLACKFRIDAY">Black Friday</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="couponType" class="form-label">Loại mã giảm giá</label>
+                        <select class="form-select" id="couponType" name="type">
+                            <option value="0">Giảm theo phần trăm</option>
+                            <option value="1">Giảm số tiền cố định</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="discountValue" class="form-label">Giá trị</label>
+                        <input type="number" class="form-control" id="discountValue" name="discountValue" required min="1" step="1" value="10">
+                        <div class="form-text" id="valueInfo">Nhập % hoặc số tiền tùy theo loại mã đã chọn.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="validityDays" class="form-label">Số ngày có hiệu lực</label>
+                        <input type="number" class="form-control" id="validityDays" name="validityDays" required min="1" max="90" value="30">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo mã giảm giá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Thay đổi hint khi người dùng chọn loại mã khác nhau
+            $('#couponType').change(function() {
+                if ($(this).val() == '0') {
+                    $('#valueInfo').text('Nhập % giảm giá (1-100)');
+                    $('#discountValue').attr('max', '100');
+                } else {
+                    $('#valueInfo').text('Nhập số tiền giảm giá (VNĐ)');
+                    $('#discountValue').removeAttr('max');
+                }
+            });
+            
+            // Tooltip cho các nút
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Highlight khi hover hàng trong bảng
+            $('tbody tr').hover(
+                function() {
+                    $(this).addClass('table-hover');
+                },
+                function() {
+                    $(this).removeClass('table-hover');
+                }
+            );
+        });
+    </script>
+}

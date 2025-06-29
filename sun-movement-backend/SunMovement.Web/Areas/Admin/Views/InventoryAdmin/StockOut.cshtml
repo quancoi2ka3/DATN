@@ -1,0 +1,142 @@
+@model SunMovement.Core.Models.InventoryTransaction
+
+@{
+    ViewData["Title"] = "Xuất kho";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Xuất kho</h1>
+    <p class="mb-4">Xuất sản phẩm từ kho cho đơn hàng hoặc lý do khác.</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin xuất kho</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="StockOut" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group">
+                            <label asp-for="ProductId" class="control-label">Sản phẩm</label>
+                            <select asp-for="ProductId" class="form-control" 
+                                    asp-items="ViewBag.Products" id="productSelect" required>
+                                <option value="">-- Chọn sản phẩm --</option>
+                            </select>
+                            <span asp-validation-for="ProductId" class="text-danger"></span>
+                            <small class="form-text text-muted">Chỉ hiển thị các sản phẩm có số lượng tồn kho > 0</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="control-label">Số lượng tồn kho hiện tại</label>
+                            <input type="text" id="currentStock" class="form-control" readonly />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Quantity" class="control-label">Số lượng xuất</label>
+                            <input asp-for="Quantity" class="form-control" min="1" id="quantity" required />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="ReferenceNumber" class="control-label">Số tham chiếu</label>
+                            <input asp-for="ReferenceNumber" class="form-control" placeholder="Mã đơn hàng, phiếu xuất kho, v.v." />
+                            <span asp-validation-for="ReferenceNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label asp-for="Notes" class="control-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                        
+                        <input type="hidden" asp-for="TransactionType" value="@SunMovement.Core.Models.InventoryTransactionType.Sale" />
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save"></i> Lưu xuất kho
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hướng dẫn</h6>
+                </div>
+                <div class="card-body">
+                    <p>Việc xuất kho sẽ:</p>
+                    <ul>
+                        <li>Giảm số lượng tồn kho của sản phẩm</li>
+                        <li>Ghi nhận thời điểm xuất kho gần nhất</li>
+                        <li>Lưu thông tin về lý do xuất kho</li>
+                    </ul>
+                    <p>Chú ý:</p>
+                    <ul>
+                        <li>Không thể xuất số lượng lớn hơn số lượng tồn kho hiện tại</li>
+                        <li>Với đơn hàng, hệ thống sẽ tự động xuất kho khi đơn hàng được xác nhận</li>
+                        <li>Xuất kho thủ công thường dùng cho các mục đích khác như mẫu, quà tặng, hàng bị hỏng, v.v.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function () {
+            // Lấy thông tin tồn kho khi chọn sản phẩm
+            $("#productSelect").change(function() {
+                var productId = $(this).val();
+                if (productId) {
+                    $.ajax({
+                        url: '@Url.Action("GetProductStock", "InventoryAdmin")',
+                        type: 'GET',
+                        data: { productId: productId },
+                        success: function(response) {
+                            if (response.success) {
+                                $("#currentStock").val(response.stockQuantity);
+                                validateQuantity();
+                            }
+                        },
+                        error: function() {
+                            alert("Có lỗi xảy ra khi lấy thông tin tồn kho!");
+                        }
+                    });
+                } else {
+                    $("#currentStock").val("");
+                }
+            });
+            
+            // Kiểm tra số lượng xuất không vượt quá tồn kho
+            $("#quantity").on("change keyup", validateQuantity);
+            
+            function validateQuantity() {
+                var currentStock = parseInt($("#currentStock").val()) || 0;
+                var quantity = parseInt($("#quantity").val()) || 0;
+                
+                if (quantity > currentStock) {
+                    $("#quantity").addClass("is-invalid");
+                    $("#submitBtn").prop("disabled", true);
+                    if (!$("#stockError").length) {
+                        $("#quantity").after('<div id="stockError" class="invalid-feedback">Số lượng xuất không thể lớn hơn tồn kho hiện tại!</div>');
+                    }
+                } else {
+                    $("#quantity").removeClass("is-invalid");
+                    $("#submitBtn").prop("disabled", false);
+                    $("#stockError").remove();
+                }
+            }
+        });
+    </script>
+}

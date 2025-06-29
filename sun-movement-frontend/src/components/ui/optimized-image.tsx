@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface OptimizedImageProps {
@@ -31,45 +31,77 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isInView, setIsInView] = useState(priority);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    if (priority || isInView) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '100px',
+      }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [priority, isInView]);
 
   return (
-    <div className={cn("relative overflow-hidden", className)}>
-      {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      
-      {hasError ? (
-        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-          <div className="text-gray-400 text-center">
-            <div className="w-12 h-12 mx-auto mb-2 opacity-50">📷</div>
-            <p className="text-sm">Không thể tải ảnh</p>
-          </div>
-        </div>
+    <div ref={imgRef} className={cn("relative overflow-hidden", className)}>
+      {!isInView && !priority ? (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       ) : (
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          fill={fill}
-          sizes={sizes}
-          priority={priority}
-          placeholder={placeholder}
-          blurDataURL={blurDataURL}
-          className={cn(
-            "transition-opacity duration-300",
-            isLoading ? "opacity-0" : "opacity-100",
-            className
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
           )}
-          onLoad={() => setIsLoading(false)}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
-          quality={85}
-        />
+          
+          {hasError ? (
+            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+              <div className="text-gray-400 text-center">
+                <div className="w-12 h-12 mx-auto mb-2 opacity-50">📷</div>
+                <p className="text-sm">Không thể tải ảnh</p>
+              </div>
+            </div>
+          ) : (
+            <Image
+              src={src}
+              alt={alt}
+              width={width}
+              height={height}
+              fill={fill}
+              sizes={sizes}
+              priority={priority}
+              placeholder={placeholder}
+              blurDataURL={blurDataURL}
+              className={cn(
+                "transition-opacity duration-300",
+                isLoading ? "opacity-0" : "opacity-100",
+                className
+              )}
+              onLoad={() => setIsLoading(false)}
+              onError={() => {
+                setIsLoading(false);
+                setHasError(true);
+              }}
+              quality={85}
+            />
+          )}
+        </>
       )}
     </div>
   );

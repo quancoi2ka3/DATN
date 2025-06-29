@@ -123,5 +123,110 @@ namespace SunMovement.Infrastructure.Services
                 _cacheService.Remove($"{ProductCachePrefix}{productId.Value}");
             }
         }
+
+        // Integrated System Methods - Product-Inventory Integration
+
+        public async Task<Product> CreateProductFromInventoryAsync(
+            int inventoryItemId, 
+            string name, 
+            decimal price, 
+            string description, 
+            ProductCategory category, 
+            string subCategory, 
+            decimal? discountPrice = null, 
+            string? sku = null, 
+            string? barcode = null, 
+            decimal weight = 0, 
+            string? dimensions = null, 
+            int minimumStockLevel = 5, 
+            int optimalStockLevel = 50, 
+            bool isFeatured = false, 
+            bool trackInventory = true, 
+            bool allowBackorder = false)
+        {
+            // For create operations, we don't use cache. Just delegate and invalidate relevant caches
+            var product = await _productService.CreateProductFromInventoryAsync(
+                inventoryItemId, name, price, description, category, subCategory, discountPrice, sku,
+                barcode, weight, dimensions, minimumStockLevel, optimalStockLevel, isFeatured, trackInventory, allowBackorder);
+            
+            // Invalidate relevant caches
+            _cacheService.Remove(AllProductsCacheKey);
+            _cacheService.Remove($"{ProductCategoryPrefix}{category}");
+            if (isFeatured)
+                _cacheService.Remove(FeaturedProductsCacheKey);
+            
+            return product;
+        }
+
+        public async Task ApplyCouponsToProductAsync(int productId, List<int> couponIds)
+        {
+            await _productService.ApplyCouponsToProductAsync(productId, couponIds);
+            
+            // Invalidate product cache
+            _cacheService.Remove($"{ProductCachePrefix}{productId}");
+        }
+
+        public async Task RemoveCouponsFromProductAsync(int productId, List<int> couponIds)
+        {
+            await _productService.RemoveCouponsFromProductAsync(productId, couponIds);
+            
+            // Invalidate product cache
+            _cacheService.Remove($"{ProductCachePrefix}{productId}");
+        }
+
+        public async Task<IEnumerable<Coupon>> GetProductCouponsAsync(int productId)
+        {
+            // This is read-only and could be cached, but let's keep it simple for now
+            return await _productService.GetProductCouponsAsync(productId);
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsWithLowStockAsync()
+        {
+            // This should not be cached as inventory levels change frequently
+            return await _productService.GetProductsWithLowStockAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsBySupplierAsync(int supplierId)
+        {
+            var cacheKey = $"ProductsBySupplier_{supplierId}";
+            var cachedProducts = _cacheService.Get<IEnumerable<Product>>(cacheKey);
+            if (cachedProducts != null)
+            {
+                return cachedProducts;
+            }
+
+            var products = await _productService.GetProductsBySupplierAsync(supplierId);
+            _cacheService.Set(cacheKey, products, TimeSpan.FromMinutes(10));
+            return products;
+        }
+
+        public async Task UpdateProductStockAsync(int productId, int newStockQuantity, string notes)
+        {
+            await _productService.UpdateProductStockAsync(productId, newStockQuantity, notes);
+            
+            // Invalidate caches
+            _cacheService.Remove($"{ProductCachePrefix}{productId}");
+            _cacheService.Remove(AllProductsCacheKey);
+        }
+
+        public async Task<decimal> CalculateProductProfitAsync(int productId)
+        {
+            // This calculation could be cached but might change frequently. Let's delegate directly.
+            return await _productService.CalculateProductProfitAsync(productId);
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsCreatedFromInventoryAsync(int inventoryItemId)
+        {
+            var cacheKey = $"ProductsFromInventory_{inventoryItemId}";
+            var cachedProducts = _cacheService.Get<IEnumerable<Product>>(cacheKey);
+            if (cachedProducts != null)
+            {
+                return cachedProducts;
+            }
+
+            var products = await _productService.GetProductsCreatedFromInventoryAsync(inventoryItemId);
+            _cacheService.Set(cacheKey, products, TimeSpan.FromMinutes(10));
+            return products;
+        }
     }
 }

@@ -45,18 +45,35 @@
                 </div>
                 
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="CostPrice" class="control-label required">Giá Vốn</label>
+                            <input asp-for="CostPrice" class="form-control" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="CostPrice" class="text-danger"></span>
+                            <small class="form-text text-muted">Giá nhập để tính lợi nhuận</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="Price" class="control-label required">Giá Bán</label>
                             <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="DiscountPrice" class="control-label">Giá Khuyến Mãi</label>
                             <input asp-for="DiscountPrice" class="form-control" type="number" step="0.01" min="0" />
                             <span asp-validation-for="DiscountPrice" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hiển thị lợi nhuận ước tính -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="alert alert-info" id="profitInfo" style="display:none;">
+                            <strong>Ước tính lợi nhuận:</strong> <span id="profitAmount">0</span> VND (<span id="profitPercent">0</span>%)
                         </div>
                     </div>
                 </div>
@@ -141,6 +158,41 @@
                     reader.readAsDataURL(fileInput.files[0]);
                 }
             });
+            
+            // Tính toán lợi nhuận khi thay đổi giá
+            function calculateProfit() {
+                var costPrice = parseFloat($('#CostPrice').val()) || 0;
+                var price = parseFloat($('#Price').val()) || 0;
+                var discountPrice = parseFloat($('#DiscountPrice').val()) || 0;
+                
+                var sellingPrice = discountPrice > 0 ? discountPrice : price;
+                
+                if (costPrice > 0 && sellingPrice > 0) {
+                    var profit = sellingPrice - costPrice;
+                    var profitPercent = (profit / costPrice) * 100;
+                    
+                    $('#profitAmount').text(profit.toLocaleString('vi-VN'));
+                    $('#profitPercent').text(profitPercent.toFixed(1));
+                    $('#profitInfo').show();
+                    
+                    // Thay đổi màu sắc dựa trên tỷ lệ lợi nhuận
+                    var alertClass = 'alert-info';
+                    if (profitPercent < 15) {
+                        alertClass = 'alert-danger';
+                    } else if (profitPercent > 50) {
+                        alertClass = 'alert-success';
+                    }
+                    
+                    $('#profitInfo').removeClass('alert-info alert-success alert-danger').addClass(alertClass);
+                } else {
+                    $('#profitInfo').hide();
+                }
+            }
+            
+            $('#CostPrice, #Price, #DiscountPrice').on('input', calculateProfit);
+            
+            // Tính toán ngay khi trang load
+            calculateProfit();
         });
     </script>
 }

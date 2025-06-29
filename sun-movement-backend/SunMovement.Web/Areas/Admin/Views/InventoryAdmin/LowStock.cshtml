@@ -1,0 +1,143 @@
+@model List<SunMovement.Core.Models.Product>
+
+@{
+    ViewData["Title"] = "Sản phẩm sắp hết hàng";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-2 text-gray-800">Sản phẩm sắp hết hàng</h1>
+    <p class="mb-4">Danh sách các sản phẩm có tồn kho thấp cần được nhập thêm.</p>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Danh sách sản phẩm (@Model.Count sản phẩm)
+            </h6>
+            <div>
+                <a asp-action="StockIn" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Nhập kho
+                </a>
+                <a asp-action="Index" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>SKU</th>
+                                <th>Tồn kho hiện tại</th>
+                                <th>Tồn kho tối thiểu</th>
+                                <th>Tình trạng</th>
+                                <th>Giá nhập</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model)
+                            {
+                                <tr>
+                                    <td style="width: 80px">
+                                        @if (product.Images != null && product.Images.Any())
+                                        {
+                                            var firstImage = product.Images.FirstOrDefault();
+                                            if (firstImage != null && !string.IsNullOrEmpty(firstImage.ImageUrl))
+                                            {
+                                                <img src="@firstImage.ImageUrl" alt="@product.Name" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            }
+                                        }
+                                        else if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="img-thumbnail d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong>@product.Name</strong>
+                                        @if (!string.IsNullOrEmpty(product.SubCategory))
+                                        {
+                                            <br><small class="text-muted">@product.SubCategory</small>
+                                        }
+                                    </td>
+                                    <td>@(product.Sku ?? "N/A")</td>
+                                    <td>
+                                        <span class="badge badge-warning">@product.StockQuantity</span>
+                                    </td>
+                                    <td>@product.MinimumStockLevel</td>
+                                    <td>
+                                        @if (product.StockQuantity == 0)
+                                        {
+                                            <span class="badge badge-danger">Hết hàng</span>
+                                        }
+                                        else if (product.StockQuantity <= product.MinimumStockLevel)
+                                        {
+                                            <span class="badge badge-warning">Sắp hết</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success">Đủ hàng</span>
+                                        }
+                                    </td>
+                                    <td>@product.CostPrice.ToString("N0") VNĐ</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="StockIn" asp-route-productId="@product.Id" 
+                                               class="btn btn-primary btn-sm" title="Nhập kho">
+                                                <i class="fas fa-plus"></i>
+                                            </a>
+                                            <a asp-controller="ProductsAdmin" asp-action="Edit" asp-route-id="@product.Id" 
+                                               class="btn btn-info btn-sm" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5>Tuyệt vời!</h5>
+                    <p class="text-muted">Hiện tại không có sản phẩm nào sắp hết hàng.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                },
+                "order": [[ 3, "asc" ]], // Sort by stock quantity ascending
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 7] } // Disable sorting for image and actions columns
+                ]
+            });
+        });
+    </script>
+}

@@ -1,0 +1,282 @@
+@model IEnumerable<SunMovement.Core.Models.CouponStatistics>
+@{
+    ViewData["Title"] = "Thống kê mã giảm giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Thống kê mã giảm giá</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a href="/admin/CouponsAdmin">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">Thống kê</li>
+    </ol>
+    
+    <!-- Tổng hợp thống kê -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Tổng mã giảm giá</div>
+                            <div class="font-weight-bold h4">@Model.Count()</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-tags fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Tổng lượt sử dụng</div>
+                            <div class="font-weight-bold h4">@Model.Sum(c => c.TotalUsageCount)</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-check-circle fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Tổng khách hàng sử dụng</div>
+                            <div class="font-weight-bold h4">@Model.Sum(c => c.UniqueUsersCount)</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-users fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-xs text-white-50">Tổng giảm giá</div>
+                            <div class="font-weight-bold h4">@Model.Sum(c => c.TotalDiscountAmount).ToString("N0") VNĐ</div>
+                        </div>
+                        <div class="mt-2">
+                            <i class="fas fa-money-bill fa-2x text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ thống kê -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Mã giảm giá được sử dụng nhiều nhất
+                </div>
+                <div class="card-body">
+                    <canvas id="mostUsedCouponsChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Phân bố giá trị giảm giá
+                </div>
+                <div class="card-body">
+                    <canvas id="discountDistributionChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng thống kê chi tiết -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Chi tiết thống kê mã giảm giá
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã giảm giá</th>
+                            <th>Loại</th>
+                            <th>Giá trị</th>
+                            <th>Lượt sử dụng</th>
+                            <th>Số khách hàng</th>
+                            <th>Tổng giảm giá</th>
+                            <th>Ngày hết hạn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in Model)
+                        {
+                            var coupon = stat.Coupon;
+                            if (coupon == null) continue;
+                            
+                            var daysLeft = (coupon.EndDate - DateTime.Now).TotalDays;
+                            var statusClass = daysLeft < 0 ? "text-danger" : (daysLeft < 7 ? "text-warning" : "text-success");
+                            var expiryText = daysLeft < 0 ? "Đã hết hạn" : $"Còn {Math.Ceiling(daysLeft)} ngày";
+                            
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("Details", "CouponsAdmin", new { id = coupon.Id })" class="fw-bold">
+                                        @coupon.Code
+                                    </a>
+                                    <div class="small text-muted">@coupon.Name</div>
+                                </td>
+                                <td>
+                                    @switch (coupon.Type)
+                                    {
+                                        case SunMovement.Core.Models.CouponType.Percentage:
+                                            <span class="badge bg-info">Giảm %</span>
+                                            break;
+                                        case SunMovement.Core.Models.CouponType.FixedAmount:
+                                            <span class="badge bg-primary">Giảm tiền</span>
+                                            break;
+                                        case SunMovement.Core.Models.CouponType.FreeShipping:
+                                            <span class="badge bg-success">Miễn phí ship</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">Khác</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    @if (coupon.Type == SunMovement.Core.Models.CouponType.Percentage)
+                                    {
+                                        @($"{coupon.Value}%")
+                                    }
+                                    else if (coupon.Type == SunMovement.Core.Models.CouponType.FixedAmount)
+                                    {
+                                        @($"{coupon.Value:N0} VNĐ")
+                                    }
+                                    else
+                                    {
+                                        @coupon.Value
+                                    }
+                                </td>
+                                <td>@stat.TotalUsageCount</td>
+                                <td>@stat.UniqueUsersCount</td>
+                                <td>@stat.TotalDiscountAmount.ToString("N0") VNĐ</td>
+                                <td class="@statusClass">@expiryText</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Dữ liệu cho biểu đồ lượt sử dụng
+            var usageData = @Html.Raw(Json.Serialize(Model.OrderByDescending(c => c.TotalUsageCount).Take(5).Select(c => new { 
+                code = c.Coupon?.Code, 
+                usageCount = c.TotalUsageCount 
+            })));
+            
+            // Biểu đồ mã giảm giá được sử dụng nhiều nhất
+            var mostUsedCtx = document.getElementById('mostUsedCouponsChart');
+            var mostUsedChart = new Chart(mostUsedCtx, {
+                type: 'bar',
+                data: {
+                    labels: usageData.map(d => d.code),
+                    datasets: [{
+                        label: 'Lượt sử dụng',
+                        data: usageData.map(d => d.usageCount),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Top 5 mã giảm giá được sử dụng nhiều nhất'
+                        }
+                    }
+                }
+            });
+            
+            // Dữ liệu cho biểu đồ phân bố giá trị giảm giá
+            var discountData = @Html.Raw(Json.Serialize(Model.OrderByDescending(c => c.TotalDiscountAmount).Take(5).Select(c => new { 
+                code = c.Coupon?.Code, 
+                amount = c.TotalDiscountAmount 
+            })));
+            
+            // Biểu đồ phân bố giá trị giảm giá
+            var discountCtx = document.getElementById('discountDistributionChart');
+            var discountChart = new Chart(discountCtx, {
+                type: 'pie',
+                data: {
+                    labels: discountData.map(d => d.code),
+                    datasets: [{
+                        data: discountData.map(d => d.amount),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 5 mã giảm giá theo giá trị giảm'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var value = context.raw;
+                                    return new Intl.NumberFormat('vi-VN', { 
+                                        style: 'currency', 
+                                        currency: 'VND',
+                                        maximumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

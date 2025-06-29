@@ -48,5 +48,10 @@ namespace SunMovement.Web.Areas.Api.Models
         {
             return Task.FromResult(true);
         }
+
+        public Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose)
+        {
+            return Task.FromResult(true);
+        }
     }
 }

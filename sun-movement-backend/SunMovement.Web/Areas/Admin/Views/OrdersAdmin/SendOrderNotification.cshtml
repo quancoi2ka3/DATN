@@ -1,0 +1,229 @@
+@model SunMovement.Core.Models.Order
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Gửi thông báo đơn hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Gửi thông báo đơn hàng #@Model.Id</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "OrdersAdmin")">Quản lý đơn hàng</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })">Đơn hàng #@Model.Id</a></li>
+        <li class="breadcrumb-item active">Gửi thông báo</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-envelope me-1"></i> Gửi email thông báo
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5>Thông tin quan trọng</h5>
+                                <p class="mb-0">
+                                    Gửi email thông báo tới khách hàng về trạng thái đơn hàng của họ. Bạn có thể điều chỉnh nội dung để phù hợp với thông điệp cần gửi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="notificationForm" action="@Url.Action("SendOrderNotification", "OrdersAdmin", new { id = Model.Id })" method="post">
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label for="recipientEmail" class="form-label">Email người nhận</label>
+                            <input type="email" class="form-control" id="recipientEmail" name="recipientEmail" readonly value="@Model.Email">
+                            <div class="form-text">Email sẽ được gửi tới khách hàng đã đặt đơn hàng.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="emailSubject" class="form-label">Tiêu đề email</label>
+                            <input type="text" class="form-control" id="emailSubject" name="emailSubject" 
+                                   value="[Sun Movement] Cập nhật đơn hàng #@Model.Id - @Model.Status">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="emailTemplate" class="form-label">Mẫu email</label>
+                            <select class="form-select mb-3" id="emailTemplate" name="emailTemplate">
+                                <option value="order_confirmation">Đơn hàng mới</option>
+                                <option value="payment_received">Đã nhận thanh toán</option>
+                                <option value="order_processing">Đơn hàng đang xử lý</option>
+                                <option value="order_shipped">Đơn hàng đã giao cho vận chuyển</option>
+                                <option value="delivery_confirmation">Xác nhận đã giao hàng</option>
+                                <option value="order_completed">Đơn hàng hoàn thành</option>
+                                <option value="order_cancelled">Đơn hàng đã hủy</option>
+                                <option value="custom">Email tùy chỉnh</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="emailContent" class="form-label">Nội dung email</label>
+                            <textarea class="form-control" id="emailContent" name="emailContent" rows="12"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Gửi email thông báo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i> Thông tin đơn hàng
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="small text-muted">Mã đơn hàng</div>
+                        <div class="h5">#@Model.Id</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Khách hàng</div>
+                        <div>@Model.DisplayCustomerName</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Email</div>
+                        <div><a href="mailto:@Model.Email">@Model.Email</a></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Trạng thái đơn hàng</div>
+                        <div>
+                            @{
+                                string statusClass = Model.Status switch
+                                {
+                                    OrderStatus.Pending => "bg-secondary text-white",
+                                    OrderStatus.AwaitingPayment => "bg-warning",
+                                    OrderStatus.Paid => "bg-info",
+                                    OrderStatus.Processing => "bg-info",
+                                    OrderStatus.Shipped => "bg-primary text-white",
+                                    OrderStatus.Delivered => "bg-success text-white",
+                                    OrderStatus.Completed => "bg-success text-white",
+                                    OrderStatus.Cancelled => "bg-danger text-white",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @statusClass">@Model.Status</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Khi chọn mẫu email, điền trước nội dung email
+            $("#emailTemplate").on("change", function() {
+                var selectedTemplate = $(this).val();
+                var orderId = '@Model.Id';
+                var customerName = '@Model.DisplayCustomerName';
+                var orderDate = '@Model.OrderDate.ToString("dd/MM/yyyy HH:mm")';
+                var totalAmount = '@Model.TotalAmount.ToString("N0") VNĐ';
+                var trackingNumber = '@(string.IsNullOrEmpty(Model.TrackingNumber) ? "Chưa có" : Model.TrackingNumber)';
+                var status = '@Model.Status';
+                
+                var content = '';
+                
+                switch(selectedTemplate) {
+                    case 'order_confirmation':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Cảm ơn bạn đã đặt hàng tại Sun Movement.\n\n`;
+                        content += `Chúng tôi đã nhận được đơn hàng #${orderId} của bạn vào ngày ${orderDate}.\n`;
+                        content += `Tổng giá trị đơn hàng: ${totalAmount}\n\n`;
+                        content += `Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất và sẽ thông báo khi đơn hàng được gửi đi.\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    case 'payment_received':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Chúng tôi đã nhận được thanh toán cho đơn hàng #${orderId} của bạn.\n\n`;
+                        content += `Đơn hàng của bạn đang được xử lý và chuẩn bị để gửi đi.\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    case 'order_shipped':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Đơn hàng #${orderId} của bạn đã được gửi đi.\n\n`;
+                        content += `Mã vận đơn: ${trackingNumber}\n`;
+                        content += `Bạn có thể theo dõi đơn hàng của mình bằng mã vận đơn trên.\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    case 'delivery_confirmation':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Đơn hàng #${orderId} của bạn đã được giao thành công.\n\n`;
+                        content += `Cảm ơn bạn đã mua sắm tại Sun Movement. Nếu bạn hài lòng với sản phẩm, hãy đánh giá cho chúng tôi nhé!\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    case 'order_cancelled':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Đơn hàng #${orderId} của bạn đã bị hủy theo yêu cầu.\n\n`;
+                        content += `Nếu đơn hàng đã được thanh toán, chúng tôi sẽ hoàn tiền cho bạn trong vòng 3-5 ngày làm việc.\n\n`;
+                        content += `Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    case 'custom':
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Đơn hàng #${orderId} của bạn đã được cập nhật.\n\n`;
+                        content += `[Nhập nội dung tùy chỉnh tại đây]\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                        break;
+                        
+                    default:
+                        content = `Kính gửi ${customerName},\n\n`;
+                        content += `Cảm ơn bạn đã đặt hàng tại Sun Movement.\n\n`;
+                        content += `Chúng tôi đang cập nhật trạng thái đơn hàng #${orderId} của bạn thành: ${status}.\n\n`;
+                        content += `Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.\n\n`;
+                        content += `Trân trọng,\n`;
+                        content += `Đội ngũ Sun Movement`;
+                }
+                
+                $("#emailContent").val(content);
+            });
+            
+            // Kích hoạt sự kiện change ban đầu để điền trước nội dung email
+            $("#emailTemplate").trigger("change");
+        });
+    </script>
+}

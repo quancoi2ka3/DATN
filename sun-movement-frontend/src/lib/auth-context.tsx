@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import { isTokenExpired } from './token-utils';
 
 interface User {
   id: string;
@@ -8,6 +9,12 @@ interface User {
   firstName: string;
   lastName: string;
   roles: string[];
+  phoneNumber?: string;
+  address?: string;
+  dateOfBirth?: string;
+  createdAt?: string;
+  lastLogin?: string;
+  emailConfirmed?: boolean;
 }
 
 interface AuthState {
@@ -46,6 +53,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userStr = localStorage.getItem("user");
     
     if (token && userStr) {
+      // Check if token is expired
+      if (isTokenExpired(token)) {
+        console.warn('Stored token is expired, clearing auth data');
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        return;
+      }
+      
       try {
         const user = JSON.parse(userStr);
         setAuthState({
@@ -120,7 +135,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          roles: user.roles
+          roles: user.roles,
+          phoneNumber: user.phoneNumber,
+          address: user.address,
+          dateOfBirth: user.dateOfBirth,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
+          emailConfirmed: user.emailConfirmed
         },
         token,
       });
@@ -210,7 +231,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: userData.email,
           firstName: userData.firstName,
           lastName: userData.lastName,
-          roles: userData.roles
+          roles: userData.roles,
+          phoneNumber: userData.phoneNumber,
+          address: userData.address,
+          dateOfBirth: userData.dateOfBirth,
+          createdAt: userData.createdAt,
+          lastLogin: userData.lastLogin,
+          emailConfirmed: userData.emailConfirmed
         };
         
         setAuthState(prev => ({
@@ -220,6 +247,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Update localStorage
         localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else if (response.status === 401) {
+        // Token expired or invalid - logout user
+        console.warn('Token expired or invalid, logging out user');
+        logout();
+      } else {
+        console.error('Failed to refresh user profile:', response.status);
       }
     } catch (error) {
       console.error('Error refreshing user profile:', error);

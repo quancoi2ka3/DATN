@@ -103,5 +103,15 @@ namespace SunMovement.Infrastructure.Services
             // Always return true for mock service
             return Task.FromResult(true);
         }
+
+        public Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose)
+        {
+            _logger.LogInformation("📧 MOCK EMAIL: OTP sent to {Email}", email);
+            _logger.LogInformation("🔐 OTP CODE: {OtpCode} (Purpose: {Purpose})", otpCode, purpose);
+            _logger.LogInformation("📝 Subject: 🔐 Mã xác thực OTP - Sun Movement");
+            
+            // Always return true for mock service
+            return Task.FromResult(true);
+        }
     }
 }

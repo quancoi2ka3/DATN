@@ -23,45 +23,7 @@ export function Footer() {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 rounded-full bg-amber-500 blur-[150px]"></div>
       </div>
       
-      {/* Newsletter section */}
-      <div className="border-b border-slate-800">
-        <div className="container py-12">
-          <div className="rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 p-1">
-            <div className="rounded-lg overflow-hidden relative">
-              <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-              <div className="absolute inset-0" style={{ backgroundImage: "url('/images/pattern-grid.png')", opacity: 0.05 }}></div>
-              
-              <div className="relative z-10 p-8 flex flex-col md:flex-row items-center gap-8 justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Dumbbell className="h-5 w-5 text-red-500" />
-                    <h3 className="text-lg font-semibold uppercase tracking-wide text-red-400">Nhận thông tin mới nhất</h3>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-2">Đăng ký nhận tin khuyến mãi & sự kiện</h2>
-                  <p className="text-slate-300 max-w-xl">Luôn cập nhật các thông tin mới nhất về chương trình tập luyện, khuyến mãi đặc biệt, và các sự kiện sắp diễn ra tại SUN MOVEMENT.</p>
-                </div>
-                
-                <div className="w-full md:w-auto">                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      placeholder="Email của bạn"
-                      className="px-4 py-3 bg-slate-800 text-white border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent min-w-[250px]"
-                    />
-                    
-                    <AuthModal defaultMode="register">
-                      <Button className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white px-6">
-                        <span>Đăng ký</span>
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </AuthModal>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-3">Chúng tôi cam kết bảo mật thông tin của bạn.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
       
       {/* Main footer content */}
       <div className="container py-16 relative z-10">
@@ -85,7 +47,7 @@ export function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
-                <span className="text-slate-300">Tầng 11, số 300 Đê La Thành, Thổ Quan, Đống Đa, Hà Nội</span>
+                <span className="text-slate-300">Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-red-500 mr-3 flex-shrink-0" />
@@ -143,7 +105,7 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link 
-                  href="/dich-vu#calisthenics" 
+                  href="/dich-vu" 
                   className="flex items-center text-slate-300 hover:text-white transition-colors group"
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
@@ -152,7 +114,7 @@ export function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/dich-vu#strength" 
+                  href="/dich-vu" 
                   className="flex items-center text-slate-300 hover:text-white transition-colors group"
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
@@ -161,7 +123,7 @@ export function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/dich-vu#yoga" 
+                  href="/dich-vu" 
                   className="flex items-center text-slate-300 hover:text-white transition-colors group"
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
@@ -170,7 +132,7 @@ export function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/dich-vu#group" 
+                  href="/dich-vu" 
                   className="flex items-center text-slate-300 hover:text-white transition-colors group"
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
@@ -179,7 +141,7 @@ export function Footer() {
               </li>
               <li>
                 <Link 
-                  href="/dich-vu#pt" 
+                  href="/dich-vu" 
                   className="flex items-center text-slate-300 hover:text-white transition-colors group"
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
@@ -211,15 +173,6 @@ export function Footer() {
                 >
                   <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
                   <span>Thực phẩm bổ sung</span>
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/store/accessories" 
-                  className="flex items-center text-slate-300 hover:text-white transition-colors group"
-                >
-                  <ChevronRight className="h-4 w-4 mr-2 text-red-500 transform group-hover:translate-x-1 transition-transform" />
-                  <span>Phụ kiện tập luyện</span>
                 </Link>
               </li>
               <li>
@@ -338,7 +291,7 @@ export function Footer() {
               </Link>
             </div>
             <Link 
-              href="/hinh-anh" 
+              href="https://www.instagram.com/sun.movement/" 
               className="inline-flex items-center mt-4 text-red-400 hover:text-red-300 transition-colors"
             >
               <span>Xem thêm hình ảnh</span>

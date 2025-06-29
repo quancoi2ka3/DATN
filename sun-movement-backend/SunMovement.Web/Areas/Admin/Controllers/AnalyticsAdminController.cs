@@ -33,11 +33,11 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
             ViewBag.SearchQueries = new[]
             {
-                new { Term = "fitness equipment", Count = 245, Results = 12 },
-                new { Term = "yoga classes", Count = 189, Results = 8 },
-                new { Term = "personal training", Count = 156, Results = 15 },
-                new { Term = "nutrition plans", Count = 98, Results = 3 },
-                new { Term = "home workouts", Count = 87, Results = 9 }
+                new { Term = "đồ tập thể dục", Count = 245, Results = 12 },
+                new { Term = "lớp yoga", Count = 189, Results = 8 },
+                new { Term = "huấn luyện cá nhân", Count = 156, Results = 15 },
+                new { Term = "kế hoạch dinh dưỡng", Count = 98, Results = 3 },
+                new { Term = "tập luyện tại nhà", Count = 87, Results = 9 }
             };
 
             ViewBag.TopProducts = (await _unitOfWork.Products.GetAllAsync())
@@ -61,11 +61,11 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             // Mock search analytics data
             ViewBag.SearchData = new[]
             {
-                new { Term = "fitness equipment", Count = 245, ResultsFound = 12, ClickThrough = 0.65 },
-                new { Term = "yoga classes", Count = 189, ResultsFound = 8, ClickThrough = 0.72 },
-                new { Term = "personal training", Count = 156, ResultsFound = 15, ClickThrough = 0.58 },
-                new { Term = "nutrition plans", Count = 98, ResultsFound = 3, ClickThrough = 0.31 },
-                new { Term = "home workouts", Count = 87, ResultsFound = 9, ClickThrough = 0.69 }
+                new { Term = "đồ tập thể dục", Count = 245, ResultsFound = 12, ClickThrough = 0.65 },
+                new { Term = "lớp yoga", Count = 189, ResultsFound = 8, ClickThrough = 0.72 },
+                new { Term = "huấn luyện cá nhân", Count = 156, ResultsFound = 15, ClickThrough = 0.58 },
+                new { Term = "kế hoạch dinh dưỡng", Count = 98, ResultsFound = 3, ClickThrough = 0.31 },
+                new { Term = "tập luyện tại nhà", Count = 87, ResultsFound = 9, ClickThrough = 0.69 }
             };
 
             return View();

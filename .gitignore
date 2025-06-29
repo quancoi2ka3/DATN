@@ -77,3 +77,39 @@ yarn-error.log*
 coverage/
 *.tsbuildinfo
 next-env.d.ts
+
+# Python/Rasa specific
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+rasa_env*/
+venv/
+ENV/
+env/
+.env*/
+models/
+.rasa/
+.venv/
+
+# Large files in Rasa environments that exceed GitHub limits
+sun-movement-chatbot/rasa_env_310/
+**/rasa_env*/
+**/rasa_env*/**
+**/rasa_env310/
+**/.rasa/
+**/models/
+*/rasa_env*/Lib/site-packages/clang/native/libclang.dll
+*/rasa_env*/Lib/site-packages/jaxlib/xla_extension.pyd
+*/rasa_env*/Lib/site-packages/tensorflow/python/_pywrap_tensorflow_internal.pyd
+
+# Các file lớn có thể xuất hiện trong dự án
+**/*.pyd
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.model
+**/*.tar.gz
+**/*.zip
+**/*.rar
+**/*.weights

@@ -1,14 +1,19 @@
 # Sun Movement Project
 
-This repository contains the Sun Movement application which consists of a .NET Core backend and a Next.js frontend.
+This repository contains the Sun Movement application which consists of a .NET Core backend, a Next.js frontend, and a Rasa chatbot.
 
 ## Project Structure
 - `sun-movement-backend`: .NET Core backend application
 - `sun-movement-frontend`: Next.js frontend application
+- `sun-movement-chatbot`: Rasa-based Vietnamese chatbot
 
 ## Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+
+### Environment Setup
+
+For detailed environment setup instructions, please refer to the [Environment Setup Guide](ENVIRONMENT_SETUP_GUIDE.md).
 
 ### Prerequisites
 

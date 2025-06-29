@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SunMovement.Core.Models;
 using SunMovement.Core.Interfaces;
+using SunMovement.Web.Areas.Admin.Models;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -493,6 +497,188 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải thống kê mã giảm giá.";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        // GET: Admin/CouponsAdmin/ApplyCoupons?productId=5
+        [HttpGet]
+        public async Task<IActionResult> ApplyCoupons(int? productId)
+        {
+            ViewBag.ProductId = productId;
+            ViewBag.PageTitle = productId.HasValue ? "Gán Mã Giảm Giá Cho Sản Phẩm" : "Quản Lý Mã Giảm Giá - Sản Phẩm";
+            
+            var viewModel = new CouponProductsViewModel();
+            
+            // Lấy tất cả mã giảm giá đang hoạt động
+            viewModel.AllCoupons = await _couponService.GetAllActiveCouponsAsync();
+            
+            // Nếu có product ID, lấy thông tin sản phẩm và các mã giảm giá đã gán
+            if (productId.HasValue)
+            {
+                var product = await _unitOfWork.Products.GetByIdAsync(productId.Value);
+                if (product != null)
+                {
+                    viewModel.Product = product;
+                    viewModel.SelectedCouponIds = await GetAppliedCouponIdsForProduct(productId.Value);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            else
+            {
+                // Lấy tất cả sản phẩm nếu không có product ID cụ thể
+                viewModel.AllProducts = await _unitOfWork.Products.GetAllAsync();
+                // Dùng coupon đầu tiên làm mặc định nếu có
+                var firstCoupon = viewModel.AllCoupons.FirstOrDefault();
+                if (firstCoupon != null)
+                {
+                    viewModel.SelectedCouponId = firstCoupon.Id;
+                    viewModel.SelectedProductIds = await GetAppliedProductIdsForCoupon(firstCoupon.Id);
+                }
+            }
+            
+            return View(viewModel);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyCoupons(CouponProductsViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                if (viewModel.Product != null)
+                {
+                    viewModel.AllCoupons = await _couponService.GetAllActiveCouponsAsync();
+                }
+                else if (viewModel.SelectedCouponId > 0)
+                {
+                    viewModel.AllCoupons = await _couponService.GetAllActiveCouponsAsync();
+                    viewModel.AllProducts = await _unitOfWork.Products.GetAllAsync();
+                }
+                return View(viewModel);
+            }
+            
+            try
+            {
+                if (viewModel.Product != null && viewModel.Product.Id > 0)
+                {
+                    // Cập nhật mã giảm giá cho sản phẩm cụ thể
+                    await UpdateCouponsForProduct(viewModel.Product.Id, viewModel.SelectedCouponIds);
+                    TempData["SuccessMessage"] = "Cập nhật mã giảm giá cho sản phẩm thành công";
+                    return RedirectToAction("ProductWithInventory", "ProductsAdmin", new { id = viewModel.Product.Id });
+                }
+                else if (viewModel.SelectedCouponId > 0)
+                {
+                    // Cập nhật sản phẩm cho mã giảm giá cụ thể
+                    await UpdateProductsForCoupon(viewModel.SelectedCouponId, viewModel.SelectedProductIds);
+                    TempData["SuccessMessage"] = "Cập nhật sản phẩm cho mã giảm giá thành công";
+                    return RedirectToAction("Details", new { id = viewModel.SelectedCouponId });
+                }
+                
+                TempData["ErrorMessage"] = "Không đủ thông tin để cập nhật";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật mã giảm giá cho sản phẩm");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi cập nhật: " + ex.Message;
+                
+                viewModel.AllCoupons = await _couponService.GetAllActiveCouponsAsync();
+                if (viewModel.SelectedCouponId > 0)
+                {
+                    viewModel.AllProducts = await _unitOfWork.Products.GetAllAsync();
+                }
+                
+                return View(viewModel);
+            }
+        }
+        
+        private async Task<List<int>> GetAppliedCouponIdsForProduct(int productId)
+        {
+            // Lấy các mã giảm giá đã áp dụng cho sản phẩm
+            if (_unitOfWork.CouponProducts != null)
+            {
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.ProductId == productId);
+                return couponProducts.Select(cp => cp.CouponId).ToList();
+            }
+            
+            // Nếu không có bảng mapping, giả định tất cả coupon đều áp dụng cho sản phẩm
+            return (await _couponService.GetAllActiveCouponsAsync()).Select(c => c.Id).ToList();
+        }
+        
+        private async Task<List<int>> GetAppliedProductIdsForCoupon(int couponId)
+        {
+            // Lấy các sản phẩm đã áp dụng cho mã giảm giá
+            if (_unitOfWork.CouponProducts != null)
+            {
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == couponId);
+                return couponProducts.Select(cp => cp.ProductId).ToList();
+            }
+            
+            // Nếu không có bảng mapping, có thể cần triển khai cách khác để lưu thông tin này
+            return (await _unitOfWork.Products.GetAllAsync()).Select(p => p.Id).ToList();
+        }
+        
+        private async Task UpdateCouponsForProduct(int productId, List<int> couponIds)
+        {
+            if (_unitOfWork.CouponProducts != null)
+            {
+                // Xóa tất cả mapping hiện tại
+                var existingMappings = await _unitOfWork.CouponProducts.FindAsync(cp => cp.ProductId == productId);
+                foreach (var mapping in existingMappings)
+                {
+                    await _unitOfWork.CouponProducts.DeleteAsync(mapping);
+                }
+                
+                // Thêm mappings mới
+                if (couponIds != null)
+                {
+                    foreach (var couponId in couponIds)
+                    {
+                        await _unitOfWork.CouponProducts.AddAsync(new CouponProduct
+                        {
+                            CouponId = couponId,
+                            ProductId = productId
+                        });
+                    }
+                }
+                
+                await _unitOfWork.CompleteAsync();
+            }
+            
+            // Nếu không có bảng mapping, có thể cần triển khai cách khác để lưu thông tin này
+        }
+        
+        private async Task UpdateProductsForCoupon(int couponId, List<int> productIds)
+        {
+            if (_unitOfWork.CouponProducts != null)
+            {
+                // Xóa tất cả mapping hiện tại
+                var existingMappings = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == couponId);
+                foreach (var mapping in existingMappings)
+                {
+                    await _unitOfWork.CouponProducts.DeleteAsync(mapping);
+                }
+                
+                // Thêm mappings mới
+                if (productIds != null)
+                {
+                    foreach (var productId in productIds)
+                    {
+                        await _unitOfWork.CouponProducts.AddAsync(new CouponProduct
+                        {
+                            CouponId = couponId,
+                            ProductId = productId
+                        });
+                    }
+                }
+                
+                await _unitOfWork.CompleteAsync();
+            }
+            
+            // Nếu không có bảng mapping, có thể cần triển khai cách khác để lưu thông tin này
         }
 
         // Helper Methods

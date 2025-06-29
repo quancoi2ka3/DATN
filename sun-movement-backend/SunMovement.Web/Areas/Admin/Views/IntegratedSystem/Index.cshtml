@@ -1,0 +1,354 @@
+@model SunMovement.Web.Areas.Admin.Models.IntegratedSystemViewModel
+@using SunMovement.Core.Models
+
+@{
+    ViewData["Title"] = "Hệ Thống Tích Hợp";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-cogs me-2"></i>Hệ Thống Tích Hợp
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang Chủ</a></li>
+        <li class="breadcrumb-item active">Hệ Thống Tích Hợp</li>
+    </ol>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    <!-- System Status Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Sản phẩm sắp hết hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.LowStockCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a class="small text-primary stretched-link" asp-area="Admin" asp-controller="InventoryAdmin" asp-action="LowStock">
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Giá trị tồn kho
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalInventoryValue.ToString("N0") đ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a class="small text-success stretched-link" asp-area="Admin" asp-controller="InventoryAdmin" asp-action="Value">
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Báo Cáo
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Mã giảm giá đang hoạt động
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ActiveCouponCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tags fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a class="small text-warning stretched-link" asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Sản phẩm hết hàng
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.OutOfStockCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a class="small text-danger stretched-link" asp-area="Admin" asp-controller="InventoryAdmin" asp-action="OutOfStock">
+                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Integration Systems -->
+    <div class="row">
+        <!-- Inventory Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-warehouse me-2"></i>Quản lý kho hàng tích hợp
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Hệ thống quản lý kho hàng tích hợp với quản lý sản phẩm và đơn hàng, giúp theo dõi tồn kho, nhập xuất và cảnh báo sắp hết hàng.</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="list-group small">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Theo dõi tồn kho theo thời gian thực
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Nhập xuất kho tự động khi có đơn hàng
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Cảnh báo sản phẩm sắp hết kho
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="list-group small">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Báo cáo biến động kho hàng
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Quản lý giá vốn và giá trị tồn kho
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Kiểm kê và điều chỉnh tồn kho
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-area="Admin" asp-controller="IntegratedSystem" asp-action="InventoryDashboard" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Tổng quan kho hàng
+                        </a>
+                        <a asp-area="Admin" asp-controller="IntegratedSystem" asp-action="BatchInventoryUpdate" class="btn btn-outline-primary">
+                            <i class="fas fa-cubes me-2"></i>Cập nhật tồn kho hàng loạt
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product-Coupon Integration -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tags me-2"></i>Tích hợp sản phẩm & mã giảm giá
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Hệ thống tích hợp giữa sản phẩm và mã giảm giá, giúp áp dụng mã giảm giá theo nhóm sản phẩm hoặc đối tượng khách hàng.</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="list-group small">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Gán mã giảm giá cho nhiều sản phẩm
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Tạo mã giảm giá theo danh mục
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Thiết kế chương trình khuyến mãi
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="list-group small">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Theo dõi hiệu quả mã giảm giá
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Tích hợp với đơn hàng tự động
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-arrow-right me-2"></i>Phân tích phân khúc khách hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-area="Admin" asp-controller="IntegratedSystem" asp-action="ProductCoupons" class="btn btn-warning">
+                            <i class="fas fa-link me-2"></i>Quản lý mã giảm giá & sản phẩm
+                        </a>
+                        <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Create" class="btn btn-outline-warning">
+                            <i class="fas fa-plus-circle me-2"></i>Tạo mã giảm giá mới
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Low Stock Products -->
+    @if (Model.LowStockProducts.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                Sản phẩm sắp hết hàng
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã sản phẩm</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Tồn kho hiện tại</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model.LowStockProducts.Take(5))
+                            {
+                                <tr>
+                                    <td>@product.Sku</td>
+                                    <td>@product.Name</td>
+                                    <td>
+                                        <span class="badge bg-danger">@product.StockQuantity</span>
+                                    </td>
+                                    <td>
+                                        @if (product.IsActive)
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Vô hiệu</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-area="Admin" asp-controller="InventoryAdmin" asp-action="AddStock" asp-route-productId="@product.Id" class="btn btn-primary">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </a>
+                                            <a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="ProductWithInventory" asp-route-id="@product.Id" class="btn btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (Model.LowStockProducts.Count() > 5)
+                {
+                    <div class="text-end mt-2">
+                        <a asp-area="Admin" asp-controller="InventoryAdmin" asp-action="LowStock" class="btn btn-sm btn-outline-primary">
+                            Xem tất cả @Model.LowStockProducts.Count() sản phẩm sắp hết hàng
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
+    <!-- Active Coupons -->
+    @if (Model.ActiveCoupons.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-tags me-1"></i>
+                Mã giảm giá đang hoạt động
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var coupon in Model.ActiveCoupons.Take(4))
+                    {
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">@coupon.Code</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text small">@coupon.Description</p>
+                                    <p class="mb-1">
+                                        <span class="fw-bold">Giá trị:</span>
+                                        @if (coupon.Type == CouponType.Percentage)
+                                        {
+                                            <span class="badge bg-primary">@coupon.Value% giảm giá</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">@coupon.Value.ToString("N0") đ giảm giá</span>
+                                        }
+                                    </p>
+                                    <p class="mb-1">
+                                        <span class="fw-bold">Thời hạn:</span>
+                                        <span class="small text-muted">@coupon.StartDate.ToString("dd/MM/yyyy") - @coupon.EndDate.ToString("dd/MM/yyyy")</span>
+                                    </p>
+                                </div>
+                                <div class="card-footer">
+                                    <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="ApplyCoupons" asp-route-couponId="@coupon.Id" class="btn btn-sm btn-outline-warning w-100">
+                                        <i class="fas fa-link me-1"></i> Gán sản phẩm
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (Model.ActiveCoupons.Count() > 4)
+                {
+                    <div class="text-end mt-2">
+                        <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index" class="btn btn-sm btn-outline-warning">
+                            Xem tất cả @Model.ActiveCoupons.Count() mã giảm giá
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

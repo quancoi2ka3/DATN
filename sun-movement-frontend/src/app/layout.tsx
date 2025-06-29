@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./critical.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { FloatingContactButton } from "@/components/ui/messenger-button";
+import { RasaChatbot } from "@/components/ui/rasa-chatbot";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
@@ -122,7 +122,7 @@ export default function RootLayout({
                 </Suspense>
               </main>
               <Footer />
-              <FloatingContactButton />
+              <RasaChatbot />
             </CartProvider>
           </AuthProvider>
         </Suspense>

@@ -1,0 +1,21 @@
+{
+  "0": "affirm",
+  "1": "ask_bot_capabilities",
+  "2": "check_order",
+  "3": "contact_support",
+  "4": "delivery_time",
+  "5": "deny",
+  "6": "discount_info",
+  "7": "goodbye",
+  "8": "greet",
+  "9": "payment_methods",
+  "10": "price_query",
+  "11": "product_consultation",
+  "12": "product_info",
+  "13": "return_policy",
+  "14": "search_product",
+  "15": "shipping_info",
+  "16": "shopping_help",
+  "17": "store_location",
+  "18": "thank"
+}

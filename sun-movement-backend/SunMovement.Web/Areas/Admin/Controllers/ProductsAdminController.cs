@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SunMovement.Infrastructure.Data;
+using Microsoft.Extensions.Logging;
+using SunMovement.Web.Areas.Admin.Models;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -716,6 +718,55 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 ProductCategory.Nutrition => new List<string> { "Thức ăn năng lượng", "Đồ uống thể thao", "Protein bar" },
                 _ => new List<string>()
             };
+        }
+
+        // GET: Admin/ProductsAdmin/WithInventory/5
+        [HttpGet("WithInventory/{id}")]
+        public async Task<IActionResult> ProductWithInventory(int id)
+        {
+            try
+            {
+                var product = await _unitOfWork.Products.GetByIdAsync(id);
+                if (product == null)
+                    return NotFound();
+                
+                // Lấy thông tin inventory
+                var inventoryTransactions = await _inventoryService.GetProductTransactionHistoryAsync(id);
+                
+                // Lấy các mã giảm giá đang áp dụng cho sản phẩm
+                var allActiveCoupons = await _couponService.GetAllActiveCouponsAsync();
+                var appliedCoupons = new List<Coupon>();
+                
+                // Điều chỉnh logic này dựa trên cấu trúc thực tế của ứng dụng
+                // Giả sử tất cả coupon đều có thể áp dụng cho tất cả sản phẩm
+                appliedCoupons.AddRange(allActiveCoupons);
+                
+                // TODO: Cập nhật logic lọc coupon theo sản phẩm khi có phương thức hỗ trợ
+
+                // Tạo view model tích hợp cho sản phẩm
+                var viewModel = new ProductWithInventoryViewModel
+                {
+                    Product = product,
+                    InventoryTransactions = inventoryTransactions.ToList(),
+                    AppliedCoupons = appliedCoupons,
+                    CurrentStock = product.StockQuantity,
+                    // Giả định giá trị mặc định vì không có trường cost trong transaction
+                    TotalCost = product.Price * product.StockQuantity * 0.7M, // Giả định giá vốn bằng 70% giá bán
+                    ReorderPoint = 10, // Giá trị mặc định nếu không có trong model
+                    LastRestock = inventoryTransactions
+                        .Where(t => t.TransactionType == 0) // 0 = StockIn (nhập kho)
+                        .OrderByDescending(t => t.TransactionDate)
+                        .FirstOrDefault()?.TransactionDate
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting product with inventory details");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi lấy thông tin sản phẩm và kho hàng";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

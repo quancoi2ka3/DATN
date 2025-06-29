@@ -1,0 +1,345 @@
+version: "3.1"
+
+stories:
+- story: chào hỏi đơn giản
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: hỏi về sản phẩm và cần trợ giúp thêm
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+  # Bỏ affirm, dùng product_consultation trực tiếp
+  - intent: product_consultation
+  - action: utter_product_consultation
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về sản phẩm đơn giản  
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm kiếm sản phẩm với từ chối
+  steps:
+  - intent: search_product
+  - action: action_search_product
+  - intent: deny
+  - action: utter_goodbye
+
+- story: hỏi về giá sản phẩm
+  steps:
+  - intent: price_query
+  - action: utter_price_query
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về vận chuyển
+  steps:
+  - intent: shipping_info
+  - action: utter_shipping_info
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về chính sách đổi trả
+  steps:
+  - intent: return_policy
+  - action: utter_return_policy
+
+- story: kiểm tra đơn hàng
+  steps:
+  - intent: check_order
+  - action: action_check_order
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về khuyến mãi
+  steps:
+  - intent: discount_info
+  - action: action_fetch_discount_info
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về phương thức thanh toán
+  steps:
+  - intent: payment_methods
+  - action: utter_payment_methods
+  - intent: thank
+  - action: utter_thank
+
+- story: chào hỏi và tư vấn sản phẩm đồng ý
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_consultation
+  - action: utter_product_consultation
+  # Bỏ intent affirm, hãy dùng thank trực tiếp
+  - intent: thank
+  - action: utter_thank
+
+- story: chào hỏi và tư vấn sản phẩm đơn giản
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_consultation
+  - action: utter_product_consultation
+  - intent: thank
+  - action: utter_thank
+
+- story: tư vấn sản phẩm trực tiếp
+  steps:
+  - intent: product_consultation
+  - action: utter_product_consultation
+
+- story: hỏi khả năng của bot và tư vấn sản phẩm
+  steps:
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+  # Bỏ affirm, dùng product_consultation trực tiếp
+  - intent: product_consultation
+  - action: utter_product_consultation
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi khả năng của bot đơn giản
+  steps:
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+  - intent: product_consultation
+  - action: utter_product_consultation
+
+- story: từ chào hỏi đến hỏi chức năng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+  - intent: thank
+  - action: utter_thank
+
+- story: từ chào hỏi đến thông tin sản phẩm
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+
+- story: tìm kiếm sản phẩm 
+  steps:
+  - intent: search_product
+  - action: action_search_product
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về vị trí cửa hàng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: store_location
+  - action: utter_store_location
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi trực tiếp vị trí cửa hàng
+  steps:
+  - intent: store_location
+  - action: utter_store_location
+
+- story: hỏi về dịch vụ huấn luyện viên
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: personal_training
+  - action: utter_personal_training
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi trực tiếp về huấn luyện viên
+  steps:
+  - intent: personal_training
+  - action: utter_personal_training
+
+- story: hỏi về dinh dưỡng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: nutrition_advice
+  - action: utter_nutrition_advice
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi trực tiếp về dinh dưỡng
+  steps:
+  - intent: nutrition_advice
+  - action: utter_nutrition_advice
+
+- story: hỏi về lịch tập
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: workout_plan
+  - action: utter_workout_plan
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi trực tiếp về lịch tập
+  steps:
+  - intent: workout_plan
+  - action: utter_workout_plan
+
+- story: hỏi về lịch tập và dinh dưỡng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: workout_plan
+  - action: utter_workout_plan
+  - intent: nutrition_advice
+  - action: utter_nutrition_advice
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về khả năng và vị trí cửa hàng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+  - intent: store_location
+  - action: utter_store_location
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về khả năng và huấn luyện viên
+  steps:
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+  - intent: personal_training
+  - action: utter_personal_training
+  - intent: thank
+  - action: utter_thank
+
+# Thêm các story mới với nhiều ngữ cảnh hơn
+- story: tìm hiểu về cả sản phẩm và dinh dưỡng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+  - intent: nutrition_advice
+  - action: utter_nutrition_advice
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về sản phẩm tập luyện và lịch tập
+  steps:
+  - intent: product_consultation
+  - action: utter_product_consultation
+  - intent: workout_plan
+  - action: utter_workout_plan
+  - intent: thank
+  - action: utter_thank
+
+- story: chào hỏi, kiểm tra đơn hàng và hỏi đổi trả
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: check_order
+  - action: action_check_order
+  - intent: return_policy
+  - action: utter_return_policy
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm cửa hàng và hỏi phương thức thanh toán
+  steps:
+  - intent: store_location
+  - action: utter_store_location
+  - intent: payment_methods
+  - action: utter_payment_methods
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi chi tiết về giao hàng và thời gian nhận hàng
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: shipping_info
+  - action: utter_shipping_info
+  - intent: delivery_time
+  - action: utter_delivery_time
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi sản phẩm theo mục tiêu tập luyện
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: workout_plan
+  - action: utter_workout_plan
+  - intent: product_consultation
+  - action: utter_product_consultation
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi các thương hiệu và chất lượng sản phẩm
+  steps:
+  - intent: product_brand
+  - action: utter_product_brand
+  - intent: product_quality
+  - action: utter_product_quality
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi dịch vụ hỗ trợ sau bán hàng
+  steps:
+  - intent: after_sales_service
+  - action: utter_after_sales_service
+  - intent: contact_support
+  - action: utter_contact_support
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về các chương trình khuyến mãi và đặt hàng
+  steps:
+  - intent: discount_info
+  - action: action_fetch_discount_info
+  - intent: shopping_help
+  - action: utter_shopping_help
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về trải nghiệm sử dụng sản phẩm
+  steps:
+  - intent: product_experience
+  - action: utter_product_experience
+  - intent: product_recommendation
+  - action: utter_product_recommendation
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi các mẹo tập luyện hiệu quả
+  steps:
+  - intent: workout_tips
+  - action: utter_workout_tips
+  - intent: nutrition_advice
+  - action: utter_nutrition_advice
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm hiểu về chương trình thành viên
+  steps:
+  - intent: membership_program
+  - action: utter_membership_program
+  - intent: membership_benefits
+  - action: utter_membership_benefits
+  - intent: thank
+  - action: utter_thank

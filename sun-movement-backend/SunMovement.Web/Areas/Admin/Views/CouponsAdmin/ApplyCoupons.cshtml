@@ -1,0 +1,246 @@
+@model SunMovement.Web.Areas.Admin.Models.CouponProductsViewModel
+@using SunMovement.Core.Models
+
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Quản Lý Mã Giảm Giá - Sản Phẩm";
+    Layout = "_AdminLayout";
+    var isProductMode = Model.Product != null && Model.Product.Id > 0;
+}
+
+<div class="container-fluid px-4">
+    @{
+        var pageTitle = isProductMode ? "Gán Mã Giảm Giá Cho Sản Phẩm" : "Gán Sản Phẩm Cho Mã Giảm Giá";
+        var iconClass = isProductMode ? "fas fa-tags" : "fas fa-box";
+    }
+    <h1 class="mt-4">
+        <i class="@iconClass me-2"></i> @pageTitle
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang Chủ</a></li>
+        @if (isProductMode)
+        {
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">Sản Phẩm</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Details" asp-route-id="@Model.Product?.Id">Chi Tiết Sản Phẩm</a></li>
+            <li class="breadcrumb-item active">Gán Mã Giảm Giá</li>
+        }
+        else
+        {
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">Mã Giảm Giá</a></li>
+            <li class="breadcrumb-item active">Gán Sản Phẩm</li>
+        }
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            @if (isProductMode)
+            {
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    <span>Chọn Mã Giảm Giá Áp Dụng Cho Sản Phẩm: <strong>@Model.Product?.Name</strong></span>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        <span>Chọn Sản Phẩm Áp Dụng Mã Giảm Giá</span>
+                    </div>
+                    <div class="form-inline">
+                        <div class="input-group">
+                            <select id="couponSelect" asp-for="SelectedCouponId" class="form-select" 
+                                    asp-items="@(new SelectList(Model.AllCoupons, "Id", "Code"))" 
+                                    onchange="document.getElementById('couponForm').submit()">
+                            </select>
+                            <button type="submit" form="couponForm" class="btn btn-primary">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            <form id="couponForm" method="post" asp-action="ApplyCoupons">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                @if (isProductMode)
+                {
+                    <input type="hidden" asp-for="Product.Id" />
+                    <input type="hidden" asp-for="Product.Name" />
+                    
+                    <div class="mb-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Chọn Mã Giảm Giá</h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.AllCoupons.Any())
+                                {
+                                    <div class="row">
+                                        @foreach (var coupon in Model.AllCoupons)
+                                        {
+                                            <div class="col-md-4 mb-3">
+                                                <div class="card h-100 @(Model.SelectedCouponIds.Contains(coupon.Id) ? "border-primary" : "")">
+                                                    <div class="card-body">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" value="@coupon.Id" 
+                                                                   name="SelectedCouponIds" id="coupon_@coupon.Id"
+                                                                   @(Model.SelectedCouponIds.Contains(coupon.Id) ? "checked" : "") />
+                                                            <label class="form-check-label" for="coupon_@coupon.Id">
+                                                                <h6 class="card-title mb-1">@coupon.Code</h6>
+                                                            </label>
+                                                        </div>
+                                                        <p class="card-text text-muted small">@coupon.Description</p>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="badge bg-info">
+                                                                @(coupon.Type == CouponType.Percentage ? $"{coupon.Value}%" : $"{coupon.Value:N0} đ")
+                                                            </span>
+                                                            <small class="text-muted">
+                                                                @(coupon.IsActive ? "Hiện hoạt động" : "Không hoạt động")
+                                                            </small>
+                                                        </div>
+                                                        <div class="mt-2 small">
+                                                            <span class="text-muted">Hết hạn: </span>
+                                                            @coupon.EndDate.ToString("dd/MM/yyyy")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        Không có mã giảm giá nào đang hoạt động.
+                                        <a asp-action="Create" asp-controller="CouponsAdmin" class="alert-link">Tạo mã giảm giá mới</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="SelectedCouponId" />
+                    
+                    <div class="mb-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Chọn Sản Phẩm</h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.AllProducts.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40px;">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="selectAll" />
+                                                        </div>
+                                                    </th>
+                                                    <th style="width: 80px;">Ảnh</th>
+                                                    <th>Tên Sản Phẩm</th>
+                                                    <th>SKU</th>
+                                                    <th>Giá</th>
+                                                    <th>Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var product in Model.AllProducts)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input product-select" type="checkbox" value="@product.Id" 
+                                                                       name="SelectedProductIds" id="product_@product.Id"
+                                                                       @(Model.SelectedProductIds.Contains(product.Id) ? "checked" : "") />
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                            {
+                                                                <img src="@product.ImageUrl" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                                     class="rounded" alt="@product.Name" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="bg-light rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                                                    <i class="fas fa-image text-muted"></i>
+                                                                </div>
+                                                            }
+                                                        </td>
+                                                        <td>@product.Name</td>
+                                                        <td>@product.Sku</td>
+                                                        <td>@product.Price.ToString("N0") đ</td>
+                                                        <td>
+                                                            @if (product.IsActive)
+                                                            {
+                                                                <span class="badge bg-success">Đang hoạt động</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-secondary">Không hoạt động</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        Không có sản phẩm nào.
+                                        <a asp-action="Create" asp-controller="ProductsAdmin" class="alert-link">Tạo sản phẩm mới</a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                
+                <div class="d-flex justify-content-between">
+                    @if (isProductMode)
+                    {
+                        <a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="ProductWithInventory" asp-route-id="@Model.Product?.Id" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay Lại Sản Phẩm
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Details" asp-route-id="@Model.SelectedCouponId" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Quay Lại Mã Giảm Giá
+                        </a>
+                    }
+                    
+                    @if ((isProductMode && Model.AllCoupons.Any()) || (!isProductMode && Model.AllProducts.Any()))
+                    {
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Lưu Thay Đổi
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAll = document.getElementById('selectAll');
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.product-select');
+                    checkboxes.forEach(checkbox => checkbox.checked = selectAll.checked);
+                });
+            }
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,92 @@
+version: "3.1"
+
+rules:
+- rule: Luôn chào khi người dùng chào
+  steps:
+  - intent: greet
+  - action: utter_greet
+
+- rule: Luôn tạm biệt khi người dùng tạm biệt
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Luôn cảm ơn khi người dùng cảm ơn
+  steps:
+  - intent: thank
+  - action: utter_thank
+
+- rule: Cung cấp thông tin vận chuyển
+  steps:
+  - intent: shipping_info
+  - action: utter_shipping_info
+
+- rule: Cung cấp thông tin đổi trả
+  steps:
+  - intent: return_policy
+  - action: utter_return_policy
+
+- rule: Cung cấp thông tin phương thức thanh toán
+  steps:
+  - intent: payment_methods
+  - action: utter_payment_methods
+
+- rule: Cung cấp tư vấn sản phẩm
+  steps:
+  - intent: product_consultation
+  - action: utter_product_consultation
+
+- rule: Hiển thị khả năng của bot
+  steps:
+  - intent: ask_bot_capabilities
+  - action: utter_bot_capabilities
+
+- rule: Hỏi thêm trợ giúp khi người dùng đồng ý
+  steps:
+  - intent: affirm
+  - action: utter_ask_more_help
+
+- rule: Phản hồi từ chối
+  steps:
+  - intent: deny
+  - action: utter_goodbye
+
+- rule: Tìm kiếm sản phẩm khi người dùng yêu cầu
+  steps:
+  - intent: search_product
+  - action: action_search_product
+
+- rule: Kiểm tra đơn hàng
+  steps:
+  - intent: check_order
+  - action: action_check_order
+
+- rule: Cung cấp thông tin chi tiết sản phẩm
+  steps:
+  - intent: product_info
+  - action: action_get_product_info
+
+- rule: Kiểm tra tình trạng sản phẩm
+  steps:
+  - intent: product_availability
+  - action: action_check_product_availability
+
+- rule: Cung cấp thông tin dịch vụ
+  steps:
+  - intent: personal_training
+  - action: action_get_service_info
+  
+- rule: Cung cấp lời khuyên về dinh dưỡng
+  steps:
+  - intent: nutrition_advice
+  - action: action_get_service_info
+  
+- rule: Cung cấp thông tin về chương trình tập luyện
+  steps:
+  - intent: workout_plan
+  - action: action_get_service_info
+
+- rule: Từ chối trả lời khi người dùng dùng tiếng Anh
+  steps:
+  - intent: out_of_scope
+  - action: action_reject_english

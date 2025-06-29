@@ -157,10 +157,32 @@
                         </a>
                         
                         <div class="sb-sidenav-menu-heading">Quản lý</div>
-                        <a class="nav-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">
+                        <!-- Product Management Dropdown -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseProducts" aria-expanded="false" aria-controls="collapseProducts">
                             <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
                             Quản lý sản phẩm
-                        </a>                        <a class="nav-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseProducts" aria-labelledby="headingProducts" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-list"></i></div>
+                                    Danh sách sản phẩm
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                    Mã giảm giá
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="InventoryAdmin" asp-action="Index">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-cubes"></i></div>
+                                    Kho hàng
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Analytics">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
+                                    Phân tích sản phẩm
+                                </a>
+                            </nav>
+                        </div>                        <a class="nav-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
                             <div class="sb-nav-link-icon"><i class="fas fa-concierge-bell"></i></div>
                             Quản lý dịch vụ
                         </a>
@@ -193,11 +215,32 @@
                             Quản lý đơn hàng
                         </a>
                         
-                        <!-- Inventory Management Dropdown -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseInventory" aria-expanded="false" aria-controls="collapseInventory">
-                            <div class="sb-nav-link-icon"><i class="fas fa-warehouse"></i></div>
-                            Quản lý kho hàng
+                        <!-- Combined Product & Inventory Management -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseIntegrated" aria-expanded="false" aria-controls="collapseIntegrated">
+                            <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                            Hệ thống tích hợp
                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseIntegrated" aria-labelledby="headingIntegrated" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="Index">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                    Tổng quan tích hợp
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="InventoryDashboard">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-warehouse"></i></div>
+                                    Tổng quan kho hàng
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="ProductCoupons">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                    Sản phẩm & Mã giảm giá
+                                </a>
+                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="BatchInventoryUpdate">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-cubes"></i></div>
+                                    Cập nhật kho hàng loạt
+                                </a>
+                            </nav>
+                        </div>
                         </a>
                         <div class="collapse" id="collapseInventory" aria-labelledby="headingInventory" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">

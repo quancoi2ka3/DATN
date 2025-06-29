@@ -1,0 +1,15 @@
+{
+  "0": "affirm",
+  "1": "ask_bot_capabilities",
+  "2": "deny",
+  "3": "discount_info",
+  "4": "goodbye",
+  "5": "greet",
+  "6": "price_query",
+  "7": "product_consultation",
+  "8": "product_info",
+  "9": "return_policy",
+  "10": "search_product",
+  "11": "shipping_info",
+  "12": "thank"
+}

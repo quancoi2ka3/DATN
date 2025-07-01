@@ -1,11 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "./critical.css";
+import "./globals.css";
+import "@/styles/enhanced-header.css";
+import "@/styles/enhanced-chatbot.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { RasaChatbot } from "@/components/ui/rasa-chatbot";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
+import { CartPerformanceMonitor } from "@/components/ui/cart-performance-monitor";
+import { TestingDashboard } from "@/components/ui/testing-dashboard";
 import { Suspense } from "react";
 
 export const viewport: Viewport = {
@@ -102,6 +107,8 @@ export default function RootLayout({
         
         {/* Simple scroll progress script */}
         <script src="/scroll-progress.js" defer></script>
+        {/* UI Enhancement Script */}
+        <script src="/ui-enhancements.js" defer></script>
       </head>
       <body className="min-h-screen bg-sunbg flex flex-col optimize-text smooth-scroll">
         {/* Enhanced scroll progress bar */}
@@ -123,6 +130,8 @@ export default function RootLayout({
               </main>
               <Footer />
               <RasaChatbot />
+              <CartPerformanceMonitor />
+              <TestingDashboard />
             </CartProvider>
           </AuthProvider>
         </Suspense>

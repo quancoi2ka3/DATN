@@ -109,7 +109,9 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
     const request: AddToCartRequest = {
       productId: parseInt(product.id),
       quantity
-    };    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
+    };
+    // Use local API proxy to avoid CORS issues
+    const response = await fetch('/api/cart', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -143,8 +145,10 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
  */
 export async function getCart(): Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
   try {
-    console.log('[CART DEBUG] Getting cart...');
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
+    console.log('[CART DEBUG] Getting cart through proxy API...');
+    // Use local API proxy to avoid CORS issues
+    const response = await fetch('/api/cart', {
+      cache: 'no-store',
       credentials: 'include' // Add credentials for session consistency
     });
 

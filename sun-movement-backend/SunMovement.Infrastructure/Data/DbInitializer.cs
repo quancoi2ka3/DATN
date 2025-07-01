@@ -247,6 +247,9 @@ namespace SunMovement.Infrastructure.Data
             {
                 await SeedArticlesAsync(context);
             }
+            
+            // Seed Sportswear Products
+            await SeedProducts.SeedSportswearProductsAsync(context);
         }
 
         private static async Task SeedArticlesAsync(ApplicationDbContext context)

@@ -7,6 +7,8 @@ import { useState, memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Minus, ShoppingCart, Star, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
+import { LoginPromptDialog } from "./login-prompt-dialog";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -24,10 +26,19 @@ const QuickAddButton = memo(({
   onSuccess?: () => void;
 }) => {
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    
     setIsAdding(true);
     
     try {
@@ -43,18 +54,28 @@ const QuickAddButton = memo(({
   };
 
   return (
-    <Button
-      onClick={handleQuickAdd}
-      disabled={isAdding}
-      size="sm"
-      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all-smooth bg-white/90 text-black hover:bg-white shadow-lg hover-lift button-press"
-    >
-      {isAdding ? (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <Plus className="w-4 h-4" />
-      )}
-    </Button>
+    <>
+      <Button
+        onClick={handleQuickAdd}
+        disabled={isAdding}
+        size="sm"
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all-smooth bg-white/90 text-black hover:bg-white shadow-lg hover-lift button-press"
+      >
+        {isAdding ? (
+          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <ShoppingCart className="h-4 w-4" />
+        )}
+      </Button>
+      
+      {/* Login Prompt Dialog */}
+      <LoginPromptDialog 
+        isOpen={isLoginPromptOpen}
+        onOpenChange={setIsLoginPromptOpen}
+        message="Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng"
+        returnUrl={`/products/${product.id}`}
+      />
+    </>
   );
 });
 
@@ -120,12 +141,21 @@ export const OptimizedProductCard = memo(({
   const [isAdding, setIsAdding] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    
     setIsAdding(true);
     
     try {
@@ -425,6 +455,14 @@ export const OptimizedProductCard = memo(({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Login Prompt Dialog (for Add to Cart) */}
+      <LoginPromptDialog 
+        isOpen={isLoginPromptOpen}
+        onOpenChange={setIsLoginPromptOpen}
+        message="Bạn cần đăng nhập để thực hiện hành động này"
+        returnUrl={`/products/${product.id}`}
+      />
     </>
   );
 });

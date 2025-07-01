@@ -1,0 +1,560 @@
+{
+  "workout_plans": [
+    {
+      "id": 1,
+      "name": "Lịch Tập Tăng Cơ 4 Ngày/Tuần",
+      "description": "Lịch tập chia theo nhóm cơ, tập trung vào phát triển cơ bắp và sức mạnh",
+      "level": "Trung cấp",
+      "goal": "Tăng cơ",
+      "duration": "8-12 tuần",
+      "schedule": [
+        {
+          "day": "Thứ 2",
+          "bodyParts": "Ngực và Vai",
+          "exercises": [
+            {
+              "name": "Đẩy ngực tạ đơn nằm",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Đẩy ngực máy",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Ép ngực với tạ đơn",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Đẩy vai tạ đơn",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Nâng vai ngang với tạ đơn",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Đảo ngược vai với dây cáp",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 3",
+          "bodyParts": "Lưng và Bụng",
+          "exercises": [
+            {
+              "name": "Kéo xà đơn rộng",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Kéo xà đơn tay chụm",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Tập lưng với tạ đơn",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Tập lưng với máy kéo",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Gập bụng",
+              "sets": 3,
+              "reps": "15-20",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Plank",
+              "sets": 3,
+              "reps": "30-60 giây",
+              "rest": "45 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 4",
+          "bodyParts": "Nghỉ hoặc Cardio nhẹ",
+          "exercises": [
+            {
+              "name": "Đi bộ nhanh",
+              "sets": 1,
+              "reps": "20-30 phút",
+              "rest": "không"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 5",
+          "bodyParts": "Chân và Vai",
+          "exercises": [
+            {
+              "name": "Squat với tạ đòn",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "120 giây"
+            },
+            {
+              "name": "Hack squat với máy",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Đá chân sau",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Nâng bắp chân",
+              "sets": 4,
+              "reps": "15-20",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Đẩy vai tạ đòn",
+              "sets": 4,
+              "reps": "8-10",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Nâng vai trước với tạ đơn",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 6",
+          "bodyParts": "Tay và Bụng",
+          "exercises": [
+            {
+              "name": "Uốn cong tay với tạ đòn",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Uốn cong tay với tạ đơn",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Đẩy ngược tay sau",
+              "sets": 4,
+              "reps": "8-12",
+              "rest": "90 giây"
+            },
+            {
+              "name": "Duỗi tay với dây cáp",
+              "sets": 3,
+              "reps": "10-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Gập bụng nghiêng",
+              "sets": 3,
+              "reps": "15-20",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Russian twist",
+              "sets": 3,
+              "reps": "20 mỗi bên",
+              "rest": "45 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 7 - Chủ nhật",
+          "bodyParts": "Nghỉ ngơi và phục hồi",
+          "exercises": []
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Lịch Tập Giảm Mỡ 5 Ngày/Tuần",
+      "description": "Lịch tập kết hợp cardio và tập luyện sức mạnh, tối ưu cho đốt mỡ và duy trì cơ bắp",
+      "level": "Trung cấp đến nâng cao",
+      "goal": "Giảm mỡ",
+      "duration": "6-8 tuần",
+      "schedule": [
+        {
+          "day": "Thứ 2",
+          "bodyParts": "HIIT Cardio + Tập thân trên",
+          "exercises": [
+            {
+              "name": "HIIT Cardio (30 giây cường độ cao, 30 giây nghỉ)",
+              "sets": 10,
+              "reps": "30 giây mỗi chu kỳ",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Hít đất",
+              "sets": 3,
+              "reps": "15-20",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Kéo xà đơn",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Đẩy vai tạ đơn",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Uốn cong tay",
+              "sets": 3,
+              "reps": "15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Nhấc bắp chân",
+              "sets": 3,
+              "reps": "20",
+              "rest": "30 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 3",
+          "bodyParts": "Tập chân và bụng",
+          "exercises": [
+            {
+              "name": "Squat với tạ",
+              "sets": 4,
+              "reps": "15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Đá chân sau",
+              "sets": 3,
+              "reps": "15 mỗi bên",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Lunge với tạ đơn",
+              "sets": 3,
+              "reps": "12 mỗi bên",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Bật nhảy squat",
+              "sets": 3,
+              "reps": "15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Plank",
+              "sets": 3,
+              "reps": "45-60 giây",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Mountain climber",
+              "sets": 3,
+              "reps": "30 giây",
+              "rest": "30 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 4",
+          "bodyParts": "Cardio nhịp độ vừa",
+          "exercises": [
+            {
+              "name": "Chạy bộ, đạp xe hoặc elliptical",
+              "sets": 1,
+              "reps": "45 phút",
+              "rest": "không"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 5",
+          "bodyParts": "Tập toàn thân",
+          "exercises": [
+            {
+              "name": "Burpee",
+              "sets": 3,
+              "reps": "12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Kettlebell swing",
+              "sets": 3,
+              "reps": "15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Thang dây battle rope",
+              "sets": 3,
+              "reps": "30 giây",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Kéo xà ngang với tạ đòn",
+              "sets": 3,
+              "reps": "12",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Đẩy vai tạ đơn",
+              "sets": 3,
+              "reps": "15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Plank với chạm vai",
+              "sets": 3,
+              "reps": "10 mỗi bên",
+              "rest": "45 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 6",
+          "bodyParts": "HIIT Cardio + Tập bụng",
+          "exercises": [
+            {
+              "name": "HIIT Cardio (40 giây cường độ cao, 20 giây nghỉ)",
+              "sets": 8,
+              "reps": "40 giây mỗi chu kỳ",
+              "rest": "20 giây"
+            },
+            {
+              "name": "Gập bụng",
+              "sets": 3,
+              "reps": "20",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Russian twist",
+              "sets": 3,
+              "reps": "20 mỗi bên",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Leg raise",
+              "sets": 3,
+              "reps": "15",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Plank nghiêng",
+              "sets": 3,
+              "reps": "30 giây mỗi bên",
+              "rest": "30 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 7 - Chủ nhật",
+          "bodyParts": "Nghỉ ngơi hoặc hoạt động nhẹ nhàng",
+          "exercises": [
+            {
+              "name": "Đi bộ hoặc yoga nhẹ",
+              "sets": 1,
+              "reps": "30-45 phút",
+              "rest": "không"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Lịch Tập Người Mới Bắt Đầu 3 Ngày/Tuần",
+      "description": "Lịch tập toàn thân dành cho người mới bắt đầu, tập trung vào kỹ thuật cơ bản và thích nghi với tập luyện",
+      "level": "Người mới",
+      "goal": "Rèn luyện sức khỏe tổng thể",
+      "duration": "4-6 tuần",
+      "schedule": [
+        {
+          "day": "Thứ 2",
+          "bodyParts": "Toàn thân",
+          "exercises": [
+            {
+              "name": "Squat không tạ",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Hít đất biến thể (có thể là hít đất với đầu gối)",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Kéo tay với dây thun",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Lunge tại chỗ",
+              "sets": 2,
+              "reps": "10 mỗi bên",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Nâng vai với tạ nhẹ",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Plank",
+              "sets": 2,
+              "reps": "20-30 giây",
+              "rest": "45 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 3",
+          "bodyParts": "Nghỉ hoặc Cardio nhẹ",
+          "exercises": [
+            {
+              "name": "Đi bộ nhanh hoặc đạp xe nhẹ",
+              "sets": 1,
+              "reps": "20-30 phút",
+              "rest": "không"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 4",
+          "bodyParts": "Toàn thân",
+          "exercises": [
+            {
+              "name": "Đẩy tường (wall push)",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Glute bridge (nâng mông)",
+              "sets": 3,
+              "reps": "15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Bird dog (tư thế chó săn mồi)",
+              "sets": 2,
+              "reps": "10 mỗi bên",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Uốn cong tay với tạ nhẹ",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Toe touch (chạm ngón chân)",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Superman",
+              "sets": 2,
+              "reps": "10-12",
+              "rest": "30 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 5",
+          "bodyParts": "Nghỉ hoặc Cardio nhẹ",
+          "exercises": [
+            {
+              "name": "Đi bộ nhanh hoặc đạp xe nhẹ",
+              "sets": 1,
+              "reps": "20-30 phút",
+              "rest": "không"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 6",
+          "bodyParts": "Toàn thân",
+          "exercises": [
+            {
+              "name": "Squat với tạ nhẹ",
+              "sets": 3,
+              "reps": "12-15",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Hít đất biến thể",
+              "sets": 3,
+              "reps": "10-12",
+              "rest": "60 giây"
+            },
+            {
+              "name": "Lunge bước về trước",
+              "sets": 2,
+              "reps": "10 mỗi bên",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Đẩy vai với tạ nhẹ",
+              "sets": 2,
+              "reps": "12",
+              "rest": "45 giây"
+            },
+            {
+              "name": "Plank nghiêng",
+              "sets": 2,
+              "reps": "20 giây mỗi bên",
+              "rest": "30 giây"
+            },
+            {
+              "name": "Gập bụng cơ bản",
+              "sets": 2,
+              "reps": "12-15",
+              "rest": "30 giây"
+            }
+          ]
+        },
+        {
+          "day": "Thứ 7 - Chủ nhật",
+          "bodyParts": "Nghỉ ngơi và phục hồi",
+          "exercises": []
+        }
+      ]
+    }
+  ]
+}

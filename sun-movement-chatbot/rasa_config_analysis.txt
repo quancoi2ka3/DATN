@@ -1,0 +1,4 @@
+
+===== KIỂM TRA CẤU HÌNH RASA =====
+
+Không tìm thấy thư mục chatbot tại d:DATN\DATN\sun-movement-chatbot

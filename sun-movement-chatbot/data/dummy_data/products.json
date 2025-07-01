@@ -1,0 +1,136 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Sun Movement Whey Protein Isolate",
+      "price": 850000,
+      "discountPrice": 750000,
+      "description": "Protein isolate chất lượng cao, hỗ trợ phát triển cơ bắp và phục hồi sau tập luyện",
+      "category": "Supplements",
+      "subCategory": "Whey Protein",
+      "stockQuantity": 100,
+      "slug": "sun-movement-whey-protein-isolate"
+    },
+    {
+      "id": 2,
+      "name": "Sun Movement Áo Thun Tập Gym Nam",
+      "price": 350000,
+      "discountPrice": 299000,
+      "description": "Áo thun tập gym chất liệu thoáng khí, co giãn 4 chiều, phù hợp mọi hoạt động thể thao",
+      "category": "Sportswear",
+      "subCategory": "Áo Nam",
+      "stockQuantity": 150,
+      "slug": "sun-movement-ao-thun-tap-gym-nam"
+    },
+    {
+      "id": 3,
+      "name": "Sun Movement BCAA 2:1:1",
+      "price": 450000,
+      "discountPrice": null,
+      "description": "BCAA giúp giảm đau nhức cơ, tăng cường phục hồi và phát triển cơ bắp",
+      "category": "Supplements",
+      "subCategory": "BCAA",
+      "stockQuantity": 75,
+      "slug": "sun-movement-bcaa-2-1-1"
+    },
+    {
+      "id": 4,
+      "name": "Sun Movement Găng Tay Tập Gym",
+      "price": 250000,
+      "discountPrice": 199000,
+      "description": "Găng tay tập gym chống trượt, bảo vệ tay tốt, thoải mái khi sử dụng",
+      "category": "Accessories",
+      "subCategory": "Găng Tay",
+      "stockQuantity": 120,
+      "slug": "sun-movement-gang-tay-tap-gym"
+    },
+    {
+      "id": 5,
+      "name": "Sun Movement Quần Jogger Thể Thao Nam",
+      "price": 450000,
+      "discountPrice": 399000,
+      "description": "Quần jogger thể thao chất liệu cao cấp, thoải mái vận động, thiết kế hiện đại",
+      "category": "Sportswear",
+      "subCategory": "Quần Nam",
+      "stockQuantity": 90,
+      "slug": "sun-movement-quan-jogger-the-thao-nam"
+    },
+    {
+      "id": 6,
+      "name": "Sun Movement Creatine Monohydrate",
+      "price": 550000,
+      "discountPrice": 499000,
+      "description": "Creatine chất lượng cao, tăng cường sức mạnh và hiệu suất tập luyện",
+      "category": "Supplements",
+      "subCategory": "Creatine",
+      "stockQuantity": 60,
+      "slug": "sun-movement-creatine-monohydrate"
+    },
+    {
+      "id": 7,
+      "name": "Sun Movement Đai Lưng Tập Gym",
+      "price": 380000,
+      "discountPrice": null,
+      "description": "Đai lưng tập gym hỗ trợ cột sống, bảo vệ vùng thắt lưng khi tập các bài tập nặng",
+      "category": "Accessories",
+      "subCategory": "Đai Lưng",
+      "stockQuantity": 45,
+      "slug": "sun-movement-dai-lung-tap-gym"
+    },
+    {
+      "id": 8,
+      "name": "Sun Movement Áo Bra Thể Thao Nữ",
+      "price": 320000,
+      "discountPrice": 269000,
+      "description": "Áo bra thể thao nữ co giãn tốt, nâng đỡ hiệu quả, thích hợp mọi hoạt động",
+      "category": "Sportswear",
+      "subCategory": "Áo Nữ",
+      "stockQuantity": 100,
+      "slug": "sun-movement-ao-bra-the-thao-nu"
+    },
+    {
+      "id": 9,
+      "name": "Sun Movement Pre-Workout Energy",
+      "price": 480000,
+      "discountPrice": null,
+      "description": "Pre-workout giúp tăng cường năng lượng, sức mạnh và sự tập trung khi tập luyện",
+      "category": "Supplements",
+      "subCategory": "Pre-Workout",
+      "stockQuantity": 70,
+      "slug": "sun-movement-pre-workout-energy"
+    },
+    {
+      "id": 10,
+      "name": "Sun Movement Dây Kháng Lực",
+      "price": 280000,
+      "discountPrice": 249000,
+      "description": "Dây kháng lực đa năng, phù hợp tập luyện tại nhà hoặc phòng tập",
+      "category": "Equipment",
+      "subCategory": "Dây Kháng Lực",
+      "stockQuantity": 85,
+      "slug": "sun-movement-day-khang-luc"
+    },
+    {
+      "id": 11,
+      "name": "Sun Movement Vitamin Tổng Hợp",
+      "price": 350000,
+      "discountPrice": 299000,
+      "description": "Vitamin tổng hợp bổ sung dinh dưỡng thiết yếu cho người tập luyện thể thao",
+      "category": "Nutrition",
+      "subCategory": "Vitamin",
+      "stockQuantity": 110,
+      "slug": "sun-movement-vitamin-tong-hop"
+    },
+    {
+      "id": 12,
+      "name": "Sun Movement Quần Legging Tập Yoga Nữ",
+      "price": 420000,
+      "discountPrice": 379000,
+      "description": "Quần legging tập yoga co giãn 4 chiều, thoáng khí, hỗ trợ các động tác yoga",
+      "category": "Sportswear",
+      "subCategory": "Quần Nữ",
+      "stockQuantity": 95,
+      "slug": "sun-movement-quan-legging-tap-yoga-nu"
+    }
+  ]
+}

@@ -86,6 +86,9 @@ namespace SunMovement.Web.ViewModels
         [Display(Name = "Kích hoạt")]
         public bool IsActive { get; set; } = true;
 
+        [Display(Name = "Thông số kỹ thuật")]
+        public string? Specifications { get; set; }
+
         // Các thuộc tính chỉ đọc (từ InventoryItem)
         public decimal CostPrice { get; set; }
         public string SupplierName { get; set; } = string.Empty;

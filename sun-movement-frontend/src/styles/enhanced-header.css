@@ -1,0 +1,97 @@
+/* Enhanced header styling */
+.top-bar {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  z-index: 60;
+}
+
+.top-bar-hidden {
+  transform: translateY(-100%);
+}
+
+.main-header {
+  background-color: rgba(16, 24, 39, 0.95); /* Slightly transparent background */
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 50;
+}
+
+.header-scrolled {
+  background-color: rgba(15, 23, 42, 0.97) !important;
+}
+
+/* Enhanced navigation menu styling */
+.header-nav-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-nav-item::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #ff5a5f;
+  transition: width 0.3s ease;
+}
+
+.header-nav-item:hover::after {
+  width: 100%;
+}
+
+/* Enhanced button styling */
+.btn-primary-enhanced {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ff5a5f, #ff3a40);
+  box-shadow: 0 4px 10px rgba(255, 90, 95, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
+}
+
+.btn-primary-enhanced:hover {
+  box-shadow: 0 6px 15px rgba(255, 90, 95, 0.4);
+  filter: brightness(105%);
+}
+
+.btn-primary-enhanced:active {
+  transform: translateY(2px);
+}
+
+/* Ripple effect for buttons */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple-effect 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Button interactions */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+}
+
+.hover-lift:active {
+  transform: translateY(1px);
+}

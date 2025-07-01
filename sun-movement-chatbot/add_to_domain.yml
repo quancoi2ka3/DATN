@@ -1,0 +1,22 @@
+  utter_fallback:
+  - text: 'Xin lỗi, tôi chưa hiểu rõ ý bạn. Tôi có thể giúp bạn với những chủ đề sau:
+
+      • Thông tin sản phẩm và dịch vụ
+      • Giá cả và khuyến mại
+      • Lịch tập và đăng ký
+      • Liên hệ và hỗ trợ
+      
+      Bạn có thể hỏi cụ thể hơn không?'
+  
+  utter_deny:
+  - text: 'Tôi hiểu. Bạn cần hỗ trợ gì khác không?'
+      
+  utter_greet:
+  - text: 'Xin chào! Tôi là trợ lý ảo của Sun Movement. Tôi có thể giúp bạn:
+  
+      • Tìm hiểu về sản phẩm và dịch vụ
+      • Tra cứu giá cả và khuyến mãi
+      • Xem lịch tập và đăng ký
+      • Thông tin liên hệ và hỗ trợ
+      
+      Bạn cần tư vấn về vấn đề gì?'

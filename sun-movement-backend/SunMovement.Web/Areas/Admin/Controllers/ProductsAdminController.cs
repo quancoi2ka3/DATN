@@ -152,7 +152,10 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-        public async Task<IActionResult> Create([Bind("Name,Description,Price,DiscountPrice,StockQuantity,Category,SubCategory,Specifications,IsFeatured,IsActive,CostPrice,SupplierId")] Product product, IFormFile? imageFile)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("CreateOld")]
+        public async Task<IActionResult> CreateOldProduct([Bind("Name,Description,Price,DiscountPrice,StockQuantity,Category,SubCategory,Specifications,IsFeatured,IsActive,CostPrice,SupplierId")] Product product, IFormFile? imageFile)
         {
             if (ModelState.IsValid)
             {
@@ -168,7 +171,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                             Value = s.Id.ToString(),
                             Text = s.Name
                         });
-                        return View(product);
+                        return View("Create_Old", product);
                     }
 
                     // Handle image upload
@@ -267,7 +270,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 Console.WriteLine($"Validation errors: {string.Join(", ", errors)}");
             }
 
-            return View(product);
+            return View("Create_Old", product);
         }
 
         // POST: Admin/ProductsAdmin/Create

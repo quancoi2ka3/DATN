@@ -1,10 +1,88 @@
 "use client";
 
 import { CartItem, Product } from "./types";
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from "react";
 import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart, apiMergeGuestCart } from "./cart-service";
 import { processCheckout, CheckoutRequest } from "./checkout-service";
 import { useAuth } from "./auth-context";
+import { toast } from "sonner";
+
+// Cache Layer
+class CartCache {
+  private static instance: CartCache;
+  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
+
+  static getInstance(): CartCache {
+    if (!CartCache.instance) {
+      CartCache.instance = new CartCache();
+    }
+    return CartCache.instance;
+  }
+
+  get(key: string): any | null {
+    const item = this.cache.get(key);
+    if (!item) return null;
+    
+    if (Date.now() > item.timestamp + item.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return item.data;
+  }
+
+  set(key: string, data: any, ttl: number = 5 * 60 * 1000): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+  }
+
+  invalidate(key: string): void {
+    this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
+// Performance Metrics Interface
+interface PerformanceMetrics {
+  cacheHits: number;
+  cacheMisses: number;
+  retryCount: number;
+  averageResponseTime: number;
+  totalRequests: number;
+}
+
+// Retry Logic
+const withRetry = async function<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  delay: number = 1000,
+  onRetry?: (attempt: number) => void
+): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      onRetry?.(attempt);
+      await new Promise(resolve => setTimeout(resolve, delay * attempt));
+    }
+  }
+  
+  throw lastError!;
+};
 
 interface CartContextType {
   items: CartItem[];
@@ -13,9 +91,10 @@ interface CartContextType {
   updateQuantity: (cartItemId: string, quantity: number) => Promise<boolean>;
   clearCart: () => Promise<boolean>;
   checkout: (checkoutDetails: CheckoutRequest) => Promise<{ success: boolean; orderId?: string; error?: string }>;
-
   preserveGuestCart: () => void;
   syncCartAfterLogin: () => Promise<void>;
+  retryLastAction: () => Promise<void>;
+  getPerformanceMetrics: () => PerformanceMetrics;
   totalItems: number;
   totalPrice: number;
   isLoading: boolean;
@@ -29,16 +108,82 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [lastAction, setLastAction] = useState<(() => Promise<void>) | null>(null);
+  const [metrics, setMetrics] = useState<PerformanceMetrics>({
+    cacheHits: 0,
+    cacheMisses: 0,
+    retryCount: 0,
+    averageResponseTime: 0,
+    totalRequests: 0,
+  });
 
-  // Fetch cart on initial load
+  const cache = CartCache.getInstance();
+
+  const updateMetrics = useCallback((responseTime: number, fromCache: boolean, retryAttempts: number = 0) => {
+    setMetrics(prev => ({
+      cacheHits: prev.cacheHits + (fromCache ? 1 : 0),
+      cacheMisses: prev.cacheMisses + (fromCache ? 0 : 1),
+      retryCount: prev.retryCount + retryAttempts,
+      averageResponseTime: (prev.averageResponseTime * prev.totalRequests + responseTime) / (prev.totalRequests + 1),
+      totalRequests: prev.totalRequests + 1,
+    }));
+  }, []);
+
+  const getPerformanceMetrics = useCallback(() => metrics, [metrics]);
+
+  const retryLastAction = useCallback(async () => {
+    if (lastAction) {
+      try {
+        await lastAction();
+        toast.success("Thao tác đã được thực hiện lại thành công");
+      } catch (error) {
+        toast.error("Không thể thực hiện lại thao tác");
+      }
+    } else {
+      toast.info("Không có thao tác nào để thực hiện lại");
+    }
+  }, [lastAction]);
+
+  // Fetch cart on initial load with cache and retry
   useEffect(() => {
     const fetchCart = async () => {
+      // Only fetch cart if user is authenticated
+      if (!isAuthenticated) {
+        setItems([]);
+        return;
+      }
+      
+      const startTime = Date.now();
       setIsLoading(true);
+      setError(undefined);
+      
       try {
-        const response = await getCart();
+        // Check cache first
+        const cachedData = cache.get('cart');
+        if (cachedData) {
+          setItems(cachedData.items || []);
+          updateMetrics(Date.now() - startTime, true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Fetch from API with retry
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await getCart(),
+          3,
+          1000,
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang thử lại... (${attempt}/3)`);
+          }
+        );
         
         if (response.success) {
           setItems(response.items);
+          // Cache the result
+          cache.set('cart', { items: response.items });
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
         } else {
           setError(response.error);
         }
@@ -51,7 +196,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
 
     fetchCart();
-  }, []);
+  }, [cache, updateMetrics, isAuthenticated]);
 
   // Auto-sync cart when user logs in
   useEffect(() => {
@@ -61,46 +206,135 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   const addToCart = async (product: Product, quantity: number, size?: string, color?: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await apiAddToCart(product, quantity, size, color);
+    const startTime = Date.now();
+    
+    // Optimistic update
+    const optimisticItem: CartItem = {
+      id: `temp-${Date.now()}`,
+      productId: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      quantity: quantity,
+      size: size,
+      color: color,
+      addedAt: new Date()
+    };
+    
+    const originalItems = [...items];
+    setItems(prev => [...prev, optimisticItem]);
+
+    const action = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(undefined);
       
-      if (response.success) {
-        setItems(response.items);
-        return true;
-      } else {
-        setError(response.error);
-        return false;
+      try {
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await apiAddToCart(product, quantity, size, color),
+          3,
+          1000,
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang thêm vào giỏ hàng... (${attempt}/3)`);
+          }
+        );
+        
+        if (response.success) {
+          setItems(response.items);
+          // Invalidate cache
+          cache.invalidate('cart');
+          cache.set('cart', { items: response.items });
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
+          toast.success("Đã thêm vào giỏ hàng");
+        } else {
+          // Rollback optimistic update
+          setItems(originalItems);
+          setError(response.error);
+          toast.error(response.error || "Không thể thêm vào giỏ hàng");
+          throw new Error(response.error || "Failed to add to cart");
+        }
+      } catch (err) {
+        // Rollback optimistic update
+        setItems(originalItems);
+        const errorMessage = 'Failed to add to cart';
+        setError(errorMessage);
+        console.error('Error adding to cart:', err);
+        toast.error("Không thể thêm vào giỏ hàng");
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Failed to add to cart');
-      console.error('Error adding to cart:', err);
+    };
+
+    setLastAction(() => action);
+    
+    try {
+      await action();
+      return true;
+    } catch {
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const removeFromCart = async (cartItemId: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await removeCartItem(cartItemId);
+    const startTime = Date.now();
+    
+    // Optimistic update
+    const originalItems = [...items];
+    const itemToRemove = items.find(item => item.id === cartItemId);
+    setItems(prev => prev.filter(item => item.id !== cartItemId));
+
+    const action = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(undefined);
       
-      if (response.success) {
-        setItems(response.items);
-        return true;
-      } else {
-        setError(response.error);
-        return false;
+      try {
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await removeCartItem(cartItemId),
+          3,
+          1000,
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang xóa khỏi giỏ hàng... (${attempt}/3)`);
+          }
+        );
+        
+        if (response.success) {
+          setItems(response.items);
+          // Invalidate cache
+          cache.invalidate('cart');
+          cache.set('cart', { items: response.items });
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
+          toast.success("Đã xóa khỏi giỏ hàng");
+        } else {
+          // Rollback optimistic update
+          setItems(originalItems);
+          setError(response.error);
+          toast.error(response.error || "Không thể xóa khỏi giỏ hàng");
+          throw new Error(response.error || "Failed to remove from cart");
+        }
+      } catch (err) {
+        // Rollback optimistic update
+        setItems(originalItems);
+        const errorMessage = 'Failed to remove from cart';
+        setError(errorMessage);
+        console.error('Error removing from cart:', err);
+        toast.error("Không thể xóa khỏi giỏ hàng");
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Failed to remove from cart');
-      console.error('Error removing from cart:', err);
+    };
+
+    setLastAction(() => action);
+    
+    try {
+      await action();
+      return true;
+    } catch {
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -108,79 +342,197 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (quantity <= 0) {
       return removeFromCart(cartItemId);
     }
+
+    const startTime = Date.now();
     
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await updateCartItem(cartItemId, quantity);
+    // Optimistic update
+    const originalItems = [...items];
+    setItems(prev => prev.map(item => 
+      item.id === cartItemId 
+        ? { ...item, quantity } 
+        : item
+    ));
+
+    const action = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(undefined);
       
-      if (response.success) {
-        setItems(response.items);
-        return true;
-      } else {
-        setError(response.error);
-        return false;
+      try {
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await updateCartItem(cartItemId, quantity),
+          3,
+          1000,
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang cập nhật giỏ hàng... (${attempt}/3)`);
+          }
+        );
+        
+        if (response.success) {
+          setItems(response.items);
+          // Invalidate cache
+          cache.invalidate('cart');
+          cache.set('cart', { items: response.items });
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
+          toast.success("Đã cập nhật giỏ hàng");
+        } else {
+          // Rollback optimistic update
+          setItems(originalItems);
+          setError(response.error);
+          toast.error(response.error || "Không thể cập nhật giỏ hàng");
+          throw new Error(response.error || "Failed to update cart");
+        }
+      } catch (err) {
+        // Rollback optimistic update
+        setItems(originalItems);
+        const errorMessage = 'Failed to update cart';
+        setError(errorMessage);
+        console.error('Error updating cart:', err);
+        toast.error("Không thể cập nhật giỏ hàng");
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Failed to update cart');
-      console.error('Error updating cart:', err);
+    };
+
+    setLastAction(() => action);
+    
+    try {
+      await action();
+      return true;
+    } catch {
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
   const clearCart = async (): Promise<boolean> => {
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await apiClearCart();
+    const startTime = Date.now();
+    
+    // Optimistic update
+    const originalItems = [...items];
+    setItems([]);
+
+    const action = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(undefined);
       
-      if (response.success) {
-        setItems([]);
-        return true;
-      } else {
-        setError(response.error);
-        return false;
+      try {
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await apiClearCart(),
+          3,
+          1000,
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang xóa giỏ hàng... (${attempt}/3)`);
+          }
+        );
+        
+        if (response.success) {
+          setItems([]);
+          // Invalidate cache
+          cache.invalidate('cart');
+          cache.set('cart', { items: [] });
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
+          toast.success("Đã xóa toàn bộ giỏ hàng");
+        } else {
+          // Rollback optimistic update
+          setItems(originalItems);
+          setError(response.error);
+          toast.error(response.error || "Không thể xóa giỏ hàng");
+          throw new Error(response.error || "Failed to clear cart");
+        }
+      } catch (err) {
+        // Rollback optimistic update
+        setItems(originalItems);
+        const errorMessage = 'Failed to clear cart';
+        setError(errorMessage);
+        console.error('Error clearing cart:', err);
+        toast.error("Không thể xóa giỏ hàng");
+        throw err;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Failed to clear cart');
-      console.error('Error clearing cart:', err);
+    };
+
+    setLastAction(() => action);
+    
+    try {
+      await action();
+      return true;
+    } catch {
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
   
   const checkout = async (checkoutDetails: CheckoutRequest): Promise<{ success: boolean; orderId?: string; error?: string }> => {
-    setIsLoading(true);
-    setError(undefined);
-    try {
-      const response = await processCheckout(checkoutDetails);
+    const startTime = Date.now();
+    
+    const action = async (): Promise<void> => {
+      setIsLoading(true);
+      setError(undefined);
       
-      if (response.success && response.order) {
-        // Clear cart after successful checkout
-        setItems([]);
+      try {
+        let retryAttempts = 0;
+        const response = await withRetry(
+          async () => await processCheckout(checkoutDetails),
+          3,
+          2000, // Longer delay for checkout
+          (attempt) => {
+            retryAttempts = attempt;
+            setError(`Đang xử lý thanh toán... (${attempt}/3)`);
+          }
+        );
+        
+        if (response.success && response.order) {
+          // Clear cart after successful checkout
+          setItems([]);
+          // Clear cache
+          cache.clear();
+          updateMetrics(Date.now() - startTime, false, retryAttempts);
+          toast.success("Thanh toán thành công!");
+          throw response; // Use throw to pass success response
+        } else {
+          setError(response.error);
+          toast.error(response.error || "Thanh toán thất bại");
+          throw response;
+        }
+      } catch (err) {
+        if (err && typeof err === 'object' && 'success' in err) {
+          // This is our response object, re-throw it
+          throw err;
+        }
+        const errorMessage = 'Failed to process checkout';
+        setError(errorMessage);
+        console.error(errorMessage, err);
+        toast.error("Lỗi thanh toán");
+        throw {
+          success: false,
+          error: errorMessage
+        };
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    setLastAction(() => action);
+    
+    try {
+      await action();
+      // This shouldn't be reached due to the throws above
+      return { success: false, error: "Unexpected error" };
+    } catch (result: any) {
+      if (result.success && result.order) {
         return {
           success: true,
-          orderId: response.order.orderId
+          orderId: result.order.orderId
         };
       } else {
-        setError(response.error);
         return {
           success: false,
-          error: response.error
+          error: result.error || "Checkout failed"
         };
       }
-    } catch (err) {
-      const errorMessage = 'Failed to process checkout';
-      setError(errorMessage);
-      console.error(errorMessage, err);
-      return {
-        success: false,
-        error: errorMessage
-      };
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -231,6 +583,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       checkout,
       preserveGuestCart,
       syncCartAfterLogin,
+      retryLastAction,
+      getPerformanceMetrics,
       totalItems,
       totalPrice,
       isLoading,

@@ -1,0 +1,94 @@
+{
+  "services": [
+    {
+      "id": 1,
+      "name": "Huấn Luyện Viên Cá Nhân",
+      "description": "Chương trình huấn luyện 1-1 với HLV chuyên nghiệp, thiết kế chương trình tập luyện và dinh dưỡng riêng biệt",
+      "price": 350000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "huan-luyen-vien-ca-nhan"
+    },
+    {
+      "id": 2,
+      "name": "Lớp Yoga Cơ Bản",
+      "description": "Lớp yoga dành cho người mới bắt đầu, tập trung vào các tư thế cơ bản và kỹ thuật hít thở",
+      "price": 150000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "lop-yoga-co-ban"
+    },
+    {
+      "id": 3,
+      "name": "Lớp Yoga Nâng Cao",
+      "description": "Lớp yoga dành cho người đã có kinh nghiệm, tập trung vào các tư thế nâng cao và kỹ thuật thiền",
+      "price": 200000,
+      "duration": 90,
+      "durationUnit": "phút",
+      "slug": "lop-yoga-nang-cao"
+    },
+    {
+      "id": 4,
+      "name": "Lớp Pilates",
+      "description": "Lớp pilates giúp tăng cường sức mạnh cơ bụng, cải thiện tư thế và sự linh hoạt",
+      "price": 180000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "lop-pilates"
+    },
+    {
+      "id": 5,
+      "name": "Lớp Zumba",
+      "description": "Lớp zumba kết hợp nhảy và thể dục nhịp điệu, giúp đốt cháy calo và cải thiện sức khỏe tim mạch",
+      "price": 150000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "lop-zumba"
+    },
+    {
+      "id": 6,
+      "name": "Tư Vấn Dinh Dưỡng",
+      "description": "Buổi tư vấn dinh dưỡng 1-1 với chuyên gia, bao gồm đánh giá chỉ số cơ thể và lên kế hoạch ăn uống",
+      "price": 500000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "tu-van-dinh-duong"
+    },
+    {
+      "id": 7,
+      "name": "Gói Tập Gym Tự Do",
+      "description": "Sử dụng toàn bộ thiết bị phòng tập không giới hạn thời gian trong ngày",
+      "price": 200000,
+      "duration": 1,
+      "durationUnit": "ngày",
+      "slug": "goi-tap-gym-tu-do"
+    },
+    {
+      "id": 8,
+      "name": "Gói Tập Gym Tháng",
+      "description": "Sử dụng toàn bộ thiết bị phòng tập không giới hạn thời gian trong 30 ngày",
+      "price": 800000,
+      "duration": 30,
+      "durationUnit": "ngày",
+      "slug": "goi-tap-gym-thang"
+    },
+    {
+      "id": 9,
+      "name": "Lớp Boxing",
+      "description": "Lớp boxing cơ bản giúp tăng cường thể lực, phản xạ và sự tự tin",
+      "price": 200000,
+      "duration": 60,
+      "durationUnit": "phút",
+      "slug": "lop-boxing"
+    },
+    {
+      "id": 10,
+      "name": "Gói Tập Gym VIP",
+      "description": "Bao gồm tập gym tự do, 4 buổi PT và 2 buổi tư vấn dinh dưỡng mỗi tháng",
+      "price": 3500000,
+      "duration": 30,
+      "durationUnit": "ngày",
+      "slug": "goi-tap-gym-vip"
+    }
+  ]
+}

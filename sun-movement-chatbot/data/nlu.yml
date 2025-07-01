@@ -35,6 +35,8 @@ nlu:
     - chào bạn iu
     - xin chào ad
     - chào người đẹp
+    - hi
+    - hello
 
 - intent: goodbye
   examples: |
@@ -57,6 +59,8 @@ nlu:
     - cảm ơn nhé tạm biệt
     - tôi phải đi rồi
     - tôi sẽ quay lại sau
+    - bye
+    - bye bye
 
 - intent: thank
   examples: |
@@ -81,59 +85,8 @@ nlu:
     - mình cảm ơn nhiều
     - đa tạ
     - cảm ơn ad
-
-- intent: affirm
-  examples: |
-    - đúng vậy
-    - đúng
-    - vâng
-    - được
-    - ok
-    - ừ
-    - ừm
-    - có
-    - đúng rồi
-    - chuẩn
-    - chính xác
-    - dĩ nhiên
-    - đồng ý
-    - tất nhiên
-    - chắc chắn rồi
-    - chắc luôn
-    - vâng ạ
-    - ok luôn
-    - đúng như vậy
-    - chính xác đó
-    - đúng là vậy
-    - tôi đồng ý
-    - tôi muốn vậy
-    - tôi nghĩ vậy
-
-- intent: deny
-  examples: |
-    - không
-    - không phải
-    - không đúng
-    - không được
-    - không cần
-    - không đồng ý
-    - chưa
-    - chưa cần
-    - chưa phải lúc
-    - chưa đúng
-    - thôi
-    - thôi bỏ đi
-    - không đời nào
-    - miễn đi
-    - đừng
-    - đừng làm vậy
-    - không bao giờ
-    - không cần đâu
-    - không phải vậy
-    - thôi khỏi
-    - khỏi đi
-    - không phải thế
-    - chưa muốn
+    - thanks
+    - thank you
 
 - intent: search_product
   examples: |
@@ -145,29 +98,40 @@ nlu:
     - giúp tôi tìm
     - bạn có sản phẩm nào
     - bạn bán sản phẩm gì
-    - shop có bán không
-    - tìm kiếm
-    - tôi muốn mua
-    - tìm sản phẩm cho nam
-    - tìm sản phẩm cho nữ
-    - tìm giúp tôi
-    - tôi đang tìm mua
-    - có bán không
-    - tôi muốn biết shop có bán
-    - tìm sản phẩm tập gym
-    - tìm đồ tập yoga
-    - tìm thực phẩm bổ sung
-    - tìm kiếm whey protein
-    - shop bán gì
-    - có những sản phẩm gì
-    - mua hàng ở đâu
-    - tôi muốn mua áo thun thể thao
-    - tôi cần tìm giày tập gym
-    - cần tìm BCAA
-    - kiếm găng tay tập
+    - tôi muốn tìm [whey protein](product)
+    - tìm [áo thun tập gym](product) giúp tôi
+    - bạn có bán [găng tay tập gym](product) không
+    - tôi đang tìm [bcaa](product)
+    - có [thực phẩm bổ sung](product_category) không
+    - shop có bán [protein](product) không
+    - mình muốn mua [quần tập yoga](product)
+    - cửa hàng có [đồ tập gym](product_category) không
+    - bạn có [dụng cụ tập tại nhà](product_category) không
+    - tìm [vitamin](product) giúp mình
+    - có [quần áo thể thao](product_category) nào không
+    - giúp tôi tìm [đai lưng tập gym](product)
+    - tìm [dây kháng lực](product) cho tôi
+    - tôi đang tìm mua [bình nước thể thao](product)
+    - shop có bán [túi tập gym](product) không
+    - tôi muốn xem [giày tập](product)
+    - có [đồ tập yoga](product_category) không
+    - bạn có [máy tập](product_category) nào không
+    - tôi muốn mua [bột protein](product)
+    - tôi cần tìm [thực phẩm tăng cơ](product_category)
+    - shop có bán [pre-workout](product) không
+    - tìm [mass gainer](product)
+    - bạn có [whey isolate](product) không
+    - cần mua [băng quấn cổ tay](product)
+    - tôi đang tìm [thảm tập yoga](product)
 
 - intent: product_info
   examples: |
+    - sản phẩm
+    - sản phẩm của shop
+    - hàng hóa
+    - đồ
+    - thiết bị
+    - dụng cụ
     - thông tin sản phẩm
     - cho tôi biết về sản phẩm
     - sản phẩm này có gì đặc biệt
@@ -191,89 +155,37 @@ nlu:
     - sản phẩm này làm từ chất liệu gì
     - đặc tính của sản phẩm
     - tác dụng của sản phẩm
-
-- intent: product_consultation
-  examples: |
-    - tư vấn sản phẩm
-    - cần tư vấn
-    - giúp tôi chọn sản phẩm
-    - nên mua sản phẩm nào
-    - sản phẩm nào phù hợp với tôi
-    - tư vấn cho người mới tập
-    - tư vấn cho người tập lâu năm
-    - tư vấn sản phẩm tăng cơ
-    - tư vấn sản phẩm giảm cân
-    - nên chọn loại nào
     - sản phẩm nào tốt nhất
-    - tư vấn áo tập gym
-    - tư vấn giày chạy bộ
-    - tư vấn whey protein
-    - tư vấn BCAA
-    - nên mua hãng nào
-    - sản phẩm nào bán chạy nhất
-    - sản phẩm nào được ưa chuộng
-    - tôi nên chọn loại nào
-    - tôi muốn được tư vấn
-    - tư vấn cho tôi một sản phẩm
-    - tư vấn dụng cụ tập gym tại nhà
-    - tư vấn quần áo tập yoga
-    - cần tư vấn về thực phẩm bổ sung
-
-- intent: ask_bot_capabilities
-  examples: |
-    - bạn có thể làm gì
-    - bạn giúp được gì
-    - chức năng của bạn là gì
-    - bạn là ai
-    - bạn có thể giúp tôi gì
-    - bạn có những khả năng gì
-    - bạn biết làm những gì
-    - bạn có thể tư vấn gì
-    - giới thiệu về bạn
-    - bạn hỗ trợ được gì
-    - khả năng của bạn
-    - bot có thể làm gì
-    - mày làm được gì
-    - em làm được gì
-    - bạn biết gì
-    - bạn tên gì
-    - bạn có thể trả lời câu hỏi gì
-    - bot này dùng để làm gì
-    - bot này có ích gì
-    - chức năng chính của bạn
-    - bạn được lập trình để làm gì
-    - bạn giỏi về lĩnh vực nào
-    - bạn là bot phải không
-    - shop sử dụng bot này để làm gì
-
-- intent: check_order
-  examples: |
-    - kiểm tra đơn hàng
-    - đơn hàng của tôi
-    - tình trạng đơn hàng
-    - đơn hàng đến đâu rồi
-    - theo dõi đơn hàng
-    - đơn hàng bao giờ giao
-    - kiểm tra trạng thái đơn hàng
-    - mã đơn hàng
-    - tôi muốn biết đơn hàng của tôi
-    - đơn hàng có mã
-    - tra cứu đơn hàng
-    - tôi đã đặt hàng bao giờ nhận được
-    - hàng của tôi đang ở đâu
-    - đơn hàng đã gửi chưa
-    - đơn hàng có vấn đề
-    - đơn hàng bị trễ
-    - đơn hàng bị hủy
-    - tại sao đơn hàng chậm
-    - tôi muốn hủy đơn hàng
-    - tôi muốn xem lại đơn hàng
-    - đơn hàng giao đến đâu rồi
-    - tôi muốn thay đổi địa chỉ giao hàng
-    - tôi không nhận được đơn hàng
+    - có sản phẩm gì
+    - thiết bị tập luyện
+    - dụng cụ gym
+    - máy tập
+    - sản phẩm của shop
+    - có bán gì không
+    - thiết bị yoga
+    - dụng cụ tập luyện
+    - sản phẩm chất lượng
+    - thiết bị thể thao
+    - sản phẩm mới nhất
+    - có gì hay không
+    - bán những gì
+    - sản phẩm nổi bật
+    - thiết bị gym nào tốt
+    - dụng cụ tập nào hay
+    - sản phẩm giá rẻ
+    - sản phẩm cao cấp
+    - sản phẩm và dịch vụ
 
 - intent: price_query
   examples: |
+    - giá
+    - giá tiền
+    - giá các gói tập
+    - giá tập
+    - giá phòng tập
+    - chi phí
+    - phí
+    - học phí
     - giá bao nhiêu
     - giá sản phẩm
     - sản phẩm này giá bao nhiêu
@@ -298,674 +210,133 @@ nlu:
     - giá so với thị trường
     - sản phẩm này có đáng tiền không
     - giá cả phải chăng không
+    - giá bao nhiều
+    - bảng giá
+    - phí tập
+    - giá cả
+    - mức giá
+    - giá dịch vụ
+    - phí lớp học
+    - giá gói tập
+    - chi phí tham gia
+    - giá thành viên
+    - phí đăng ký
+    - giá yoga
+    - phí personal training
+    - giá massage
+    - chi phí hàng tháng
+    - giá năm
+    - giá rẻ nhất
+    - ưu đãi giá
+    - giá cả ở đây đắt không
 
-- intent: discount_info
+- intent: schedule_info
   examples: |
-    - có khuyến mãi không
-    - khuyến mãi
-    - giảm giá
-    - ưu đãi
-    - chương trình khuyến mãi
-    - có đang giảm giá không
-    - có voucher không
-    - mã giảm giá
-    - có code giảm giá không
-    - khuyến mãi nào đang có
-    - ưu đãi hiện tại
-    - đợt sale
-    - chương trình giảm giá
-    - chiết khấu
-    - đang có chương trình gì
-    - khuyến mãi tháng này
-    - có flash sale không
-    - giảm giá đặc biệt
-    - ưu đãi thành viên
-    - ưu đãi sinh nhật
-    - mua 1 tặng 1
-    - khuyến mãi mua nhiều giảm nhiều
-    - quà tặng kèm
-    - có combo khuyến mãi không
-
-- intent: shipping_info
-  examples: |
-    - thông tin vận chuyển
-    - phí vận chuyển
-    - giao hàng
-    - ship hàng
-    - thời gian giao hàng
-    - phí ship
-    - giao hàng miễn phí không
-    - vận chuyển mất bao lâu
-    - ship về tỉnh
-    - giao hàng nhanh không
-    - đơn vị vận chuyển
-    - phí ship là bao nhiêu
-    - có free ship không
-    - ship cod không
-    - giao hàng đến địa chỉ
-    - có giao hàng tận nơi không
-    - tốn phí ship bao nhiêu
-    - thời gian nhận hàng
-    - giao hàng bằng gì
-    - giao hàng qua đơn vị nào
-    - có ship ra nước ngoài không
-    - ship về miền tây mất bao lâu
-    - phí ship tới Hà Nội
-
-- intent: return_policy
-  examples: |
-    - chính sách đổi trả
-    - quy định đổi trả
-    - đổi trả hàng
-    - hoàn tiền
-    - có được đổi hàng không
-    - có được trả hàng không
-    - điều kiện đổi trả
-    - thời gian đổi trả
-    - quy trình đổi trả
-    - đổi size được không
-    - đổi màu được không
-    - trả hàng lỗi
-    - sản phẩm bị lỗi đổi được không
-    - mua rồi không vừa đổi được không
-    - nếu không hài lòng có đổi được không
-    - nếu không thích có trả được không
-    - thủ tục đổi hàng
-    - muốn trả lại hàng
-    - thủ tục hoàn tiền
-    - đổi trả có mất phí không
-    - có bảo hành không
-    - hàng lỗi xử lý thế nào
-    - sản phẩm không đúng mô tả có đổi được không
-
-- intent: contact_support
-  examples: |
-    - liên hệ hỗ trợ
-    - số điện thoại hỗ trợ
-    - email hỗ trợ
-    - chat với nhân viên
-    - gặp người thật
-    - gặp nhân viên tư vấn
-    - đội ngũ hỗ trợ
-    - cần gặp nhân viên
-    - liên hệ trực tiếp
-    - tổng đài hỗ trợ
-    - hotline
-    - liên hệ qua đâu
-    - kênh liên lạc
-    - tổng đài chăm sóc khách hàng
-    - liên hệ bộ phận kỹ thuật
-    - liên hệ bộ phận bán hàng
-    - cần nói chuyện với người thật
-    - số điện thoại của shop
-    - email của shop
-    - fanpage của shop
-    - địa chỉ văn phòng
-    - zalo của shop
-    - liên hệ qua mạng xã hội
-
-- intent: shopping_help
-  examples: |
-    - hướng dẫn mua hàng
-    - cách đặt hàng
-    - quy trình mua hàng
-    - cách thức mua hàng
-    - mua hàng như thế nào
-    - mua hàng online
-    - đặt hàng qua website
-    - đặt hàng qua app
-    - thanh toán như thế nào
-    - các bước mua hàng
-    - hướng dẫn đặt hàng
-    - cách đặt hàng online
-    - mua hàng trực tuyến
-    - đặt hàng qua điện thoại
-    - mua hàng tại cửa hàng
-    - đặt hàng qua Facebook
-    - quy trình thanh toán
-    - tôi muốn mua hàng
-    - hướng dẫn tôi đặt hàng
-    - tôi không biết cách mua
-    - làm sao để đặt hàng
-    - tôi muốn thanh toán
-    - tôi muốn mua online
-
-- intent: payment_methods
-  examples: |
-    - phương thức thanh toán
-    - cách thức thanh toán
-    - trả tiền bằng gì
-    - thanh toán bằng gì
-    - có thanh toán online không
-    - thanh toán bằng thẻ
-    - thanh toán khi nhận hàng
-    - có COD không
-    - thanh toán qua ngân hàng
-    - chuyển khoản
-    - quẹt thẻ
-    - thanh toán qua ví điện tử
-    - có chấp nhận Momo không
-    - thanh toán qua Zalopay
-    - có thanh toán bằng Visa không
-    - có thanh toán bằng Mastercard không
-    - trả góp được không
-    - thanh toán qua VNPay
-    - các hình thức thanh toán
-    - thanh toán bằng tiền mặt
-    - thanh toán qua internet banking
-    - thanh toán bằng QR code
-    - có trả góp 0% không
-
-- intent: delivery_time
-  examples: |
-    - thời gian giao hàng
-    - mất bao lâu để nhận được hàng
-    - khi nào nhận được hàng
-    - thời gian vận chuyển
-    - hàng giao trong bao lâu
-    - thời gian ship
-    - bao giờ có hàng
-    - thời gian nhận được đơn hàng
-    - giao hàng mất mấy ngày
-    - giao hàng nhanh không
-    - có giao hàng nhanh không
-    - có giao hàng trong ngày không
-    - giao hàng gấp được không
-    - giao hàng chậm quá
-    - khi nào đơn hàng được gửi đi
-    - khi nào đến nơi
-    - thời gian giao hàng ra tỉnh
-    - mất bao lâu để giao đến HCM
-    - giao đến Hà Nội mất mấy ngày
-    - tốc độ giao hàng
-    - dự kiến ngày giao hàng
-    - đơn hàng mất bao lâu để xử lý
-    - có giao nhanh 2h không
-
-- intent: store_location
-  examples: |
-    - địa chỉ cửa hàng
-    - cửa hàng ở đâu
-    - vị trí shop
-    - cửa hàng gần nhất
-    - các chi nhánh
-    - cửa hàng tại Hà Nội
-    - cửa hàng tại HCM
-    - cửa hàng tại Đà Nẵng
-    - địa điểm bán hàng
-    - cửa hàng offline
-    - có bao nhiêu cửa hàng
-    - shop có ở đâu
-    - tìm cửa hàng gần đây
-    - cửa hàng chính
-    - địa chỉ showroom
-    - cửa hàng ở tỉnh nào
-    - có cửa hàng ở miền tây không
-    - cửa hàng ở trung tâm thương mại
+    - lịch tập
+    - lịch hoạt động
+    - lịch mở cửa
+    - lịch học
+    - lịch trình
+    - thời gian hoạt động
+    - thời gian mở cửa
+    - thời gian đóng cửa
     - giờ mở cửa
     - giờ đóng cửa
-    - cửa hàng có mở vào chủ nhật không
-    - cửa hàng có nghỉ trưa không
-    - tìm đường đến cửa hàng
-    - bản đồ cửa hàng
-
-- intent: personal_training
-  examples: |
-    - dịch vụ huấn luyện viên
-    - huấn luyện viên cá nhân
-    - PT
-    - dịch vụ PT
-    - giá PT
-    - thuê PT
-    - huấn luyện viên
-    - tập với PT
-    - có dịch vụ PT không
-    - PT giỏi không
-    - PT nam hay nữ
-    - lịch tập với PT
-    - PT online có không
-    - PT theo dõi chế độ ăn không
-    - PT có kinh nghiệm không
-    - PT chuyên về gì
-    - có PT chuyên về giảm cân không
-    - có PT chuyên về tăng cơ không
-    - có PT chuyên về yoga không
-    - PT có bằng cấp không
-    - PT có chứng chỉ không
-    - PT có kiến thức dinh dưỡng không
-    - PT có lịch trống không
-    - đăng ký PT như thế nào
-
-- intent: nutrition_advice
-  examples: |
-    - tư vấn dinh dưỡng
-    - chế độ ăn
-    - ăn gì để tăng cơ
-    - ăn gì để giảm cân
-    - thực đơn tập gym
-    - dinh dưỡng thể thao
-    - dinh dưỡng tập luyện
-    - ăn uống khi tập
-    - chế độ dinh dưỡng
-    - ăn bao nhiêu protein
-    - ăn gì trước tập
-    - ăn gì sau tập
-    - thực phẩm tốt cho tập luyện
-    - chế độ ăn cho người tập gym
-    - ăn như thế nào để có cơ bụng
-    - ăn kiêng đúng cách
-    - thực đơn giảm cân
-    - thực đơn tăng cân
-    - thực đơn tăng cơ
-    - nên ăn mấy bữa một ngày
-    - ăn bao nhiêu calo
-    - tính macros như thế nào
-    - tư vấn về protein
-    - ăn gì tốt cho sức khỏe
-
-- intent: workout_plan
-  examples: |
-    - lịch tập luyện
-    - kế hoạch tập luyện
-    - lịch tập gym
-    - tập như thế nào
-    - bài tập hiệu quả
-    - tần suất tập luyện
-    - tập mấy buổi một tuần
+    - giờ hoạt động
+    - giờ tập
+    - ngày mở cửa
+    - lịch các lớp
+    - lịch yoga
+    - lịch pilates
+    - lịch zumba
+    - lịch boxing
+    - lịch aerobic
+    - lớp học vào giờ nào
+    - phòng tập mở cửa lúc nào
+    - phòng tập đóng cửa lúc nào
+    - giờ cao điểm
+    - lịch huấn luyện viên
+    - lịch PT
+    - thời gian tốt nhất để tập
+    - lịch các buổi học
+    - có lớp sáng không
+    - có lớp tối không
+    - lịch cuối tuần
+    - giờ tập cuối tuần
+    - thứ bảy có mở cửa không
+    - chủ nhật có mở cửa không
+    - lịch ngày lễ
+    - phòng gym mở mấy giờ
+    - phòng tập đóng cửa mấy giờ
     - thời gian tập luyện
-    - lịch tập cho người mới
-    - lịch tập tăng cơ
-    - lịch tập giảm cân
-    - lịch tập cho nữ
-    - lịch tập cho nam
-    - tập mỗi nhóm cơ mấy lần một tuần
-    - tập cardio như thế nào
-    - tập bao nhiêu là đủ
-    - tập gym theo lịch nào
-    - tập bao lâu mỗi buổi
-    - tập nặng hay nhẹ
-    - tập nhanh hay chậm
-    - tập mấy hiệp mỗi bài
-    - tập mấy bài mỗi buổi
-    - lịch tập chia nhóm cơ
-    - lịch tập toàn thân
+    - Tôi cần biết về lịch tập và đăng kí
 
-- intent: product_brand
+- intent: service_info
   examples: |
-    - thương hiệu sản phẩm
-    - hãng nào tốt
-    - sản phẩm của hãng nào
-    - thương hiệu uy tín
-    - các thương hiệu có tại shop
-    - so sánh các thương hiệu
-    - thương hiệu nổi tiếng
-    - hãng nào chất lượng tốt
-    - hãng nào bán chạy
-    - shop có bán Nike không
-    - có Adidas không
-    - có Under Armour không
-    - có Gymshark không
-    - có Optimum Nutrition không
-    - hãng nào được ưa chuộng
-    - thương hiệu cao cấp
-    - thương hiệu giá rẻ
-    - thương hiệu phù hợp cho người mới
-    - thương hiệu cho dân chuyên
-    - shop phân phối những hãng nào
-    - hãng nào đáng tin cậy
-    - hãng nào bền
-    - thương hiệu nào chính hãng
-    - có hàng fake không
-
-- intent: product_quality
-  examples: |
-    - chất lượng sản phẩm
-    - sản phẩm có tốt không
-    - độ bền sản phẩm
-    - sản phẩm có bền không
-    - sản phẩm có chất lượng không
-    - chất lượng có đảm bảo không
-    - có phải hàng chính hãng không
-    - có phải hàng thật không
-    - có phải hàng auth không
-    - có bị lỗi không
-    - độ tin cậy
-    - chất lượng so với giá
-    - đánh giá chất lượng
-    - sản phẩm có đáng tiền không
-    - review về chất lượng
-    - khách hàng đánh giá thế nào
-    - sản phẩm có dễ hỏng không
-    - mức độ hài lòng của khách
-    - tỉ lệ khách phàn nàn
-    - có khách nào trả hàng không
-    - có bị vỡ khi vận chuyển không
-    - có bị hư hỏng không
-    - có bị lỗi sản xuất không
-    - kiểm tra chất lượng như thế nào
-
-- intent: after_sales_service
-  examples: |
-    - dịch vụ hậu mãi
-    - chăm sóc sau bán hàng
-    - hỗ trợ sau mua
-    - bảo hành sản phẩm
-    - sửa chữa sản phẩm
-    - chính sách bảo hành
-    - hư hỏng sau mua
-    - hỗ trợ kỹ thuật
-    - bảo trì
-    - thời gian bảo hành
-    - chế độ bảo hành
-    - có được sửa chữa miễn phí không
-    - hỏng có sửa được không
-    - chi phí sửa chữa
-    - điều kiện bảo hành
-    - trung tâm bảo hành
-    - hỗ trợ sau bán hàng
-    - mang đi bảo hành ở đâu
-    - bảo hành bao lâu
-    - chính sách hậu mãi
-    - có hỗ trợ sửa chữa không
-    - giày bị hỏng có sửa được không
-    - có bảo dưỡng sản phẩm không
-    - các dịch vụ sau bán hàng
-
-- intent: product_experience
-  examples: |
-    - trải nghiệm sản phẩm
-    - người dùng nói gì
-    - cảm nhận khi dùng
-    - feedback từ khách hàng
-    - review từ người dùng
-    - đánh giá sản phẩm
-    - sản phẩm có thoải mái không
-    - sản phẩm có dễ sử dụng không
-    - người dùng có hài lòng không
-    - có ai phàn nàn không
-    - ưu điểm khi sử dụng
-    - nhược điểm khi sử dụng
-    - cảm giác khi mặc
-    - cảm giác khi dùng
-    - độ vừa vặn
-    - có vừa size không
-    - có đúng màu như hình không
-    - có đúng như mô tả không
-    - có ai dùng thử chưa
-    - phản hồi từ người dùng
-    - có ai trả lại không
-    - tỉ lệ hài lòng
-    - đánh giá sao trên website
-    - có review trên mạng xã hội không
-
-- intent: product_recommendation
-  examples: |
-    - gợi ý sản phẩm
-    - sản phẩm nào phù hợp
-    - giới thiệu sản phẩm
-    - sản phẩm bán chạy
-    - sản phẩm hot
-    - sản phẩm mới
-    - sản phẩm đáng mua
-    - sản phẩm tốt nhất
-    - best seller
-    - top sản phẩm
-    - sản phẩm đáng tiền
-    - sản phẩm đáng đầu tư
-    - sản phẩm chất lượng cao
-    - sản phẩm giá tốt
-    - sản phẩm đáng mua nhất
-    - sản phẩm cho người mới
-    - sản phẩm cho dân chuyên
-    - gợi ý sản phẩm theo nhu cầu
-    - sản phẩm cho người béo
-    - sản phẩm cho người gầy
-    - sản phẩm theo mục đích
-    - sản phẩm theo ngân sách
-    - sản phẩm theo độ tuổi
-    - sản phẩm theo giới tính
-
-- intent: workout_tips
-  examples: |
-    - mẹo tập luyện
-    - bí quyết tập hiệu quả
-    - làm thế nào để tập hiệu quả
-    - tips tập gym
-    - hướng dẫn tập đúng cách
-    - cách tập đúng
-    - kỹ thuật tập
-    - lời khuyên khi tập
-    - các lỗi cần tránh khi tập
-    - làm sao tập không bị chấn thương
-    - tập thế nào để tăng cơ nhanh
-    - tập thế nào để giảm mỡ nhanh
-    - cách tập cho người mới
-    - mẹo tăng hiệu quả tập luyện
-    - làm sao để có động lực tập
-    - làm sao để duy trì thói quen tập
-    - mẹo vượt qua plateau
-    - làm sao để tăng sức mạnh
-    - làm sao để tăng sức bền
-    - tip giảm cân hiệu quả
-    - mẹo cho người tập tại nhà
-    - mẹo cho người tập gym
-    - mẹo cho người tập yoga
-    - mẹo tập cardio hiệu quả
-
-- intent: membership_program
-  examples: |
-    - chương trình thành viên
-    - thẻ thành viên
-    - membership
-    - đăng ký thành viên
-    - quyền lợi thành viên
-    - điểm thưởng
-    - tích lũy điểm
-    - hạng thành viên
-    - thành viên vip
-    - thành viên bạc
-    - thành viên vàng
-    - thành viên kim cương
-    - chính sách thành viên
-    - đặc quyền thành viên
-    - ưu đãi thành viên
-    - cách trở thành thành viên
-    - thẻ khách hàng thân thiết
-    - có chương trình thành viên không
-    - làm thẻ thành viên ở đâu
-    - phí làm thẻ thành viên
-    - thành viên được giảm giá không
-    - thành viên có quà không
-    - thành viên có ưu tiên không
-    - cách nâng hạng thành viên
-
-- intent: membership_benefits
-  examples: |
-    - quyền lợi thành viên
-    - lợi ích khi là thành viên
-    - thành viên được gì
-    - đặc quyền thành viên
-    - ưu đãi cho thành viên
-    - quyền lợi độc quyền
-    - thành viên có quà không
-    - thành viên được giảm giá không
-    - thành viên được tích điểm không
-    - thành viên được đổi quà không
-    - thành viên được ưu tiên không
-    - thành viên được giao hàng miễn phí không
-    - thành viên được tư vấn riêng không
-    - thành viên được đổi trả dễ dàng không
-    - thành viên có được mời sự kiện không
-    - thành viên có được mua sớm không
-    - quyền lợi hạng bạc
-    - quyền lợi hạng vàng
-    - quyền lợi hạng kim cương
-    - thành viên được hỗ trợ đặc biệt không
-    - thành viên được bảo hành lâu hơn không
-    - chênh lệch quyền lợi các hạng
-    - khác biệt giữa các cấp thành viên
-
-- intent: product_comparison
-  examples: |
-    - so sánh sản phẩm
-    - khác biệt giữa các sản phẩm
-    - sự khác nhau
-    - sản phẩm nào tốt hơn
-    - nên chọn loại nào
-    - đâu là sự khác biệt
-    - so sánh chất lượng
-    - so sánh giá cả
-    - so sánh tính năng
-    - so sánh hiệu quả
-    - so sánh độ bền
-    - đâu là lựa chọn tốt nhất
-    - nên mua loại nào
-    - sản phẩm A hay sản phẩm B tốt hơn
-    - bảng so sánh sản phẩm
-    - phân biệt các dòng sản phẩm
-    - khác biệt giữa hàng cao cấp và thông thường
-    - có gì khác nhau không
-    - ưu điểm của từng loại
-    - nhược điểm của từng loại
-    - nên chọn thương hiệu nào
-    - nên chọn mẫu nào
-    - nên chọn size nào
-    - nên chọn màu nào
-
-- intent: product_size
-  examples: |
-    - kích thước sản phẩm
-    - size sản phẩm
-    - chọn size nào
-    - bảng size
-    - hướng dẫn chọn size
-    - size bao nhiêu là vừa
-    - size chuẩn
-    - đo size như thế nào
-    - size áo
-    - size quần
-    - size giày
-    - chọn size thế nào cho vừa
-    - size cho người cao
-    - size cho người thấp
-    - size cho người mập
-    - size cho người gầy
-    - size oversize
-    - size form rộng
-    - size form ôm
-    - có size lớn không
-    - có size nhỏ không
-    - size có chuẩn không
-    - size có vừa không
-    - size châu Á hay châu Âu
-    - cách đổi đơn vị size
-
-- intent: product_availability
-  examples: |
-    - sản phẩm còn không
-    - còn hàng không
-    - hết hàng chưa
-    - còn size nào
-    - còn màu nào
-    - khi nào có hàng
-    - đã hết hàng
-    - còn trong kho không
-    - đặt trước được không
-    - báo khi có hàng
-    - thông báo khi có hàng
-    - hết size rồi
-    - hết màu rồi
-    - sản phẩm sold out
-    - sản phẩm cháy hàng
-    - tần suất nhập hàng
-    - có sẵn không
-    - có sẵn tại cửa hàng không
-    - có hàng tại kho không
-    - kiểm tra tồn kho
-    - kiểm tra hàng còn không
-    - còn đủ size không
-    - còn đủ màu không
-    - có hàng mới không
-    - khi nào nhập hàng mới
-
-- intent: warranty_info
-  examples: |
-    - thông tin bảo hành
-    - chế độ bảo hành
-    - thời gian bảo hành
-    - bảo hành bao lâu
-    - điều kiện bảo hành
-    - chính sách bảo hành
-    - bảo hành như thế nào
-    - quy trình bảo hành
-    - địa điểm bảo hành
-    - chi phí bảo hành
-    - bảo hành miễn phí không
-    - bảo hành trọn đời không
-    - bảo hành có phí không
-    - đổi mới trong thời gian bảo hành
-    - bảo hành lỗi nhà sản xuất
-    - bảo hành lỗi người dùng
-    - bảo hành khi nào
-    - hết hạn bảo hành
-    - gia hạn bảo hành
-    - chứng từ bảo hành
-    - phiếu bảo hành
-    - điều kiện từ chối bảo hành
-    - có bảo hành không
-    - bảo hành online được không
-
-- intent: material_info
-  examples: |
-    - chất liệu sản phẩm
-    - làm từ chất liệu gì
-    - nguyên liệu sản xuất
-    - thành phần chất liệu
-    - vải gì
-    - chất vải
-    - thành phần vải
-    - độ co giãn của vải
-    - độ thoáng khí
-    - có thấm hút mồ hôi không
-    - chất liệu có mềm không
-    - chất liệu có bền không
-    - chất liệu cao cấp không
-    - có phải cotton không
-    - có phải polyester không
-    - có phải spandex không
-    - có phải vải thun không
-    - có phải vải len không
-    - vải có mỏng không
-    - vải có dày không
-    - chất liệu có gây kích ứng không
-    - chất liệu thân thiện với môi trường không
-    - chất liệu dễ giặt không
-    - vải có bạc màu không
-
-- intent: delivery_tracking
-  examples: |
-    - theo dõi vận chuyển
-    - tracking đơn hàng
-    - kiểm tra vận chuyển
-    - mã vận đơn
-    - tracking code
-    - theo dõi package
-    - kiểm tra tình trạng giao hàng
-    - kiểm tra vị trí đơn hàng
-    - hàng đang ở đâu
-    - đơn hàng đã gửi chưa
-    - đơn hàng đã đến đâu
-    - shipper đang ở đâu
-    - đơn vị vận chuyển nào
-    - trạng thái vận chuyển
-    - tình trạng đơn hàng
-    - cập nhật giao hàng
-    - đơn hàng đang giao
-    - đơn hàng đang vận chuyển
-    - theo dõi shipper
-    - số điện thoại shipper
-    - thời gian giao dự kiến
-    - hàng bị chậm
-    - hàng bị lưu kho
-    - hàng bị hoàn
-    - giao hàng không thành công
+    - dịch vụ
+    - các dịch vụ
+    - dịch vụ của shop
+    - dịch vụ tư vấn
+    - dịch vụ hỗ trợ
+    - dịch vụ khách hàng
+    - dịch vụ đi kèm
+    - dịch vụ miễn phí
+    - dịch vụ trả phí
+    - dịch vụ thêm
+    - dịch vụ tập luyện
+    - dịch vụ huấn luyện
+    - các gói dịch vụ
+    - dịch vụ cơ bản
+    - dịch vụ cao cấp
+    - dịch vụ VIP
+    - dịch vụ chăm sóc
+    - dịch vụ bảo hành
+    - dịch vụ bảo trì
+    - dịch vụ giao hàng
+    - dịch vụ lắp đặt
+    - dịch vụ sửa chữa
+    - dịch vụ vận chuyển
+    - dịch vụ tư vấn dinh dưỡng
+    - dịch vụ massage
+    - dịch vụ xông hơi
+    - dịch vụ spa
+    - dịch vụ giảm cân
+    - dịch vụ tăng cân
+    - dịch vụ tăng cơ
+    - dịch vụ phục hồi
+    - dịch vụ yoga
+    - dịch vụ pilates
+    - dịch vụ thiết kế lịch tập
+    - dịch vụ đo chỉ số cơ thể
+    - dịch vụ theo dõi sức khỏe
+    - dịch vụ tư vấn online
+    - các dịch vụ của shop
+    - bạn có những dịch vụ gì
+    - tôi muốn biết về dịch vụ
+    - dịch vụ tại phòng tập
+    - cung cấp dịch vụ gì
+    - có dịch vụ [huấn luyện cá nhân](service) không
+    - tôi muốn tìm [huấn luyện viên](service)
+    - thông tin về [lớp yoga](service)
+    - chi tiết [lớp zumba](service)
+    - có [dịch vụ massage](service) không
+    - thông tin về [gói tập gym](service)
+    - giá [PT cá nhân](service)
+    - chi phí thuê [huấn luyện viên](service)
+    - đăng ký [lớp nhảy](service)
+    - chi tiết về [khóa học dinh dưỡng](service)
+    - có [lớp tập nhóm](service) không
+    - thông tin về [gói tập thử](service)
+    - có [dịch vụ tư vấn](service) không
+    - tôi muốn biết về [lớp pilates](service)
+    - chi phí các [gói tập](service_type)
+    - thông tin các [lớp học nhóm](service_type)
+    - giá [các dịch vụ huấn luyện](service_type)
+    - tôi muốn xem [dịch vụ spa](service)
+    - cần thông tin về [phục hồi chấn thương](service)
+    - có [tư vấn sức khỏe](service) không
+    - shop có [đo chỉ số cơ thể](service) không
+    - có [kiểm tra sức khỏe](service) không
+    - đánh giá về [dịch vụ PT](service)
+    - thông tin về [lớp aerobic](service)
+    - tôi muốn đăng ký [dịch vụ boxing](service)

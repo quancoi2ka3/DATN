@@ -1,0 +1,349 @@
+nlu:
+- examples: "    - xin chào\n    - chào bạn\n    - chào buổi sáng\n    - chào buổi\
+    \ chiều\n    - chào buổi tối\n    - chào shop\n    - chào cửa hàng\n    - chào\
+    \ ad\n    - có ai ở đó không\n    - shop ơi\n    - bạn ơi\n    - cho mình hỏi\n\
+    \    - a lô\n    - cho tôi hỏi\n    - kính chào\n    - xin kính chào\n    - có\
+    \ người không vậy\n    - bên trong có ai không\n    - chào anh\n    - chào chị\n\
+    \    - chào em\n    - hey\n    - ê\n    - alo alo\n    - xin chào shop\n    -\
+    \ chào admin\n    - chào nhân viên\n    - em muốn hỏi\n    - anh chị ơi\n    -\
+    \ chào bạn iu\n    - xin chào ad\n    - chào người đẹp"
+  intent: greet
+- examples: "    - tạm biệt\n    - hẹn gặp lại\n    - tạm biệt nhé\n    - gặp lại\
+    \ sau\n    - chào tạm biệt\n    - thôi mình đi đây\n    - chào nhé\n    - bái\
+    \ bai\n    - đi đây\n    - mình đi nhé\n    - mình phải đi rồi\n    - mình cúp\
+    \ máy đây\n    - kết thúc cuộc trò chuyện\n    - chào tạm biệt bạn\n    - hẹn\
+    \ gặp lại sau nhé\n    - lát nói chuyện tiếp\n    - cảm ơn nhé tạm biệt\n    -\
+    \ tôi phải đi rồi\n    - tôi sẽ quay lại sau"
+  intent: goodbye
+- examples: "    - cảm ơn\n    - cảm ơn bạn\n    - cảm ơn vì đã giúp đỡ\n    - cảm\
+    \ ơn nhiều\n    - cảm ơn vì thông tin\n    - cảm ơn shop\n    - cám ơn\n    -\
+    \ cám ơn bạn nhiều\n    - cám ơn vì sự hỗ trợ\n    - cám ơn nhé\n    - cảm ơn\
+    \ rất nhiều\n    - cảm ơn vì đã tư vấn\n    - cảm ơn shop nhé\n    - đội ơn\n\
+    \    - cảm ơn rất nhiều nhé\n    - cảm ơn vì sự giúp đỡ\n    - cảm ơn vì câu trả\
+    \ lời\n    - cảm tạ\n    - mình cảm ơn nhiều\n    - đa tạ\n    - cảm ơn ad"
+  intent: thank
+- examples: "    - đúng vậy\n    - đúng\n    - vâng\n    - được\n    - ok\n    - ừ\n\
+    \    - ừm\n    - có\n    - đúng rồi\n    - chuẩn\n    - chính xác\n    - dĩ nhiên\n\
+    \    - đồng ý\n    - tất nhiên\n    - chắc chắn rồi\n    - chắc luôn\n    - vâng\
+    \ ạ\n    - ok luôn\n    - đúng như vậy\n    - chính xác đó\n    - đúng là vậy\n\
+    \    - tôi đồng ý\n    - tôi muốn vậy\n    - tôi nghĩ vậy"
+  intent: affirm
+- examples: "    - không\n    - không phải\n    - không đúng\n    - không được\n \
+    \   - không cần\n    - không đồng ý\n    - chưa\n    - chưa cần\n    - chưa phải\
+    \ lúc\n    - chưa đúng\n    - thôi\n    - thôi bỏ đi\n    - không đời nào\n  \
+    \  - miễn đi\n    - đừng\n    - đừng làm vậy\n    - không bao giờ\n    - không\
+    \ cần đâu\n    - không phải vậy\n    - thôi khỏi\n    - khỏi đi\n    - không phải\
+    \ thế\n    - chưa muốn"
+  intent: deny
+- examples: "    - tìm sản phẩm\n    - tôi muốn tìm sản phẩm\n    - tìm giúp tôi sản\
+    \ phẩm\n    - tôi đang tìm\n    - tôi cần tìm\n    - giúp tôi tìm\n    - bạn có\
+    \ sản phẩm nào\n    - bạn bán sản phẩm gì\n    - shop có bán không\n    - tìm\
+    \ kiếm\n    - tôi muốn mua\n    - tìm sản phẩm cho nam\n    - tìm sản phẩm cho\
+    \ nữ\n    - tìm giúp tôi\n    - tôi đang tìm mua\n    - có bán không\n    - tôi\
+    \ muốn biết shop có bán\n    - tìm sản phẩm tập gym\n    - tìm đồ tập yoga\n \
+    \   - tìm thực phẩm bổ sung\n    - tìm kiếm whey protein\n    - shop bán gì\n\
+    \    - có những sản phẩm gì\n    - mua hàng ở đâu\n    - tôi muốn mua áo thun\
+    \ thể thao\n    - tôi cần tìm giày tập gym\n    - cần tìm BCAA\n    - kiếm găng\
+    \ tay tập"
+  intent: search_product
+- examples: "    - sản phẩm\n    - sản phẩm của shop\n    - hàng hóa\n    - đồ\n \
+    \   - thiết bị\n    - dụng cụ\n    - thông tin sản phẩm\n    - cho tôi biết về\
+    \ sản phẩm\n    - sản phẩm này có gì đặc biệt\n    - đặc điểm sản phẩm\n    -\
+    \ mô tả sản phẩm\n    - sản phẩm này tốt không\n    - thông tin chi tiết\n   \
+    \ - thông số kỹ thuật\n    - xuất xứ sản phẩm\n    - sản phẩm này là gì\n    -\
+    \ chức năng sản phẩm\n    - công dụng sản phẩm\n    - chỉ số dinh dưỡng\n    -\
+    \ thành phần sản phẩm\n    - ưu điểm sản phẩm\n    - nhược điểm sản phẩm\n   \
+    \ - thông tin về protein\n    - thông tin về giày tập gym\n    - chi tiết về áo\
+    \ tập yoga\n    - thông tin về quần jogger\n    - sản phẩm này làm từ chất liệu\
+    \ gì\n    - đặc tính của sản phẩm\n    - tác dụng của sản phẩm\n    - sản phẩm\
+    \ nào tốt nhất\n    - có sản phẩm gì\n    - thiết bị tập luyện\n    - dụng cụ\
+    \ gym\n    - máy tập\n    - sản phẩm của shop\n    - có bán gì không\n    - thiết\
+    \ bị yoga\n    - dụng cụ tập luyện\n    - sản phẩm chất lượng\n    - thiết bị\
+    \ thể thao\n    - sản phẩm mới nhất\n    - có gì hay không\n    - bán những gì\n\
+    \    - sản phẩm nổi bật\n    - thiết bị gym nào tốt\n    - dụng cụ tập nào hay\n\
+    \    - sản phẩm giá rẻ\n    - sản phẩm cao cấp"
+  intent: product_info
+- examples: "    - tư vấn sản phẩm\n    - cần tư vấn\n    - giúp tôi chọn sản phẩm\n\
+    \    - nên mua sản phẩm nào\n    - sản phẩm nào phù hợp với tôi\n    - tư vấn\
+    \ cho người mới tập\n    - tư vấn cho người tập lâu năm\n    - tư vấn sản phẩm\
+    \ tăng cơ\n    - tư vấn sản phẩm giảm cân\n    - nên chọn loại nào\n    - tư vấn\
+    \ áo tập gym\n    - tư vấn giày chạy bộ\n    - tư vấn whey protein\n    - tư vấn\
+    \ BCAA\n    - nên mua hãng nào\n    - sản phẩm nào bán chạy nhất\n    - sản phẩm\
+    \ nào được ưa chuộng\n    - tôi nên chọn loại nào\n    - tôi muốn được tư vấn\n\
+    \    - tư vấn cho tôi một sản phẩm\n    - tư vấn dụng cụ tập gym tại nhà\n   \
+    \ - tư vấn quần áo tập yoga\n    - cần tư vấn về thực phẩm bổ sung"
+  intent: product_consultation
+- examples: "    - bạn có thể làm gì\n    - bạn giúp được gì\n    - chức năng của\
+    \ bạn là gì\n    - bạn là ai\n    - bạn có thể giúp tôi gì\n    - bạn có những\
+    \ khả năng gì\n    - bạn biết làm những gì\n    - bạn có thể tư vấn gì\n    -\
+    \ giới thiệu về bạn\n    - bạn hỗ trợ được gì\n    - khả năng của bạn\n    - bot\
+    \ có thể làm gì\n    - mày làm được gì\n    - em làm được gì\n    - bạn biết gì\n\
+    \    - bạn tên gì\n    - bạn có thể trả lời câu hỏi gì\n    - bot này dùng để\
+    \ làm gì\n    - bot này có ích gì\n    - chức năng chính của bạn\n    - bạn được\
+    \ lập trình để làm gì\n    - bạn giỏi về lĩnh vực nào\n    - bạn là bot phải không\n\
+    \    - shop sử dụng bot này để làm gì"
+  intent: ask_bot_capabilities
+- examples: "    - kiểm tra đơn hàng\n    - đơn hàng của tôi\n    - tình trạng đơn\
+    \ hàng\n    - đơn hàng đến đâu rồi\n    - theo dõi đơn hàng\n    - đơn hàng bao\
+    \ giờ giao\n    - kiểm tra trạng thái đơn hàng\n    - mã đơn hàng\n    - tôi muốn\
+    \ biết đơn hàng của tôi\n    - đơn hàng có mã\n    - tra cứu đơn hàng\n    - tôi\
+    \ đã đặt hàng bao giờ nhận được\n    - hàng của tôi đang ở đâu\n    - đơn hàng\
+    \ đã gửi chưa\n    - đơn hàng có vấn đề\n    - đơn hàng bị trễ\n    - đơn hàng\
+    \ bị hủy\n    - tại sao đơn hàng chậm\n    - tôi muốn hủy đơn hàng\n    - tôi\
+    \ muốn xem lại đơn hàng\n    - đơn hàng giao đến đâu rồi\n    - tôi muốn thay\
+    \ đổi địa chỉ giao hàng\n    - tôi không nhận được đơn hàng"
+  intent: check_order
+- examples: "    - giá\n    - giá tiền\n    - giá các gói tập\n    - giá tập\n   \
+    \ - giá phòng tập\n    - chi phí\n    - phí\n    - học phí\n    - giá bao nhiêu\n\
+    \    - giá sản phẩm\n    - sản phẩm này giá bao nhiêu\n    - cho tôi biết giá\n\
+    \    - bao nhiêu tiền\n    - giá cả thế nào\n    - giá tiền là bao nhiêu\n   \
+    \ - chi phí\n    - giá bán\n    - giá niêm yết\n    - giá trọn gói\n    - giá\
+    \ sau giảm\n    - giá khuyến mãi\n    - giá thành sản phẩm\n    - giá gốc\n  \
+    \  - giá hợp lý không\n    - giá đắt quá\n    - giá rẻ không\n    - giá vừa phải\
+    \ không\n    - có đắt không\n    - giá đang giảm không\n    - giá so với thị trường\n\
+    \    - sản phẩm này có đáng tiền không\n    - giá cả phải chăng không\n    - giá\
+    \ bao nhiều\n    - bảng giá\n    - phí tập\n    - giá cả\n    - mức giá\n    -\
+    \ giá dịch vụ\n    - phí lớp học\n    - giá gói tập\n    - chi phí tham gia\n\
+    \    - giá thành viên\n    - phí đăng ký\n    - giá yoga\n    - phí personal training\n\
+    \    - giá massage\n    - chi phí hàng tháng\n    - giá năm\n    - giá rẻ nhất\n\
+    \    - ưu đãi giá"
+  intent: price_query
+- examples: "    - có khuyến mãi không\n    - khuyến mãi\n    - giảm giá\n    - ưu\
+    \ đãi\n    - chương trình khuyến mãi\n    - có đang giảm giá không\n    - có voucher\
+    \ không\n    - mã giảm giá\n    - có code giảm giá không\n    - khuyến mãi nào\
+    \ đang có\n    - ưu đãi hiện tại\n    - đợt sale\n    - chương trình giảm giá\n\
+    \    - chiết khấu\n    - đang có chương trình gì\n    - khuyến mãi tháng này\n\
+    \    - có flash sale không\n    - giảm giá đặc biệt\n    - ưu đãi thành viên\n\
+    \    - ưu đãi sinh nhật\n    - mua 1 tặng 1\n    - khuyến mãi mua nhiều giảm nhiều\n\
+    \    - quà tặng kèm\n    - có combo khuyến mãi không"
+  intent: discount_info
+- examples: "    - thông tin vận chuyển\n    - phí vận chuyển\n    - giao hàng\n \
+    \   - ship hàng\n    - thời gian giao hàng\n    - phí ship\n    - giao hàng miễn\
+    \ phí không\n    - vận chuyển mất bao lâu\n    - ship về tỉnh\n    - giao hàng\
+    \ nhanh không\n    - đơn vị vận chuyển\n    - phí ship là bao nhiêu\n    - có\
+    \ free ship không\n    - ship cod không\n    - giao hàng đến địa chỉ\n    - có\
+    \ giao hàng tận nơi không\n    - tốn phí ship bao nhiêu\n    - thời gian nhận\
+    \ hàng\n    - giao hàng bằng gì\n    - giao hàng qua đơn vị nào\n    - có ship\
+    \ ra nước ngoài không\n    - ship về miền tây mất bao lâu\n    - phí ship tới\
+    \ Hà Nội"
+  intent: shipping_info
+- examples: "    - chính sách đổi trả\n    - quy định đổi trả\n    - đổi trả hàng\n\
+    \    - hoàn tiền\n    - có được đổi hàng không\n    - có được trả hàng không\n\
+    \    - điều kiện đổi trả\n    - thời gian đổi trả\n    - quy trình đổi trả\n \
+    \   - đổi size được không\n    - đổi màu được không\n    - trả hàng lỗi\n    -\
+    \ sản phẩm bị lỗi đổi được không\n    - mua rồi không vừa đổi được không\n   \
+    \ - nếu không hài lòng có đổi được không\n    - nếu không thích có trả được không\n\
+    \    - thủ tục đổi hàng\n    - muốn trả lại hàng\n    - thủ tục hoàn tiền\n  \
+    \  - đổi trả có mất phí không\n    - có bảo hành không\n    - hàng lỗi xử lý thế\
+    \ nào\n    - sản phẩm không đúng mô tả có đổi được không"
+  intent: return_policy
+- examples: "    - liên hệ hỗ trợ\n    - số điện thoại hỗ trợ\n    - email hỗ trợ\n\
+    \    - chat với nhân viên\n    - gặp người thật\n    - gặp nhân viên tư vấn\n\
+    \    - đội ngũ hỗ trợ\n    - cần gặp nhân viên\n    - liên hệ trực tiếp\n    -\
+    \ tổng đài hỗ trợ\n    - hotline\n    - liên hệ qua đâu\n    - kênh liên lạc\n\
+    \    - tổng đài chăm sóc khách hàng\n    - liên hệ bộ phận kỹ thuật\n    - liên\
+    \ hệ bộ phận bán hàng\n    - cần nói chuyện với người thật\n    - số điện thoại\
+    \ của shop\n    - email của shop\n    - fanpage của shop\n    - địa chỉ văn phòng\n\
+    \    - zalo của shop\n    - liên hệ qua mạng xã hội"
+  intent: contact_support
+- examples: "    - hướng dẫn mua hàng\n    - cách đặt hàng\n    - quy trình mua hàng\n\
+    \    - cách thức mua hàng\n    - mua hàng như thế nào\n    - mua hàng online\n\
+    \    - đặt hàng qua website\n    - đặt hàng qua app\n    - thanh toán như thế\
+    \ nào\n    - các bước mua hàng\n    - hướng dẫn đặt hàng\n    - cách đặt hàng\
+    \ online\n    - mua hàng trực tuyến\n    - đặt hàng qua điện thoại\n    - mua\
+    \ hàng tại cửa hàng\n    - đặt hàng qua Facebook\n    - quy trình thanh toán\n\
+    \    - tôi muốn mua hàng\n    - hướng dẫn tôi đặt hàng\n    - tôi không biết cách\
+    \ mua\n    - làm sao để đặt hàng\n    - tôi muốn thanh toán\n    - tôi muốn mua\
+    \ online"
+  intent: shopping_help
+- examples: "    - phương thức thanh toán\n    - cách thức thanh toán\n    - trả tiền\
+    \ bằng gì\n    - thanh toán bằng gì\n    - có thanh toán online không\n    - thanh\
+    \ toán bằng thẻ\n    - thanh toán khi nhận hàng\n    - có COD không\n    - thanh\
+    \ toán qua ngân hàng\n    - chuyển khoản\n    - quẹt thẻ\n    - thanh toán qua\
+    \ ví điện tử\n    - có chấp nhận Momo không\n    - thanh toán qua Zalopay\n  \
+    \  - có thanh toán bằng Visa không\n    - có thanh toán bằng Mastercard không\n\
+    \    - trả góp được không\n    - thanh toán qua VNPay\n    - các hình thức thanh\
+    \ toán\n    - thanh toán bằng tiền mặt\n    - thanh toán qua internet banking\n\
+    \    - thanh toán bằng QR code\n    - có trả góp 0% không"
+  intent: payment_methods
+- examples: "    - mất bao lâu để nhận được hàng\n    - khi nào nhận được hàng\n \
+    \   - thời gian vận chuyển\n    - hàng giao trong bao lâu\n    - thời gian ship\n\
+    \    - bao giờ có hàng\n    - thời gian nhận được đơn hàng\n    - giao hàng mất\
+    \ mấy ngày\n    - có giao hàng nhanh không\n    - có giao hàng trong ngày không\n\
+    \    - giao hàng gấp được không\n    - giao hàng chậm quá\n    - khi nào đơn hàng\
+    \ được gửi đi\n    - khi nào đến nơi\n    - thời gian giao hàng ra tỉnh\n    -\
+    \ mất bao lâu để giao đến HCM\n    - giao đến Hà Nội mất mấy ngày\n    - tốc độ\
+    \ giao hàng\n    - dự kiến ngày giao hàng\n    - đơn hàng mất bao lâu để xử lý\n\
+    \    - có giao nhanh 2h không"
+  intent: delivery_time
+- examples: "    - địa chỉ cửa hàng\n    - cửa hàng ở đâu\n    - vị trí shop\n   \
+    \ - cửa hàng gần nhất\n    - các chi nhánh\n    - cửa hàng tại Hà Nội\n    - cửa\
+    \ hàng tại HCM\n    - cửa hàng tại Đà Nẵng\n    - địa điểm bán hàng\n    - cửa\
+    \ hàng offline\n    - có bao nhiêu cửa hàng\n    - shop có ở đâu\n    - tìm cửa\
+    \ hàng gần đây\n    - cửa hàng chính\n    - địa chỉ showroom\n    - cửa hàng ở\
+    \ tỉnh nào\n    - có cửa hàng ở miền tây không\n    - cửa hàng ở trung tâm thương\
+    \ mại\n    - giờ mở cửa\n    - giờ đóng cửa\n    - cửa hàng có mở vào chủ nhật\
+    \ không\n    - cửa hàng có nghỉ trưa không\n    - tìm đường đến cửa hàng\n   \
+    \ - bản đồ cửa hàng"
+  intent: store_location
+- examples: "    - dịch vụ huấn luyện viên\n    - huấn luyện viên cá nhân\n    - PT\n\
+    \    - dịch vụ PT\n    - giá PT\n    - thuê PT\n    - huấn luyện viên\n    - tập\
+    \ với PT\n    - có dịch vụ PT không\n    - PT giỏi không\n    - PT nam hay nữ\n\
+    \    - lịch tập với PT\n    - PT online có không\n    - PT theo dõi chế độ ăn\
+    \ không\n    - PT có kinh nghiệm không\n    - PT chuyên về gì\n    - có PT chuyên\
+    \ về giảm cân không\n    - có PT chuyên về tăng cơ không\n    - có PT chuyên về\
+    \ yoga không\n    - PT có bằng cấp không\n    - PT có chứng chỉ không\n    - PT\
+    \ có kiến thức dinh dưỡng không\n    - PT có lịch trống không\n    - đăng ký PT\
+    \ như thế nào"
+  intent: personal_training
+- examples: "    - tư vấn dinh dưỡng\n    - chế độ ăn\n    - ăn gì để tăng cơ\n  \
+    \  - ăn gì để giảm cân\n    - thực đơn tập gym\n    - dinh dưỡng thể thao\n  \
+    \  - dinh dưỡng tập luyện\n    - ăn uống khi tập\n    - chế độ dinh dưỡng\n  \
+    \  - ăn bao nhiêu protein\n    - ăn gì trước tập\n    - ăn gì sau tập\n    - thực\
+    \ phẩm tốt cho tập luyện\n    - chế độ ăn cho người tập gym\n    - ăn như thế\
+    \ nào để có cơ bụng\n    - ăn kiêng đúng cách\n    - thực đơn giảm cân\n    -\
+    \ thực đơn tăng cân\n    - thực đơn tăng cơ\n    - nên ăn mấy bữa một ngày\n \
+    \   - ăn bao nhiêu calo\n    - tính macros như thế nào\n    - tư vấn về protein\n\
+    \    - ăn gì tốt cho sức khỏe"
+  intent: nutrition_advice
+- examples: "    - lịch tập luyện\n    - kế hoạch tập luyện\n    - lịch tập gym\n\
+    \    - tập như thế nào\n    - bài tập hiệu quả\n    - tần suất tập luyện\n   \
+    \ - tập mấy buổi một tuần\n    - thời gian tập luyện\n    - lịch tập cho người\
+    \ mới\n    - lịch tập tăng cơ\n    - lịch tập giảm cân\n    - lịch tập cho nữ\n\
+    \    - lịch tập cho nam\n    - tập mỗi nhóm cơ mấy lần một tuần\n    - tập cardio\
+    \ như thế nào\n    - tập bao nhiêu là đủ\n    - tập gym theo lịch nào\n    - tập\
+    \ bao lâu mỗi buổi\n    - tập nặng hay nhẹ\n    - tập nhanh hay chậm\n    - tập\
+    \ mấy hiệp mỗi bài\n    - tập mấy bài mỗi buổi\n    - lịch tập chia nhóm cơ\n\
+    \    - lịch tập toàn thân"
+  intent: workout_plan
+- examples: "    - thương hiệu sản phẩm\n    - hãng nào tốt\n    - sản phẩm của hãng\
+    \ nào\n    - thương hiệu uy tín\n    - các thương hiệu có tại shop\n    - so sánh\
+    \ các thương hiệu\n    - thương hiệu nổi tiếng\n    - hãng nào chất lượng tốt\n\
+    \    - hãng nào bán chạy\n    - shop có bán Nike không\n    - có Adidas không\n\
+    \    - có Under Armour không\n    - có Gymshark không\n    - có Optimum Nutrition\
+    \ không\n    - hãng nào được ưa chuộng\n    - thương hiệu cao cấp\n    - thương\
+    \ hiệu giá rẻ\n    - thương hiệu phù hợp cho người mới\n    - thương hiệu cho\
+    \ dân chuyên\n    - shop phân phối những hãng nào\n    - hãng nào đáng tin cậy\n\
+    \    - hãng nào bền\n    - thương hiệu nào chính hãng\n    - có hàng fake không"
+  intent: product_brand
+- examples: "    - chất lượng sản phẩm\n    - sản phẩm có tốt không\n    - độ bền\
+    \ sản phẩm\n    - sản phẩm có bền không\n    - sản phẩm có chất lượng không\n\
+    \    - chất lượng có đảm bảo không\n    - có phải hàng chính hãng không\n    -\
+    \ có phải hàng thật không\n    - có phải hàng auth không\n    - có bị lỗi không\n\
+    \    - độ tin cậy\n    - chất lượng so với giá\n    - đánh giá chất lượng\n  \
+    \  - sản phẩm có đáng tiền không\n    - review về chất lượng\n    - khách hàng\
+    \ đánh giá thế nào\n    - sản phẩm có dễ hỏng không\n    - mức độ hài lòng của\
+    \ khách\n    - tỉ lệ khách phàn nàn\n    - có khách nào trả hàng không\n    -\
+    \ có bị vỡ khi vận chuyển không\n    - có bị hư hỏng không\n    - có bị lỗi sản\
+    \ xuất không\n    - kiểm tra chất lượng như thế nào"
+  intent: product_quality
+- examples: "    - dịch vụ hậu mãi\n    - chăm sóc sau bán hàng\n    - hỗ trợ sau\
+    \ mua\n    - bảo hành sản phẩm\n    - sửa chữa sản phẩm\n    - chính sách bảo\
+    \ hành\n    - hư hỏng sau mua\n    - hỗ trợ kỹ thuật\n    - bảo trì\n    - thời\
+    \ gian bảo hành\n    - chế độ bảo hành\n    - có được sửa chữa miễn phí không\n\
+    \    - hỏng có sửa được không\n    - chi phí sửa chữa\n    - điều kiện bảo hành\n\
+    \    - trung tâm bảo hành\n    - hỗ trợ sau bán hàng\n    - mang đi bảo hành ở\
+    \ đâu\n    - bảo hành bao lâu\n    - chính sách hậu mãi\n    - có hỗ trợ sửa chữa\
+    \ không\n    - giày bị hỏng có sửa được không\n    - có bảo dưỡng sản phẩm không\n\
+    \    - các dịch vụ sau bán hàng"
+  intent: after_sales_service
+- examples: "    - trải nghiệm sản phẩm\n    - người dùng nói gì\n    - cảm nhận khi\
+    \ dùng\n    - feedback từ khách hàng\n    - review từ người dùng\n    - đánh giá\
+    \ sản phẩm\n    - sản phẩm có thoải mái không\n    - sản phẩm có dễ sử dụng không\n\
+    \    - người dùng có hài lòng không\n    - có ai phàn nàn không\n    - ưu điểm\
+    \ khi sử dụng\n    - nhược điểm khi sử dụng\n    - cảm giác khi mặc\n    - cảm\
+    \ giác khi dùng\n    - độ vừa vặn\n    - có vừa size không\n    - có đúng màu\
+    \ như hình không\n    - có đúng như mô tả không\n    - có ai dùng thử chưa\n \
+    \   - phản hồi từ người dùng\n    - có ai trả lại không\n    - tỉ lệ hài lòng\n\
+    \    - đánh giá sao trên website\n    - có review trên mạng xã hội không"
+  intent: product_experience
+- examples: "    - gợi ý sản phẩm\n    - sản phẩm nào phù hợp\n    - giới thiệu sản\
+    \ phẩm\n    - sản phẩm bán chạy\n    - sản phẩm hot\n    - sản phẩm mới\n    -\
+    \ sản phẩm đáng mua\n    - sản phẩm tốt nhất\n    - best seller\n    - top sản\
+    \ phẩm\n    - sản phẩm đáng tiền\n    - sản phẩm đáng đầu tư\n    - sản phẩm chất\
+    \ lượng cao\n    - sản phẩm giá tốt\n    - sản phẩm đáng mua nhất\n    - sản phẩm\
+    \ cho người mới\n    - sản phẩm cho dân chuyên\n    - gợi ý sản phẩm theo nhu\
+    \ cầu\n    - sản phẩm cho người béo\n    - sản phẩm cho người gầy\n    - sản phẩm\
+    \ theo mục đích\n    - sản phẩm theo ngân sách\n    - sản phẩm theo độ tuổi\n\
+    \    - sản phẩm theo giới tính"
+  intent: product_recommendation
+- examples: "    - mẹo tập luyện\n    - bí quyết tập hiệu quả\n    - làm thế nào để\
+    \ tập hiệu quả\n    - tips tập gym\n    - hướng dẫn tập đúng cách\n    - cách\
+    \ tập đúng\n    - kỹ thuật tập\n    - lời khuyên khi tập\n    - các lỗi cần tránh\
+    \ khi tập\n    - làm sao tập không bị chấn thương\n    - tập thế nào để tăng cơ\
+    \ nhanh\n    - tập thế nào để giảm mỡ nhanh\n    - cách tập cho người mới\n  \
+    \  - mẹo tăng hiệu quả tập luyện\n    - làm sao để có động lực tập\n    - làm\
+    \ sao để duy trì thói quen tập\n    - mẹo vượt qua plateau\n    - làm sao để tăng\
+    \ sức mạnh\n    - làm sao để tăng sức bền\n    - tip giảm cân hiệu quả\n    -\
+    \ mẹo cho người tập tại nhà\n    - mẹo cho người tập gym\n    - mẹo cho người\
+    \ tập yoga\n    - mẹo tập cardio hiệu quả"
+  intent: workout_tips
+- examples: "    - chương trình thành viên\n    - thẻ thành viên\n    - membership\n\
+    \    - đăng ký thành viên\n    - quyền lợi thành viên\n    - điểm thưởng\n   \
+    \ - tích lũy điểm\n    - hạng thành viên\n    - thành viên vip\n    - thành viên\
+    \ bạc\n    - thành viên vàng\n    - thành viên kim cương\n    - chính sách thành\
+    \ viên\n    - đặc quyền thành viên\n    - cách trở thành thành viên\n    - thẻ\
+    \ khách hàng thân thiết\n    - có chương trình thành viên không\n    - làm thẻ\
+    \ thành viên ở đâu\n    - phí làm thẻ thành viên\n    - thành viên được giảm giá\
+    \ không\n    - thành viên có quà không\n    - thành viên có ưu tiên không\n  \
+    \  - cách nâng hạng thành viên"
+  intent: membership_program
+- examples: "    - lợi ích khi là thành viên\n    - thành viên được gì\n    - ưu đãi\
+    \ cho thành viên\n    - quyền lợi độc quyền\n    - thành viên được tích điểm không\n\
+    \    - thành viên được đổi quà không\n    - thành viên được ưu tiên không\n  \
+    \  - thành viên được giao hàng miễn phí không\n    - thành viên được tư vấn riêng\
+    \ không\n    - thành viên được đổi trả dễ dàng không\n    - thành viên có được\
+    \ mời sự kiện không\n    - thành viên có được mua sớm không\n    - quyền lợi hạng\
+    \ bạc\n    - quyền lợi hạng vàng\n    - quyền lợi hạng kim cương\n    - thành\
+    \ viên được hỗ trợ đặc biệt không\n    - thành viên được bảo hành lâu hơn không\n\
+    \    - chênh lệch quyền lợi các hạng\n    - khác biệt giữa các cấp thành viên"
+  intent: membership_benefits
+- examples: "    - sản phẩm còn không\n    - còn hàng không\n    - hết hàng chưa\n\
+    \    - còn size nào\n    - còn màu nào\n    - khi nào có hàng\n    - đã hết hàng\n\
+    \    - còn trong kho không\n    - đặt trước được không\n    - báo khi có hàng\n\
+    \    - thông báo khi có hàng\n    - hết size rồi\n    - hết màu rồi\n    - sản\
+    \ phẩm sold out\n    - sản phẩm cháy hàng\n    - tần suất nhập hàng\n    - có\
+    \ sẵn không\n    - có sẵn tại cửa hàng không\n    - có hàng tại kho không\n  \
+    \  - kiểm tra tồn kho\n    - kiểm tra hàng còn không\n    - còn đủ size không\n\
+    \    - còn đủ màu không\n    - có hàng mới không\n    - khi nào nhập hàng mới"
+  intent: product_availability
+- examples: "    - dịch vụ\n    - các dịch vụ\n    - dịch vụ của bạn\n    - dịch vụ\
+    \ của các bạn\n    - dịch vụ của shop\n    - dịch vụ gì\n    - có dịch vụ nào\n\
+    \    - dịch vụ tại đây\n    - shop có dịch vụ gì\n    - dịch vụ nào hay\n    -\
+    \ dịch vụ chất lượng\n    - dịch vụ uy tín\n    - danh sách dịch vụ\n    - thông\
+    \ tin dịch vụ\n    - giới thiệu dịch vụ\n    - tìm hiểu dịch vụ\n    - dịch vụ\
+    \ hot nhất\n    - dịch vụ nổi bật\n    - dịch vụ tốt nhất\n    - cho xem dịch\
+    \ vụ\n    - xem dịch vụ\n    - các loại dịch vụ\n    - dịch vụ phổ biến"
+  intent: service_info
+- examples: "    - liên hệ\n    - thông tin liên hệ\n    - số điện thoại\n    - địa\
+    \ chỉ\n    - email\n    - cách liên hệ\n    - zalo\n    - facebook\n    - website\n\
+    \    - thông tin shop\n    - ở đâu\n    - làm sao liên hệ\n    - muốn liên hệ\n\
+    \    - cần liên hệ\n    - thông tin công ty\n    - fanpage\n    - mạng xã hội\n\
+    \    - phương thức liên hệ\n    - cách gọi\n    - số máy\n    - điện thoại bàn\n\
+    \    - văn phòng đại diện\n    - chi nhánh\n    - showroom\n    - cơ sở\n    -\
+    \ trụ sở"
+  intent: contact_info
+- examples: "    - lịch\n    - lịch hoạt động\n    - thời gian\n    - giờ làm việc\n\
+    \    - mở cửa lúc mấy giờ\n    - đóng cửa lúc mấy giờ\n    - lịch làm việc\n \
+    \   - thời gian hoạt động\n    - lịch trình\n    - lịch học\n    - lịch tập\n\
+    \    - thời khóa biểu\n    - lịch lớp học\n    - có lớp nào không\n    - lớp mấy\
+    \ giờ\n    - lịch PT\n    - lịch personal training\n    - lịch yoga\n    - lịch\
+    \ gym\n    - giờ nào có lớp\n    - khi nào mở\n    - ngày nào mở\n    - chủ nhật\
+    \ có mở không\n    - thứ 7 có làm không\n    - lễ có hoạt động không\n    - tết\
+    \ có mở không\n    - lịch nghỉ\n    - thông báo lịch"
+  intent: schedule_info
+- examples: "    - thành viên\n    - hội viên\n    - card thành viên\n    - làm thành\
+    \ viên\n    - giảm giá thành viên\n    - phí thành viên\n    - gói thành viên\n\
+    \    - loại thành viên\n    - VIP\n    - premium\n    - gold member\n    - silver\
+    \ member\n    - bronze member\n    - platinum\n    - benefit\n    - tích điểm\n\
+    \    - đổi điểm\n    - quà tặng thành viên\n    - sinh nhật thành viên\n    -\
+    \ khuyến mại thành viên\n    - gia hạn thành viên\n    - gia nhập thành viên\n\
+    \    - điều kiện thành viên\n    - cách đăng ký"
+  intent: membership_info
+- examples: "    - hello\n    - hi\n    - hey there\n    - good morning\n    - good\
+    \ evening\n    - how are you\n    - what's up\n    - nice to meet you\n    - I\
+    \ want to speak English\n    - do you speak English\n    - can we talk in English\n\
+    \    - English please\n    - switch to English\n    - I don't speak Vietnamese\n\
+    \    - English only"
+  intent: out_of_scope
+version: '3.1'

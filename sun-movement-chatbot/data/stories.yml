@@ -34,12 +34,12 @@ stories:
   - intent: search_product
   - action: action_search_product
   - intent: deny
-  - action: utter_goodbye
+  - action: utter_deny
 
 - story: hỏi về giá sản phẩm
   steps:
   - intent: price_query
-  - action: utter_price_query
+  - action: utter_price_info
   - intent: thank
   - action: utter_thank
 
@@ -341,5 +341,111 @@ stories:
   - action: utter_membership_program
   - intent: membership_benefits
   - action: utter_membership_benefits
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về sản phẩm
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+
+- story: hỏi về dịch vụ
+  steps:
+  - intent: greet
+  - action: utter_greet  
+  - intent: service_info
+  - action: utter_service_info
+
+- story: hỏi về giá cả và sản phẩm
+  steps:
+  - intent: price_query
+  - action: utter_price_info
+
+- story: hỏi thông tin liên hệ
+  steps:
+  - intent: contact_info
+  - action: utter_contact_info
+
+- story: hỏi lịch hoạt động
+  steps:
+  - intent: schedule_info
+  - action: utter_schedule_info
+
+- story: hỏi về thành viên
+  steps:
+  - intent: membership_info
+  - action: utter_membership_info
+
+- story: cuộc trò chuyện hoàn chỉnh về sản phẩm
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: product_info
+  - action: utter_product_info
+  - intent: price_query
+  - action: utter_price_info
+  - intent: thank
+  - action: utter_thank
+
+- story: cuộc trò chuyện hoàn chỉnh về dịch vụ
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: service_info
+  - action: utter_service_info
+  - intent: schedule_info
+  - action: utter_schedule_info
+  - intent: contact_info
+  - action: utter_contact_info
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: hỏi về kế hoạch dinh dưỡng
+  steps:
+  - intent: nutrition_advice
+  - action: action_get_nutrition_info
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về kế hoạch tập luyện
+  steps:
+  - intent: workout_plan
+  - action: action_get_workout_plan
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm kiếm thông tin dịch vụ
+  steps:
+  - intent: service_info
+  - action: action_get_service_info
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm kiếm sản phẩm và tiếp tục hỏi về dinh dưỡng
+  steps:
+  - intent: search_product
+  - action: action_search_product
+  - intent: nutrition_advice
+  - action: action_get_nutrition_info
+  - intent: thank
+  - action: utter_thank
+
+- story: tìm kiếm sản phẩm và tiếp tục hỏi về tập luyện
+  steps:
+  - intent: search_product
+  - action: action_search_product
+  - intent: workout_plan
+  - action: action_get_workout_plan
+  - intent: thank
+  - action: utter_thank
+
+- story: hỏi về dinh dưỡng và dịch vụ huấn luyện cá nhân
+  steps:
+  - intent: nutrition_advice
+  - action: action_get_nutrition_info
+  - intent: service_info
+  - action: action_get_service_info
   - intent: thank
   - action: utter_thank

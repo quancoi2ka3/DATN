@@ -1,0 +1,176 @@
+{
+  "nutrition_plans": [
+    {
+      "id": 1,
+      "name": "Kế Hoạch Dinh Dưỡng Tăng Cơ",
+      "description": "Kế hoạch dinh dưỡng giúp tăng cơ bắp hiệu quả, phù hợp cho người tập thể hình",
+      "macroRatio": {
+        "protein": 40,
+        "carbs": 40,
+        "fat": 20
+      },
+      "dailyCalories": 2800,
+      "mealPlan": [
+        {
+          "mealName": "Bữa sáng",
+          "foods": [
+            "4 lòng trắng trứng + 2 trứng nguyên quả",
+            "100g yến mạch",
+            "1 trái chuối",
+            "300ml sữa ít béo"
+          ]
+        },
+        {
+          "mealName": "Bữa trưa",
+          "foods": [
+            "150g ức gà",
+            "100g cơm gạo lứt",
+            "200g rau xanh",
+            "15ml dầu oliu"
+          ]
+        },
+        {
+          "mealName": "Bữa trước tập",
+          "foods": [
+            "1 scoop whey protein",
+            "1 trái táo",
+            "30g bơ đậu phộng"
+          ]
+        },
+        {
+          "mealName": "Bữa sau tập",
+          "foods": [
+            "2 scoop whey protein",
+            "50g bột yến mạch",
+            "1 trái chuối"
+          ]
+        },
+        {
+          "mealName": "Bữa tối",
+          "foods": [
+            "150g cá hồi",
+            "100g khoai lang",
+            "200g rau xanh",
+            "15ml dầu oliu"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Kế Hoạch Dinh Dưỡng Giảm Mỡ",
+      "description": "Kế hoạch dinh dưỡng giúp đốt cháy mỡ thừa, duy trì cơ bắp và tăng cường năng lượng",
+      "macroRatio": {
+        "protein": 45,
+        "carbs": 30,
+        "fat": 25
+      },
+      "dailyCalories": 1800,
+      "mealPlan": [
+        {
+          "mealName": "Bữa sáng",
+          "foods": [
+            "3 lòng trắng trứng + 1 trứng nguyên quả",
+            "50g yến mạch",
+            "100g quả mọng",
+            "200ml sữa hạnh nhân không đường"
+          ]
+        },
+        {
+          "mealName": "Bữa trưa",
+          "foods": [
+            "120g ức gà",
+            "50g cơm gạo lứt",
+            "250g rau xanh và salad",
+            "10ml dầu oliu"
+          ]
+        },
+        {
+          "mealName": "Bữa trước tập",
+          "foods": [
+            "1 scoop whey protein",
+            "1/2 trái táo"
+          ]
+        },
+        {
+          "mealName": "Bữa sau tập",
+          "foods": [
+            "1 scoop whey protein",
+            "25g bột yến mạch"
+          ]
+        },
+        {
+          "mealName": "Bữa tối",
+          "foods": [
+            "120g cá ngừ hoặc cá hồi",
+            "200g rau xanh",
+            "1/4 bơ",
+            "10ml dầu oliu"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Kế Hoạch Dinh Dưỡng Người Mới Tập",
+      "description": "Kế hoạch dinh dưỡng cân bằng dành cho người mới bắt đầu tập luyện thể thao",
+      "macroRatio": {
+        "protein": 30,
+        "carbs": 45,
+        "fat": 25
+      },
+      "dailyCalories": 2200,
+      "mealPlan": [
+        {
+          "mealName": "Bữa sáng",
+          "foods": [
+            "2 trứng nguyên quả",
+            "2 lát bánh mì nguyên cám",
+            "1/4 bơ",
+            "1 trái chuối",
+            "250ml sữa ít béo"
+          ]
+        },
+        {
+          "mealName": "Bữa giữa sáng",
+          "foods": [
+            "1 hũ sữa chua Hy Lạp",
+            "30g hạt mixed nuts"
+          ]
+        },
+        {
+          "mealName": "Bữa trưa",
+          "foods": [
+            "100g thịt nạc (gà, bò hoặc cá)",
+            "75g cơm gạo lứt",
+            "200g rau xanh",
+            "10ml dầu oliu"
+          ]
+        },
+        {
+          "mealName": "Bữa trước tập",
+          "foods": [
+            "1 trái táo",
+            "30g bơ đậu phộng"
+          ]
+        },
+        {
+          "mealName": "Bữa sau tập",
+          "foods": [
+            "1 scoop whey protein",
+            "1 trái chuối"
+          ]
+        },
+        {
+          "mealName": "Bữa tối",
+          "foods": [
+            "100g thịt nạc",
+            "50g khoai lang hoặc gạo lứt",
+            "200g rau xanh",
+            "10ml dầu oliu"
+          ]
+        }
+      ]
+    }
+  ]
+}

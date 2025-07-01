@@ -25,6 +25,10 @@ import {
 import AuthModal from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/auth-context";
 import { Menu, X, ChevronDown, Phone, Instagram, Facebook, MapPin, User, LogOut, Settings } from "lucide-react";
+import { initUIEnhancements } from "@/lib/ui-enhancements";
+
+// Import custom CSS
+import "@/styles/enhanced-header.css";
 
 const mainNavItems = [
   { label: "Trang Chủ", href: "/" },
@@ -191,7 +195,7 @@ export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   
-  // Handle scroll effect
+  // Handle scroll effect and initialize UI enhancements
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -199,21 +203,25 @@ export function Header() {
     };
     
     window.addEventListener("scroll", handleScroll);
+    
+    // Initialize enhanced UI interactions
+    initUIEnhancements();
+    
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header 
       className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-500 backdrop-blur-md border-b will-change-transform",
+        "sticky top-0 z-50 w-full transition-all duration-500 backdrop-blur-md border-b will-change-transform main-header",
         scrolled
-          ? "bg-slate-900/95 border-slate-800 py-2 shadow-xl shadow-slate-900/20"
+          ? "bg-slate-900/95 border-slate-800 py-2 shadow-xl shadow-slate-900/20 header-scrolled"
           : "bg-gradient-to-r from-slate-900 to-slate-800 border-slate-800/50 py-4"
       )}
     >
       {/* Top Bar - only visible when not scrolled */}
       {!scrolled && (
-        <div className="hidden lg:block absolute top-0 left-0 w-full bg-red-500 text-white py-1 text-center text-xs font-medium">
+        <div className="hidden lg:block absolute top-0 left-0 w-full bg-red-500 text-white py-1 text-center text-xs font-medium top-bar">
           <div className="container flex justify-between items-center">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
@@ -262,7 +270,7 @@ export function Header() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-red-500 hover:scale-105 hover:shadow-lg focus:bg-red-500 focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-white hover-lift",
+                        "group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-red-500 hover:scale-105 hover:shadow-lg focus:bg-red-500 focus:outline-none disabled:pointer-events-none disabled:opacity-50 text-white hover-lift header-nav-item",
                         pathname === item.href && "bg-red-500 shadow-lg"
                       )}
                     >
@@ -284,7 +292,7 @@ export function Header() {
           <Button
             size={scrolled ? "default" : "lg"}
             className={cn(
-              "hidden md:flex btn-primary-enhanced text-white border-none transition-all duration-300 hover-lift",
+              "hidden md:flex btn-primary-enhanced text-white border-none transition-all duration-300 hover-lift btn-ripple",
               scrolled ? "h-9 px-4" : "h-10 px-6"
             )}
             asChild
@@ -352,7 +360,7 @@ export function Header() {
                   {/* Mobile Authentication */}
                   <MobileAuthSection />
                   
-                  <Button className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white" asChild>
+                  <Button className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white btn-primary-enhanced hover-lift" asChild>
                     <a 
                       href="https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"
                       target="_blank"

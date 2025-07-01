@@ -1,262 +1,553 @@
-version: "3.1"
-
-intents:
-  - greet
-  - goodbye
-  - thank
-  - affirm
-  - deny
-  - search_product
-  - product_info
-  - product_consultation
-  - ask_bot_capabilities
-  - check_order
-  - price_query
-  - discount_info
-  - shipping_info
-  - return_policy
-  - contact_support
-  - shopping_help
-  - payment_methods
-  - delivery_time
-  - store_location
-  - personal_training
-  - nutrition_advice
-  - workout_plan
-  # Thêm các intent mới
-  - product_brand
-  - product_quality
-  - after_sales_service
-  - product_experience
-  - product_recommendation
-  - workout_tips
-  - membership_program
-  - membership_benefits
-  - product_comparison
-  - product_size
-  - product_availability
-  - warranty_info
-  - material_info
-  - delivery_tracking
-
+actions:
+- action_search_product
+- action_get_product_info
+- action_get_service_info
+- action_get_price_info
+- action_check_order
+- action_fetch_discount_info
+- action_check_product_availability
+- action_reject_english
+- action_get_nutrition_info
+- action_get_workout_plan
 entities:
-  - product
-  - product_category
-  - order_id
+- product
+- product_category
+- order_id
+- service
+- service_type
+- workout_goal
+- experience_level
+- nutrition_goal
+intents:
+- greet
+- goodbye
+- thank
+- affirm
+- deny
+- search_product
+- product_info
+- product_consultation
+- ask_bot_capabilities
+- check_order
+- price_query
+- discount_info
+- shipping_info
+- return_policy
+- contact_support
+- shopping_help
+- payment_methods
+- delivery_time
+- store_location
+- personal_training
+- nutrition_advice
+- workout_plan
+- service_info
+- contact_info
+- schedule_info
+- membership_info
+- product_brand
+- product_quality
+- after_sales_service
+- product_experience
+- product_recommendation
+- workout_tips
+- membership_program
+- membership_benefits
+- product_availability
+- out_of_scope
+responses:
+  utter_after_sales_service:
+  - text: '🛠️ **Dịch vụ hậu mãi:**
 
+      • Bảo trì thiết bị định kỳ
+
+      • Hướng dẫn sử dụng chi tiết
+
+      • Hotline hỗ trợ 24/7
+
+      • Sửa chữa tại nhà
+
+      • Đổi phụ tùng chính hãng'
+  utter_ask_bot_capabilities:
+  - text: '🤖 **Tôi có thể giúp bạn:**
+
+      • Tư vấn sản phẩm tập luyện
+
+      • Thông tin về dịch vụ và lớp học
+
+      • Bảng giá và khuyến mại
+
+      • Hướng dẫn đăng ký thành viên
+
+      • Thông tin liên hệ và địa chỉ
+
+      • Lịch hoạt động và đặt lịch
+
+
+      Bạn cần hỗ trợ gì?'
+  utter_ask_more_help:
+  - text: 'Bạn có cần hỗ trợ thêm gì không? Tôi có thể giúp bạn về:
+
+      • Thông tin sản phẩm chi tiết
+
+      • Tư vấn lựa chọn phù hợp
+
+      • Hướng dẫn đặt hàng
+
+      • Chính sách và ưu đãi'
+  utter_bot_capabilities:
+  - text: '🤖 **Tôi có thể giúp bạn:**
+
+      • Tư vấn sản phẩm tập luyện
+
+      • Thông tin về dịch vụ và lớp học
+
+      • Bảng giá và khuyến mại
+
+      • Hướng dẫn đăng ký thành viên'
+      
+  utter_fallback:
+  - text: 'Xin lỗi, tôi chưa hiểu rõ ý bạn. Tôi có thể giúp bạn với những chủ đề sau:
+
+      • Thông tin sản phẩm và dịch vụ
+      • Giá cả và khuyến mại
+      • Lịch tập và đăng ký
+      • Liên hệ và hỗ trợ
+      
+      Bạn có thể hỏi cụ thể hơn không?'
+  
+  utter_deny:
+  - text: 'Tôi hiểu. Bạn cần hỗ trợ gì khác không?'
+      
+  utter_greet:
+  - text: 'Xin chào! Tôi là trợ lý ảo của Sun Movement. Tôi có thể giúp bạn:
+  
+      • Tìm hiểu về sản phẩm và dịch vụ
+      • Tra cứu giá cả và khuyến mãi
+      • Xem lịch tập và đăng ký
+      • Thông tin liên hệ và hỗ trợ
+      
+      Bạn cần tư vấn về vấn đề gì?'
+  utter_contact_info:
+  - text: '📞 **Thông tin liên hệ Sun Movement:**
+
+
+      🏢 **Địa chỉ:** Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội
+
+      📱 **Hotline:** 08999139393
+
+      📧 **Email:** contact@sunmovement.vn
+
+      🌐 **Website:** sunmovement.vn
+
+      ⏰ **Giờ làm việc:** 6:00 - 22:00 hàng ngày
+
+
+      Hãy liên hệ với chúng tôi để được tư vấn miễn phí!'
+  utter_contact_support:
+  - text: '📞 **Hỗ trợ khách hàng:**
+
+      • **Hotline:** 08999139393
+
+      • **Email:** support@sunmovement.vn
+
+      • **Live Chat:** Trên website
+
+      • **Zalo:** @sunmovement
+
+      • **Facebook:** Sun Movement Vietnam
+
+
+      ⏰ **Thời gian hỗ trợ:** 6:00 - 22:00 hàng ngày'
+  utter_default:
+  - text: 'Xin lỗi, tôi không hiểu câu hỏi của bạn. Bạn có thể hỏi về:
+
+      • Sản phẩm và dịch vụ
+
+      • Giá cả và khuyến mại
+
+      • Lịch tập và đăng ký
+
+      • Liên hệ và hỗ trợ'
+  utter_delivery_time:
+  - text: '⏰ **Thời gian giao hàng:**
+
+      • Nội thành Hà Nội: 2-4 giờ (giao hàng nhanh)
+
+      • Ngoại thành Hà Nội: 1-2 ngày
+
+      • Các tỉnh thành khác: 2-5 ngày
+
+      • Đặt hàng trước 15h: giao trong ngày
+
+      • Hỗ trợ giao hàng cuối tuần'
+  utter_goodbye:
+  - text: Cảm ơn bạn đã quan tâm đến Sun Movement! Hẹn gặp lại!
+  - text: Tạm biệt! Chúc bạn một ngày tốt lành!
+  utter_membership_benefits:
+  - text: '🎁 **Quyền lợi thành viên:**
+
+      • Giảm giá 10-30% tất cả dịch vụ
+
+      • Ưu tiên đặt lịch
+
+      • Tham gia sự kiện độc quyền
+
+      • Nhận quà tặng sinh nhật
+
+      • Tích điểm đổi quà
+
+      • Giới thiệu bạn bè nhận thưởng'
+  utter_membership_info:
+  - text: '🎯 **Thành viên Sun Movement:**
+
+
+      ✨ **Quyền lợi:**
+
+      • Tập không giới hạn
+
+      • Ưu đãi đặc biệt cho các dịch vụ
+
+      • Tham gia sự kiện độc quyền
+
+      • Tư vấn miễn phí từ chuyên gia
+
+
+      🎁 **Khuyến mại:**
+
+      • Thành viên mới: Giảm 20%
+
+      • Giới thiệu bạn bè: Tặng 1 tháng
+
+      • Đăng ký dài hạn: Ưu đãi tới 30%
+
+
+      Bạn muốn đăng ký ngay không?'
+  utter_membership_program:
+  - text: '🏆 **Chương trình thành viên:**
+
+      • **Bronze:** Tập không giới hạn
+
+      • **Silver:** + Personal Training 2 buổi/tháng
+
+      • **Gold:** + Tư vấn dinh dưỡng + Massage
+
+      • **Platinum:** + Tất cả dịch vụ VIP
+
+
+      Ưu đãi đặc biệt cho thành viên mới!'
+  utter_nutrition_advice:
+  - text: '🥗 **Tư vấn dinh dưỡng Sun Movement:**
+
+
+      📋 **Dịch vụ:**
+
+      • Phân tích thành phần cơ thể (InBody)
+
+      • Lập thực đơn cá nhân hóa
+
+      • Tư vấn thực phẩm bổ sung
+
+      • Theo dõi tiến trình hàng tuần
+
+
+      🎯 **Phù hợp với:**
+
+      • Giảm cân, tăng cơ
+
+      • Người bệnh tiểu đường, tim mạch
+
+      • Vận động viên
+
+
+      💰 **Phí tư vấn:** 300.000đ/buổi
+
+      📞 **Đặt lịch:** 08999139393'
+  utter_payment_methods:
+  - text: '💳 **Phương thức thanh toán:**
+
+      • Tiền mặt tại cửa hàng
+
+      • Chuyển khoản ngân hàng
+
+      • Thẻ tín dụng/ghi nợ
+
+      • Ví điện tử (MoMo, ZaloPay)
+
+      • COD (thanh toán khi nhận hàng)
+
+      • Trả góp 0% qua thẻ tín dụng'
+  utter_personal_training:
+  - text: '💪 **Personal Training tại Sun Movement:**
+
+
+      👨‍⚕️ **Huấn luyện viên:**
+
+      • Chứng chỉ quốc tế ACSM, NASM
+
+      • Kinh nghiệm 5+ năm
+
+      • Chuyên về giảm cân, tăng cơ, phục hồi chấn thương
+
+
+      📅 **Lịch train:**
+
+      • Linh hoạt theo thời gian của bạn
+
+      • 1-1 hoặc small group (2-3 người)
+
+      • 60-90 phút/buổi
+
+
+      💰 **Giá:** 500.000đ/buổi
+
+      🎁 **Ưu đãi:** Mua 10 buổi tặng 1'
+  utter_price_info:
+  - text: '💰 **Bảng giá dịch vụ Sun Movement:**
+
+
+      🏃 **Gói tập:**
+
+      • Gói 1 tháng: 500.000đ
+
+      • Gói 3 tháng: 1.350.000đ (Tiết kiệm 150.000đ)
+
+      • Gói 6 tháng: 2.400.000đ (Tiết kiệm 600.000đ)
+
+      • Gói 1 năm: 4.200.000đ (Tiết kiệm 1.800.000đ)
+
+
+      🧘 **Lớp học đặc biệt:**
+
+      • Yoga: 200.000đ/buổi
+
+      • Personal Training: 500.000đ/buổi
+
+
+      💥 **Ưu đãi hiện tại:** Giảm 20% cho thành viên mới!'
+  utter_product_brand:
+  - text: '🏷️ **Thương hiệu sản phẩm tại Sun Movement:**
+
+      • **Thiết bị gym:** Life Fitness, Technogym, Precor
+
+      • **Yoga:** Lululemon, Manduka, Gaiam
+
+      • **Thực phẩm bổ sung:** Optimum Nutrition, Dymatize
+
+      • **Phụ kiện:** Nike, Adidas, Under Armour
+
+
+      Tất cả đều chính hãng, bảo hành đầy đủ!'
+  utter_product_consultation:
+  - text: Tôi có thể tư vấn chi tiết về sản phẩm phù hợp với nhu cầu của bạn. Bạn
+      đang tìm thiết bị cho mục đích gì? (Giảm cân, tăng cơ, yoga, cardio...)
+  utter_product_experience:
+  - text: '⭐ **Trải nghiệm sử dụng:**
+
+      • Thử nghiệm sản phẩm miễn phí tại cửa hàng
+
+      • Đánh giá từ khách hàng thực tế
+
+      • Video demo sử dụng
+
+      • Hướng dẫn từ chuyên gia
+
+      • Chính sách đổi trả linh hoạt'
+  utter_product_info:
+  - text: '🏋️ Sun Movement có đa dạng các sản phẩm tập luyện chất lượng cao:
+
+      • Thiết bị gym chuyên nghiệp
+
+      • Dụng cụ yoga và pilates
+
+      • Phụ kiện tập luyện
+
+      • Thực phẩm bổ sung
+
+
+      Bạn muốn tìm hiểu về sản phẩm nào cụ thể?'
+  utter_product_quality:
+  - text: '✅ **Cam kết chất lượng:**
+
+      • 100% hàng chính hãng
+
+      • Kiểm tra chất lượng trước khi bán
+
+      • Bảo hành 12-24 tháng
+
+      • Đổi trả miễn phí nếu lỗi
+
+      • Hỗ trợ kỹ thuật 24/7'
+  utter_product_recommendation:
+  - text: '🎯 **Gợi ý sản phẩm:**
+
+      Hãy cho tôi biết:
+
+      • Mục tiêu tập luyện của bạn?
+
+      • Kinh nghiệm tập luyện?
+
+      • Ngân sách dự kiến?
+
+      • Không gian tập luyện?
+
+
+      Tôi sẽ tư vấn sản phẩm phù hợp nhất!'
+  utter_return_policy:
+  - text: '🔄 **Chính sách đổi trả:**
+
+      • Đổi trả trong 7 ngày nếu sản phẩm lỗi
+
+      • Miễn phí đổi size trong 3 ngày đầu
+
+      • Sản phẩm phải còn nguyên tem, hộp
+
+      • Hoàn tiền 100% nếu sản phẩm lỗi từ nhà sản xuất
+
+      • Hỗ trợ đổi sang sản phẩm khác cùng giá trị'
+  utter_schedule_info:
+  - text: '⏰ **Lịch hoạt động Sun Movement:**
+
+
+      🌅 **Sáng:**
+
+      • 6:00 - 9:00: Yoga buổi sáng
+
+      • 9:00 - 11:00: Gym & Cardio
+
+
+      🌞 **Trưa:**
+
+      • 11:00 - 14:00: Personal Training
+
+      • 14:00 - 16:00: Lớp nhóm
+
+
+      🌆 **Chiều/Tối:**
+
+      • 16:00 - 19:00: Peak hours - Tất cả dịch vụ
+
+      • 19:00 - 22:00: Yoga thư giãn
+
+
+      📅 **Mở cửa:** Thứ 2 - Chủ nhật (6:00 - 22:00)'
+  utter_service_info:
+  - text: '🧘 **Dịch vụ tại Sun Movement:**
+
+      • Lớp Yoga cơ bản & nâng cao
+
+      • Personal Training 1-1
+
+      • Group Fitness Classes
+
+      • Tư vấn dinh dưỡng
+
+      • Massage thư giãn
+
+
+      Bạn quan tâm đến dịch vụ nào?'
+  utter_shipping_info:
+  - text: '🚚 **Thông tin vận chuyển:**
+
+      • Miễn phí ship nội thành Hà Nội (đơn từ 500k)
+
+      • Ship toàn quốc: 30.000đ - 50.000đ
+
+      • Thời gian: 1-3 ngày làm việc
+
+      • COD: Thanh toán khi nhận hàng
+
+      • Đóng gói cẩn thận, bảo hành sản phẩm'
+  utter_shopping_help:
+  - text: '🛒 **Hỗ trợ mua sắm:**
+
+      • Tư vấn sản phẩm phù hợp
+
+      • So sánh tính năng, giá cả
+
+      • Hướng dẫn đặt hàng online
+
+      • Hỗ trợ thanh toán
+
+      • Theo dõi đơn hàng
+
+
+      Bạn cần hỗ trợ gì cụ thể?'
+  utter_store_location:
+  - text: '🏢 **Địa chỉ Sun Movement:**
+
+
+      📍 **Cơ sở chính:**
+
+      Tầng 11, số 300 Đê La Thành nhỏ
+
+      Thổ Quan, Đống Đa, Hà Nội
+
+
+      🅿️ **Parking:** Có chỗ đậu xe miễn phí
+
+      🚇 **Gần Metro:** Ga La Thành (300m)
+
+      🚌 **Bus:** Tuyến 03, 23, 40
+
+
+      ⏰ **Giờ mở cửa:** 6:00 - 22:00 hàng ngày'
+  utter_thank:
+  - text: Không có gì! Tôi rất vui được giúp bạn.
+  - text: Rất vui được hỗ trợ bạn!
+  utter_workout_tips:
+  - text: '💡 **Mẹo tập luyện hiệu quả:**
+
+      • Khởi động 10-15 phút trước khi tập
+
+      • Tập đều đặn 3-5 lần/tuần
+
+      • Kết hợp cardio và strength training
+
+      • Nghỉ ngơi đủ giấc (7-8 tiếng/ngày)
+
+      • Uống đủ nước (2-3 lít/ngày)
+
+      • Lắng nghe cơ thể, tránh quá sức'
 slots:
-  product:
-    type: text
-    mappings:
-    - type: from_entity
-      entity: product
-  
-  product_category:
-    type: text
-    mappings:
-    - type: from_entity
-      entity: product_category
-  
   order_id:
     type: text
     mappings:
     - type: from_entity
       entity: order_id
-
-responses:
-  utter_greet:
-  - text: "Xin chào! Tôi là trợ lý ảo của Sun Movement. Tôi có thể giúp gì cho bạn hôm nay?"
-  - text: "Chào bạn! Rất vui được hỗ trợ bạn. Bạn đang tìm hiểu về sản phẩm nào?"
-  - text: "Xin chào! Sun Movement có thể giúp gì cho bạn?"
-  - text: "Chào mừng bạn đến với Sun Movement! Tôi là chatbot hỗ trợ, bạn cần tư vấn về gì ạ?"
-  - text: "Xin chào quý khách! Sun Movement rất vui được hỗ trợ bạn hôm nay."
-  
-  utter_goodbye:
-  - text: "Cảm ơn đã ghé thăm Sun Movement! Chúc bạn một ngày tốt lành."
-  - text: "Hẹn gặp lại bạn! Chúc bạn tập luyện hiệu quả."
-  - text: "Tạm biệt và cảm ơn đã liên hệ với Sun Movement! Rất mong được phục vụ bạn lần sau."
-  - text: "Chào tạm biệt! Nếu cần hỗ trợ thêm, đừng ngần ngại quay lại với Sun Movement nhé."
-  - text: "Cảm ơn bạn đã trò chuyện. Sun Movement luôn sẵn sàng hỗ trợ bạn 24/7!"
-  
-  utter_thank:
-  - text: "Không có gì! Rất vui được hỗ trợ bạn."
-  - text: "Tôi rất vui khi có thể giúp đỡ bạn!"
-  - text: "Đó là nhiệm vụ của tôi! Rất vui khi giúp được bạn."
-  - text: "Rất hân hạnh được phục vụ quý khách. Sun Movement luôn đồng hành cùng bạn!"
-  - text: "Không có chi bạn nhé! Nếu cần hỗ trợ gì thêm, cứ cho tôi biết."
-  
-  utter_product_consultation:
-  - text: "Tôi rất sẵn lòng tư vấn sản phẩm cho bạn! Sun Movement có các nhóm sản phẩm chính:\n\n🏃‍♂️ **Sportswear**: Áo, quần, giày thể thao\n💪 **Supplements**: Protein, BCAA, Mass Gainer, Creatine\n🏋️‍♀️ **Dụng cụ tập luyện**: Găng tay, đai lưng, dây kháng lực\n\nBạn đang quan tâm đến loại sản phẩm nào?"
-  - text: "Tuyệt vời! Tôi có thể giúp bạn tìm sản phẩm phù hợp. Bạn có thể cho biết:\n\n- Bạn tập luyện môn thể thao gì?\n- Mục tiêu của bạn là gì? (tăng cơ, giảm cân, tăng sức bền...)\n- Ngân sách dự kiến của bạn?\n\nCho tôi biết để tư vấn tốt nhất nhé!"
-  - text: "Sun Movement có rất nhiều sản phẩm đa dạng cho nhu cầu tập luyện của bạn:\n\n▶️ **Quần áo thể thao**: Chất liệu thoáng khí, thấm hút mồ hôi tốt\n▶️ **Giày thể thao**: Phù hợp với từng môn thể thao khác nhau\n▶️ **Thực phẩm bổ sung**: Protein, BCAA, Pre-workout...\n▶️ **Phụ kiện tập luyện**: Găng tay, đai lưng, băng quấn...\n\nBạn muốn được tư vấn về nhóm sản phẩm nào?"
-  - text: "Tôi sẽ giúp bạn chọn sản phẩm phù hợp nhất! Sun Movement có đa dạng sản phẩm từ các thương hiệu hàng đầu như Optimum Nutrition, Gymshark, Nike, Adidas... Bạn có thể cho biết bạn đang tìm kiếm sản phẩm cho mục đích gì không?"
-
-  utter_bot_capabilities:
-  - text: "Tôi có thể hỗ trợ bạn về:\n\n✅ Tư vấn sản phẩm thể thao và thực phẩm bổ sung\n✅ Thông tin giá cả và khuyến mãi\n✅ Hướng dẫn đặt hàng và thanh toán\n✅ Chính sách giao hàng và đổi trả\n✅ Thông tin về các dịch vụ tập luyện\n✅ Địa chỉ và thời gian hoạt động\n\nBạn cần hỗ trợ về vấn đề gì?"
-  - text: "Xin chào! Tôi là trợ lý ảo của Sun Movement, tôi có thể:\n\n📱 Tư vấn sản phẩm phù hợp với nhu cầu của bạn\n💰 Cung cấp thông tin về giá cả và khuyến mãi hiện tại\n🚚 Thông tin về giao hàng và tình trạng đơn hàng\n🔄 Giải đáp thắc mắc về đổi trả và hoàn tiền\n📍 Hướng dẫn tìm cửa hàng gần nhất\n\nBạn muốn được tư vấn về vấn đề nào?"
-  - text: "Chào bạn! Tôi là chatbot của Sun Movement, tôi có thể giúp bạn:\n\n👕 Tìm sản phẩm thể thao phù hợp\n💪 Tư vấn về thực phẩm bổ sung\n🔍 Tìm kiếm sản phẩm theo nhu cầu\n💳 Thông tin về thanh toán và đặt hàng\n🎁 Cập nhật chương trình khuyến mãi mới nhất\n\nBạn cần tư vấn về vấn đề gì?"
-  
-  utter_product_info:
-  - text: "Sản phẩm {product} của chúng tôi là một lựa chọn tuyệt vời. Bạn có thể xem thông tin chi tiết ở trang sản phẩm."
-  - text: "{product} là sản phẩm bán chạy tại Sun Movement. Sản phẩm được nhiều khách hàng đánh giá cao về chất lượng và hiệu quả. Bạn có muốn biết thêm thông tin chi tiết không?"
-  - text: "Sun Movement rất tự hào giới thiệu {product} - được nhập khẩu chính hãng và kiểm tra chất lượng nghiêm ngặt. Sản phẩm này đang được nhiều người ưa chuộng vì hiệu quả và độ bền cao."
-  
-  utter_price_query:
-  - text: "Để biết giá của sản phẩm {product}, vui lòng truy cập trang sản phẩm hoặc tìm kiếm trên website của chúng tôi."
-  - text: "Sản phẩm {product} hiện có nhiều phiên bản và kích cỡ khác nhau, với mức giá từ 500.000đ đến 2.000.000đ tùy loại. Để biết giá chính xác, bạn có thể truy cập website hoặc liên hệ hotline 08999 139 393."
-  - text: "Giá của {product} thay đổi theo từng phiên bản và thời điểm khuyến mãi. Hiện tại, chúng tôi có chương trình giảm giá đặc biệt cho sản phẩm này. Bạn có thể ghé thăm website hoặc cửa hàng để biết thêm chi tiết."
-
-  utter_shipping_info:
-  - text: "Sun Movement miễn phí vận chuyển cho đơn hàng trên 500.000đ. Thời gian giao hàng thông thường từ 2-5 ngày làm việc."
-  - text: "Chính sách giao hàng của Sun Movement:\n\n🚚 Miễn phí giao hàng cho đơn từ 500.000đ\n⏱️ Giao hàng nội thành: 1-2 ngày\n⏱️ Giao hàng tỉnh: 3-5 ngày\n💰 Phí ship đối với đơn dưới 500.000đ: 30.000đ - 50.000đ tùy khu vực\n✅ Có hỗ trợ giao hàng thu tiền COD\n\nBạn cần hỗ trợ thêm về vấn đề giao hàng không?"
-  - text: "Sun Movement cung cấp dịch vụ giao hàng nhanh chóng và đáng tin cậy. Đơn hàng trên 500.000đ được miễn phí vận chuyển toàn quốc. Bạn có thể theo dõi đơn hàng qua tin nhắn SMS hoặc email sau khi đặt hàng thành công."
-  
-  utter_return_policy:
-  - text: "Chúng tôi chấp nhận đổi trả trong vòng 30 ngày kể từ ngày mua hàng nếu sản phẩm còn nguyên vẹn và có hóa đơn mua hàng."
-  - text: "Chính sách đổi trả của Sun Movement:\n\n⏱️ Thời gian đổi trả: 30 ngày kể từ ngày mua\n📋 Điều kiện: Sản phẩm chưa qua sử dụng, còn nguyên tem mác\n🧾 Yêu cầu: Có hóa đơn mua hàng/email xác nhận đơn hàng\n💰 Hoàn tiền: Trong vòng 7-14 ngày làm việc\n👕 Đối với quần áo: Chỉ đổi size, không đổi mẫu\n\nBạn cần hỗ trợ đổi trả sản phẩm nào không?"
-  - text: "Sun Movement cam kết bảo vệ quyền lợi khách hàng với chính sách đổi trả linh hoạt. Nếu bạn không hài lòng với sản phẩm, bạn có thể đổi trả trong vòng 30 ngày với điều kiện sản phẩm còn nguyên vẹn. Chúng tôi sẵn sàng hỗ trợ bạn trong quá trình này."
-
-  utter_payment_methods:
-  - text: "Sun Movement chấp nhận nhiều phương thức thanh toán: tiền mặt, chuyển khoản ngân hàng, thẻ tín dụng/ghi nợ (Visa, Mastercard, JCB), và các ví điện tử như Momo, VNPay, ZaloPay."
-  - text: "Các phương thức thanh toán tại Sun Movement:\n\n💵 Tiền mặt tại cửa hàng hoặc khi nhận hàng (COD)\n🏦 Chuyển khoản qua các ngân hàng: Vietcombank, Techcombank, BIDV, MB Bank\n💳 Thẻ tín dụng/ghi nợ: Visa, Mastercard, JCB\n📱 Ví điện tử: Momo, VNPay, ZaloPay, ShopeePay\n🌐 Thanh toán online qua cổng VNPAY\n\nBạn muốn sử dụng phương thức thanh toán nào?"
-  - text: "Sun Movement luôn đảm bảo sự tiện lợi cho khách hàng với nhiều phương thức thanh toán an toàn. Bạn có thể thanh toán bằng tiền mặt, chuyển khoản, thẻ ngân hàng hoặc các ví điện tử phổ biến. Tất cả đều được mã hóa và bảo mật cao."
-  
-  utter_ask_more_help:
-  - text: "Bạn cần hỗ trợ thêm về vấn đề gì nữa không?"
-  - text: "Còn gì khác tôi có thể giúp bạn?"
-  - text: "Bạn còn câu hỏi nào khác không? Tôi sẵn sàng hỗ trợ."
-  - text: "Ngoài ra, bạn cần tôi tư vấn thêm về vấn đề gì không?"
-  - text: "Tôi có thể giúp gì thêm cho bạn không?"
-  
-  utter_default:
-  - text: "Xin lỗi, tôi chưa hiểu rõ yêu cầu của bạn. Bạn có thể diễn đạt theo cách khác hoặc hỏi tôi về:\n\n• Sản phẩm và dịch vụ\n• Giá cả và khuyến mãi\n• Đặt hàng và giao hàng\n• Chính sách đổi trả\n\nHoặc liên hệ hotline: 08999 139 393"
-  - text: "Tôi có thể chưa hiểu câu hỏi này. Bạn có thể hỏi tôi về sản phẩm, giá cả, dịch vụ hoặc chính sách của Sun Movement. Hãy thử diễn đạt lại nhé!"
-  - text: "Xin lỗi, tôi chưa hiểu ý của bạn. Sun Movement có nhiều dịch vụ và sản phẩm đa dạng, bạn có thể hỏi cụ thể hơn về:\n\n🏋️ Sản phẩm thể thao\n💪 Thực phẩm bổ sung\n💰 Khuyến mãi đang có\n🚚 Thông tin giao hàng\n\nHoặc bạn cần tư vấn về vấn đề gì khác?"
-  - text: "Tôi chưa được lập trình để hiểu nội dung này. Bạn có thể cho tôi biết bạn cần tư vấn về sản phẩm nào hoặc dịch vụ gì của Sun Movement không? Tôi rất muốn được hỗ trợ bạn!"
-  - text: "Xin lỗi, tôi là chatbot của Sun Movement nên tôi chỉ có thể hỗ trợ các thông tin liên quan đến sản phẩm thể thao, thực phẩm bổ sung, dịch vụ và chính sách của cửa hàng. Bạn cần hỏi về vấn đề gì cụ thể không?"
-  
-  utter_check_order:
-  - text: "Để kiểm tra đơn hàng, bạn vui lòng cung cấp mã đơn hàng hoặc số điện thoại đặt hàng. Tôi sẽ kiểm tra trạng thái đơn hàng cho bạn ngay lập tức."
-  - text: "Tôi có thể giúp bạn kiểm tra tình trạng đơn hàng. Bạn vui lòng cho tôi biết mã đơn hàng (bắt đầu bằng SM) hoặc email/số điện thoại đã sử dụng khi đặt hàng."
-  
-  utter_store_location:
-  - text: "Sun Movement hiện có các cửa hàng tại:\n\n📍 Hà Nội: 95 Láng Hạ, Đống Đa\n📍 TP.HCM: 123 Nguyễn Thị Minh Khai, Q.1\n📍 Đà Nẵng: 45 Lê Duẩn\n\nGiờ mở cửa: 8:00 - 22:00 tất cả các ngày trong tuần. Bạn có muốn biết thêm thông tin về cửa hàng nào không?"
-  - text: "Các cửa hàng Sun Movement được đặt tại các vị trí trung tâm, dễ tìm. Hiện chúng tôi có mặt tại Hà Nội, TP.HCM và Đà Nẵng. Bạn đang ở khu vực nào? Tôi có thể gợi ý cửa hàng gần nhất."
-  
-  utter_personal_training:
-  - text: "Sun Movement cung cấp dịch vụ huấn luyện viên cá nhân (PT) với các gói tập luyện đa dạng. Các PT của chúng tôi đều có chứng chỉ và nhiều năm kinh nghiệm. Bạn muốn đăng ký tư vấn miễn phí về dịch vụ PT không?"
-  - text: "Dịch vụ PT tại Sun Movement được thiết kế phù hợp với từng mục tiêu cá nhân:\n\n🥇 Gói Cơ bản: 12 buổi - 3.600.000đ\n🥈 Gói Nâng cao: 24 buổi - 6.500.000đ\n🥉 Gói VIP: 36 buổi - 9.000.000đ\n\nMỗi gói đều bao gồm đánh giá thể chất, lên kế hoạch dinh dưỡng và lịch tập cá nhân hóa."
-  - text: "Đội ngũ PT của Sun Movement gồm các huấn luyện viên chuyên nghiệp, có kinh nghiệm lâu năm và được đào tạo bài bản. Chúng tôi có PT nam và nữ, chuyên về các lĩnh vực khác nhau như giảm cân, tăng cơ, yoga, pilates, v.v. Bạn có thể đặt lịch tư vấn miễn phí để tìm PT phù hợp nhất với nhu cầu của mình."
-
-  utter_nutrition_advice:
-  - text: "Chế độ dinh dưỡng đóng vai trò quan trọng trong việc đạt được mục tiêu tập luyện. Sun Movement có đội ngũ chuyên gia dinh dưỡng có thể tư vấn riêng cho bạn. Nhưng tôi có thể chia sẻ một số nguyên tắc cơ bản:\n\n1️⃣ Tăng cơ: Cần tăng lượng protein (1.6-2g/kg), ăn đủ carbs và chất béo lành mạnh\n2️⃣ Giảm cân: Tạo thâm hụt calo, ưu tiên protein để giữ cơ\n3️⃣ Nên ăn trước tập 1-2 giờ, và bổ sung protein sau tập 30 phút\n\nBạn muốn biết thêm về chế độ dinh dưỡng cho mục tiêu cụ thể nào?"
-  - text: "Sun Movement cung cấp các gói tư vấn dinh dưỡng chuyên sâu với chuyên gia. Chúng tôi sẽ phân tích cơ thể, mục tiêu và thói quen của bạn để tạo lịch ăn uống phù hợp nhất. Bạn có muốn đặt lịch tư vấn dinh dưỡng không?"
-  - text: "Để đạt hiệu quả tập luyện tốt nhất, chế độ dinh dưỡng cần phù hợp với mục tiêu của bạn. Sun Movement khuyến nghị:\n\n🥩 Đảm bảo đủ protein (thịt nạc, trứng, đậu, whey protein)\n🍚 Carbs chất lượng (gạo lứt, khoai, yến mạch)\n🥑 Chất béo lành mạnh (dầu oliu, cá, quả bơ)\n🥦 Rau xanh và trái cây (vitamin và khoáng chất)\n💧 Uống đủ nước (tối thiểu 2L/ngày)\n\nSun Movement có các sản phẩm thực phẩm bổ sung hỗ trợ chế độ dinh dưỡng của bạn."
-
-  utter_workout_plan:
-  - text: "Lịch tập luyện nên được cá nhân hóa theo mục tiêu và thể trạng của bạn. Một số hướng dẫn cơ bản:\n\n🏋️‍♂️ Người mới: 3-4 buổi/tuần, tập toàn thân\n🏋️‍♀️ Tăng cơ: Chia nhóm cơ, 4-5 buổi/tuần, tập nặng\n🤸‍♂️ Giảm mỡ: Kết hợp cardio và tập luyện sức mạnh\n⏱️ Thời gian: 45-60 phút/buổi là hiệu quả nhất\n🔄 Nghỉ ngơi: 1-2 ngày/tuần để cơ phục hồi\n\nSun Movement có các PT chuyên nghiệp có thể lên lịch tập luyện phù hợp với bạn."
-  - text: "Lịch tập hiệu quả phụ thuộc vào mục tiêu của bạn. Nếu bạn là người mới, nên bắt đầu với 2-3 buổi/tuần và tăng dần. Tập với cường độ vừa phải và tập trung vào kỹ thuật đúng. Sự nhất quán quan trọng hơn cường độ. Sun Movement có chương trình \"Khởi động cho người mới\" giúp bạn bắt đầu an toàn và hiệu quả."
-  - text: "Sun Movement cung cấp lịch tập được thiết kế riêng cho từng mục tiêu. Để có lịch tập chuẩn, bạn nên:\n\n1️⃣ Xác định rõ mục tiêu (tăng cơ, giảm cân, tăng sức bền...)\n2️⃣ Phân tích thể trạng và giới hạn hiện tại\n3️⃣ Lên lịch tập phù hợp với thời gian của bạn\n4️⃣ Theo dõi và điều chỉnh theo tiến độ\n\nBạn có thể đăng ký buổi tư vấn miễn phí với HLV của chúng tôi để có lịch tập cá nhân hóa."
-  
-  # Thêm các responses mới
-  utter_delivery_time:
-  - text: "Thời gian giao hàng của Sun Movement được tính từ thời điểm đơn hàng được xác nhận:\n\n⏱️ Nội thành Hà Nội, TP.HCM: 1-2 ngày làm việc\n⏱️ Các tỉnh thành khác: 3-5 ngày làm việc\n⏱️ Vùng sâu vùng xa: 5-7 ngày làm việc\n\nLưu ý: Thời gian có thể thay đổi trong các dịp cao điểm hoặc do yếu tố thời tiết. Bạn sẽ nhận được thông báo khi đơn hàng được gửi đi và mã vận đơn để theo dõi."
-  - text: "Sun Movement cam kết giao hàng đúng hẹn. Thời gian giao hàng phụ thuộc vào khu vực của bạn, thông thường từ 1-5 ngày làm việc. Bạn sẽ nhận được email và tin nhắn thông báo khi đơn hàng được xác nhận và khi hàng được gửi đi."
-  - text: "Chúng tôi hợp tác với nhiều đơn vị vận chuyển uy tín để đảm bảo hàng đến tay bạn nhanh nhất. Thời gian giao hàng tại các thành phố lớn thường là 1-2 ngày, các tỉnh thành khác khoảng 3-5 ngày. Bạn có thể theo dõi đơn hàng qua tin nhắn SMS hoặc email."
-  
-  utter_product_brand:
-  - text: "Sun Movement phân phối chính hãng nhiều thương hiệu thể thao và dinh dưỡng uy tín toàn cầu như:\n\n👕 Thời trang thể thao: Nike, Adidas, Gymshark, Under Armour, Lululemon\n💪 Thực phẩm bổ sung: Optimum Nutrition, Mutant, Muscletech, Dymatize, Rule 1\n🏀 Dụng cụ tập: Adidas, Nike, Reebok, Technogym\n\nTất cả sản phẩm đều có tem nhãn chính hãng, mã xác thực và được nhập khẩu qua kênh phân phối chính thức."
-  - text: "Chúng tôi chỉ kinh doanh các sản phẩm chính hãng, được nhập trực tiếp từ nhà sản xuất hoặc nhà phân phối được ủy quyền. Sun Movement tự hào là đối tác của nhiều thương hiệu thể thao và dinh dưỡng hàng đầu như Nike, Adidas, Optimum Nutrition, Cellucor và nhiều thương hiệu khác."
-  - text: "Sun Movement là nhà phân phối độc quyền một số thương hiệu thể thao và thực phẩm bổ sung cao cấp tại Việt Nam. Chúng tôi cam kết mọi sản phẩm đều là hàng chính hãng 100%, có đầy đủ hóa đơn, chứng từ nhập khẩu và được bảo hành theo chính sách của hãng."
-  
-  utter_product_quality:
-  - text: "Sun Movement cam kết về chất lượng sản phẩm:\n\n✅ 100% chính hãng, có mã xác thực\n✅ Nhập khẩu qua kênh chính thức\n✅ Được kiểm tra chất lượng trước khi đến tay khách hàng\n✅ Đảm bảo date mới, còn hạn sử dụng dài\n✅ Tem nhãn, bao bì nguyên vẹn\n\nNếu phát hiện sản phẩm không đúng với cam kết, chúng tôi sẽ hoàn tiền 200% giá trị sản phẩm."
-  - text: "Tất cả sản phẩm tại Sun Movement đều trải qua quy trình kiểm tra chất lượng nghiêm ngặt trước khi đến tay khách hàng. Chúng tôi chỉ kinh doanh hàng chính hãng, có nguồn gốc rõ ràng và đảm bảo các tiêu chuẩn về an toàn. Đặc biệt với thực phẩm bổ sung, chúng tôi đảm bảo sản phẩm còn nguyên seal, date mới và có giấy chứng nhận an toàn thực phẩm."
-  - text: "Sun Movement xây dựng uy tín bằng chất lượng sản phẩm. Chúng tôi có đội ngũ chuyên môn kiểm tra từng sản phẩm trước khi nhập kho và trước khi gửi đến khách hàng. Với quần áo thể thao, chúng tôi đảm bảo chất liệu đúng chuẩn, đường may tỉ mỉ và độ bền cao. Với thực phẩm bổ sung, chúng tôi chỉ phân phối các sản phẩm đã được kiểm nghiệm và chứng nhận an toàn."
-  
-  utter_after_sales_service:
-  - text: "Dịch vụ hậu mãi của Sun Movement bao gồm:\n\n🔧 Bảo hành sản phẩm theo chính sách của hãng\n🔄 Hỗ trợ đổi size trong vòng 30 ngày\n💬 Tư vấn sử dụng sản phẩm sau mua\n🛠️ Sửa chữa nhỏ miễn phí cho quần áo, giày dép\n📊 Theo dõi hiệu quả sử dụng thực phẩm bổ sung\n\nQuý khách có thể liên hệ bộ phận CSKH qua số hotline 08999 139 393 hoặc email support@sunmovement.vn để được hỗ trợ."
-  - text: "Sun Movement đặt sự hài lòng của khách hàng lên hàng đầu với dịch vụ hậu mãi chuyên nghiệp. Chúng tôi có đội ngũ CSKH luôn sẵn sàng hỗ trợ bạn sau khi mua hàng, từ việc hướng dẫn sử dụng sản phẩm đến giải quyết các vấn đề phát sinh. Đối với sản phẩm thực phẩm bổ sung, chúng tôi còn cung cấp tư vấn miễn phí về cách sử dụng hiệu quả nhất."
-  - text: "Sau khi mua hàng tại Sun Movement, bạn sẽ được hưởng các đặc quyền:\n- Tư vấn sử dụng sản phẩm miễn phí\n- Kiểm tra và bảo dưỡng sản phẩm định kỳ\n- Ưu đãi đặc biệt cho lần mua tiếp theo\n- Đổi size/màu miễn phí trong 30 ngày\n- Tham gia cộng đồng người dùng Sun Movement với nhiều hoạt động và chia sẻ kinh nghiệm"
-  
-  utter_product_experience:
-  - text: "Sản phẩm của Sun Movement được đánh giá cao về trải nghiệm sử dụng. Khách hàng thường hài lòng với:\n\n👍 Chất lượng vượt trội so với mức giá\n👍 Thiết kế thời trang, phù hợp xu hướng\n👍 Độ bền cao, sử dụng lâu dài\n👍 Hiệu quả rõ rệt với thực phẩm bổ sung\n👍 Dịch vụ hậu mãi chu đáo\n\nBạn có thể tham khảo đánh giá chi tiết trên website hoặc fanpage của chúng tôi."
-  - text: "Nhiều khách hàng chia sẻ rằng sản phẩm của Sun Movement đã giúp họ cải thiện đáng kể hiệu quả tập luyện. Với quần áo thể thao, người dùng đánh giá cao khả năng thoáng khí, thấm hút mồ hôi và thoải mái khi vận động. Với thực phẩm bổ sung, khách hàng nhận thấy hiệu quả rõ rệt sau 2-4 tuần sử dụng đều đặn kết hợp với chế độ tập luyện phù hợp."
-  - text: "Trải nghiệm sử dụng sản phẩm tại Sun Movement được đảm bảo bởi quy trình kiểm tra chất lượng nghiêm ngặt. Chúng tôi thường xuyên nhận được phản hồi tích cực về cảm giác thoải mái khi sử dụng sản phẩm, độ bền cao và hiệu quả đúng như cam kết. Đặc biệt, nhiều khách hàng quay lại mua thêm sau khi đã trải nghiệm sản phẩm đầu tiên."
-  
-  utter_product_recommendation:
-  - text: "Dựa vào nhu cầu tập luyện phổ biến, Sun Movement gợi ý các sản phẩm bán chạy:\n\n🔹 Tập gym nam: Bộ đồ tập Gymshark, Whey Protein Optimum Nutrition, Găng tay tập Power System\n🔹 Tập gym nữ: Áo bra và legging Lululemon, Collagen Vital Proteins, Đai lưng McDavid\n🔹 Chạy bộ: Giày Nike Pegasus, Áo thun thoáng khí Adidas, Pre-workout C4\n🔹 Yoga/Pilates: Thảm yoga Manduka, Quần áo tập Alo Yoga, BCAA Scivation Xtend\n\nBạn đang quan tâm đến loại hình tập luyện nào?"
-  - text: "Với người mới bắt đầu tập luyện, Sun Movement khuyến nghị:\n\n1️⃣ Bộ đồ tập cơ bản (áo thun thoáng khí + quần short/legging)\n2️⃣ Giày tập đa năng (Nike Metcon hoặc Adidas Alphatorsion)\n3️⃣ Whey protein cơ bản cho người mới\n4️⃣ Phụ kiện cần thiết: bình nước, găng tay tập, khăn thể thao\n\nĐây là những sản phẩm thiết yếu giúp bạn có trải nghiệm tập luyện tốt nhất ngay từ đầu."
-  - text: "Dựa trên phân tích dữ liệu khách hàng, những sản phẩm được đánh giá cao nhất tại Sun Movement là:\n\n⭐ Whey Protein Gold Standard của Optimum Nutrition\n⭐ Áo thun tập Dri-FIT của Nike\n⭐ Giày tập đa năng Metcon của Nike\n⭐ BCAA Xtend của Scivation\n⭐ Legging tập yoga của Lululemon\n\nChúng tôi tin rằng những sản phẩm này sẽ mang lại trải nghiệm tuyệt vời cho bạn."
-  
-  utter_workout_tips:
-  - text: "Những mẹo tập luyện hiệu quả từ Sun Movement:\n\n💯 Luôn khởi động kỹ trước khi tập nặng (5-10 phút)\n💯 Ưu tiên kỹ thuật đúng hơn là nâng tạ nặng\n💯 Tăng cường độ từ từ (5-10% mỗi tuần)\n💯 Kết hợp tập luyện sức mạnh và cardio\n💯 Nghỉ ngơi đủ giấc (7-8 tiếng mỗi đêm)\n💯 Uống đủ nước trước, trong và sau khi tập\n💯 Bổ sung protein trong vòng 30-45 phút sau tập\n\nBạn muốn biết thêm mẹo cho bộ môn nào cụ thể?"
-  - text: "Để đạt hiệu quả tập luyện tối ưu, các chuyên gia của Sun Movement khuyên bạn nên:\n\n✅ Lên kế hoạch tập luyện rõ ràng và thực hiện nhất quán\n✅ Theo dõi tiến độ (cân nặng, số đo, sức mạnh) hàng tuần\n✅ Thay đổi bài tập mỗi 4-6 tuần để tránh bị plateau\n✅ Kết hợp chặt chẽ giữa chế độ ăn và lịch tập\n✅ Bổ sung đủ protein (1.6-2g/kg cân nặng mỗi ngày)\n✅ Không bỏ qua việc khởi động và giãn cơ\n✅ Tìm bạn tập để duy trì động lực"
-  - text: "Những sai lầm phổ biến cần tránh khi tập luyện:\n\n❌ Tập quá sức hoặc quá thường xuyên\n❌ Bỏ qua khởi động và giãn cơ\n❌ Thực hiện kỹ thuật sai\n❌ Thiếu kiên nhẫn, muốn kết quả nhanh\n❌ Dinh dưỡng không phù hợp\n❌ Không nghỉ ngơi đủ giữa các buổi tập\n❌ Uống không đủ nước\n\nTránh những điều này, kết quả tập luyện sẽ cải thiện rõ rệt!"
-  
-  utter_membership_program:
-  - text: "Chương trình thành viên của Sun Movement có các hạng mức:\n\n🥉 Bronze (0-2tr): Giảm 5% mỗi đơn, tích 5% điểm thưởng\n🥈 Silver (2-5tr): Giảm 7%, tích 7% điểm, ưu tiên tư vấn\n🥇 Gold (5-10tr): Giảm 10%, tích 10% điểm, quà sinh nhật\n💎 Platinum (10tr+): Giảm 15%, tích 15% điểm, CSKH riêng, quà VIP\n\nĐiểm thưởng có thể đổi thành voucher mua hàng. Bạn có thể đăng ký thành viên miễn phí tại cửa hàng hoặc website."
-  - text: "Khi trở thành thành viên của Sun Movement, bạn sẽ được hưởng nhiều đặc quyền như giảm giá trực tiếp trên mỗi đơn hàng, tích lũy điểm thưởng để đổi quà, nhận thông báo sớm về các chương trình khuyến mãi, tham gia các sự kiện độc quyền và nhận quà sinh nhật. Mức ưu đãi sẽ tăng theo cấp bậc thành viên, từ Bronze đến Platinum."
-  - text: "Chương trình thành viên Sun Movement Movement được thiết kế để tri ân khách hàng thân thiết. Ngoài các ưu đãi về giá và tích điểm, thành viên còn được:\n- Tham gia các workshop về tập luyện và dinh dưỡng\n- Gặp gỡ các vận động viên/HLV nổi tiếng\n- Nhận bộ sản phẩm dùng thử mới\n- Ưu tiên mua hàng limited edition\n- Nhận tư vấn riêng từ chuyên gia dinh dưỡng và HLV\nĐăng ký ngay để tận hưởng những đặc quyền này!"
-  
-  utter_membership_benefits:
-  - text: "Quyền lợi của thành viên Sun Movement:\n\n🎁 Giảm giá trực tiếp từ 5-15% mỗi đơn hàng\n🎁 Tích lũy điểm thưởng đổi quà (tối đa 15% giá trị đơn)\n🎁 Thông báo sớm về các đợt sale và sản phẩm mới\n🎁 Tham gia các sự kiện độc quyền (workshop, gặp gỡ KOLs)\n🎁 Quà tặng sinh nhật và các dịp đặc biệt\n🎁 Miễn phí vận chuyển không giới hạn số đơn (từ hạng Silver)\n🎁 Đổi trả ưu tiên và linh hoạt hơn (từ hạng Gold)\n\nThành viên Platinum còn được hưởng dịch vụ mua sắm cá nhân và tư vấn riêng."
-  - text: "Là thành viên của Sun Movement, bạn sẽ nhận được những ưu đãi độc quyền mà khách hàng thông thường không có, bao gồm: giảm giá trực tiếp trên hóa đơn, tích điểm thưởng để đổi quà hoặc voucher, nhận thông báo sớm về hàng mới và chương trình giảm giá, miễn phí vận chuyển, quyền ưu tiên mua các sản phẩm giới hạn, và tham gia các sự kiện độc quyền."
-  - text: "Thành viên Sun Movement không chỉ nhận được những ưu đãi về mặt tài chính mà còn được hưởng những trải nghiệm độc đáo:\n- Buổi tập thử miễn phí với các PT nổi tiếng\n- Tham quan nhà máy sản xuất của các đối tác\n- Nhận bộ sản phẩm dùng thử trước khi ra mắt\n- Tham gia cộng đồng người dùng với các hoạt động thường xuyên\n- Nhận tư vấn dinh dưỡng và lịch tập cá nhân hóa\n- Ưu đãi đặc biệt từ các đối tác (phòng tập, spa, nhà hàng healthy food...)"
-  
-  utter_product_comparison:
-  - text: "So sánh các dòng sản phẩm tại Sun Movement:\n\n🔹 Whey Protein:\n- Isolate: Hàm lượng protein cao nhất (90%), ít chất béo & đường, hấp thụ nhanh, giá cao hơn\n- Concentrate: Hàm lượng protein trung bình (80%), giá hợp lý hơn\n- Hydrolyzed: Đã được phân hủy một phần, hấp thụ nhanh nhất, giá cao nhất\n\n🔹 Giày tập:\n- Running: Đệm nhiều, nhẹ, phù hợp chạy bộ\n- Training: Đế phẳng hơn, ổn định, đa năng\n- Lifting: Đế cứng, gót cao, đặc biệt cho tập nặng\n\nBạn quan tâm đến loại nào?"
-  - text: "Khi so sánh các dòng quần áo thể thao, Sun Movement có thể giúp bạn phân biệt:\n\n👕 Theo chất liệu:\n- Polyester: Thoáng khí, thấm hút, phù hợp tập cường độ cao\n- Cotton: Thoải mái, mềm mại, phù hợp tập nhẹ nhàng\n- Spandex/Elastane: Co giãn tốt, phù hợp yoga, pilates\n\n👕 Theo công nghệ:\n- Dri-FIT (Nike): Thoát ẩm cực tốt, khô nhanh\n- Climacool (Adidas): Thoáng khí, làm mát\n- HeatGear (Under Armour): Giữ mát khi trời nóng\n\nBạn cần trang phục cho hoạt động nào?"
-  - text: "So sánh các dòng thực phẩm bổ sung cho người tập gym:\n\n💊 Tăng cơ:\n- Whey Protein: Hấp thụ nhanh, phù hợp sau tập\n- Casein: Hấp thụ chậm, phù hợp trước ngủ\n- Mass Gainer: Nhiều calo & carbs, cho người gầy muốn tăng cân\n\n💊 Tăng sức mạnh:\n- Creatine: Tăng sức mạnh & khối lượng cơ\n- Pre-workout: Tăng năng lượng & sức bền khi tập\n- BCAA: Giảm mệt mỏi & hỗ trợ phục hồi cơ\n\nSun Movement có đầy đủ các sản phẩm này từ nhiều thương hiệu uy tín."
-  
-  utter_product_size:
-  - text: "Hướng dẫn chọn size tại Sun Movement:\n\n👕 Áo thun/polo nam:\n- S: 50-60kg, cao 160-170cm\n- M: 60-70kg, cao 165-175cm\n- L: 70-80kg, cao 170-180cm\n- XL: 80-90kg, cao 175-185cm\n\n👖 Quần short/jogger nam:\n- S: vòng eo 70-75cm\n- M: vòng eo 75-80cm\n- L: vòng eo 80-85cm\n- XL: vòng eo 85-90cm\n\nBạn cần tư vấn về size nữ hoặc giày dép không?"
-  - text: "Size quần áo tập nữ tại Sun Movement:\n\n👚 Áo bra/tank top:\n- S: 45-50kg, ngực 75-80cm\n- M: 50-55kg, ngực 80-85cm\n- L: 55-60kg, ngực 85-90cm\n\n👖 Legging/quần short:\n- S: eo 60-65cm, hông 85-90cm\n- M: eo 65-70cm, hông 90-95cm\n- L: eo 70-75cm, hông 95-100cm\n\nLưu ý: Size có thể thay đổi theo từng thương hiệu. Bạn nên đo kích thước cơ thể và tham khảo bảng size cụ thể của mỗi sản phẩm."
-  - text: "Hướng dẫn chọn size giày thể thao:\n\n👟 Giày Nike: Thường đúng size hoặc lớn hơn 0.5 so với size thông thường\n👟 Giày Adidas: Thường nhỏ hơn 0.5-1 size so với Nike\n👟 Giày Under Armour: Thường đúng size hoặc lớn hơn 0.5\n\nCách đo size chân chính xác:\n1. Đặt chân lên tờ giấy, đánh dấu điểm dài nhất\n2. Đo khoảng cách từ gót đến điểm dài nhất\n3. Cộng thêm 0.5-1cm cho khoảng trống mũi giày\n4. Đối chiếu với bảng size của từng hãng\n\nSun Movement hỗ trợ đổi size giày trong vòng 7 ngày nếu chưa sử dụng."
-  
-  utter_product_availability:
-  - text: "Để kiểm tra sản phẩm có sẵn, bạn có thể:\n\n✔️ Truy cập website sunmovement.vn và tìm kiếm sản phẩm\n✔️ Liên hệ hotline 08999 139 393 để nhân viên kiểm tra kho\n✔️ Ghé trực tiếp cửa hàng Sun Movement gần nhất\n✔️ Nhắn tin qua fanpage Facebook hoặc Zalo Official Account\n\nNếu sản phẩm tạm hết, bạn có thể đặt trước và sẽ được thông báo ngay khi có hàng về."
-  - text: "Sun Movement luôn cập nhật tình trạng kho hàng trực tuyến. Trên website, các sản phẩm có biểu tượng \"Còn hàng\" là có sẵn để giao ngay. Nếu bạn đang tìm một sản phẩm cụ thể, hãy cho tôi biết tên để tôi kiểm tra giúp bạn."
-  - text: "Chúng tôi liên tục nhập hàng mới mỗi tuần. Nếu sản phẩm bạn quan tâm tạm thời hết hàng, bạn có thể để lại email/số điện thoại để được thông báo ngay khi có hàng về. Với các sản phẩm bestseller, chúng tôi luôn duy trì lượng tồn kho ổn định để đáp ứng nhu cầu của khách hàng."
-  
-  utter_warranty_info:
-  - text: "Chính sách bảo hành của Sun Movement:\n\n⏱️ Thời hạn bảo hành:\n- Giày thể thao: 3-6 tháng (tùy hãng)\n- Phụ kiện điện tử (đồng hồ thể thao, máy đo nhịp tim...): 12 tháng\n- Dụng cụ tập: 1-6 tháng (tùy loại)\n\n🛠️ Điều kiện bảo hành:\n- Sản phẩm còn trong thời hạn bảo hành\n- Lỗi do nhà sản xuất (không phải do sử dụng sai)\n- Còn phiếu hoặc hóa đơn mua hàng\n\nLưu ý: Thực phẩm bổ sung và quần áo không thuộc diện bảo hành."
-  - text: "Sun Movement áp dụng chính sách bảo hành của hãng đối với tất cả sản phẩm chính hãng. Thời gian bảo hành khác nhau tùy thuộc vào từng loại sản phẩm và thương hiệu, thông thường từ 3-12 tháng. Chúng tôi hỗ trợ khách hàng trong quá trình bảo hành, giúp liên hệ với đơn vị bảo hành chính hãng khi cần thiết."
-  - text: "Quy trình bảo hành tại Sun Movement rất đơn giản:\n1. Mang sản phẩm cùng hóa đơn/phiếu bảo hành đến cửa hàng\n2. Nhân viên sẽ kiểm tra tình trạng sản phẩm và xác định nguyên nhân lỗi\n3. Nếu thuộc diện bảo hành, chúng tôi sẽ gửi sản phẩm đi bảo hành hoặc đổi mới\n4. Thời gian bảo hành thông thường từ 7-21 ngày tùy loại sản phẩm\n\nTrong thời gian bảo hành, với một số sản phẩm, chúng tôi có dịch vụ cho mượn sản phẩm thay thế tạm thời."
-  
-  utter_material_info:
-  - text: "Thông tin về chất liệu sản phẩm tại Sun Movement:\n\n👕 Quần áo thể thao:\n- Polyester: Thoáng khí, thấm hút tốt, khô nhanh, bền\n- Nylon: Nhẹ, bền, chống nước, co giãn tốt\n- Spandex/Elastane: Đàn hồi cao, ôm sát, thoải mái khi chuyển động\n- Cotton: Mềm mại, thoáng khí, thoải mái, thân thiện với da nhạy cảm\n\n👟 Giày thể thao:\n- Phần trên: Mesh, Flyknit, Primeknit (thoáng khí), da (bền)\n- Đế giữa: EVA, React, Boost, ZoomX (đệm)\n- Đế ngoài: Cao su carbon, cao su đúc (độ bám, bền)"
-  - text: "Sun Movement luôn ưu tiên các sản phẩm có chất liệu cao cấp, thân thiện với môi trường và an toàn cho người sử dụng. Nhiều dòng sản phẩm của chúng tôi sử dụng chất liệu tái chế và công nghệ tiết kiệm năng lượng trong sản xuất. Với thực phẩm bổ sung, chúng tôi chỉ kinh doanh các sản phẩm đã được kiểm nghiệm, không chứa chất cấm và an toàn cho sức khỏe."
-  - text: "Hướng dẫn chọn chất liệu phù hợp với mục đích sử dụng:\n\n🏃‍♂️ Chạy bộ: Áo polyester nhẹ, thoáng khí; quần có spandex để co giãn tốt\n🏋️ Tập gym: Áo cotton/polyester blend thoáng khí, quần có độ co giãn cao\n🧘‍♀️ Yoga: Vải mềm, co giãn tốt, thấm hút (nylon/spandex blend)\n🏊‍♂️ Bơi lội: Vải nylon chống nước, chống clo, bền màu\n🚴‍♂️ Đạp xe: Vải có đệm, chống gió, thoáng khí\n\nSun Movement có đa dạng sản phẩm với nhiều chất liệu khác nhau phù hợp với từng nhu cầu tập luyện."
-  
-  utter_delivery_tracking:
-  - text: "Để theo dõi đơn hàng của bạn tại Sun Movement, bạn có thể:\n\n📱 Sử dụng mã vận đơn được gửi qua SMS/email sau khi đơn hàng được gửi đi\n🌐 Truy cập mục \"Kiểm tra đơn hàng\" trên website sunmovement.vn\n💬 Liên hệ hotline 08999 139 393 hoặc chat với CSKH trên website/fanpage\n\nĐơn hàng của bạn sẽ trải qua các trạng thái: Đã tiếp nhận → Đang xử lý → Đang giao hàng → Giao hàng thành công"
-  - text: "Sun Movement hợp tác với các đơn vị vận chuyển uy tín như GHN, GHTK, J&T Express, Ninja Van. Sau khi đơn hàng được gửi đi, bạn sẽ nhận được mã vận đơn qua SMS và email. Sử dụng mã này trên website của đơn vị vận chuyển hoặc trên trang web Sun Movement để theo dõi hành trình đơn hàng theo thời gian thực."
-  - text: "Hệ thống theo dõi đơn hàng của Sun Movement cho phép bạn biết chính xác vị trí và trạng thái của đơn hàng. Trong trường hợp giao hàng bị chậm trễ hoặc có vấn đề, đội ngũ CSKH sẽ chủ động liên hệ để thông báo và đề xuất giải pháp. Bạn cũng có thể cài đặt thông báo để nhận cập nhật tự động về tình trạng đơn hàng."
-
-session_config:
-  session_expiration_time: 60
-  carry_over_slots_to_new_session: true
-
-actions:
-  - utter_greet
-  - utter_goodbye
-  - utter_thank
-  - utter_product_consultation
-  - utter_bot_capabilities
-  - utter_product_info
-  - utter_price_query
-  - utter_shipping_info
-  - utter_return_policy
-  - utter_payment_methods
-  - utter_ask_more_help
-  - utter_default
-  - action_search_product
-  - action_check_order
-  - action_fetch_discount_info
-  - action_get_product_info
-  - action_get_faq
-  - action_get_service_info
-  - action_check_product_availability
-  - action_reject_english
-  - action_list_products
+  product:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: product
+  product_category:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: product_category
+  service:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: service
+  service_type:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: service_type
+  workout_goal:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: workout_goal
+  experience_level:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: experience_level
+  nutrition_goal:
+    type: text
+    mappings:
+    - type: from_entity
+      entity: nutrition_goal
+version: '3.1'

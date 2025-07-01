@@ -1,0 +1,109 @@
+KẾT QUẢ TEST CHATBOT
+==================================================
+
+
+Testing message: 'sản phẩm'
+✓ Nhận được phản hồi từ proxy:
+  1. 🏋️ Sun Movement có đa dạng các sản phẩm tập luyện chất lượng cao như:
+• Thiết bị gym chuyên nghiệp
+• Dụng cụ yoga và pilates
+• Phụ kiện tập luyện
+• Thực phẩm bổ sung
+
+Bạn muốn tìm hiểu về sản phẩm nào cụ thể?
+
+Testing message: 'giá'
+✓ Nhận được phản hồi từ proxy:
+  1. 💰 **Bảng giá dịch vụ Sun Movement:**
+
+🏃 **Gói tập:**
+• Gói 1 tháng: 500.000đ
+• Gói 3 tháng: 1.350.000đ (Tiết kiệm 150.000đ)
+• Gói 6 tháng: 2.400.000đ (Tiết kiệm 600.000đ)
+• Gói 1 năm: 4.200.000đ (Tiết kiệm 1.800.000đ)
+
+🧘 **Lớp học đặc biệt:**
+• Yoga: 200.000đ/buổi
+• Personal Training: 500.000đ/buổi
+
+💥 **Ưu đãi hiện tại:** Giảm 20% cho thành viên mới!
+
+Testing message: 'dịch vụ'
+✓ Nhận được phản hồi từ proxy:
+  1. 🧘 **Dịch vụ tại Sun Movement:**
+• Lớp Yoga cơ bản & nâng cao
+• Personal Training 1-1
+• Group Fitness Classes
+• Tư vấn dinh dưỡng
+• Massage thư giãn
+
+Bạn quan tâm đến dịch vụ nào?
+
+Testing message: 'địa chỉ'
+✓ Nhận được phản hồi từ proxy:
+  1. 📞 **Thông tin liên hệ Sun Movement:**
+
+🏢 **Địa chỉ:** Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội
+📱 **Hotline:** 08999139393
+📧 **Email:** contact@sunmovement.vn
+🌐 **Website:** sunmovement.vn
+⏰ **Giờ làm việc:** 6:00 - 22:00 hàng ngày
+
+Hãy liên hệ với chúng tôi để được tư vấn miễn phí!
+
+Testing message: 'liên hệ'
+✓ Nhận được phản hồi từ proxy:
+  1. 📞 **Thông tin liên hệ Sun Movement:**
+
+🏢 **Địa chỉ:** Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội
+📱 **Hotline:** 08999139393
+📧 **Email:** contact@sunmovement.vn
+🌐 **Website:** sunmovement.vn
+⏰ **Giờ làm việc:** 6:00 - 22:00 hàng ngày
+
+Hãy liên hệ với chúng tôi để được tư vấn miễn phí!
+
+Testing message: 'lịch'
+✓ Nhận được phản hồi từ proxy:
+  1. ⏰ **Lịch hoạt động Sun Movement:**
+
+🌅 **Sáng:**
+• 6:00 - 9:00: Yoga buổi sáng
+• 9:00 - 11:00: Gym & Cardio
+
+🌞 **Trưa:**
+• 11:00 - 14:00: Personal Training
+• 14:00 - 16:00: Lớp nhóm
+
+🌆 **Chiều/Tối:**
+• 16:00 - 19:00: Peak hours - Tất cả dịch vụ
+• 19:00 - 22:00: Yoga thư giãn
+
+📅 **Mở cửa:** Thứ 2 - Chủ nhật (6:00 - 22:00)
+
+Testing message: 'thành viên'
+✓ Nhận được phản hồi từ proxy:
+  1. 🌟 **Thông tin thành viên Sun Movement:**
+
+📊 **Các gói thành viên:**
+• Basic: 500.000đ/tháng
+• Premium: 800.000đ/tháng
+• VIP: 1.200.000đ/tháng
+
+✨ **Quyền lợi thành viên:**
+• Sử dụng đầy đủ trang thiết bị
+• Tham gia các lớp nhóm miễn phí
+• Tư vấn dinh dưỡng cá nhân
+• Giảm giá dịch vụ bổ sung
+
+💳 **Đăng ký thành viên tại quầy lễ tân hoặc website của chúng tôi!**
+
+Testing message: 'sp'
+✓ Nhận được phản hồi từ proxy:
+  1. 🏋️ Sun Movement có đa dạng các sản phẩm tập luyện chất lượng cao như:
+• Thiết bị gym chuyên nghiệp
+• Dụng cụ yoga và pilates
+• Phụ kiện tập luyện
+• Thực phẩm bổ sung
+
+Bạn muốn tìm hiểu về sản phẩm nào cụ thể?

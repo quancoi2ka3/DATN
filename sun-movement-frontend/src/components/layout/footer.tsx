@@ -51,9 +51,14 @@ export function Footer() {
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 text-red-500 mr-3 flex-shrink-0" />
-                <a href="tel:08999139393" className="text-slate-300 hover:text-white transition-colors">
-                  08999139393
-                </a>
+                {typeof window !== 'undefined' && (
+                  <a href="tel:08999139393" className="text-slate-300 hover:text-white transition-colors">
+                    08999139393
+                  </a>
+                )}
+                {typeof window === 'undefined' && (
+                  <span className="text-slate-300">08999139393</span>
+                )}
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-red-500 mr-3 flex-shrink-0" />

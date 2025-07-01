@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback, Suspense } from 'react';
-import { Dialog, DialogContent, DialogTrigger } from './dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from './dialog';
+import { VisuallyHidden } from './visually-hidden';
 
 // Modal skeleton component  
 export const ModalSkeleton = () => (
@@ -54,6 +55,9 @@ export const LazyModal = ({
       </DialogTrigger>
       {shouldRender && (
         <DialogContent className={className}>
+          <DialogTitle>
+            <VisuallyHidden>Modal Content</VisuallyHidden>
+          </DialogTitle>
           {showSkeleton ? (
             <Suspense fallback={<ModalSkeleton />}>
               {children}
@@ -112,6 +116,9 @@ export const LazyDynamicModal = ({
       </DialogTrigger>
       {(isLoading || Component) && (
         <DialogContent className={className}>
+          <DialogTitle>
+            <VisuallyHidden>Dynamic Modal Content</VisuallyHidden>
+          </DialogTitle>
           {isLoading ? (
             <ModalSkeleton />
           ) : Component ? (

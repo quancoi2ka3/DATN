@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 import { Plus, Minus, ShoppingCart, Star, Heart, X } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
+import { LoginPromptDialog } from "./login-prompt-dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { LoginPromptDialog } from "./login-prompt-dialog";
 
 interface ProductDetailModalProps {
   product: Product;
@@ -18,12 +22,20 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   const handleAddToCart = async () => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    
     setIsAdding(true);
     
     try {
@@ -236,5 +248,13 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
         </div>
       </div>
     </div>
+    
+    {/* Login Prompt Dialog */}
+    <LoginPromptDialog 
+      isOpen={isLoginPromptOpen}
+      onOpenChange={setIsLoginPromptOpen}
+      message="Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng"
+      returnUrl={`/products/${product.id}`}
+    />
   );
 }

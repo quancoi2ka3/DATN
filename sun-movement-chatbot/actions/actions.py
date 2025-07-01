@@ -49,7 +49,7 @@ class ActionSearchProduct(Action):
             return []
         
         try:
-            # Thử tải dữ liệu mẫu trước
+            # Thử tải dữ liệu mẫu từ file JSON thực tế
             dummy_data = load_dummy_data("products.json")
             
             if dummy_data and "products" in dummy_data:
@@ -59,6 +59,12 @@ class ActionSearchProduct(Action):
                     if search_term.lower() in product_data["name"].lower() or (
                         "category" in product_data and 
                         search_term.lower() in product_data["category"].lower()
+                    ) or (
+                        "subCategory" in product_data and
+                        search_term.lower() in product_data["subCategory"].lower()
+                    ) or (
+                        "description" in product_data and
+                        search_term.lower() in product_data["description"].lower()
                     ):
                         products.append(product_data)
             else:
@@ -72,30 +78,69 @@ class ActionSearchProduct(Action):
                     
                     # Mô phỏng dữ liệu khi không có dữ liệu mẫu hoặc API
                     products = [
-                        {"name": f"Sun Movement {search_term} Premium", "price": "850000", "discountPrice": "750000"},
-                        {"name": f"Sun Movement {search_term} Standard", "price": "650000", "discountPrice": None},
-                        {"name": f"Sun Movement {search_term} Basic", "price": "450000", "discountPrice": None}
+                        {"name": f"Sun Movement {search_term} Premium", "price": "850000", "discountPrice": "750000", "description": f"Sản phẩm {search_term} cao cấp từ Sun Movement", "slug": f"sun-movement-{search_term.lower().replace(' ', '-')}-premium"},
+                        {"name": f"Sun Movement {search_term} Standard", "price": "650000", "discountPrice": None, "description": f"Sản phẩm {search_term} chất lượng tốt từ Sun Movement", "slug": f"sun-movement-{search_term.lower().replace(' ', '-')}-standard"},
+                        {"name": f"Sun Movement {search_term} Basic", "price": "450000", "discountPrice": None, "description": f"Sản phẩm {search_term} cơ bản từ Sun Movement", "slug": f"sun-movement-{search_term.lower().replace(' ', '-')}-basic"}
                     ]
                 except Exception as e:
                     logger.error(f"Lỗi khi gọi API: {str(e)}")
                     products = []
                 
             if products and len(products) > 0:
-                message = f"Tôi đã tìm thấy {len(products)} sản phẩm về '{search_term}':\n\n"
+                # Tạo tiêu đề SEO-friendly
+                message = f"🔍 **Top sản phẩm {search_term} chất lượng cao tại Sun Movement**\n\n"
+                message += f"Chúng tôi tìm thấy {len(products)} sản phẩm phù hợp với yêu cầu của bạn:\n\n"
                 
-                # Hiển thị tối đa 5 sản phẩm
+                # Hiển thị tối đa 5 sản phẩm với định dạng phong phú hơn
                 for i, product in enumerate(products[:5], 1):
                     price = product["price"] if isinstance(product["price"], str) else f"{product['price']:,}"
-                    message += f"{i}. {product['name']} - {price}đ"
+                    # Tạo tên sản phẩm với format markdown để SEO
+                    product_name = product.get("name", "")
+                    slug = product.get("slug", product_name.lower().replace(" ", "-"))
+                    product_url = f"https://www.sunmovement.vn/products/{slug}"
+                    
+                    message += f"{i}. **{product_name}**\n"
+                    
+                    # Thêm mô tả ngắn nếu có
+                    if "description" in product and product["description"]:
+                        message += f"   {product['description']}\n"
+                    
+                    message += f"   💰 Giá: {price}đ"
                     
                     discount_price = product.get("discountPrice")
                     if discount_price:
                         discount_price = discount_price if isinstance(discount_price, str) else f"{discount_price:,}"
-                        message += f" (Giảm giá: {discount_price}đ)"
-                    message += "\n"
+                        # Tính phần trăm giảm giá nếu có thể
+                        if isinstance(product["price"], (int, float)) and isinstance(discount_price, str):
+                            discount_price_num = int(discount_price.replace(",", ""))
+                            discount_percent = round((product["price"] - discount_price_num) / product["price"] * 100)
+                            message += f" (🔥 Giảm: {discount_price}đ - Tiết kiệm {discount_percent}%)"
+                        else:
+                            message += f" (🔥 Giảm: {discount_price}đ)"
+                    
+                    # Thêm thông tin về danh mục và tồn kho
+                    if "category" in product:
+                        message += f"\n   📋 Danh mục: {product['category']}"
+                        if "subCategory" in product:
+                            message += f" > {product['subCategory']}"
+                    
+                    if "stockQuantity" in product:
+                        stock = "✅ Còn hàng" if product["stockQuantity"] > 0 else "❌ Hết hàng"
+                        message += f"\n   📦 Tình trạng: {stock}"
+                    
+                    # Thêm link đến sản phẩm
+                    message += f"\n   [👉 Xem chi tiết và mua hàng]({product_url})\n\n"
                 
+                # Thêm thông tin bổ sung nếu có nhiều sản phẩm
                 if len(products) > 5:
-                    message += f"\nVà {len(products) - 5} sản phẩm khác. Bạn có thể xem thêm tại website của chúng tôi."
+                    category_url = f"https://www.sunmovement.vn/collections/{search_term.lower().replace(' ', '-')}"
+                    message += f"\n**[👉 Xem thêm {len(products) - 5} sản phẩm {search_term} khác tại đây]({category_url})**"
+                
+                # Thêm lời khuyên hoặc khuyến mãi để tăng tỷ lệ chuyển đổi
+                message += f"\n\n💡 **Lời khuyên**: Khi chọn {search_term}, hãy chú ý đến chất lượng và thông số kỹ thuật phù hợp với nhu cầu của bạn. Cần tư vấn thêm? Liên hệ hotline 1900.xxxx hoặc chat với chúng tôi!"
+                
+                if any(p.get("discountPrice") for p in products):
+                    message += "\n\n🎁 **Ưu đãi**: Mua ngay hôm nay để hưởng giá ưu đãi và freeship cho đơn hàng từ 500.000đ!"
                 
                 dispatcher.utter_message(text=message)
             else:
@@ -256,6 +301,141 @@ class ActionGetFAQ(Action):
             logger.error(f"Error in action_get_faq: {str(e)}")
             dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm thông tin. Vui lòng thử lại sau.")
             
+        return []
+
+class ActionGetProductInfo(Action):
+    def name(self) -> Text:
+        return "action_get_product_info"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        try:
+            # Thử gọi API backend để lấy sản phẩm thực
+            response = requests.get(f"{BASE_URL}/Products", timeout=5)
+            
+            if response.status_code == 200:
+                products = response.json()
+                
+                if products and len(products) > 0:
+                    featured_products = products[:3]  # Lấy 3 sản phẩm đầu tiên
+                    
+                    message = "🏋️ **Sản phẩm nổi bật của Sun Movement:**\n\n"
+                    
+                    for i, product in enumerate(featured_products, 1):
+                        message += f"{i}. **{product.get('name', 'N/A')}**\n"
+                        price = product.get('price', 0)
+                        message += f"   💰 Giá: {price:,}đ\n"
+                        
+                        description = product.get('description', '')
+                        if description:
+                            short_desc = description[:100] + "..." if len(description) > 100 else description
+                            message += f"   📝 {short_desc}\n"
+                        message += "\n"
+                    
+                    message += "Bạn có thể xem thêm sản phẩm khác trên website của chúng tôi!"
+                    dispatcher.utter_message(text=message)
+                else:
+                    dispatcher.utter_message(response="utter_product_info")
+            else:
+                dispatcher.utter_message(response="utter_product_info")
+                
+        except Exception as e:
+            logger.error(f"Lỗi khi gọi API products: {str(e)}")
+            dispatcher.utter_message(response="utter_product_info")
+        
+        return []
+
+class ActionGetServiceInfo(Action):
+    def name(self) -> Text:
+        return "action_get_service_info"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        service_name = tracker.get_slot("service")
+        service_type = tracker.get_slot("service_type")
+        
+        search_term = service_name if service_name else service_type
+        
+        if not search_term:
+            dispatcher.utter_message(text="Bạn muốn tìm hiểu về dịch vụ nào tại Sun Movement?")
+            return []
+        
+        try:
+            # Tải dữ liệu dịch vụ từ file mẫu
+            service_data = load_dummy_data("services.json")
+            
+            if service_data and "services" in service_data:
+                # Tìm kiếm dịch vụ phù hợp
+                services = []
+                for service in service_data["services"]:
+                    if search_term.lower() in service["name"].lower() or (
+                        "type" in service and search_term.lower() in service["type"].lower()
+                    ) or (
+                        "description" in service and search_term.lower() in service["description"].lower()
+                    ):
+                        services.append(service)
+                
+                if services:
+                    message = f"🧘‍♂️ **Dịch vụ tại Sun Movement phù hợp với '{search_term}'**\n\n"
+                    
+                    # Hiển thị chi tiết các dịch vụ
+                    for i, service in enumerate(services[:3], 1):
+                        service_name = service.get("name", "")
+                        slug = service.get("slug", service_name.lower().replace(" ", "-"))
+                        service_url = f"https://www.sunmovement.vn/services/{slug}"
+                        
+                        message += f"{i}. **{service_name}**\n"
+                        
+                        if "description" in service:
+                            message += f"   {service['description']}\n"
+                        
+                        price = service["price"] if isinstance(service["price"], str) else f"{service['price']:,}"
+                        message += f"   💰 Giá: {price}đ"
+                        
+                        if "duration" in service and "durationUnit" in service:
+                            message += f" / {service['duration']} {service['durationUnit']}\n"
+                        else:
+                            message += "\n"
+                        
+                        # Thêm link đến trang dịch vụ
+                        message += f"   [👉 Đặt lịch và xem thêm]({service_url})\n\n"
+                    
+                    # Thêm CTA để tăng tỷ lệ chuyển đổi
+                    message += "\n**Lợi ích khi sử dụng dịch vụ tại Sun Movement:**\n"
+                    message += "• Huấn luyện viên chuyên nghiệp, được chứng nhận\n"
+                    message += "• Thiết bị hiện đại, không gian thoáng mát\n"
+                    message += "• Lịch trình linh hoạt, phù hợp với nhu cầu cá nhân\n"
+                    message += "• Giá cả hợp lý với nhiều gói ưu đãi\n\n"
+                    
+                    message += "📱 **Đặt lịch ngay:** Gọi 1900.xxxx hoặc đặt lịch trực tuyến tại website của chúng tôi để nhận ưu đãi đặc biệt dành cho hội viên mới!"
+                    
+                    dispatcher.utter_message(text=message)
+                else:
+                    # Gợi ý các dịch vụ phổ biến nếu không tìm thấy
+                    popular_services = ", ".join([s["name"] for s in service_data["services"][:3]])
+                    dispatcher.utter_message(text=f"Rất tiếc, chúng tôi không tìm thấy dịch vụ nào phù hợp với '{search_term}'. Bạn có thể tham khảo một số dịch vụ phổ biến như: {popular_services}. Hoặc liên hệ trực tiếp để được tư vấn chi tiết.")
+            else:
+                dispatcher.utter_message(text="Rất tiếc, hiện tại thông tin về dịch vụ chưa có sẵn. Bạn có thể liên hệ trực tiếp với chúng tôi để được tư vấn chi tiết.")
+        except Exception as e:
+            logger.error(f"Error in action_get_service_info: {str(e)}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm thông tin dịch vụ. Vui lòng thử lại sau.")
+        
+        return []
+
+class ActionGetPriceInfo(Action):
+    def name(self) -> Text:
+        return "action_get_price_info"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        # Trả về thông tin giá cố định hoặc có thể lấy từ database
+        dispatcher.utter_message(response="utter_price_info")
         return []
 
 class ActionGetServiceInfo(Action):
@@ -468,4 +648,154 @@ class ActionRejectEnglish(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         
         dispatcher.utter_message(text="Xin lỗi, tôi chỉ có thể trả lời các câu hỏi bằng tiếng Việt. Vui lòng sử dụng tiếng Việt để giao tiếp với tôi.")
+        return []
+
+class ActionGetNutritionInfo(Action):
+    def name(self) -> Text:
+        return "action_get_nutrition_info"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        goal = tracker.get_slot("nutrition_goal")
+        
+        if not goal:
+            dispatcher.utter_message(text="Bạn muốn tìm kế hoạch dinh dưỡng cho mục tiêu gì? (Ví dụ: tăng cơ, giảm cân, sức khỏe tổng quát...)")
+            return []
+        
+        try:
+            # Tải dữ liệu dinh dưỡng từ file mẫu
+            nutrition_data = load_dummy_data("nutrition.json")
+            
+            if nutrition_data and "nutrition_plans" in nutrition_data:
+                # Tìm kiếm kế hoạch dinh dưỡng phù hợp
+                plans = []
+                for plan in nutrition_data["nutrition_plans"]:
+                    plan_goal = plan.get("goal", "").lower() if "goal" in plan else ""
+                    plan_name = plan.get("name", "").lower()
+                    plan_desc = plan.get("description", "").lower()
+                    
+                    if (goal.lower() in plan_goal or 
+                        goal.lower() in plan_name or 
+                        goal.lower() in plan_desc):
+                        plans.append(plan)
+                
+                if plans:
+                    # Chọn kế hoạch phù hợp nhất
+                    plan = plans[0]
+                    
+                    message = f"📋 **Kế hoạch dinh dưỡng cho {goal}**\n\n"
+                    message += f"**{plan['name']}**\n"
+                    message += f"{plan['description']}\n\n"
+                    
+                    # Thông tin về macro
+                    if "macroRatio" in plan:
+                        message += f"**Tỷ lệ dinh dưỡng**: {plan['macroRatio']['protein']}% protein, {plan['macroRatio']['carbs']}% carbs, {plan['macroRatio']['fat']}% fat\n"
+                    
+                    if "dailyCalories" in plan:
+                        message += f"**Lượng calo mỗi ngày**: {plan['dailyCalories']} kcal\n\n"
+                    
+                    # Thông tin về bữa ăn
+                    if "mealPlan" in plan:
+                        message += "**Lịch ăn trong ngày**:\n"
+                        for meal in plan["mealPlan"]:
+                            message += f"- {meal['mealName']}:\n"
+                            for food in meal["foods"]:
+                                message += f"  • {food}\n"
+                            message += "\n"
+                    
+                    message += "\n🔍 *Lưu ý: Kế hoạch dinh dưỡng này chỉ mang tính tham khảo. Để có chế độ ăn phù hợp với cơ thể, bạn nên tham khảo ý kiến từ chuyên gia dinh dưỡng.*"
+                    
+                    # Thêm link SEO
+                    message += "\n\nXem thêm các bài viết về [dinh dưỡng thể thao](https://www.sunmovement.vn/blogs/nutrition) và [thực phẩm bổ sung](https://www.sunmovement.vn/collections/supplements) tại website chính thức của chúng tôi."
+                    
+                    dispatcher.utter_message(text=message)
+                else:
+                    dispatcher.utter_message(text=f"Hiện tại chúng tôi chưa có kế hoạch dinh dưỡng cụ thể cho mục tiêu '{goal}'. Bạn có thể tham khảo các bài viết về dinh dưỡng tại website của chúng tôi hoặc đặt lịch tư vấn với chuyên gia dinh dưỡng.")
+            else:
+                dispatcher.utter_message(text="Rất tiếc, hiện tại thông tin về kế hoạch dinh dưỡng chưa có sẵn. Bạn có thể liên hệ trực tiếp với chúng tôi để được tư vấn chi tiết.")
+        except Exception as e:
+            logger.error(f"Error in action_get_nutrition_info: {str(e)}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm thông tin dinh dưỡng. Vui lòng thử lại sau.")
+        
+        return []
+
+class ActionGetWorkoutPlan(Action):
+    def name(self) -> Text:
+        return "action_get_workout_plan"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        
+        goal = tracker.get_slot("workout_goal")
+        level = tracker.get_slot("experience_level")
+        
+        if not goal:
+            dispatcher.utter_message(text="Bạn muốn tìm kế hoạch tập luyện cho mục tiêu gì? (Ví dụ: tăng cơ, giảm cân, sức bền...)")
+            return []
+        
+        try:
+            # Tải dữ liệu tập luyện từ file mẫu
+            workout_data = load_dummy_data("workout.json")
+            
+            if workout_data and "workout_plans" in workout_data:
+                # Tìm kiếm kế hoạch tập luyện phù hợp
+                plans = []
+                for plan in workout_data["workout_plans"]:
+                    plan_goal = plan.get("goal", "").lower() if "goal" in plan else ""
+                    plan_level = plan.get("level", "").lower() if "level" in plan else ""
+                    plan_name = plan.get("name", "").lower()
+                    plan_desc = plan.get("description", "").lower()
+                    
+                    goal_match = goal.lower() in plan_goal or goal.lower() in plan_name or goal.lower() in plan_desc
+                    level_match = True if not level else (level.lower() in plan_level)
+                    
+                    if goal_match and level_match:
+                        plans.append(plan)
+                
+                if plans:
+                    # Chọn kế hoạch phù hợp nhất
+                    plan = plans[0]
+                    
+                    message = f"💪 **Kế hoạch tập luyện cho {goal}**\n\n"
+                    message += f"**{plan['name']}**\n"
+                    message += f"{plan['description']}\n\n"
+                    
+                    if "level" in plan:
+                        message += f"**Cấp độ**: {plan['level']}\n"
+                    
+                    if "duration" in plan:
+                        message += f"**Thời gian**: {plan['duration']}\n\n"
+                    
+                    # Lịch tập hàng tuần
+                    if "schedule" in plan:
+                        message += "**Lịch tập hàng tuần**:\n"
+                        for day in plan["schedule"][:3]:  # Giới hạn 3 ngày để không quá dài
+                            message += f"- {day['day']} ({day['bodyParts']}):\n"
+                            for ex in day["exercises"][:3]:  # Giới hạn 3 bài tập mỗi ngày
+                                message += f"  • {ex['name']}: {ex['sets']} set x {ex['reps']} reps (nghỉ {ex['rest']})\n"
+                            
+                            if len(day["exercises"]) > 3:
+                                message += f"  • ... và {len(day['exercises']) - 3} bài tập khác\n"
+                            message += "\n"
+                        
+                        if len(plan["schedule"]) > 3:
+                            message += f"- ... và lịch tập cho {len(plan['schedule']) - 3} ngày khác\n\n"
+                    
+                    message += "\n🔍 *Lưu ý: Kế hoạch tập luyện này chỉ mang tính tham khảo. Để có chương trình phù hợp với cơ thể, bạn nên tham khảo ý kiến từ huấn luyện viên cá nhân.*"
+                    
+                    # Thêm link SEO
+                    message += "\n\nXem thêm các [thiết bị tập luyện](https://www.sunmovement.vn/collections/equipment) và [dịch vụ huấn luyện cá nhân](https://www.sunmovement.vn/pages/personal-training) tại website chính thức của chúng tôi."
+                    
+                    dispatcher.utter_message(text=message)
+                else:
+                    dispatcher.utter_message(text=f"Hiện tại chúng tôi chưa có kế hoạch tập luyện cụ thể cho mục tiêu '{goal}'{' với cấp độ ' + level if level else ''}. Bạn có thể đặt lịch tư vấn với huấn luyện viên để có chương trình phù hợp.")
+            else:
+                dispatcher.utter_message(text="Rất tiếc, hiện tại thông tin về kế hoạch tập luyện chưa có sẵn. Bạn có thể liên hệ trực tiếp với chúng tôi để được tư vấn chi tiết.")
+        except Exception as e:
+            logger.error(f"Error in action_get_workout_plan: {str(e)}")
+            dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm thông tin tập luyện. Vui lòng thử lại sau.")
+        
         return []

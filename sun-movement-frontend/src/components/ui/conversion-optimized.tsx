@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { X, Gift, Clock, Users } from "lucide-react";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
 // Social proof component
 export function SocialProof() {
@@ -158,6 +159,9 @@ export function ExitIntentPopup() {
   return (
     <Dialog open={isVisible} onOpenChange={setIsVisible}>
       <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        <DialogTitle>
+          <VisuallyHidden>Ưu đãi đặc biệt</VisuallyHidden>
+        </DialogTitle>
         <div className="relative bg-gradient-to-br from-primary to-red-600 text-white p-8">
           <button
             onClick={handleClose}
@@ -171,7 +175,9 @@ export function ExitIntentPopup() {
               <Gift className="w-8 h-8" />
             </div>
             
-            <h2 className="text-2xl font-bold mb-2">Đừng bỏ lỡ cơ hội!</h2>
+            <DialogTitle className="text-2xl font-bold mb-2">
+              Đừng bỏ lỡ cơ hội!
+            </DialogTitle>
             <p className="text-white/90 mb-6">
               Nhận ngay voucher giảm giá <span className="font-bold text-yellow-300">20%</span> cho lần đăng ký đầu tiên
             </p>

@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/auth-context";
+import { LoginPromptDialog } from "./login-prompt-dialog";
 
 interface ProductCardProps {
   product: Product;
@@ -14,17 +16,26 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
   const { addToCart, isLoading } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setIsLoginPromptOpen(true);
+      return;
+    }
+    
     setIsAdding(true);
     
     try {
@@ -137,6 +148,14 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Login Prompt Dialog */}
+      <LoginPromptDialog 
+        isOpen={isLoginPromptOpen}
+        onOpenChange={setIsLoginPromptOpen}
+        message="Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng"
+        returnUrl={`/products/${product.id}`}
+      />
     </>
   );
 }

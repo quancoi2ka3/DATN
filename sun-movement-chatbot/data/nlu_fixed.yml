@@ -1,0 +1,308 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - xin chào
+    - chào bạn
+    - chào buổi sáng
+    - chào buổi chiều
+    - chào buổi tối
+    - chào shop
+    - chào cửa hàng
+    - chào ad
+    - có ai ở đó không
+    - shop ơi
+    - bạn ơi
+    - cho mình hỏi
+    - a lô
+    - cho tôi hỏi
+    - kính chào
+    - xin kính chào
+    - có người không vậy
+    - bên trong có ai không
+    - chào anh
+    - chào chị
+    - chào em
+    - hey
+    - ê
+    - alo alo
+    - xin chào shop
+    - chào admin
+    - chào nhân viên
+    - em muốn hỏi
+    - anh chị ơi
+    - chào bạn iu
+    - xin chào ad
+    - chào người đẹp
+    - hi
+    - hello
+
+- intent: goodbye
+  examples: |
+    - tạm biệt
+    - hẹn gặp lại
+    - tạm biệt nhé
+    - gặp lại sau
+    - chào tạm biệt
+    - thôi mình đi đây
+    - chào nhé
+    - bái bai
+    - đi đây
+    - mình đi nhé
+    - mình phải đi rồi
+    - mình cúp máy đây
+    - kết thúc cuộc trò chuyện
+    - chào tạm biệt bạn
+    - hẹn gặp lại sau nhé
+    - lát nói chuyện tiếp
+    - cảm ơn nhé tạm biệt
+    - tôi phải đi rồi
+    - tôi sẽ quay lại sau
+    - bye
+    - bye bye
+
+- intent: thank
+  examples: |
+    - cảm ơn
+    - cảm ơn bạn
+    - cảm ơn vì đã giúp đỡ
+    - cảm ơn nhiều
+    - cảm ơn vì thông tin
+    - cảm ơn shop
+    - cám ơn
+    - cám ơn bạn nhiều
+    - cám ơn vì sự hỗ trợ
+    - cám ơn nhé
+    - cảm ơn rất nhiều
+    - cảm ơn vì đã tư vấn
+    - cảm ơn shop nhé
+    - đội ơn
+    - cảm ơn rất nhiều nhé
+    - cảm ơn vì sự giúp đỡ
+    - cảm ơn vì câu trả lời
+    - cảm tạ
+    - mình cảm ơn nhiều
+    - đa tạ
+    - cảm ơn ad
+    - thanks
+    - thank you
+
+- intent: search_product
+  examples: |
+    - tìm sản phẩm
+    - tôi muốn tìm sản phẩm
+    - tìm giúp tôi sản phẩm
+    - tôi đang tìm
+    - tôi cần tìm
+    - giúp tôi tìm
+    - bạn có sản phẩm nào
+    - bạn bán sản phẩm gì
+    - shop có bán không
+    - tìm kiếm
+    - tôi muốn mua
+    - tìm sản phẩm cho nam
+    - tìm sản phẩm cho nữ
+    - tìm giúp tôi
+    - tôi đang tìm mua
+    - có bán không
+    - tôi muốn biết shop có bán
+    - tìm sản phẩm tập gym
+    - tìm đồ tập yoga
+    - tìm thực phẩm bổ sung
+    - tìm kiếm whey protein
+    - shop bán gì
+    - có những sản phẩm gì
+    - mua hàng ở đâu
+    - tôi muốn mua áo thun thể thao
+    - tôi cần tìm giày tập gym
+    - cần tìm BCAA
+    - kiếm găng tay tập
+    - sản phẩm và dịch vụ ở đây có gì
+
+- intent: product_info
+  examples: |
+    - sản phẩm
+    - sản phẩm của shop
+    - hàng hóa
+    - đồ
+    - thiết bị
+    - dụng cụ
+    - thông tin sản phẩm
+    - cho tôi biết về sản phẩm
+    - sản phẩm này có gì đặc biệt
+    - đặc điểm sản phẩm
+    - mô tả sản phẩm
+    - sản phẩm này tốt không
+    - thông tin chi tiết
+    - thông số kỹ thuật
+    - xuất xứ sản phẩm
+    - sản phẩm này là gì
+    - chức năng sản phẩm
+    - công dụng sản phẩm
+    - chỉ số dinh dưỡng
+    - thành phần sản phẩm
+    - ưu điểm sản phẩm
+    - nhược điểm sản phẩm
+    - thông tin về protein
+    - thông tin về giày tập gym
+    - chi tiết về áo tập yoga
+    - thông tin về quần jogger
+    - sản phẩm này làm từ chất liệu gì
+    - đặc tính của sản phẩm
+    - tác dụng của sản phẩm
+    - sản phẩm nào tốt nhất
+    - có sản phẩm gì
+    - thiết bị tập luyện
+    - dụng cụ gym
+    - máy tập
+    - sản phẩm của shop
+    - có bán gì không
+    - thiết bị yoga
+    - dụng cụ tập luyện
+    - sản phẩm chất lượng
+    - thiết bị thể thao
+    - sản phẩm mới nhất
+    - có gì hay không
+    - bán những gì
+    - sản phẩm nổi bật
+    - thiết bị gym nào tốt
+    - dụng cụ tập nào hay
+    - sản phẩm giá rẻ
+    - sản phẩm cao cấp
+    - sản phẩm và dịch vụ
+
+- intent: price_query
+  examples: |
+    - giá
+    - giá tiền
+    - giá các gói tập
+    - giá tập
+    - giá phòng tập
+    - chi phí
+    - phí
+    - học phí
+    - giá bao nhiêu
+    - giá sản phẩm
+    - sản phẩm này giá bao nhiêu
+    - cho tôi biết giá
+    - bao nhiêu tiền
+    - giá cả thế nào
+    - giá tiền là bao nhiêu
+    - chi phí
+    - giá bán
+    - giá niêm yết
+    - giá trọn gói
+    - giá sau giảm
+    - giá khuyến mãi
+    - giá thành sản phẩm
+    - giá gốc
+    - giá hợp lý không
+    - giá đắt quá
+    - giá rẻ không
+    - giá vừa phải không
+    - có đắt không
+    - giá đang giảm không
+    - giá so với thị trường
+    - sản phẩm này có đáng tiền không
+    - giá cả phải chăng không
+    - giá bao nhiều
+    - bảng giá
+    - phí tập
+    - giá cả
+    - mức giá
+    - giá dịch vụ
+    - phí lớp học
+    - giá gói tập
+    - chi phí tham gia
+    - giá thành viên
+    - phí đăng ký
+    - giá yoga
+    - phí personal training
+    - giá massage
+    - chi phí hàng tháng
+    - giá năm
+    - giá rẻ nhất
+    - ưu đãi giá
+    - giá cả ở đây đắt không
+
+- intent: schedule_info
+  examples: |
+    - lịch tập
+    - lịch hoạt động
+    - lịch mở cửa
+    - lịch học
+    - lịch trình
+    - thời gian hoạt động
+    - thời gian mở cửa
+    - thời gian đóng cửa
+    - giờ mở cửa
+    - giờ đóng cửa
+    - giờ hoạt động
+    - giờ tập
+    - ngày mở cửa
+    - lịch các lớp
+    - lịch yoga
+    - lịch pilates
+    - lịch zumba
+    - lịch boxing
+    - lịch aerobic
+    - lớp học vào giờ nào
+    - phòng tập mở cửa lúc nào
+    - phòng tập đóng cửa lúc nào
+    - giờ cao điểm
+    - lịch huấn luyện viên
+    - lịch PT
+    - thời gian tốt nhất để tập
+    - lịch các buổi học
+    - có lớp sáng không
+    - có lớp tối không
+    - lịch cuối tuần
+    - giờ tập cuối tuần
+    - thứ bảy có mở cửa không
+    - chủ nhật có mở cửa không
+    - lịch ngày lễ
+    - phòng gym mở mấy giờ
+    - phòng tập đóng cửa mấy giờ
+    - thời gian tập luyện
+    - Tôi cần biết về lịch tập và đăng kí
+
+- intent: service_info
+  examples: |
+    - dịch vụ
+    - các dịch vụ
+    - dịch vụ của shop
+    - dịch vụ tư vấn
+    - dịch vụ hỗ trợ
+    - dịch vụ khách hàng
+    - dịch vụ đi kèm
+    - dịch vụ miễn phí
+    - dịch vụ trả phí
+    - dịch vụ thêm
+    - dịch vụ tập luyện
+    - dịch vụ huấn luyện
+    - các gói dịch vụ
+    - dịch vụ cơ bản
+    - dịch vụ cao cấp
+    - dịch vụ VIP
+    - dịch vụ chăm sóc
+    - dịch vụ bảo hành
+    - dịch vụ bảo trì
+    - dịch vụ giao hàng
+    - dịch vụ lắp đặt
+    - dịch vụ sửa chữa
+    - dịch vụ vận chuyển
+    - dịch vụ tư vấn dinh dưỡng
+    - dịch vụ massage
+    - dịch vụ xông hơi
+    - dịch vụ spa
+    - dịch vụ giảm cân
+    - dịch vụ tăng cân
+    - dịch vụ tăng cơ
+    - dịch vụ phục hồi
+    - dịch vụ yoga
+    - dịch vụ pilates
+    - dịch vụ thiết kế lịch tập
+    - dịch vụ đo chỉ số cơ thể
+    - dịch vụ theo dõi sức khỏe
+    - dịch vụ tư vấn online

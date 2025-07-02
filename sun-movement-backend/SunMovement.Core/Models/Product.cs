@@ -21,7 +21,7 @@ namespace SunMovement.Core.Models
         Discontinued = 3
     }
 
-    public class Product
+    public partial class Product
     {
         public int Id { get; set; }
         

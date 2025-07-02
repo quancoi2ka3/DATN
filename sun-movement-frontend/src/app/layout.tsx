@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/footer";
 import { RasaChatbot } from "@/components/ui/rasa-chatbot";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
+import { MixpanelProvider } from "@/lib/mixpanel-context";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
 import { CartPerformanceMonitor } from "@/components/ui/cart-performance-monitor";
 import { TestingDashboard } from "@/components/ui/testing-dashboard";

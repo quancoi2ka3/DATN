@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SunMovement.Core.Models;
+using SunMovement.Core.ViewModels;
 using SunMovement.Core.Interfaces;
 using SunMovement.Web.Areas.Admin.Models;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.Threading.Tasks;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -16,15 +19,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICouponService _couponService;
+        private readonly IProductInventoryService _productInventoryService;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<CouponsAdminController> _logger;
 
         public CouponsAdminController(
             IUnitOfWork unitOfWork, 
             ICouponService couponService,
+            IProductInventoryService productInventoryService,
+            IAnalyticsService analyticsService,
             ILogger<CouponsAdminController> logger)
         {
             _unitOfWork = unitOfWork;
             _couponService = couponService;
+            _productInventoryService = productInventoryService;
+            _analyticsService = analyticsService;
             _logger = logger;
         }
 
@@ -679,6 +688,118 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
             
             // Nếu không có bảng mapping, có thể cần triển khai cách khác để lưu thông tin này
+        }
+
+        // GET: Admin/CouponsAdmin/Analytics
+        public async Task<IActionResult> Analytics(int? id)
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+                
+                // Get coupon analytics data
+                var couponAnalytics = await _analyticsService.GetCouponAnalyticsAsync(startOfMonth, today);
+                
+                // If specific coupon is requested, get its metrics
+                CouponMetrics? specificCouponMetrics = null;
+                Coupon? specificCoupon = null;
+                
+                if (id.HasValue)
+                {
+                    specificCouponMetrics = await _analyticsService.GetCouponMetricsAsync(id, startOfMonth, today);
+                    specificCoupon = await _unitOfWork.Coupons.GetByIdAsync(id.Value);
+                    
+                    if (specificCoupon == null)
+                    {
+                        TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                
+                // Create a view model
+                var viewModel = new CouponAnalyticsViewModel
+                {
+                    CouponAnalytics = couponAnalytics,
+                    SpecificCouponMetrics = specificCouponMetrics,
+                    SpecificCoupon = specificCoupon
+                };
+                
+                // Get coupon list for dropdown
+                viewModel.AvailableCoupons = (await _unitOfWork.Coupons.GetAllAsync())
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.Code)
+                    .ToList();
+                
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading coupon analytics");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải phân tích mã giảm giá.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // POST: Admin/CouponsAdmin/UpdateProductAvailability
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProductAvailability(int id, bool disableForOutOfStock)
+        {
+            try
+            {
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(id);
+                if (coupon == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá.";
+                    return RedirectToAction(nameof(Index));
+                }
+                
+                // Update the coupon's inventory relationship setting
+                coupon.DisableWhenProductsOutOfStock = disableForOutOfStock;
+                await _unitOfWork.Coupons.UpdateAsync(coupon);
+                await _unitOfWork.CompleteAsync();
+                
+                // If enabled, check product availability and update coupon status
+                if (disableForOutOfStock)
+                {
+                    // Get all products associated with this coupon
+                    var productCoupons = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == id);
+                    var productIds = productCoupons.Select(cp => cp.ProductId).ToList();
+                    
+                    // Check if any of these products are out of stock
+                    var anyOutOfStock = false;
+                    foreach (var productId in productIds)
+                    {
+                        var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                        if (product != null && product.StockQuantity <= 0)
+                        {
+                            anyOutOfStock = true;
+                            break;
+                        }
+                    }
+                    
+                    // Update coupon status if needed
+                    if (anyOutOfStock && coupon.IsActive)
+                    {
+                        coupon.IsActive = false;
+                        coupon.DeactivationReason = "Deactivated automatically due to out of stock products";
+                        await _unitOfWork.Coupons.UpdateAsync(coupon);
+                        await _unitOfWork.CompleteAsync();
+                        
+                        TempData["WarningMessage"] = "Mã giảm giá đã bị tắt tự động vì có sản phẩm hết hàng.";
+                    }
+                }
+                
+                TempData["SuccessMessage"] = "Đã cập nhật thiết lập tồn kho cho mã giảm giá.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating coupon product availability settings for ID: {CouponId}", id);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật thiết lập tồn kho cho mã giảm giá.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
         }
 
         // Helper Methods

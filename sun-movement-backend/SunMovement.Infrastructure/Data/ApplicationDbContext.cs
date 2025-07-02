@@ -38,6 +38,10 @@ namespace SunMovement.Infrastructure.Data
         
         // Thêm các DbSet cho product variants và reviews
         public DbSet<ProductVariant> ProductVariants { get; set; }
+        
+        // Thêm các DbSet cho hệ thống đề xuất và phân tích hành vi
+        public DbSet<UserInteraction> UserInteractions { get; set; }
+        public DbSet<ProductRecommendation> ProductRecommendations { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
         public DbSet<ProductReviewHelpful> ProductReviewHelpfuls { get; set; }
         public DbSet<ProductReviewImage> ProductReviewImages { get; set; }
@@ -55,12 +59,46 @@ namespace SunMovement.Infrastructure.Data
                 .HasMany(s => s.Schedules)
                 .WithOne(ss => ss.Service)
                 .HasForeignKey(ss => ss.ServiceId)
-                .OnDelete(DeleteBehavior.Cascade);            builder.Entity<ApplicationUser>()
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Orders)
                 .WithOne(o => o.User)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false); // Allow orders without user for anonymous checkouts
+
+            // Configure relationships for recommendation system
+            builder.Entity<Product>()
+                .HasMany(p => p.UserInteractions)
+                .WithOne(ui => ui.Product)
+                .HasForeignKey(ui => ui.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.UserInteractions)
+                .WithOne(ui => ui.User)
+                .HasForeignKey(ui => ui.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Product>()
+                .HasMany(p => p.Recommendations)
+                .WithOne(r => r.Product)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Product>()
+                .HasMany(p => p.SourceRecommendations)
+                .WithOne(r => r.SourceProduct)
+                .HasForeignKey(r => r.SourceProductId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.Recommendations)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Order>()
                 .HasMany(o => o.Items)

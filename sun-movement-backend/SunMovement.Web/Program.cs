@@ -171,15 +171,22 @@ builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 
-// Register new inventory and coupon services
+// Register new inventory, coupon, and integration services
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IProductInventoryService, ProductInventoryService>();
+builder.Services.AddScoped<IAnalyticsService, StubAnalyticsService>();
 
 // Configure Email Service based on provider and environment
 EmailServiceFactory.ConfigureEmailService(builder.Services, builder.Configuration);
 
 builder.Services.AddScoped<IEmailVerificationService, EmailVerificationService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
+// Register recommendation and user interaction services
+builder.Services.AddScoped<IUserInteractionService, UserInteractionService>();
+builder.Services.AddScoped<IRecommendationService, RecommendationService>();
+builder.Services.AddScoped<MixpanelService>();
 
 // Register AutoMapper profiles
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly, typeof(SunMovement.Web.Mappings.WebMappingProfile).Assembly);

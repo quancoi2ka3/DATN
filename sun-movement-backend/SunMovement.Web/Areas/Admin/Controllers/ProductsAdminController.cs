@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Core.ViewModels;
 using SunMovement.Web.ViewModels;
 using System;
 using System.Linq;
@@ -26,6 +27,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly IInventoryService _inventoryService;
         private readonly ICouponService _couponService;
+        private readonly IProductInventoryService _productInventoryService;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<ProductsAdminController> _logger;
 
         public ProductsAdminController(
@@ -35,6 +38,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             IProductService productService,
             IInventoryService inventoryService,
             ICouponService couponService,
+            IProductInventoryService productInventoryService,
+            IAnalyticsService analyticsService,
             ILogger<ProductsAdminController> logger)
         {
             _unitOfWork = unitOfWork;
@@ -43,6 +48,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             _productService = productService;
             _inventoryService = inventoryService;
             _couponService = couponService;
+            _productInventoryService = productInventoryService;
+            _analyticsService = analyticsService;
             _logger = logger;
         }
 
@@ -97,16 +104,33 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
             try
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(id.Value);
-                if (product == null)
+                // Sử dụng ProductInventoryService để lấy thông tin đầy đủ về sản phẩm và kho hàng
+                var productWithInventory = await _productInventoryService.GetProductWithInventoryAsync(id.Value);
+                if (productWithInventory.Product == null)
                 {
                     return NotFound();
                 }
 
-                // Load related coupons
-                ViewBag.ProductCoupons = await _couponService.GetProductCouponsAsync(id.Value);
+                // Load thông tin phân tích sản phẩm
+                var today = DateTime.Today;
+                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+                var productMetrics = await _analyticsService.GetProductMetricsAsync(id.Value, startOfMonth, today);
                 
-                return View(product);
+                // Thêm thông tin phân tích vào ProductWithInventoryViewModel
+                productWithInventory.ViewCount = productMetrics.TotalViews;
+                productWithInventory.CartAddCount = productMetrics.AddToCarts;
+                productWithInventory.PurchaseCount = productMetrics.Purchases;
+                productWithInventory.ConversionRate = productMetrics.ConversionRate;
+                
+                // Load related coupons
+                productWithInventory.AppliedCoupons = (await _couponService.GetProductCouponsAsync(id.Value)).ToList();
+                
+                // Pass ViewBag for backward compatibility
+                ViewBag.ProductCoupons = productWithInventory.AppliedCoupons;
+                ViewBag.Product = productWithInventory.Product;
+                ViewBag.HasInventoryData = true;
+                
+                return View(productWithInventory);
             }
             catch (Exception ex)
             {
@@ -290,24 +314,37 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         return View(model);
                     }
 
-                    // Tạo sản phẩm từ hàng tồn kho
-                    var product = await _productService.CreateProductFromInventoryAsync(
-                        model.InventoryItemId,
-                        model.Name,
-                        model.Price,
-                        model.Description,
-                        model.Category,
-                        model.SubCategory,
-                        model.DiscountPrice,
-                        model.Sku,
-                        model.Barcode,
-                        model.Weight,
-                        model.Dimensions,
-                        model.MinimumStockLevel,
-                        model.OptimalStockLevel,
-                        model.IsFeatured,
-                        model.TrackInventory,
-                        model.AllowBackorder);
+                    // Tạo Product object từ model
+                    var product = new Product
+                    {
+                        Name = model.Name,
+                        Price = model.Price,
+                        Description = model.Description,
+                        Category = model.Category,
+                        SubCategory = model.SubCategory,
+                        DiscountPrice = model.DiscountPrice,
+                        Sku = model.Sku,
+                        Barcode = model.Barcode,
+                        Weight = model.Weight,
+                        Dimensions = model.Dimensions,
+                        MinimumStockLevel = model.MinimumStockLevel,
+                        OptimalStockLevel = model.OptimalStockLevel,
+                        IsFeatured = model.IsFeatured,
+                        TrackInventory = model.TrackInventory,
+                        AllowBackorder = model.AllowBackorder,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    
+                    // Sử dụng ProductInventoryService để tạo sản phẩm với tồn kho ban đầu
+                    var inventoryItem = await _unitOfWork.InventoryItems.GetByIdAsync(model.InventoryItemId);
+                    product = await _productInventoryService.CreateProductWithInventoryAsync(
+                        product,
+                        inventoryItem?.Quantity ?? 0,
+                        inventoryItem?.CostPrice,
+                        null, // Không có thông tin SupplierId trong InventoryItem
+                        inventoryItem?.BatchNumber ?? "",
+                        "Created from existing inventory item");
 
                     // Áp dụng mã giảm giá nếu có
                     if (model.SelectedCouponIds != null && model.SelectedCouponIds.Any())

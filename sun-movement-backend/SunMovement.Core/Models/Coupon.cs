@@ -88,6 +88,16 @@ namespace SunMovement.Core.Models
         public virtual ICollection<CouponProduct> CouponProducts { get; set; } = new List<CouponProduct>();
         public virtual ICollection<CouponCategory> CouponCategories { get; set; } = new List<CouponCategory>();
         
+        // Additional properties for inventory integration
+        public bool DisableWhenProductsOutOfStock { get; set; }
+        
+        [StringLength(500)]
+        public string? DeactivationReason { get; set; }
+        
+        public DateTime? LastAutoDeactivation { get; set; }
+        
+        public int TimesDisabledDueToInventory { get; set; }
+        
         // Computed properties
         public bool IsValid => IsActive && 
                               DateTime.UtcNow >= StartDate && 

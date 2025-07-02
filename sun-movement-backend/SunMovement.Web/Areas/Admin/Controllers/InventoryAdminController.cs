@@ -2,8 +2,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SunMovement.Core.Models;
+using SunMovement.Core.ViewModels;
 using SunMovement.Core.Interfaces;
 using SunMovement.Infrastructure.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using SunMovement.Web.Areas.Admin.Models;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -13,15 +20,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventoryService _inventoryService;
+        private readonly IProductInventoryService _productInventoryService;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<InventoryAdminController> _logger;
 
         public InventoryAdminController(
             IUnitOfWork unitOfWork, 
             IInventoryService inventoryService,
+            IProductInventoryService productInventoryService,
+            IAnalyticsService analyticsService,
             ILogger<InventoryAdminController> logger)
         {
             _unitOfWork = unitOfWork;
             _inventoryService = inventoryService;
+            _productInventoryService = productInventoryService;
+            _analyticsService = analyticsService;
             _logger = logger;
         }
 
@@ -35,8 +48,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     transactionsQuery = transactionsQuery.Where(t => 
-                        t.Product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        t.Notes.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                        (t.Product != null && t.Product.Name != null && t.Product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                        (t.Notes != null && t.Notes.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
                 }
 
                 if (transactionType.HasValue)
@@ -319,6 +332,119 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 _logger.LogError(ex, "Error getting product stock: {ProductId}", productId);
                 return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin tồn kho." });
+            }
+        }
+
+        // GET: Admin/InventoryAdmin/Insights
+        public async Task<IActionResult> Insights()
+        {
+            try
+            {
+                // Get enhanced inventory insights directly from the stub service
+                var viewModel = await _analyticsService.GetInventoryInsightsAsync();
+                
+                // If needed, we can still get additional data from the product inventory service
+                var lowStockAlerts = await _productInventoryService.GetLowStockAlertsAsync();
+                var reorderSuggestions = await _productInventoryService.GetProductsForReorderAsync();
+                
+                // Use the view model directly since it's already of the correct type
+                if (viewModel is Core.ViewModels.InventoryInsightsViewModel modelWithInsights)
+                {
+                    // Just update the low stock alerts and reorder suggestions from the product inventory service
+                    modelWithInsights.LowStockAlerts = lowStockAlerts.Select(alert => new Core.ViewModels.LowStockAlert
+                    {
+                        ProductId = alert.ProductId,
+                        ProductName = alert.ProductName,
+                        SKU = alert.SKU,
+                        CurrentStock = alert.CurrentStock,
+                        MinimumStockLevel = alert.MinimumStockLevel,
+                        ReorderPoint = alert.MinimumStockLevel + 5, // Estimated reorder point
+                        LastRestock = alert.LastUpdated
+                    }).ToList();
+
+                    modelWithInsights.ReorderSuggestions = reorderSuggestions.Select(suggestion => new Core.ViewModels.ProductReorderSuggestion
+                    {
+                        ProductId = suggestion.Product.Id,
+                        ProductName = suggestion.Product.Name,
+                        SKU = suggestion.Product.Sku ?? string.Empty,
+                        CurrentStock = suggestion.CurrentStock,
+                        SuggestedReorderQuantity = suggestion.SuggestedOrderQuantity,
+                        EstimatedCost = suggestion.EstimatedCost,
+                        OptimalReorderDate = DateTime.Now.AddDays(Math.Max(1, suggestion.DaysToOutOfStock - 5)),
+                        AverageDailySales = suggestion.AverageDailySales,
+                        DaysUntilStockout = suggestion.DaysToOutOfStock
+                    }).ToList();
+                    
+                    return View(modelWithInsights);
+                }
+                
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading inventory insights");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải phân tích tồn kho.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Admin/InventoryAdmin/BatchUpdateInventory
+        public async Task<IActionResult> BatchUpdateInventory()
+        {
+            try
+            {
+                var products = await _unitOfWork.Products.GetAllAsync();
+                var model = new BatchInventoryUpdateViewModel();
+                model.Products = products.Where(p => p.TrackInventory).ToList();
+                
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading batch inventory update form");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải form cập nhật hàng loạt.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // POST: Admin/InventoryAdmin/BatchUpdateInventory
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchUpdateInventory(BatchInventoryUpdateViewModel model)
+        {
+            try
+            {
+                if (ModelState.IsValid && model.Updates != null && model.Updates.Any())
+                {
+                    // Convert view model to domain model
+                    var updates = model.Updates.Select(u => new Core.Interfaces.InventoryUpdateItem
+                    {
+                        ProductId = u.ProductId,
+                        NewQuantity = u.NewQuantity,
+                        NewCostPrice = u.NewCostPrice,
+                        Reason = u.Reason
+                    }).ToList();
+                    
+                    // Use product inventory service to batch update
+                    await _productInventoryService.BatchUpdateInventoryAsync(updates);
+                    
+                    TempData["SuccessMessage"] = "Cập nhật hàng loạt thành công.";
+                    return RedirectToAction(nameof(Index));
+                }
+                
+                // If we got this far, something failed, redisplay form
+                var products = await _unitOfWork.Products.GetAllAsync();
+                model.Products = products.Where(p => p.TrackInventory).ToList();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error performing batch inventory update");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật hàng loạt.";
+                
+                var products = await _unitOfWork.Products.GetAllAsync();
+                model.Products = products.Where(p => p.TrackInventory).ToList();
+                return View(model);
             }
         }
 

@@ -1,0 +1,188 @@
+@model Dictionary<string, double>
+@{
+    ViewData["Title"] = "Recommendation Performance";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Recommendation Performance</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="HomeAdmin" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item"><a asp-action="Dashboard">Analytics</a></li>
+        <li class="breadcrumb-item active">Recommendation Performance</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h2>@(Model.ContainsKey("click_through_rate") ? $"{Model["click_through_rate"]:0.00}%" : "N/A")</h2>
+                    <div>Click-Through Rate</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h2>@(Model.ContainsKey("conversion_rate") ? $"{Model["conversion_rate"]:0.00}%" : "N/A")</h2>
+                    <div>Conversion Rate</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h2>@(Model.ContainsKey("impression_count") ? Model["impression_count"].ToString("N0") : "N/A")</h2>
+                    <div>Recommendation Impressions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <h2>@(Model.ContainsKey("click_count") ? Model["click_count"].ToString("N0") : "N/A")</h2>
+                    <div>Recommendation Clicks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-bar me-1"></i>
+            Recommendation Performance by Type
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="recommendationTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Recommendation Type</th>
+                            <th>Impressions</th>
+                            <th>Clicks</th>
+                            <th>Purchases</th>
+                            <th>CTR</th>
+                            <th>Conversion Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var recommendationTypes = new[] { "personal", "similar", "trending", "recently_viewed" };
+                            foreach (var type in recommendationTypes)
+                            {
+                                var impressionKey = $"{type}_impression_count";
+                                var clickKey = $"{type}_click_count";
+                                var purchaseKey = $"{type}_purchase_count";
+                                var ctrKey = $"{type}_ctr";
+                                var conversionKey = $"{type}_conversion_rate";
+                                
+                                <tr>
+                                    <td>@type.Replace("_", " ").ToUpper()</td>
+                                    <td>@(Model.ContainsKey(impressionKey) ? Model[impressionKey].ToString("N0") : "N/A")</td>
+                                    <td>@(Model.ContainsKey(clickKey) ? Model[clickKey].ToString("N0") : "N/A")</td>
+                                    <td>@(Model.ContainsKey(purchaseKey) ? Model[purchaseKey].ToString("N0") : "N/A")</td>
+                                    <td>@(Model.ContainsKey(ctrKey) ? $"{Model[ctrKey]:0.00}%" : "N/A")</td>
+                                    <td>@(Model.ContainsKey(conversionKey) ? $"{Model[conversionKey]:0.00}%" : "N/A")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    CTR by Recommendation Type
+                </div>
+                <div class="card-body">
+                    <canvas id="ctrByTypeChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Conversion Rate by Recommendation Type
+                </div>
+                <div class="card-body">
+                    <canvas id="conversionByTypeChart" width="100%" height="40"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prepare data for CTR chart
+            const recommendationTypes = @Json.Serialize(new[] { "personal", "similar", "trending", "recently_viewed" });
+            
+            // Serialize model data once
+            const modelData = @Html.Raw(Json.Serialize(Model));
+            
+            const ctrData = recommendationTypes.map(type => {
+                const key = `${type}_ctr`;
+                return modelData && modelData[key] ? modelData[key] : 0;
+            });
+            
+            const conversionData = recommendationTypes.map(type => {
+                const key = `${type}_conversion_rate`;
+                return modelData && modelData[key] ? modelData[key] : 0;
+            });
+            
+            const typeLabels = recommendationTypes.map(type => 
+                type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+            );
+            
+            // CTR Chart
+            const ctrChart = new Chart(document.getElementById("ctrByTypeChart"), {
+                type: 'bar',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        label: "CTR (%)",
+                        backgroundColor: "rgba(2, 117, 216, 0.8)",
+                        borderColor: "rgba(2, 117, 216, 1)",
+                        data: ctrData
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Conversion Rate Chart
+            const conversionChart = new Chart(document.getElementById("conversionByTypeChart"), {
+                type: 'bar',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        label: "Conversion Rate (%)",
+                        backgroundColor: "rgba(92, 184, 92, 0.8)",
+                        borderColor: "rgba(92, 184, 92, 1)",
+                        data: conversionData
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

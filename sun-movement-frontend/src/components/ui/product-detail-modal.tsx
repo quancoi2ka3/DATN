@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { OptimizedImage } from "./optimized-image";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 import { Plus, Minus, ShoppingCart, Star, Heart, X } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { useAuth } from "@/lib/auth-context";
-import { LoginPromptDialog } from "./login-prompt-dialog";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/lib/auth-context";
-import { LoginPromptDialog } from "./login-prompt-dialog";
+import dynamic from 'next/dynamic';
+
+// Dynamically import SimilarProducts component
+const SimilarProducts = dynamic(
+  () => import('@/components/recommendations/SimilarProducts'),
+  { ssr: false, loading: () => <div className="h-32 bg-gray-100 animate-pulse rounded-md"></div> }
+);
 
 interface ProductDetailModalProps {
   product: Product;
@@ -22,20 +25,12 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
-  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const { addToCart } = useCart();
-  const { isAuthenticated } = useAuth();
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   const handleAddToCart = async () => {
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      setIsLoginPromptOpen(true);
-      return;
-    }
-    
     setIsAdding(true);
     
     try {
@@ -52,9 +47,8 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-      {/* Product Image */}
-      <div className="space-y-4">
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
         <div className="relative aspect-square overflow-hidden rounded-lg">
           <OptimizedImage
             src={product.imageUrl || '/placeholder-product.jpg'}
@@ -246,15 +240,15 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
             <span className="font-medium">{product.id}</span>
           </div>
         </div>
+
+        {/* Similar Products Section - Suspense fallback used here */}
+        <div className="pt-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Sản phẩm tương tự</h2>
+          <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse rounded-md"></div>}>
+            <SimilarProducts productId={product.id} />
+          </Suspense>
+        </div>
       </div>
-    </div>
-    
-    {/* Login Prompt Dialog */}
-    <LoginPromptDialog 
-      isOpen={isLoginPromptOpen}
-      onOpenChange={setIsLoginPromptOpen}
-      message="Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng"
-      returnUrl={`/products/${product.id}`}
-    />
+    </>
   );
 }

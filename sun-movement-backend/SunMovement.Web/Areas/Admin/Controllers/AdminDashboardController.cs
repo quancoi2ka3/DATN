@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using SunMovement.Core.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly IInventoryService _inventoryService;
         private readonly ICouponService _couponService;
         private readonly IProductService _productService;
+        private readonly IProductInventoryService _productInventoryService;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<AdminDashboardController> _logger;
 
         public AdminDashboardController(
@@ -29,6 +32,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             IInventoryService inventoryService,
             ICouponService couponService,
             IProductService productService,
+            IProductInventoryService productInventoryService,
+            IAnalyticsService analyticsService,
             ILogger<AdminDashboardController> logger)
         {
             _unitOfWork = unitOfWork;
@@ -36,106 +41,149 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             _inventoryService = inventoryService;
             _couponService = couponService;
             _productService = productService;
+            _productInventoryService = productInventoryService;
+            _analyticsService = analyticsService;
             _logger = logger;
         }        public async Task<IActionResult> Index()
         {
-            // Initialize view model
-            var dashboardViewModel = new AdminDashboardViewModel();
-            
-            // Get basic statistics
-            dashboardViewModel.ProductCount = await _unitOfWork.Products.CountAsync();
-            dashboardViewModel.ServiceCount = await _unitOfWork.Services.CountAsync();
-            dashboardViewModel.OrderCount = await _unitOfWork.Orders.CountAsync();
-            dashboardViewModel.UserCount = _userManager.Users.Count();
-            
-            // Get customer statistics
-            var allUsers = _userManager.Users.ToList();
-            var totalCustomers = 0;
-            var activeCustomers = 0;
-            foreach (var user in allUsers)
+            try
             {
-                if (await _userManager.IsInRoleAsync(user, "Customer"))
+                // Initialize view model
+                var dashboardViewModel = new AdminDashboardViewModel();
+                
+                var today = DateTime.Today;
+                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+                var startOfWeek = today.AddDays(-(int)today.DayOfWeek);
+                
+                // Get analytics data from our new services
+                var dashboardMetrics = await _analyticsService.GetDashboardMetricsAsync(
+                    startOfMonth, 
+                    today);
+                
+                // Get product inventory insights
+                var lowStockAlerts = await _productInventoryService.GetLowStockAlertsAsync();
+                var reorderSuggestions = await _productInventoryService.GetProductsForReorderAsync();
+                
+                // Update dashboard with analytics data
+                dashboardViewModel.ProductCount = await _unitOfWork.Products.CountAsync();
+                dashboardViewModel.ServiceCount = await _unitOfWork.Services.CountAsync();
+                dashboardViewModel.OrderCount = dashboardMetrics.TotalOrders;
+                dashboardViewModel.UserCount = _userManager.Users.Count();
+                
+                dashboardViewModel.TotalVisits = dashboardMetrics.TotalVisits;
+                dashboardViewModel.ConversionRate = dashboardMetrics.ConversionRate;
+                dashboardViewModel.AverageOrderValue = dashboardMetrics.AverageOrderValue;
+                
+                // Get customer statistics
+                var allUsers = _userManager.Users.ToList();
+                var totalCustomers = 0;
+                var activeCustomers = 0;
+                foreach (var user in allUsers)
                 {
-                    totalCustomers++;
-                    if (user.IsActive)
+                    if (await _userManager.IsInRoleAsync(user, "Customer"))
                     {
-                        activeCustomers++;
+                        totalCustomers++;
+                        if (user.IsActive)
+                        {
+                            activeCustomers++;
+                        }
                     }
                 }
-            }
-            
-            // Get order statistics
-            dashboardViewModel.PendingOrderCount = await _unitOfWork.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
-            dashboardViewModel.UnreadMessageCount = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead);
-            dashboardViewModel.TotalMessageCount = await _unitOfWork.ContactMessages.CountAsync();
-            
-            // Get inventory statistics
-            dashboardViewModel.LowStockProducts = await _inventoryService.GetLowStockProductsAsync();
-            dashboardViewModel.OutOfStockCount = (await _inventoryService.GetOutOfStockProductsAsync()).Count();
-            dashboardViewModel.TotalInventoryValue = await _inventoryService.GetTotalInventoryValueAsync();
-            
-            // Get recent orders (limit to 5)
-            var recentOrders = await _unitOfWork.Orders.GetAllAsync();
-            dashboardViewModel.RecentOrders = recentOrders
-                .OrderByDescending(o => o.OrderDate)
-                .Take(5)
-                .ToList();
-            
-            // Get top selling products - placeholder implementation since method doesn't exist yet
-            var allProducts = await _unitOfWork.Products.GetAllAsync();
-            dashboardViewModel.TopSellingProducts = allProducts
-                .OrderByDescending(p => p.OrderItems?.Sum(oi => oi.Quantity) ?? 0)
-                .Take(5)
-                .ToList();
-            
-            // Get active coupons
-            dashboardViewModel.ActiveDiscounts = await _couponService.GetAllActiveCouponsAsync();
-            dashboardViewModel.ActiveDiscountCount = dashboardViewModel.ActiveDiscounts.Count();
-            
-            // Get expiring coupons - temporary implementation until method is created
-            var today = DateTime.Today;
-            var oneWeekLater = today.AddDays(7);
-            var allCoupons = await _unitOfWork.Coupons.GetAllAsync();
-            dashboardViewModel.ExpiringDiscounts = allCoupons
-                .Where(c => c.IsActive && c.EndDate <= oneWeekLater && c.EndDate >= today)
-                .ToList();
-            
-            // Calculate revenue metrics
-            try {
-                dashboardViewModel.TodayRevenue = await CalculateDailyRevenueAsync(today);
-                dashboardViewModel.WeekRevenue = await CalculateWeeklyRevenueAsync(today);
-                dashboardViewModel.MonthlyRevenue = await CalculateMonthlyRevenueAsync(today.Year, today.Month);
+                
+                dashboardViewModel.NewCustomers = dashboardMetrics.NewCustomers;
+                dashboardViewModel.ReturningCustomers = dashboardMetrics.ReturningCustomers;
+                
+                // Get order statistics
+                dashboardViewModel.PendingOrderCount = dashboardMetrics.OrdersByStatus.TryGetValue(
+                    OrderStatus.Pending.ToString(), out int pendingCount) ? pendingCount : 0;
+                    
+                dashboardViewModel.UnreadMessageCount = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead);
+                dashboardViewModel.TotalMessageCount = await _unitOfWork.ContactMessages.CountAsync();
+                
+                // Get inventory statistics from our product inventory service
+                // Get product information from low stock alerts
+                var productIds = lowStockAlerts.Select(a => a.ProductId).ToList();
+                var lowStockProducts = await _unitOfWork.Products.FindAsync(p => productIds.Contains(p.Id));
+                dashboardViewModel.LowStockProducts = lowStockProducts.ToList();
+                
+                dashboardViewModel.OutOfStockCount = dashboardMetrics.ProductsOutOfStock;
+                // Calculate total inventory value from inventory metrics
+                var inventoryMetrics = await _analyticsService.GetInventoryMetricsAsync(startOfMonth, today);
+                dashboardViewModel.TotalInventoryValue = inventoryMetrics.TotalInventoryValue;
+                
+                // Get recent orders (limit to 5)
+                var recentOrders = await _unitOfWork.Orders.GetAllAsync();
+                dashboardViewModel.RecentOrders = recentOrders
+                    .OrderByDescending(o => o.OrderDate)
+                    .Take(5)
+                    .ToList();
+                
+                // Get top selling products from analytics service
+                var topSellingProducts = await _analyticsService.GetTopSellingProductsAsync(5);
+                var topProductIds = topSellingProducts.Select(t => t.ProductId).ToList();
+                var topProducts = await _unitOfWork.Products.FindAsync(p => topProductIds.Contains(p.Id));
+                dashboardViewModel.TopSellingProducts = topProducts.ToList();
+                
+                // Get active coupons
+                var couponMetrics = await _analyticsService.GetCouponMetricsAsync();
+                dashboardViewModel.ActiveDiscounts = await _couponService.GetAllActiveCouponsAsync();
+                dashboardViewModel.ActiveDiscountCount = dashboardViewModel.ActiveDiscounts.Count();
+                
+                // Get expiring coupons
+                var oneWeekLater = today.AddDays(7);
+                var allCoupons = await _unitOfWork.Coupons.GetAllAsync();
+                dashboardViewModel.ExpiringDiscounts = allCoupons
+                    .Where(c => c.IsActive && c.EndDate <= oneWeekLater && c.EndDate >= today)
+                    .ToList();
+                    
+                // Calculate revenue metrics
+                try {
+                    dashboardViewModel.TodayRevenue = await CalculateDailyRevenueAsync(today);
+                    dashboardViewModel.WeekRevenue = await CalculateWeeklyRevenueAsync(today);
+                    dashboardViewModel.MonthlyRevenue = await CalculateMonthlyRevenueAsync(today.Year, today.Month);
+                }
+                catch (Exception ex) {
+                    // Log exception
+                    _logger.LogError(ex, "Error calculating revenue metrics");
+                    
+                    // Use placeholder data
+                    dashboardViewModel.TodayRevenue = GetRandomRevenue(1000, 5000);
+                    dashboardViewModel.WeekRevenue = GetRandomRevenue(8000, 25000);
+                    dashboardViewModel.MonthlyRevenue = GetRandomRevenue(30000, 80000);
+                }
+                
+                // Set sales by category from dashboard metrics
+                dashboardViewModel.SalesByCategory = dashboardMetrics.SalesByCategory;
+                
+                // Set visitors by source from dashboard metrics
+                dashboardViewModel.VisitorsBySource = dashboardMetrics.VisitsBySource;
+                
+                // FAQs count
+                dashboardViewModel.FAQCount = await _unitOfWork.FAQs.CountAsync();
+                dashboardViewModel.EventCount = await _unitOfWork.Events.CountAsync();
+                
+                // Populate ViewBag for backward compatibility with existing view
+                ViewBag.TotalProducts = dashboardViewModel.ProductCount;
+                ViewBag.TotalServices = dashboardViewModel.ServiceCount;
+                ViewBag.TotalOrders = dashboardViewModel.OrderCount;
+                ViewBag.TotalUsers = dashboardViewModel.UserCount;
+                ViewBag.PendingOrders = dashboardViewModel.PendingOrderCount;
+                ViewBag.UnreadMessages = dashboardViewModel.UnreadMessageCount;
+                ViewBag.LowStockItems = dashboardViewModel.LowStockProducts.Count();
+                ViewBag.TodayRevenue = dashboardViewModel.TodayRevenue.ToString("N0");
+                ViewBag.WeekRevenue = dashboardViewModel.WeekRevenue.ToString("N0");
+                ViewBag.MonthlyRevenue = dashboardViewModel.MonthlyRevenue.ToString("N0");
+                
+                return View(dashboardViewModel);
             }
             catch (Exception ex)
             {
-                // Log exception
-                _logger.LogError(ex, "Error calculating revenue metrics");
+                _logger.LogError(ex, "Error loading dashboard data");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải dữ liệu bảng điều khiển.";
                 
-                // Use placeholder data
-                dashboardViewModel.TodayRevenue = GetRandomRevenue(1000, 5000);
-                dashboardViewModel.WeekRevenue = GetRandomRevenue(8000, 25000);
-                dashboardViewModel.MonthlyRevenue = GetRandomRevenue(30000, 80000);
+                // Return empty dashboard model
+                return View(new AdminDashboardViewModel());
             }
-            
-            // FAQs count
-            dashboardViewModel.FAQCount = await _unitOfWork.FAQs.CountAsync();
-            dashboardViewModel.EventCount = await _unitOfWork.Events.CountAsync();
-            
-            // Populate ViewBag for backward compatibility with existing view
-            ViewBag.TotalProducts = dashboardViewModel.ProductCount;
-            ViewBag.TotalServices = dashboardViewModel.ServiceCount;
-            ViewBag.TotalOrders = dashboardViewModel.OrderCount;
-            ViewBag.TotalUsers = dashboardViewModel.UserCount;
-            ViewBag.TotalCustomers = totalCustomers;
-            ViewBag.ActiveCustomers = activeCustomers;
-            ViewBag.PendingOrders = dashboardViewModel.PendingOrderCount;
-            ViewBag.UnreadMessages = dashboardViewModel.UnreadMessageCount;
-            ViewBag.LowStockItems = dashboardViewModel.LowStockProducts.Count();
-            ViewBag.TodayRevenue = dashboardViewModel.TodayRevenue.ToString("N0");
-            ViewBag.WeekRevenue = dashboardViewModel.WeekRevenue.ToString("N0");
-            ViewBag.MonthlyRevenue = dashboardViewModel.MonthlyRevenue.ToString("N0");
-
-            return View(dashboardViewModel);
         }
         
         private async Task<decimal> CalculateDailyRevenueAsync(DateTime date)

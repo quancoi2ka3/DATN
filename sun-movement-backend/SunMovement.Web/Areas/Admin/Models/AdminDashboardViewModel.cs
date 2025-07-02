@@ -1,5 +1,7 @@
 using SunMovement.Core.Models;
 using System.Collections.Generic;
+using SunMovement.Core.ViewModels;
+using SunMovement.Core.Interfaces;
 
 namespace SunMovement.Web.Areas.Admin.Models
 {
@@ -14,6 +16,13 @@ namespace SunMovement.Web.Areas.Admin.Models
         public int UnreadMessageCount { get; set; }
         public int TotalMessageCount { get; set; }
         public int UserCount { get; set; }
+        
+        // Analytics từ Mixpanel
+        public int TotalVisits { get; set; }
+        public decimal ConversionRate { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public int NewCustomers { get; set; }
+        public int ReturningCustomers { get; set; }
         
         // Doanh thu
         public decimal TodayRevenue { get; set; }
@@ -35,6 +44,10 @@ namespace SunMovement.Web.Areas.Admin.Models
         public IEnumerable<Coupon> ExpiringDiscounts { get; set; }
         public int ActiveDiscountCount { get; set; }
         
+        // Xu hướng
+        public Dictionary<string, int> VisitorsBySource { get; set; }
+        public Dictionary<string, decimal> SalesByCategory { get; set; }
+        
         public AdminDashboardViewModel()
         {
             // Initialize collections to avoid null reference exceptions
@@ -43,6 +56,8 @@ namespace SunMovement.Web.Areas.Admin.Models
             TopSellingProducts = new List<Product>();
             ActiveDiscounts = new List<Coupon>();
             ExpiringDiscounts = new List<Coupon>();
+            VisitorsBySource = new Dictionary<string, int>();
+            SalesByCategory = new Dictionary<string, decimal>();
         }
     }
 }

@@ -27,6 +27,7 @@ interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAdmin: () => boolean;
+  isLoading: boolean;
   // E-commerce specific methods
   redirectAfterLogin: (defaultPath?: string) => void;
   setReturnUrl: (url: string) => void;
@@ -43,12 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: null,
     token: null,
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   // Track return URL for post-login redirect
   const [returnUrl, setReturnUrlState] = useState<string | null>(null);
 
   // On mount, try to restore auth state from localStorage
   useEffect(() => {
+    setIsLoading(true);
     const token = localStorage.getItem("token");
     const userStr = localStorage.getItem("user");
     
@@ -58,6 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.warn('Stored token is expired, clearing auth data');
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        setIsLoading(false);
         return;
       }
       
@@ -74,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("user");
       }
     }
+    setIsLoading(false);
   }, []);  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Preserve shopping session before login
@@ -265,6 +270,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       isAdmin,
+      isLoading,
       redirectAfterLogin,
       setReturnUrl,
       preserveShoppingSession,

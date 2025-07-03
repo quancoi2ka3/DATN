@@ -61,13 +61,84 @@ interface CartItemDto {
   createdAt: string;
 }
 
+// Function to process image URL
+function processImageUrl(imageUrl: string | undefined): string {
+  console.log('[CART DEBUG] Processing image URL:', imageUrl);
+  
+  if (!imageUrl) {
+    console.log('[CART DEBUG] No image URL, using placeholder');
+    return '/images/placeholder.jpg';
+  }
+  
+  // If it's already a full URL, return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    console.log('[CART DEBUG] Full URL detected:', imageUrl);
+    return imageUrl;
+  }
+  
+  // Backend base URL for images
+  const backendBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:5001';
+  console.log('[CART DEBUG] Backend base URL:', backendBaseUrl);
+  
+  // If it starts with /uploads, it's a backend relative path (uploaded files)
+  if (imageUrl.startsWith('/uploads/')) {
+    const finalUrl = `${backendBaseUrl}${imageUrl}`;
+    console.log('[CART DEBUG] Uploads path detected, final URL:', finalUrl);
+    return finalUrl;
+  }
+  
+  // If it starts with uploads/ (without leading slash)
+  if (imageUrl.startsWith('uploads/')) {
+    const finalUrl = `${backendBaseUrl}/${imageUrl}`;
+    console.log('[CART DEBUG] Uploads path (no slash) detected, final URL:', finalUrl);
+    return finalUrl;
+  }
+  
+  // If it starts with /images/products, it's also a backend path (static/seed files)
+  if (imageUrl.startsWith('/images/products/')) {
+    const finalUrl = `${backendBaseUrl}${imageUrl}`;
+    console.log('[CART DEBUG] Backend images/products path detected, final URL:', finalUrl);
+    return finalUrl;
+  }
+  
+  // If it starts with images/products (without leading slash)
+  if (imageUrl.startsWith('images/products/')) {
+    const finalUrl = `${backendBaseUrl}/${imageUrl}`;
+    console.log('[CART DEBUG] Backend images/products path (no slash) detected, final URL:', finalUrl);
+    return finalUrl;
+  }
+  
+  // If it's just a filename (like f7f6747d-488e-4c8a-afc6-fc70b0e0463d.webp)
+  if (!imageUrl.startsWith('/') && (imageUrl.includes('.webp') || imageUrl.includes('.jpg') || imageUrl.includes('.png'))) {
+    const finalUrl = `${backendBaseUrl}/uploads/products/${imageUrl}`;
+    console.log('[CART DEBUG] Filename detected, final URL:', finalUrl);
+    return finalUrl;
+  }
+  
+  // If it starts with /images/ or /assets/ (frontend static assets)
+  if (imageUrl.startsWith('/images/') && !imageUrl.startsWith('/images/products/')) {
+    console.log('[CART DEBUG] Frontend static asset detected:', imageUrl);
+    return imageUrl; // Keep as frontend static asset
+  }
+  
+  if (imageUrl.startsWith('/assets/')) {
+    console.log('[CART DEBUG] Frontend assets detected:', imageUrl);
+    return imageUrl; // Keep as frontend static asset
+  }
+  
+  // Default case - treat as relative path from domain root
+  const finalUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+  console.log('[CART DEBUG] Default case, final URL:', finalUrl);
+  return finalUrl;
+}
+
 // Function to map backend response to frontend format
 function mapBackendCartResponse(backendResponse: BackendCartResponse): CartResponse {
   const mappedItems = backendResponse.items.map(item => ({
     id: item.id.toString(),
     productId: item.productId || item.serviceId || 0,
     productName: item.itemName || item.product?.name || 'Unknown Product',
-    productImage: item.itemImageUrl || item.product?.imageUrl || '/images/placeholder.jpg',
+    productImage: processImageUrl(item.itemImageUrl || item.product?.imageUrl),
     quantity: item.quantity,
     price: item.unitPrice || item.product?.price || 0,
     createdAt: backendResponse.createdAt
@@ -86,7 +157,7 @@ function mapCartItemDtoToCartItem(dto: CartItemDto): CartItem {
     id: dto.id,
     productId: dto.productId.toString(),
     name: dto.productName,
-    imageUrl: dto.productImage || '/images/placeholder.jpg',
+    imageUrl: processImageUrl(dto.productImage),
     quantity: dto.quantity,
     price: dto.price,
     size: dto.size,
@@ -110,6 +181,9 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
       productId: parseInt(product.id),
       quantity
     };
+    console.log('[CART DEBUG] Adding item to cart through proxy API...');
+    console.log('[CART DEBUG] Request:', request);
+    
     // Use local API proxy to avoid CORS issues
     const response = await fetch('/api/cart', {
       method: 'POST',
@@ -120,13 +194,48 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
       credentials: 'include' // Add credentials for session consistency
     });
 
+    console.log('[CART DEBUG] Add to cart response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CART DEBUG] Add to cart error:', errorText);
       throw new Error(`Failed to add item to cart: ${errorText}`);
     }
 
-    // After adding, get the updated cart
-    return await getCart();
+    // Try to parse response, but don't fail if it's empty
+    let addResponse;
+    try {
+      const responseText = await response.text();
+      console.log('[CART DEBUG] Add to cart response text:', responseText);
+      
+      if (responseText.trim() === '') {
+        addResponse = { success: true };
+      } else {
+        addResponse = JSON.parse(responseText);
+      }
+      console.log('[CART DEBUG] Parsed add response:', addResponse);
+    } catch (parseError) {
+      console.warn('[CART DEBUG] Failed to parse add response, assuming success:', parseError);
+      addResponse = { success: true };
+    }
+
+    // POST was successful, now try to get updated cart
+    // If getCart fails, still consider the add operation successful
+    const cartResult = await getCart();
+    if (cartResult.success) {
+      return cartResult;
+    } else {
+      // Add was successful but couldn't retrieve updated cart
+      // Return success with minimal info
+      console.warn('Item added to cart but failed to retrieve updated cart:', cartResult.error);
+      return {
+        success: true,
+        items: [],
+        totalQuantity: 0,
+        totalPrice: 0,
+        error: undefined
+      };
+    }
   } catch (error) {
     console.error('Error adding to cart:', error);
     return {
@@ -194,7 +303,11 @@ export async function updateCartItem(cartItemId: string, quantity: number):
     const request: UpdateCartItemRequest = { 
       cartItemId: parseInt(cartItemId),
       quantity 
-    };    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items`, {
+    };
+    
+    console.log('[CART DEBUG] Updating cart item:', request);
+    // Use local API proxy to avoid CORS issues
+    const response = await fetch('/api/cart', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -203,8 +316,11 @@ export async function updateCartItem(cartItemId: string, quantity: number):
       credentials: 'include' // Add credentials for session consistency
     });
 
+    console.log('[CART DEBUG] Update cart item response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CART DEBUG] Update cart item error:', errorText);
       throw new Error(`Failed to update cart item: ${errorText}`);
     }
 
@@ -229,13 +345,19 @@ export async function updateCartItem(cartItemId: string, quantity: number):
  */
 export async function removeCartItem(cartItemId: string): 
   Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
-  try {    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/items/${cartItemId}`, {
+  try {
+    console.log('[CART DEBUG] Removing cart item:', cartItemId);
+    // Use local API proxy to avoid CORS issues
+    const response = await fetch(`/api/cart?itemId=${cartItemId}`, {
       method: 'DELETE',
       credentials: 'include' // Add credentials for session consistency
     });
 
+    console.log('[CART DEBUG] Remove cart item response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CART DEBUG] Remove cart item error:', errorText);
       throw new Error(`Failed to remove cart item: ${errorText}`);
     }
 
@@ -258,13 +380,19 @@ export async function removeCartItem(cartItemId: string):
  * @returns Empty cart data or error
  */
 export async function clearCart(): Promise<{ success: boolean; error?: string }> {
-  try {    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ShoppingCart/clear`, {
+  try {
+    console.log('[CART DEBUG] Clearing cart...');
+    // Use local API proxy to avoid CORS issues
+    const response = await fetch('/api/cart/clear', {
       method: 'DELETE',
       credentials: 'include' // Add credentials for session consistency
     });
 
+    console.log('[CART DEBUG] Clear cart response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
+      console.error('[CART DEBUG] Clear cart error:', errorText);
       throw new Error(`Failed to clear cart: ${errorText}`);
     }
 

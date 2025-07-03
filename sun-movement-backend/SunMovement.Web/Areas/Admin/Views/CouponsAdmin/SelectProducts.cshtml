@@ -1,0 +1,105 @@
+@model SunMovement.Web.Areas.Admin.Models.ApplyCouponViewModel
+@{
+    ViewData["Title"] = "Chọn sản phẩm áp dụng mã giảm giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-link me-2"></i>Áp dụng mã giảm giá cho sản phẩm
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">Chọn sản phẩm</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-tag me-1"></i>
+                    Chọn sản phẩm cho mã giảm giá <strong class="text-primary">@Model.CouponCode</strong>
+                </div>
+                <a asp-action="ApplyCouponToProducts" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-exchange-alt me-1"></i> Chọn mã khác
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">@Model.CouponDescription</p>
+
+            <form asp-action="ApplyCouponToProducts" method="post">
+                <input type="hidden" asp-for="CouponId" />
+                <input type="hidden" asp-for="CouponCode" />
+                <input type="hidden" asp-for="CouponDescription" />
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover datatable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px" class="text-center">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
+                                    </div>
+                                </th>
+                                <th>Mã SKU</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Products.Count; i++)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input type="hidden" asp-for="@Model.Products[i].ProductId" />
+                                            <input type="hidden" asp-for="@Model.Products[i].ProductName" />
+                                            <input type="hidden" asp-for="@Model.Products[i].ProductSku" />
+                                            <input type="hidden" asp-for="@Model.Products[i].ProductCategory" />
+                                            <input type="checkbox" class="form-check-input product-checkbox" asp-for="@Model.Products[i].IsSelected">
+                                        </div>
+                                    </td>
+                                    <td>@Model.Products[i].ProductSku</td>
+                                    <td>@Model.Products[i].ProductName</td>
+                                    <td>@Model.Products[i].ProductCategory</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý chọn tất cả
+            $("#selectAll").change(function() {
+                $(".product-checkbox").prop('checked', $(this).prop('checked'));
+            });
+
+            // Cập nhật nút "Chọn tất cả" khi thay đổi các checkbox
+            $(".product-checkbox").change(function() {
+                var allChecked = $(".product-checkbox:not(:checked)").length === 0;
+                $("#selectAll").prop('checked', allChecked);
+            });
+
+            // Kiểm tra trạng thái ban đầu
+            var allChecked = $(".product-checkbox:not(:checked)").length === 0;
+            $("#selectAll").prop('checked', allChecked);
+        });
+    </script>
+}

@@ -1,0 +1,106 @@
+@model SunMovement.Core.ViewModels.BatchInventoryUpdateViewModel
+@{
+    ViewData["Title"] = "Cập nhật kho hàng loạt";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-layer-group me-2"></i>Cập nhật kho hàng loạt
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="InventoryAdmin" asp-action="Index">Quản lý kho</a></li>
+        <li class="breadcrumb-item active">Cập nhật hàng loạt</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-edit me-1"></i>
+                    Cập nhật số lượng và giá vốn
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Hướng dẫn:</strong> Nhập số lượng mới và giá vốn mới cho các sản phẩm cần cập nhật. Chỉ những sản phẩm có thay đổi mới được cập nhật.
+            </div>
+
+            <form asp-action="BatchUpdateInventory" method="post">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover datatable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px">STT</th>
+                                <th>Mã SKU</th>
+                                <th>Tên sản phẩm</th>
+                                <th style="width: 120px">Tồn kho hiện tại</th>
+                                <th style="width: 150px">Số lượng mới</th>
+                                <th style="width: 150px">Giá vốn mới (VNĐ)</th>
+                                <th style="width: 200px">Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Products != null)
+                            {
+                                for (int i = 0; i < Model.Products.Count; i++)
+                                {
+                                    var product = Model.Products[i];
+                                    <tr>
+                                        <td>@(i+1)</td>
+                                        <td>@product.Sku</td>
+                                        <td>@product.Name</td>
+                                        <td class="text-center">@product.StockQuantity</td>
+                                        <td>
+                                            <input type="hidden" name="Updates[@i].ProductId" value="@product.Id" />
+                                            <input type="hidden" name="Updates[@i].ProductName" value="@product.Name" />
+                                            <input type="hidden" name="Updates[@i].ProductSku" value="@product.Sku" />
+                                            <input type="number" class="form-control form-control-sm" name="Updates[@i].NewQuantity" min="0" placeholder="@product.StockQuantity" />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm" name="Updates[@i].NewCostPrice" min="0" step="1000" placeholder="@product.CostPrice.ToString("N0")" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" name="Updates[@i].Reason" maxlength="500" placeholder="Lý do điều chỉnh" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Lưu thay đổi
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            $('.datatable').DataTable({
+                "paging": false,
+                "ordering": true,
+                "info": false,
+                "searching": true,
+                "language": {
+                    "search": "Tìm kiếm:",
+                    "zeroRecords": "Không tìm thấy sản phẩm nào",
+                    "emptyTable": "Không có sản phẩm nào trong danh sách"
+                }
+            });
+        });
+    </script>
+}

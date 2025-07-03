@@ -1,18 +1,42 @@
 // src/services/analytics.js
 import mixpanel from 'mixpanel-browser';
 
+let mixpanelInitialized = false;
+
 // Initialize mixpanel
 export const initMixpanel = () => {
-  mixpanel.init('YOUR_MIXPANEL_TOKEN', { 
-    debug: process.env.NODE_ENV !== 'production',
-    track_pageview: true,
-    persistence: 'localStorage'
-  });
+  const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN || 'demo-token';
+  
+  try {
+    mixpanel.init(token, { 
+      debug: process.env.NODE_ENV !== 'production',
+      track_pageview: true,
+      persistence: 'localStorage'
+    });
+    mixpanelInitialized = true;
+  } catch (error) {
+    console.warn('Mixpanel initialization failed:', error);
+    mixpanelInitialized = false;
+  }
+};
+
+// Safe mixpanel track wrapper
+const safeMixpanelTrack = (eventName, properties) => {
+  if (!mixpanelInitialized) {
+    console.log('Analytics Event:', eventName, properties);
+    return;
+  }
+  
+  try {
+    mixpanel.track(eventName, properties);
+  } catch (error) {
+    console.error('Mixpanel tracking error:', error);
+  }
 };
 
 // Track page view
 export const trackPageView = (pageName) => {
-  mixpanel.track('Page View', {
+  safeMixpanelTrack('Page View', {
     page_name: pageName,
     timestamp: new Date()
   });
@@ -20,7 +44,7 @@ export const trackPageView = (pageName) => {
 
 // Track product view
 export const trackProductView = (userId, product) => {
-  mixpanel.track('Product View', {
+  safeMixpanelTrack('Product View', {
     user_id: userId,
     product_id: product.id,
     product_name: product.name,
@@ -44,7 +68,7 @@ export const trackProductView = (userId, product) => {
 
 // Track add to cart
 export const trackAddToCart = (userId, product, quantity) => {
-  mixpanel.track('Add to Cart', {
+  safeMixpanelTrack('Add to Cart', {
     user_id: userId,
     product_id: product.id,
     product_name: product.name,
@@ -68,7 +92,7 @@ export const trackAddToCart = (userId, product, quantity) => {
 
 // Track add to wishlist
 export const trackAddToWishlist = (userId, product) => {
-  mixpanel.track('Add to Wishlist', {
+  safeMixpanelTrack('Add to Wishlist', {
     user_id: userId,
     product_id: product.id,
     product_name: product.name,
@@ -91,7 +115,7 @@ export const trackAddToWishlist = (userId, product) => {
 
 // Track purchase
 export const trackPurchase = (userId, order) => {
-  mixpanel.track('Purchase', {
+  safeMixpanelTrack('Purchase', {
     user_id: userId,
     order_id: order.id,
     products: order.items.map(item => ({
@@ -121,7 +145,7 @@ export const trackPurchase = (userId, order) => {
 
 // Track product rating
 export const trackProductRating = (userId, productId, rating) => {
-  mixpanel.track('Product Rating', {
+  safeMixpanelTrack('Product Rating', {
     user_id: userId,
     product_id: productId,
     rating: rating,
@@ -144,7 +168,7 @@ export const trackProductRating = (userId, productId, rating) => {
 
 // Track recommendation shown
 export const trackRecommendationShown = (userId, productId, recommendationType, sourceProductId = null) => {
-  mixpanel.track('Recommendation Impression', {
+  safeMixpanelTrack('Recommendation Impression', {
     user_id: userId,
     product_id: productId,
     recommendation_type: recommendationType,
@@ -169,7 +193,7 @@ export const trackRecommendationShown = (userId, productId, recommendationType, 
 
 // Track recommendation click
 export const trackRecommendationClick = (userId, productId, recommendationType) => {
-  mixpanel.track('Recommendation Click', {
+  safeMixpanelTrack('Recommendation Click', {
     user_id: userId,
     product_id: productId,
     recommendation_type: recommendationType,

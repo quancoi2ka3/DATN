@@ -1,4 +1,4 @@
-@model SunMovement.Core.Models.Product
+@model SunMovement.Core.ViewModels.ProductWithInventoryViewModel
 @{
     ViewData["Title"] = "Chi Tiết Sản Phẩm";
     Layout = "_AdminLayout";
@@ -7,8 +7,8 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Chi Tiết Sản Phẩm</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/admin">Trang Chủ Quản Trị</a></li>
-        <li class="breadcrumb-item"><a href="/admin/productsadmin">Sản Phẩm</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang Chủ Quản Trị</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">Sản Phẩm</a></li>
         <li class="breadcrumb-item active">Chi Tiết</li>
     </ol>
     
@@ -19,9 +19,9 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    @if (!string.IsNullOrEmpty(Model.Product?.ImageUrl))
                     {
-                        <img src="@Url.Content(Model.ImageUrl)" alt="@Model.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: contain;" />
+                        <img src="@Url.Content(Model.Product.ImageUrl)" alt="@Model.Product.Name" class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: contain;" />
                     }
                     else
                     {
@@ -34,26 +34,26 @@
                 <div class="col-md-8">
                     <dl class="row">
                         <dt class="col-sm-3">Tên</dt>
-                        <dd class="col-sm-9">@Model.Name</dd>
+                        <dd class="col-sm-9">@Model.Product?.Name</dd>
                         
                         <dt class="col-sm-3">Danh Mục</dt>
-                        <dd class="col-sm-9">@Model.Category.ToString()</dd>
+                        <dd class="col-sm-9">@Model.Product?.Category.ToString()</dd>
                         
                         <dt class="col-sm-3">Giá</dt>
-                        <dd class="col-sm-9">@Model.Price.ToString("N0") VND</dd>
+                        <dd class="col-sm-9">@Model.Product?.Price.ToString("N0") VND</dd>
                         
-                        @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0)
+                        @if (Model.Product?.DiscountPrice.HasValue == true && Model.Product.DiscountPrice.Value > 0)
                         {
                             <dt class="col-sm-3">Giá Khuyến Mãi</dt>
-                            <dd class="col-sm-9">@Model.DiscountPrice.Value.ToString("N0") VND</dd>
+                            <dd class="col-sm-9">@Model.Product.DiscountPrice.Value.ToString("N0") VND</dd>
                         }
                         
                         <dt class="col-sm-3">Số Lượng Tồn Kho</dt>
-                        <dd class="col-sm-9">@Model.StockQuantity</dd>
+                        <dd class="col-sm-9">@Model.CurrentStock</dd>
                         
                         <dt class="col-sm-3">Trạng Thái</dt>
                         <dd class="col-sm-9">
-                            @if (Model.IsActive)
+                            @if (Model.Product?.IsActive == true)
                             {
                                 <span class="badge bg-success">Hoạt Động</span>
                             }
@@ -65,7 +65,7 @@
                         
                         <dt class="col-sm-3">Nổi Bật</dt>
                         <dd class="col-sm-9">
-                            @if (Model.IsFeatured)
+                            @if (Model.Product?.IsFeatured == true)
                             {
                                 <span class="badge bg-primary">Có</span>
                             }
@@ -76,10 +76,10 @@
                         </dd>
                         
                         <dt class="col-sm-3">Ngày Tạo</dt>
-                        <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+                        <dd class="col-sm-9">@Model.Product?.CreatedAt.ToString("g")</dd>
                         
                         <dt class="col-sm-3">Cập Nhật Lần Cuối</dt>
-                        <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Chưa bao giờ")</dd>
+                        <dd class="col-sm-9">@(Model.Product?.UpdatedAt.HasValue == true ? Model.Product.UpdatedAt.Value.ToString("g") : "Chưa bao giờ")</dd>
                     </dl>
                 </div>
             </div>
@@ -87,24 +87,24 @@
             <div class="row mt-4">
                 <div class="col">
                     <h5>Mô Tả</h5>
-                    <p class="border p-3 bg-light">@Model.Description</p>
+                    <p class="border p-3 bg-light">@Model.Product?.Description</p>
                 </div>
             </div>
             
-            @if (!string.IsNullOrEmpty(Model.Specifications))
+            @if (!string.IsNullOrEmpty(Model.Product?.Specifications))
             {
                 <div class="row mt-4">
                     <div class="col">
                         <h5>Thông Số Kỹ Thuật</h5>
-                        <pre class="border p-3 bg-light">@Model.Specifications</pre>
+                        <pre class="border p-3 bg-light">@Model.Product.Specifications</pre>
                     </div>
                 </div>
             }
             
             <div class="mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Chỉnh Sửa</a>
+                <a asp-action="Edit" asp-route-id="@Model.Product?.Id" class="btn btn-primary">Chỉnh Sửa</a>
                 <a asp-action="Index" class="btn btn-secondary">Quay Lại</a>
-                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
+                <a asp-action="Delete" asp-route-id="@Model.Product?.Id" class="btn btn-danger">Xóa</a>
             </div>
         </div>
     </div>

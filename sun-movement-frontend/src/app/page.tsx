@@ -19,13 +19,7 @@ import {
 } from "@/components/ui/lazy-sections";
 import { LazyOnScroll } from "@/components/ui/lazy-skeleton";
 import { ComponentPreloader } from "@/components/ui/lazy-preloader";
-import dynamic from 'next/dynamic';
-
-// Dynamically import PersonalRecommendations to avoid SSR issues with user state
-const PersonalRecommendations = dynamic(
-  () => import('@/components/recommendations/PersonalRecommendations'),
-  { ssr: false }
-);
+import PersonalRecommendationsWrapper from "@/components/recommendations/PersonalRecommendationsWrapper";
 
 export default async function Home() {
   // Fetch data for all the product sections
@@ -57,7 +51,7 @@ export default async function Home() {
             <div className="container mx-auto px-4">
               <h2 className="text-3xl font-bold text-center mb-10">Dành riêng cho bạn</h2>
               <Suspense fallback={<div className="h-64 animate-pulse bg-gray-100 rounded"></div>}>
-                <PersonalRecommendations count={4} title="Sản phẩm phù hợp với bạn" />
+                <PersonalRecommendationsWrapper count={4} title="Sản phẩm phù hợp với bạn" />
               </Suspense>
             </div>
           </section>

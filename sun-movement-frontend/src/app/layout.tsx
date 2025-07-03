@@ -9,9 +9,13 @@ import { RasaChatbot } from "@/components/ui/rasa-chatbot";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { MixpanelProvider } from "@/lib/mixpanel-context";
+import { NotificationProvider } from "@/lib/notification-context";
+import { ReduxProvider } from "@/store/ReduxProvider";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
-import { CartPerformanceMonitor } from "@/components/ui/cart-performance-monitor";
-import { TestingDashboard } from "@/components/ui/testing-dashboard";
+
+import FloatingCart from "@/components/ui/floating-cart";
+import ScrollButtons from "@/components/ui/scroll-buttons";
+import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 
 export const viewport: Viewport = {
@@ -121,20 +125,24 @@ export default function RootLayout({
         <PerformanceMonitor />
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
-          <AuthProvider>
-            <CartProvider>
-              <Header />
-              <main className="flex-grow">
-                <Suspense fallback={<LoadingSpinner />}>
-                  {children}
-                </Suspense>
-              </main>
-              <Footer />
-              <RasaChatbot />
-              <CartPerformanceMonitor />
-              <TestingDashboard />
-            </CartProvider>
-          </AuthProvider>
+          <ReduxProvider>
+            <NotificationProvider>
+              <AuthProvider>
+                <CartProvider>
+                <Header />
+                <main className="flex-grow">
+                  <Suspense fallback={<LoadingSpinner />}>
+                    {children}
+                  </Suspense>
+                </main>
+                <Footer />
+                <RasaChatbot />                  <FloatingCart />
+                  <ScrollButtons />
+                  <Toaster />
+                </CartProvider>
+              </AuthProvider>
+            </NotificationProvider>
+          </ReduxProvider>
         </Suspense>
       </body>
     </html>

@@ -5,7 +5,7 @@ import { createContext, useState, useContext, ReactNode, useEffect, useCallback 
 import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart, apiMergeGuestCart } from "./cart-service";
 import { processCheckout, CheckoutRequest } from "./checkout-service";
 import { useAuth } from "./auth-context";
-import { toast } from "sonner";
+import { useNotification } from "./notification-context";
 
 // Cache Layer
 class CartCache {
@@ -105,10 +105,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
+  const { showSuccess, showError, showInfo } = useNotification();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [lastAction, setLastAction] = useState<(() => Promise<void>) | null>(null);
+  const [pendingOperations, setPendingOperations] = useState<Set<string>>(new Set());
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     cacheHits: 0,
     cacheMisses: 0,
@@ -135,14 +137,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (lastAction) {
       try {
         await lastAction();
-        toast.success("Thao tác đã được thực hiện lại thành công");
+        showSuccess("Thao tác đã được thực hiện lại thành công");
       } catch (error) {
-        toast.error("Không thể thực hiện lại thao tác");
+        showError("Không thể thực hiện lại thao tác");
       }
     } else {
-      toast.info("Không có thao tác nào để thực hiện lại");
+      showInfo("Không có thao tác nào để thực hiện lại");
     }
-  }, [lastAction]);
+  }, [lastAction, showSuccess, showError, showInfo]);
 
   // Fetch cart on initial load with cache and retry
   useEffect(() => {
@@ -206,23 +208,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   const addToCart = async (product: Product, quantity: number, size?: string, color?: string): Promise<boolean> => {
+    const operationKey = `add-${product.id}-${size || ''}-${color || ''}`;
+    
+    // Prevent duplicate operations
+    if (pendingOperations.has(operationKey)) {
+      console.log('[CART DEBUG] Operation already pending, skipping:', operationKey);
+      return false;
+    }
+    
+    setPendingOperations(prev => new Set(prev).add(operationKey));
+    
     const startTime = Date.now();
     
-    // Optimistic update
-    const optimisticItem: CartItem = {
-      id: `temp-${Date.now()}`,
-      productId: product.id,
-      name: product.name,
-      imageUrl: product.imageUrl,
-      price: product.price,
-      quantity: quantity,
-      size: size,
-      color: color,
-      addedAt: new Date()
-    };
-    
+    // Remove optimistic update to prevent duplicates
     const originalItems = [...items];
-    setItems(prev => [...prev, optimisticItem]);
 
     const action = async (): Promise<void> => {
       setIsLoading(true);
@@ -246,24 +245,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cache.invalidate('cart');
           cache.set('cart', { items: response.items });
           updateMetrics(Date.now() - startTime, false, retryAttempts);
-          toast.success("Đã thêm vào giỏ hàng");
+          showSuccess("Đã thêm vào giỏ hàng");
         } else {
-          // Rollback optimistic update
+          // Keep original items
           setItems(originalItems);
           setError(response.error);
-          toast.error(response.error || "Không thể thêm vào giỏ hàng");
+          showError(response.error || "Không thể thêm vào giỏ hàng");
           throw new Error(response.error || "Failed to add to cart");
         }
       } catch (err) {
-        // Rollback optimistic update
+        // Keep original items
         setItems(originalItems);
         const errorMessage = 'Failed to add to cart';
         setError(errorMessage);
         console.error('Error adding to cart:', err);
-        toast.error("Không thể thêm vào giỏ hàng");
+        showError("Không thể thêm vào giỏ hàng");
         throw err;
       } finally {
         setIsLoading(false);
+        setPendingOperations(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(operationKey);
+          return newSet;
+        });
       }
     };
 
@@ -307,12 +311,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cache.invalidate('cart');
           cache.set('cart', { items: response.items });
           updateMetrics(Date.now() - startTime, false, retryAttempts);
-          toast.success("Đã xóa khỏi giỏ hàng");
+          showSuccess("Đã xóa khỏi giỏ hàng");
         } else {
           // Rollback optimistic update
           setItems(originalItems);
           setError(response.error);
-          toast.error(response.error || "Không thể xóa khỏi giỏ hàng");
+          showError(response.error || "Không thể xóa khỏi giỏ hàng");
           throw new Error(response.error || "Failed to remove from cart");
         }
       } catch (err) {
@@ -321,7 +325,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const errorMessage = 'Failed to remove from cart';
         setError(errorMessage);
         console.error('Error removing from cart:', err);
-        toast.error("Không thể xóa khỏi giỏ hàng");
+        showError("Không thể xóa khỏi giỏ hàng");
         throw err;
       } finally {
         setIsLoading(false);
@@ -342,6 +346,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (quantity <= 0) {
       return removeFromCart(cartItemId);
     }
+
+    const operationKey = `update-${cartItemId}-${quantity}`;
+    
+    // Prevent duplicate operations
+    if (pendingOperations.has(operationKey)) {
+      console.log('[CART DEBUG] Update operation already pending, skipping:', operationKey);
+      return false;
+    }
+    
+    setPendingOperations(prev => new Set(prev).add(operationKey));
 
     const startTime = Date.now();
     
@@ -375,12 +389,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cache.invalidate('cart');
           cache.set('cart', { items: response.items });
           updateMetrics(Date.now() - startTime, false, retryAttempts);
-          toast.success("Đã cập nhật giỏ hàng");
+          showSuccess("Đã cập nhật giỏ hàng");
         } else {
           // Rollback optimistic update
           setItems(originalItems);
           setError(response.error);
-          toast.error(response.error || "Không thể cập nhật giỏ hàng");
+          showError(response.error || "Không thể cập nhật giỏ hàng");
           throw new Error(response.error || "Failed to update cart");
         }
       } catch (err) {
@@ -389,10 +403,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const errorMessage = 'Failed to update cart';
         setError(errorMessage);
         console.error('Error updating cart:', err);
-        toast.error("Không thể cập nhật giỏ hàng");
+        showError("Không thể cập nhật giỏ hàng");
         throw err;
       } finally {
         setIsLoading(false);
+        setPendingOperations(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(operationKey);
+          return newSet;
+        });
       }
     };
 
@@ -434,12 +453,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           cache.invalidate('cart');
           cache.set('cart', { items: [] });
           updateMetrics(Date.now() - startTime, false, retryAttempts);
-          toast.success("Đã xóa toàn bộ giỏ hàng");
+          showSuccess("Đã xóa toàn bộ giỏ hàng");
         } else {
           // Rollback optimistic update
           setItems(originalItems);
           setError(response.error);
-          toast.error(response.error || "Không thể xóa giỏ hàng");
+          showError(response.error || "Không thể xóa giỏ hàng");
           throw new Error(response.error || "Failed to clear cart");
         }
       } catch (err) {
@@ -448,7 +467,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const errorMessage = 'Failed to clear cart';
         setError(errorMessage);
         console.error('Error clearing cart:', err);
-        toast.error("Không thể xóa giỏ hàng");
+        showError("Không thể xóa giỏ hàng");
         throw err;
       } finally {
         setIsLoading(false);
@@ -490,11 +509,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
           // Clear cache
           cache.clear();
           updateMetrics(Date.now() - startTime, false, retryAttempts);
-          toast.success("Thanh toán thành công!");
+          showSuccess("Thanh toán thành công!");
           throw response; // Use throw to pass success response
         } else {
           setError(response.error);
-          toast.error(response.error || "Thanh toán thất bại");
+          showError(response.error || "Thanh toán thất bại");
           throw response;
         }
       } catch (err) {
@@ -505,7 +524,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const errorMessage = 'Failed to process checkout';
         setError(errorMessage);
         console.error(errorMessage, err);
-        toast.error("Lỗi thanh toán");
+        showError("Lỗi thanh toán");
         throw {
           success: false,
           error: errorMessage

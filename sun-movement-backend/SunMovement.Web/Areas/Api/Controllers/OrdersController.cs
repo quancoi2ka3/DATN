@@ -434,17 +434,138 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
         // GET: api/orders
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        public async Task<ActionResult<object>> GetUserOrders()
         {
             try
             {
-                var orders = await _unitOfWork.Orders.GetAllAsync();
-                return Ok(orders.Take(10)); // Return last 10 orders for testing
+                Console.WriteLine("[ORDERS API] GetUserOrders called");
+                
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("[ORDERS API] User not authenticated");
+                    return BadRequest(new { success = false, error = "User not authenticated" });
+                }
+
+                Console.WriteLine($"[ORDERS API] Getting orders for user: {userId}");
+
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                var orders = await dbContext.Orders
+                    .Where(o => o.UserId == userId)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                    .OrderByDescending(o => o.OrderDate)
+                    .ToListAsync();
+
+                Console.WriteLine($"[ORDERS API] Found {orders.Count} orders");
+
+                var orderDtos = orders.Select(order => new
+                {
+                    orderId = order.Id.ToString(),
+                    orderDate = order.OrderDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    status = order.Status.ToString().ToLower(),
+                    totalAmount = order.TotalAmount,
+                    email = order.Email,
+                    phoneNumber = order.PhoneNumber,
+                    shippingAddress = order.ShippingAddress,
+                    paymentMethod = order.PaymentMethod,
+                    paymentStatus = order.PaymentStatus.ToString().ToLower(),
+                    trackingNumber = order.TrackingNumber,
+                    notes = order.Notes,
+                    orderItems = order.OrderItems.Select(item => new
+                    {
+                        id = item.Id.ToString(),
+                        productId = item.ProductId,
+                        productName = item.ProductName,
+                        quantity = item.Quantity,
+                        unitPrice = item.UnitPrice,
+                        subtotal = item.Subtotal,
+                        size = (string?)null, // Add these fields to OrderItem model if needed
+                        color = (string?)null // Add these fields to OrderItem model if needed
+                    }).ToList()
+                }).ToList();
+
+                return Ok(new { success = true, orders = orderDtos });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                Console.WriteLine($"[ORDERS API ERROR] {ex.Message}");
+                return StatusCode(500, new { success = false, error = "Internal server error" });
+            }
+        }
+
+        // GET: api/orders/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<object>> GetOrderById(string id)
+        {
+            try
+            {
+                Console.WriteLine($"[ORDER DETAIL API] GetOrderById called with ID: {id}");
+                
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("[ORDER DETAIL API] User not authenticated");
+                    return BadRequest(new { success = false, error = "User not authenticated" });
+                }
+
+                if (!int.TryParse(id, out int orderId))
+                {
+                    Console.WriteLine($"[ORDER DETAIL API] Invalid order ID format: {id}");
+                    return BadRequest(new { success = false, error = "Invalid order ID" });
+                }
+
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                var order = await dbContext.Orders
+                    .Where(o => o.Id == orderId && o.UserId == userId)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                    .FirstOrDefaultAsync();
+
+                if (order == null)
+                {
+                    Console.WriteLine($"[ORDER DETAIL API] Order not found: {orderId}");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                Console.WriteLine($"[ORDER DETAIL API] Order found: {orderId}");
+
+                var orderDto = new
+                {
+                    orderId = order.Id.ToString(),
+                    orderDate = order.OrderDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    status = order.Status.ToString().ToLower(),
+                    totalAmount = order.TotalAmount,
+                    email = order.Email,
+                    phoneNumber = order.PhoneNumber,
+                    shippingAddress = order.ShippingAddress,
+                    paymentMethod = order.PaymentMethod,
+                    paymentStatus = order.PaymentStatus.ToString().ToLower(),
+                    trackingNumber = order.TrackingNumber,
+                    notes = order.Notes,
+                    customerName = $"{order.Email}", // You might want to add a proper customer name field
+                    estimatedDelivery = (string?)null, // Add if you have this field
+                    orderItems = order.OrderItems.Select(item => new
+                    {
+                        id = item.Id.ToString(),
+                        productId = item.ProductId,
+                        productName = item.ProductName,
+                        quantity = item.Quantity,
+                        unitPrice = item.UnitPrice,
+                        subtotal = item.Subtotal,
+                        size = (string?)null, // Add these fields to OrderItem model if needed
+                        color = (string?)null // Add these fields to OrderItem model if needed
+                    }).ToList()
+                };
+
+                return Ok(new { success = true, order = orderDto });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ORDER DETAIL API ERROR] {ex.Message}");
+                return StatusCode(500, new { success = false, error = "Internal server error" });
             }
         }
 

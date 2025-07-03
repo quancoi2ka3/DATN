@@ -41,9 +41,9 @@ export async function processCheckout(checkoutDetails: CheckoutRequest):
   Promise<{ success: boolean; order?: CheckoutResponse; error?: string }> {  
   try {
     console.log('[CHECKOUT DEBUG] Starting checkout with data:', checkoutDetails);
-    console.log('[CHECKOUT DEBUG] API URL:', `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/checkout`);
+    console.log('[CHECKOUT DEBUG] Using API proxy: /api/checkout');
     
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/checkout`, {
+    const response = await fetch('/api/checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +59,9 @@ export async function processCheckout(checkoutDetails: CheckoutRequest):
       const errorText = await response.text();
       console.error('[CHECKOUT DEBUG] Error response:', errorText);
       throw new Error(`Checkout failed: ${errorText}`);
-    }    const data = await response.json();
+    }
+    
+    const data = await response.json();
     console.log('[CHECKOUT DEBUG] Parsed data:', data);
 
     // Ensure data has the expected structure

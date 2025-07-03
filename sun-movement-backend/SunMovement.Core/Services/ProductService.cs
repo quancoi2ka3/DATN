@@ -78,10 +78,85 @@ namespace SunMovement.Core.Services
         public async Task DeleteProductAsync(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
-            if (product != null)
+            if (product == null)
             {
+                throw new ArgumentException($"Product with ID {id} not found.");
+            }
+
+            try
+            {
+                // Check if product is in any active orders
+                var orderItems = await _unitOfWork.OrderItems.FindAsync(oi => oi.ProductId == id);
+                var hasActiveOrders = orderItems.Any(oi => 
+                    oi.Order != null && 
+                    oi.Order.Status != OrderStatus.Cancelled && 
+                    oi.Order.Status != OrderStatus.Completed);
+
+                if (hasActiveOrders)
+                {
+                    throw new InvalidOperationException("Không thể xóa sản phẩm vì có đơn hàng đang xử lý.");
+                }
+
+                // Remove related data in proper order to avoid foreign key violations
+
+                // 1. Remove coupon associations
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.ProductId == id);
+                foreach (var couponProduct in couponProducts)
+                {
+                    await _unitOfWork.CouponProducts.DeleteAsync(couponProduct);
+                }
+
+                // 3. Remove inventory transactions
+                var inventoryTransactions = await _unitOfWork.InventoryTransactions.FindAsync(it => it.ProductId == id);
+                foreach (var transaction in inventoryTransactions)
+                {
+                    await _unitOfWork.InventoryTransactions.DeleteAsync(transaction);
+                }
+
+                // 4. Remove product reviews
+                var reviews = await _unitOfWork.ProductReviews.FindAsync(pr => pr.ProductId == id);
+                foreach (var review in reviews)
+                {
+                    await _unitOfWork.ProductReviews.DeleteAsync(review);
+                }
+
+                // 5. Remove product images
+                var images = await _unitOfWork.ProductImages.FindAsync(pi => pi.ProductId == id);
+                foreach (var image in images)
+                {
+                    await _unitOfWork.ProductImages.DeleteAsync(image);
+                }
+
+                // 6. Remove product variants
+                var variants = await _unitOfWork.ProductVariants.FindAsync(pv => pv.ProductId == id);
+                foreach (var variant in variants)
+                {
+                    await _unitOfWork.ProductVariants.DeleteAsync(variant);
+                }
+
+                // 7. Remove product tags
+                var productTags = await _unitOfWork.ProductTags.FindAsync(pt => pt.ProductId == id);
+                foreach (var productTag in productTags)
+                {
+                    await _unitOfWork.ProductTags.DeleteAsync(productTag);
+                }
+
+                // 8. Remove product suppliers
+                var productSuppliers = await _unitOfWork.ProductSuppliers.FindAsync(ps => ps.ProductId == id);
+                foreach (var supplier in productSuppliers)
+                {
+                    await _unitOfWork.ProductSuppliers.DeleteAsync(supplier);
+                }
+
+                // 9. Finally, delete the product itself
                 await _unitOfWork.Products.DeleteAsync(product);
+                
+                // Save all changes
                 await _unitOfWork.CompleteAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Lỗi khi xóa sản phẩm: {ex.Message}", ex);
             }
         }
 

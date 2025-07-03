@@ -102,12 +102,8 @@ export default function CheckoutForm({
             <Label htmlFor="cod">Thanh toán khi nhận hàng (COD)</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="bank_transfer" id="transfer" />
-            <Label htmlFor="transfer">Chuyển khoản ngân hàng</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="credit_card" id="card" />
-            <Label htmlFor="card">Thẻ tín dụng (Comming soon)</Label>
+            <RadioGroupItem value="vnpay" id="vnpay" />
+            <Label htmlFor="vnpay">Thanh toán qua VNPay</Label>
           </div>
         </RadioGroup>
       </Card>

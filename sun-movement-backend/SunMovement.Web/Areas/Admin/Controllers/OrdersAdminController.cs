@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class OrdersAdminController : Controller
+    public class OrdersAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventoryService _inventoryService;
@@ -58,13 +55,33 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         // GET: Admin/Orders/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var order = await _unitOfWork.Orders.GetByIdAsync(id);
-            if (order == null)
+            try
             {
-                return NotFound();
-            }
+                var order = await _unitOfWork.Orders.GetByIdAsync(id);
+                if (order == null)
+                {
+                    return NotFound();
+                }
 
-            return View(order);
+                // Load OrderItems với Product details
+                var orderItems = await _unitOfWork.OrderItems.FindAsync(oi => oi.OrderId == id);
+                
+                // Load Product details cho mỗi OrderItem
+                foreach (var item in orderItems)
+                {
+                    item.Product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                }
+                
+                order.Items = orderItems.ToList();
+                
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading order details {OrderId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi tải chi tiết đơn hàng.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // GET: Admin/Orders/Edit/5
@@ -90,64 +107,36 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                // Remove TotalAmount validation error if it's 0 (will be recalculated)
+                if (order.TotalAmount == 0)
                 {
-                    var existingOrder = await _unitOfWork.Orders.GetByIdAsync(id);
-                    if (existingOrder == null)
+                    ModelState.Remove("TotalAmount");
+                }
+
+                if (ModelState.IsValid)
+                {
+                    // Recalculate TotalAmount from order items if needed
+                    var orderItems = await _unitOfWork.OrderItems.FindAsync(oi => oi.OrderId == id);
+                    if (orderItems.Any())
                     {
-                        return NotFound();
+                        order.SubtotalAmount = orderItems.Sum(oi => oi.UnitPrice * oi.Quantity);
+                        order.TotalAmount = order.SubtotalAmount + order.ShippingAmount + order.TaxAmount - order.DiscountAmount;
                     }
 
-                    // Kiểm tra thay đổi trạng thái đơn hàng
-                    var oldStatus = existingOrder.Status;
-                    var newStatus = order.Status;
-                    
-                    // Update properties
-                    existingOrder.Status = order.Status;
-                    existingOrder.ShippingAddress = order.ShippingAddress;
-                    existingOrder.PhoneNumber = order.PhoneNumber;
-                    existingOrder.Email = order.Email;
-                    existingOrder.PaymentMethod = order.PaymentMethod;
-
-                    await _unitOfWork.Orders.UpdateAsync(existingOrder);
+                    order.UpdatedAt = DateTime.UtcNow;
+                    await _unitOfWork.Orders.UpdateAsync(order);
                     await _unitOfWork.CompleteAsync();
 
-                    // Nếu chuyển sang trạng thái Đã giao, Đã thanh toán hoặc Hoàn thành, tự động giảm tồn kho
-                    if ((newStatus == OrderStatus.Delivered || newStatus == OrderStatus.Completed || newStatus == OrderStatus.Paid) 
-                        && oldStatus != OrderStatus.Delivered && oldStatus != OrderStatus.Completed && oldStatus != OrderStatus.Paid)
-                    {
-                        try
-                        {
-                            var inventoryResult = await _inventoryService.AdjustStockAfterOrderAsync(existingOrder.Id);
-                            if (inventoryResult)
-                            {
-                                TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công và đã điều chỉnh tồn kho.";
-                            }
-                            else
-                            {
-                                TempData["WarningMessage"] = "Cập nhật đơn hàng thành công nhưng có lỗi khi điều chỉnh tồn kho.";
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Lỗi khi điều chỉnh tồn kho cho đơn hàng {OrderId}", id);
-                            TempData["WarningMessage"] = "Cập nhật đơn hàng thành công nhưng có lỗi khi điều chỉnh tồn kho.";
-                        }
-                    }
-                    else
-                    {
-                        TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công.";
-                    }
-
+                    TempData["SuccessMessage"] = "Cập nhật đơn hàng thành công!";
                     return RedirectToAction(nameof(Details), new { id = order.Id });
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Lỗi khi cập nhật đơn hàng {OrderId}", id);
-                    ModelState.AddModelError("", "Có lỗi xảy ra khi cập nhật đơn hàng. " + ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order {OrderId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi cập nhật đơn hàng: " + ex.Message;
             }
 
             ViewBag.OrderStatuses = Enum.GetValues<OrderStatus>();
@@ -175,6 +164,9 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     else if (status == OrderStatus.Delivered && order.DeliveredDate == null)
                     {
                         order.DeliveredDate = DateTime.UtcNow;
+                        
+                        // SYNC INVENTORY: When order is delivered/completed, reduce product stock
+                        await SyncInventoryOnOrderCompletion(order);
                     }
 
                     await _unitOfWork.Orders.UpdateAsync(order);
@@ -189,6 +181,43 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
 
             return Json(new { success = false, message = "Order not found" });
+        }
+
+        private async Task SyncInventoryOnOrderCompletion(Order order)
+        {
+            try
+            {
+                // Load order items from database
+                var orderItems = await _unitOfWork.OrderItems.GetAllAsync();
+                var items = orderItems.Where(oi => oi.OrderId == order.Id).ToList();
+                
+                if (items.Any())
+                {
+                    foreach (var item in items)
+                    {
+                        var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                        if (product != null)
+                        {
+                            // Reduce stock based on order quantity
+                            product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                            
+                            // Update IsAvailable status if stock is depleted
+                            if (product.StockQuantity == 0)
+                            {
+                                product.IsAvailable = false;
+                            }
+                            
+                            await _unitOfWork.Products.UpdateAsync(product);
+                        }
+                    }
+                    await _unitOfWork.CompleteAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't throw to avoid breaking order status update
+                Console.WriteLine($"Error syncing inventory for order {order.Id}: {ex.Message}");
+            }
         }
 
         // GET: Admin/Orders/Search
@@ -395,6 +424,33 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 _logger.LogError(ex, "Lỗi khi gửi email thông báo cho đơn hàng {OrderId}", orderId);
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi email thông báo: " + ex.Message;
                 return RedirectToAction(nameof(SendOrderNotification), new { id = orderId });
+            }
+        }
+
+        // GET: Admin/Orders/UpdateStatus/5
+        public async Task<IActionResult> UpdateStatus(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var order = await _unitOfWork.Orders.GetByIdAsync(id.Value);
+                if (order == null)
+                {
+                    return NotFound();
+                }
+
+                ViewBag.OrderStatuses = Enum.GetValues<OrderStatus>();
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading order for status update {OrderId}", id);
+                TempData["ErrorMessage"] = "Có lỗi khi tải thông tin đơn hàng.";
+                return RedirectToAction(nameof(Index));
             }
         }
     }

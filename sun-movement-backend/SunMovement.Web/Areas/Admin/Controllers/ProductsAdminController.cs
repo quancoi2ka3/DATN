@@ -19,7 +19,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
-    public class ProductsAdminController : Controller
+    public class ProductsAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileUploadService _fileUploadService;
@@ -564,14 +564,36 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                await _productService.DeleteProductAsync(id);
-                TempData["SuccessMessage"] = "Đã xóa sản phẩm thành công!";
+                // Sử dụng ProductInventoryService để xóa tích hợp
+                var success = await _productInventoryService.DeleteProductWithInventoryAsync(id);
+                
+                if (success)
+                {
+                    ShowSuccess("Đã xóa sản phẩm và tất cả dữ liệu kho hàng liên quan thành công!");
+                }
+                else
+                {
+                    ShowError("Không tìm thấy sản phẩm để xóa.");
+                }
+                
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Cannot delete product {ProductId}: {Message}", id, ex.Message);
+                ShowError(ex.Message);
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Product {ProductId} not found for deletion", id);
+                ShowError("Không tìm thấy sản phẩm để xóa.");
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting product {ProductId}", id);
-                TempData["ErrorMessage"] = "Có lỗi khi xóa sản phẩm: " + ex.Message;
+                _logger.LogError(ex, "Unexpected error deleting product {ProductId}", id);
+                ShowError("Có lỗi không mong muốn khi xóa sản phẩm. Vui lòng thử lại sau.");
                 return RedirectToAction(nameof(Index));
             }
         }

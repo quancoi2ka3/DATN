@@ -60,17 +60,22 @@ namespace SunMovement.Core.Interfaces
         /// <summary>
         /// Lấy danh sách sản phẩm cần nhập hàng
         /// </summary>
-        Task<IEnumerable<ProductReorderSuggestion>> GetProductsForReorderAsync();
+        Task<IEnumerable<ViewModels.ProductReorderSuggestion>> GetProductsForReorderAsync();
         
         /// <summary>
         /// Cảnh báo tồn kho thấp
         /// </summary>
-        Task<IEnumerable<LowStockAlert>> GetLowStockAlertsAsync();
+        Task<IEnumerable<ViewModels.LowStockAlert>> GetLowStockAlertsAsync();
 
         /// <summary>
         /// Đồng bộ tồn kho từ các biến thể sản phẩm với sản phẩm chính
         /// </summary>
         Task SyncProductStockFromVariantsAsync(int productId);
+
+        /// <summary>
+        /// Xóa sản phẩm và tất cả dữ liệu kho hàng liên quan
+        /// </summary>
+        Task<bool> DeleteProductWithInventoryAsync(int productId);
     }
 
     public class InventoryUpdateItem
@@ -81,28 +86,5 @@ namespace SunMovement.Core.Interfaces
         public string Reason { get; set; } = "";
     }
 
-    public class ProductReorderSuggestion
-    {
-        public Product Product { get; set; } = null!;
-        public int CurrentStock { get; set; }
-        public int ReorderPoint { get; set; }
-        public int OptimalQuantity { get; set; }
-        public int SuggestedOrderQuantity { get; set; }
-        public decimal EstimatedCost { get; set; }
-        public DateTime LastRestockDate { get; set; }
-        public int DaysToOutOfStock { get; set; }
-        public int AverageDailySales { get; set; }
-    }
-
-    public class LowStockAlert
-    {
-        public int ProductId { get; set; }
-        public string ProductName { get; set; } = "";
-        public string SKU { get; set; } = "";
-        public int CurrentStock { get; set; }
-        public int MinimumStockLevel { get; set; }
-        public int OptimalStockLevel { get; set; }
-        public string AlertType { get; set; } = ""; // "Low", "Critical", "OutOfStock"
-        public DateTime LastUpdated { get; set; }
-    }
+    // Classes moved to SunMovement.Core.ViewModels namespace
 }

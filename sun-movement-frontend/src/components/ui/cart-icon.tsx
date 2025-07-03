@@ -19,6 +19,8 @@ export function CartIcon({ className }: CartIconProps) {
   const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useCart();
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
     setUpdatingItemId(itemId);
@@ -30,6 +32,14 @@ export function CartIcon({ className }: CartIconProps) {
     setRemovingItemId(itemId);
     await removeFromCart(itemId);
     setRemovingItemId(null);
+  };
+
+  const handleCheckout = () => {
+    setIsCheckoutLoading(true);
+    setIsOpen(false); // Close the sheet
+    // The navigation will be handled by the Link component
+    // Reset loading state after a short delay
+    setTimeout(() => setIsCheckoutLoading(false), 1000);
   };
 
   const CartItemComponent = ({ item }: { item: CartItem }) => (
@@ -98,7 +108,7 @@ export function CartIcon({ className }: CartIconProps) {
   );
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className={cn("relative", className)}>
           <ShoppingCart className="h-5 w-5" />
@@ -135,9 +145,14 @@ export function CartIcon({ className }: CartIconProps) {
               <p>Tổng cộng</p>
               <p>{totalPrice.toLocaleString()} VNĐ</p>
             </div>
-            <Button className="w-full" asChild disabled={isLoading}>
+            <Button 
+              className="w-full" 
+              onClick={handleCheckout}
+              disabled={isLoading || isCheckoutLoading}
+              asChild
+            >
               <Link href="/checkout">
-                {isLoading ? (
+                {(isLoading || isCheckoutLoading) ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Đang xử lý...

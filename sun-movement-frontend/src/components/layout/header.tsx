@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AuthModal from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/auth-context";
-import { Menu, X, ChevronDown, Phone, Instagram, Facebook, MapPin, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, Instagram, Facebook, MapPin, User, LogOut, Settings, Package } from "lucide-react";
 import { initUIEnhancements } from "@/lib/ui-enhancements";
 
 // Import custom CSS
@@ -78,6 +78,11 @@ function AuthSection() {
           <DropdownMenuItem className="text-white hover:bg-slate-700">
             <User className="mr-2 h-4 w-4" />
             <Link href="/profile">Thông tin cá nhân</Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem className="text-white hover:bg-slate-700">
+            <Package className="mr-2 h-4 w-4" />
+            <Link href="/orders" prefetch={false}>Theo dõi đơn hàng</Link>
           </DropdownMenuItem>
           
           <DropdownMenuItem className="text-white hover:bg-slate-700">

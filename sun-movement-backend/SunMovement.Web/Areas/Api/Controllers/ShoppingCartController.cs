@@ -83,6 +83,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
             try
             {
                 var userId = GetUserId();
+                _logger.LogInformation($"[ADD TO CART] UserId: {userId}, Request: {System.Text.Json.JsonSerializer.Serialize(addToCartDto)}");
+                
                 // Remove authorization check for testing
                 // if (string.IsNullOrEmpty(userId))
                 // {
@@ -91,44 +93,56 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
                 if (addToCartDto.ProductId == null && addToCartDto.ServiceId == null)
                 {
+                    _logger.LogWarning("[ADD TO CART] Missing ProductId and ServiceId");
                     return BadRequest("Either ProductId or ServiceId must be provided");
                 }
 
                 if (addToCartDto.ProductId != null && addToCartDto.ServiceId != null)
                 {
+                    _logger.LogWarning("[ADD TO CART] Both ProductId and ServiceId provided");
                     return BadRequest("Cannot add both Product and Service at the same time");
                 }
 
                 if (addToCartDto.Quantity <= 0)
                 {
+                    _logger.LogWarning($"[ADD TO CART] Invalid quantity: {addToCartDto.Quantity}");
                     return BadRequest("Quantity must be greater than zero");
                 }
 
                 string itemName = "";
                 string imageUrl = "";
-                decimal unitPrice = 0;                if (addToCartDto.ProductId.HasValue)
+                decimal unitPrice = 0;
+
+                if (addToCartDto.ProductId.HasValue)
                 {
+                    _logger.LogInformation($"[ADD TO CART] Looking up product: {addToCartDto.ProductId.Value}");
                     var product = await _productService.GetProductByIdAsync(addToCartDto.ProductId.Value);
                     if (product == null)
                     {
+                        _logger.LogWarning($"[ADD TO CART] Product not found: {addToCartDto.ProductId.Value}");
                         return NotFound("Product not found");
                     }
                     itemName = product.Name ?? "Unknown Product";
                     imageUrl = product.ImageUrl ?? "/images/placeholder.jpg";
                     unitPrice = product.Price;
+                    _logger.LogInformation($"[ADD TO CART] Product found: {itemName}, Price: {unitPrice}");
                 }
                 else if (addToCartDto.ServiceId.HasValue)
                 {
+                    _logger.LogInformation($"[ADD TO CART] Looking up service: {addToCartDto.ServiceId.Value}");
                     var service = await _serviceService.GetServiceByIdAsync(addToCartDto.ServiceId.Value);
                     if (service == null)
                     {
+                        _logger.LogWarning($"[ADD TO CART] Service not found: {addToCartDto.ServiceId.Value}");
                         return NotFound("Service not found");
                     }
                     itemName = service.Name ?? "Unknown Service";
                     imageUrl = service.ImageUrl ?? "/images/placeholder.jpg";
                     unitPrice = service.Price;
+                    _logger.LogInformation($"[ADD TO CART] Service found: {itemName}, Price: {unitPrice}");
                 }
 
+                _logger.LogInformation($"[ADD TO CART] Adding item to cart for user: {userId}");
                 await _cartService.AddItemToCartAsync(
                     userId,
                     addToCartDto.ProductId,
@@ -139,12 +153,13 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     addToCartDto.Quantity
                 );
 
+                _logger.LogInformation($"[ADD TO CART] Successfully added item to cart for user: {userId}");
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error adding item to cart");
-                return StatusCode(500, "An error occurred while adding item to cart");
+                _logger.LogError(ex, "[ADD TO CART] Error adding item to cart");
+                return StatusCode(500, $"An error occurred while adding item to cart: {ex.Message}");
             }
         }        [HttpPut("items")]
         public async Task<ActionResult> UpdateCartItem(UpdateCartItemDto updateCartItemDto)

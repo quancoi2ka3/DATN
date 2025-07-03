@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class PaymentsAdminController : Controller
+    public class PaymentsAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
 

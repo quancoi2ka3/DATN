@@ -452,10 +452,17 @@ namespace SunMovement.Infrastructure.Migrations
                     b.Property<int>("CurrentUsageCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("DeactivationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("DisableWhenProductsOutOfStock")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -468,6 +475,9 @@ namespace SunMovement.Infrastructure.Migrations
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastAutoDeactivation")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("MaximumDiscountAmount")
                         .HasColumnType("decimal(18,2)");
@@ -485,6 +495,9 @@ namespace SunMovement.Infrastructure.Migrations
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("TimesDisabledDueToInventory")
+                        .HasColumnType("int");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

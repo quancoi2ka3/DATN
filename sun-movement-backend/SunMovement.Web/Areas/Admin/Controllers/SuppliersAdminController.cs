@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Models;
 using SunMovement.Core.Interfaces;
@@ -6,9 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class SuppliersAdminController : Controller
+    public class SuppliersAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SuppliersAdminController> _logger;

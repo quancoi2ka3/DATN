@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class EventsAdminController : Controller
+    public class EventsAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileUploadService _fileUploadService;

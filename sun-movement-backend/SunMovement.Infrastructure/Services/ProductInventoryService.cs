@@ -449,12 +449,12 @@ namespace SunMovement.Infrastructure.Services
         /// <summary>
         /// Lấy danh sách sản phẩm cần nhập hàng
         /// </summary>
-        public async Task<IEnumerable<Core.Interfaces.ProductReorderSuggestion>> GetProductsForReorderAsync()
+        public async Task<IEnumerable<Core.ViewModels.ProductReorderSuggestion>> GetProductsForReorderAsync()
         {
             try
             {
                 var products = await _unitOfWork.Products.GetAllAsync();
-                var result = new List<Core.Interfaces.ProductReorderSuggestion>();
+                var result = new List<Core.ViewModels.ProductReorderSuggestion>();
                 
                 foreach (var product in products)
                 {
@@ -463,17 +463,17 @@ namespace SunMovement.Infrastructure.Services
                     {
                         var productInventory = await GetProductWithInventoryAsync(product.Id);
                         
-                        var suggestion = new Core.Interfaces.ProductReorderSuggestion
+                        var suggestion = new Core.ViewModels.ProductReorderSuggestion
                         {
-                            Product = product,
+                            ProductId = product.Id,
+                            ProductName = product.Name,
+                            SKU = product.Sku ?? "",
                             CurrentStock = product.StockQuantity,
-                            ReorderPoint = product.MinimumStockLevel,
-                            OptimalQuantity = product.OptimalStockLevel,
-                            SuggestedOrderQuantity = productInventory.SuggestedReorderQuantity,
+                            SuggestedReorderQuantity = productInventory.SuggestedReorderQuantity,
                             EstimatedCost = productInventory.SuggestedReorderQuantity * product.CostPrice,
-                            LastRestockDate = productInventory.LastRestock ?? DateTime.MinValue,
-                            DaysToOutOfStock = productInventory.EstimatedDaysToOutOfStock,
-                            AverageDailySales = (int)Math.Ceiling(productInventory.AverageDailySales)
+                            OptimalReorderDate = DateTime.Now.AddDays(productInventory.EstimatedDaysToOutOfStock - 14), // 2 tuần trước khi hết hàng
+                            AverageDailySales = productInventory.AverageDailySales,
+                            DaysUntilStockout = productInventory.EstimatedDaysToOutOfStock
                         };
                         
                         result.Add(suggestion);
@@ -493,63 +493,59 @@ namespace SunMovement.Infrastructure.Services
         /// <summary>
         /// Cảnh báo tồn kho thấp
         /// </summary>
-        public async Task<IEnumerable<Core.Interfaces.LowStockAlert>> GetLowStockAlertsAsync()
+        public async Task<IEnumerable<Core.ViewModels.LowStockAlert>> GetLowStockAlertsAsync()
         {
             try
             {
                 var products = await _unitOfWork.Products.GetAllAsync();
-                var alerts = new List<Core.Interfaces.LowStockAlert>();
+                var alerts = new List<Core.ViewModels.LowStockAlert>();
                 
                 foreach (var product in products)
                 {
                     if (product.StockQuantity <= 0 && product.Status != ProductStatus.Discontinued)
                     {
-                        alerts.Add(new Core.Interfaces.LowStockAlert
+                        alerts.Add(new Core.ViewModels.LowStockAlert
                         {
                             ProductId = product.Id,
                             ProductName = product.Name,
                             SKU = product.Sku ?? "",
                             CurrentStock = product.StockQuantity,
                             MinimumStockLevel = product.MinimumStockLevel,
-                            OptimalStockLevel = product.OptimalStockLevel,
-                            AlertType = "OutOfStock",
-                            LastUpdated = product.LastStockUpdateDate
+                            ReorderPoint = product.MinimumStockLevel,
+                            LastRestock = product.LastStockUpdateDate
                         });
                     }
                     else if (product.StockQuantity <= product.MinimumStockLevel / 2 && product.Status != ProductStatus.Discontinued)
                     {
-                        alerts.Add(new Core.Interfaces.LowStockAlert
+                        alerts.Add(new Core.ViewModels.LowStockAlert
                         {
                             ProductId = product.Id,
                             ProductName = product.Name,
                             SKU = product.Sku ?? "",
                             CurrentStock = product.StockQuantity,
                             MinimumStockLevel = product.MinimumStockLevel,
-                            OptimalStockLevel = product.OptimalStockLevel,
-                            AlertType = "Critical",
-                            LastUpdated = product.LastStockUpdateDate
+                            ReorderPoint = product.MinimumStockLevel,
+                            LastRestock = product.LastStockUpdateDate
                         });
                     }
                     else if (product.StockQuantity <= product.MinimumStockLevel && product.Status != ProductStatus.Discontinued)
                     {
-                        alerts.Add(new Core.Interfaces.LowStockAlert
+                        alerts.Add(new Core.ViewModels.LowStockAlert
                         {
                             ProductId = product.Id,
                             ProductName = product.Name,
                             SKU = product.Sku ?? "",
                             CurrentStock = product.StockQuantity,
                             MinimumStockLevel = product.MinimumStockLevel,
-                            OptimalStockLevel = product.OptimalStockLevel,
-                            AlertType = "Low",
-                            LastUpdated = product.LastStockUpdateDate
+                            ReorderPoint = product.MinimumStockLevel,
+                            LastRestock = product.LastStockUpdateDate
                         });
                     }
                 }
                 
-                return alerts.OrderBy(a => 
-                    a.AlertType == "OutOfStock" ? 0 : 
-                    a.AlertType == "Critical" ? 1 : 2
-                ).ToList();
+                return alerts.OrderBy(a => a.IsOutOfStock ? 0 : 1)
+                       .ThenBy(a => a.CurrentStock)
+                       .ToList();
             }
             catch (Exception ex)
             {
@@ -676,6 +672,78 @@ namespace SunMovement.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi kích hoạt lại mã giảm giá cho sản phẩm {ProductId}", productId);
+            }
+        }
+
+        /// <summary>
+        /// Xóa sản phẩm và tất cả dữ liệu kho hàng liên quan
+        /// </summary>
+        public async Task<bool> DeleteProductWithInventoryAsync(int productId)
+        {
+            try
+            {
+                // 1. Kiểm tra ràng buộc nghiệp vụ
+                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                if (product == null)
+                {
+                    _logger.LogWarning("Attempted to delete non-existent product {ProductId}", productId);
+                    return false;
+                }
+
+                // 2. Kiểm tra xem có đơn hàng nào đang sử dụng sản phẩm này không
+                var orderItems = await _unitOfWork.OrderItems.FindAsync(oi => oi.ProductId == productId);
+                if (orderItems.Any())
+                {
+                    _logger.LogWarning("Cannot delete product {ProductId} because it has associated orders", productId);
+                    throw new InvalidOperationException("Không thể xóa sản phẩm vì đã có đơn hàng liên quan");
+                }
+
+                // 3. Xóa các transaction inventory
+                var inventoryTransactions = await _unitOfWork.InventoryTransactions.FindAsync(it => it.ProductId == productId);
+                foreach (var transaction in inventoryTransactions)
+                {
+                    await _unitOfWork.InventoryTransactions.DeleteAsync(transaction);
+                }
+
+                // 4. Xóa liên kết với coupon
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.ProductId == productId);
+                foreach (var cp in couponProducts)
+                {
+                    await _unitOfWork.CouponProducts.DeleteAsync(cp);
+                }
+
+                // 5. Cập nhật các coupon tự động bị ảnh hưởng
+                var allCoupons = await _unitOfWork.Coupons.GetAllAsync();
+                var affectedCoupons = allCoupons.Where(c => c.DisableWhenProductsOutOfStock && c.IsActive);
+                
+                foreach (var coupon in affectedCoupons)
+                {
+                    // Kiểm tra xem coupon này có còn sản phẩm nào khác không
+                    var remainingProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == coupon.Id && cp.ProductId != productId);
+                    
+                    if (!remainingProducts.Any())
+                    {
+                        coupon.IsActive = false;
+                        coupon.DeactivationReason = $"Tất cả sản phẩm liên kết đã bị xóa (bao gồm sản phẩm ID: {productId})";
+                        coupon.LastAutoDeactivation = DateTime.UtcNow;
+                        coupon.TimesDisabledDueToInventory++;
+                        await _unitOfWork.Coupons.UpdateAsync(coupon);
+                    }
+                }
+
+                // 6. Cuối cùng mới xóa sản phẩm
+                await _unitOfWork.Products.DeleteAsync(product);
+                
+                // 7. Commit tất cả thay đổi
+                await _unitOfWork.CompleteAsync();
+                
+                _logger.LogInformation("Successfully deleted product {ProductId} with all inventory data", productId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting product with inventory {ProductId}", productId);
+                throw;
             }
         }
     }

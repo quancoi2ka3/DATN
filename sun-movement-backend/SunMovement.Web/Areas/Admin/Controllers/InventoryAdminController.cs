@@ -11,12 +11,13 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SunMovement.Web.Areas.Admin.Models;
+using CoreBatchInventoryUpdateViewModel = SunMovement.Core.ViewModels.BatchInventoryUpdateViewModel;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
-    public class InventoryAdminController : Controller
+    public class InventoryAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventoryService _inventoryService;
@@ -359,20 +360,20 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         CurrentStock = alert.CurrentStock,
                         MinimumStockLevel = alert.MinimumStockLevel,
                         ReorderPoint = alert.MinimumStockLevel + 5, // Estimated reorder point
-                        LastRestock = alert.LastUpdated
+                        LastRestock = alert.LastRestock
                     }).ToList();
 
                     modelWithInsights.ReorderSuggestions = reorderSuggestions.Select(suggestion => new Core.ViewModels.ProductReorderSuggestion
                     {
-                        ProductId = suggestion.Product.Id,
-                        ProductName = suggestion.Product.Name,
-                        SKU = suggestion.Product.Sku ?? string.Empty,
+                        ProductId = suggestion.ProductId,
+                        ProductName = suggestion.ProductName,
+                        SKU = suggestion.SKU,
                         CurrentStock = suggestion.CurrentStock,
-                        SuggestedReorderQuantity = suggestion.SuggestedOrderQuantity,
+                        SuggestedReorderQuantity = suggestion.SuggestedReorderQuantity,
                         EstimatedCost = suggestion.EstimatedCost,
-                        OptimalReorderDate = DateTime.Now.AddDays(Math.Max(1, suggestion.DaysToOutOfStock - 5)),
+                        OptimalReorderDate = DateTime.Now.AddDays(Math.Max(1, suggestion.DaysUntilStockout - 5)),
                         AverageDailySales = suggestion.AverageDailySales,
-                        DaysUntilStockout = suggestion.DaysToOutOfStock
+                        DaysUntilStockout = suggestion.DaysUntilStockout
                     }).ToList();
                     
                     return View(modelWithInsights);
@@ -394,7 +395,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             try
             {
                 var products = await _unitOfWork.Products.GetAllAsync();
-                var model = new BatchInventoryUpdateViewModel();
+                var model = new CoreBatchInventoryUpdateViewModel();
                 model.Products = products.Where(p => p.TrackInventory).ToList();
                 
                 return View(model);
@@ -410,7 +411,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         // POST: Admin/InventoryAdmin/BatchUpdateInventory
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BatchUpdateInventory(BatchInventoryUpdateViewModel model)
+        public async Task<IActionResult> BatchUpdateInventory(CoreBatchInventoryUpdateViewModel model)
         {
             try
             {
@@ -448,7 +449,291 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
         }
 
-        // Helper Methods
+        // GET: Admin/InventoryAdmin/ManageProductInventory/5
+        public async Task<IActionResult> ManageProductInventory(int id)
+        {
+            try
+            {
+                var product = await _unitOfWork.Products.GetByIdAsync(id);
+                if (product == null)
+                {
+                    ShowError("Không tìm thấy sản phẩm");
+                    return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+                }
+                
+                // Lấy thông tin kho hàng
+                var inventory = await _productInventoryService.GetProductWithInventoryAsync(id);
+                if (inventory == null || inventory.Product == null)
+                {
+                    ShowError("Không tìm thấy thông tin kho hàng cho sản phẩm này");
+                    return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+                }
+                
+                return View(inventory);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading inventory management for product {ProductId}", id);
+                ShowError("Có lỗi xảy ra khi tải thông tin kho hàng");
+                return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+            }
+        }
+        
+        // GET: Admin/InventoryAdmin/BatchUpdate
+        public async Task<IActionResult> BatchUpdate()
+        {
+            try
+            {
+                var products = await _unitOfWork.Products.GetAllAsync();
+                var model = new CoreBatchInventoryUpdateViewModel
+                {
+                    Products = products.Where(p => p.TrackInventory).ToList()
+                };
+                
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading batch update form");
+                ShowError("Có lỗi xảy ra khi tải form cập nhật hàng loạt");
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // POST: Admin/InventoryAdmin/BatchUpdate
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchUpdate(CoreBatchInventoryUpdateViewModel model)
+        {
+            try
+            {
+                if (ModelState.IsValid && model.Updates != null && model.Updates.Any())
+                {
+                    // Chuyển đổi từ view model sang domain model
+                    var updates = model.Updates.Select(u => new Core.Interfaces.InventoryUpdateItem
+                    {
+                        ProductId = u.ProductId,
+                        NewQuantity = u.NewQuantity,
+                        NewCostPrice = u.NewCostPrice,
+                        Reason = u.Reason
+                    }).ToList();
+                    
+                    // Sử dụng service để cập nhật hàng loạt
+                    await _productInventoryService.BatchUpdateInventoryAsync(updates);
+                    
+                    ShowSuccess("Cập nhật hàng loạt thành công");
+                    return RedirectToAction(nameof(Index));
+                }
+                
+                // Nếu có lỗi, tải lại danh sách sản phẩm và hiển thị form
+                var products = await _unitOfWork.Products.GetAllAsync();
+                model.Products = products.Where(p => p.TrackInventory).ToList();
+                
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error performing batch inventory update");
+                ShowError("Có lỗi xảy ra khi cập nhật hàng loạt");
+                
+                var products = await _unitOfWork.Products.GetAllAsync();
+                model.Products = products.Where(p => p.TrackInventory).ToList();
+                
+                return View(model);
+            }
+        }
+        
+        // GET: Admin/InventoryAdmin/ExportInventory
+        public async Task<IActionResult> ExportInventory()
+        {
+            try
+            {
+                var products = await _unitOfWork.Products.GetAllAsync();
+                var inventoryData = products.Where(p => p.TrackInventory)
+                    .Select(p => new
+                    {
+                        SKU = p.Sku,
+                        ProductName = p.Name,
+                        Category = p.Category,
+                        CurrentStock = p.StockQuantity,
+                        CostPrice = p.CostPrice,
+                        RetailPrice = p.Price,
+                        TotalValue = p.StockQuantity * p.CostPrice,
+                        MinimumStock = p.MinimumStockLevel,
+                        Status = p.IsActive ? "Đang bán" : "Ngừng bán"
+                    })
+                    .ToList();
+                
+                // Export to CSV
+                var csv = "SKU,Tên Sản Phẩm,Danh Mục,Tồn Kho,Giá Nhập,Giá Bán,Giá Trị Kho,Tồn Kho Tối Thiểu,Trạng Thái\n";
+                foreach (var item in inventoryData)
+                {
+                    csv += $"\"{item.SKU}\",\"{item.ProductName}\",\"{item.Category}\",{item.CurrentStock},{item.CostPrice},{item.RetailPrice},{item.TotalValue},{item.MinimumStock},\"{item.Status}\"\n";
+                }
+                
+                return File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"inventory-export-{DateTime.Now:yyyyMMdd}.csv");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting inventory data");
+                ShowError("Có lỗi xảy ra khi xuất dữ liệu kho hàng");
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Admin/InventoryAdmin/AddStock/5
+        public async Task<IActionResult> AddStock(int productId)
+        {
+            try
+            {
+                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                if (product == null)
+                {
+                    ShowError("Không tìm thấy sản phẩm");
+                    return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+                }
+                
+                ViewBag.Product = product;
+                var transaction = new InventoryTransaction
+                {
+                    ProductId = productId,
+                    TransactionType = InventoryTransactionType.Purchase,
+                    TransactionDate = DateTime.Now
+                };
+                
+                await LoadSuppliersToViewBag();
+                
+                return View(transaction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading add stock form for product {ProductId}", productId);
+                ShowError("Có lỗi xảy ra khi tải form nhập kho");
+                return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+            }
+        }
+        
+        // POST: Admin/InventoryAdmin/AddStock
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddStock(InventoryTransaction transaction)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    transaction.TransactionType = InventoryTransactionType.Purchase;
+                    transaction.TransactionDate = DateTime.Now;
+                    
+                    await _inventoryService.AddStockAsync(
+                        transaction.ProductId,
+                        transaction.Quantity,
+                        transaction.UnitPrice,
+                        transaction.SupplierId,
+                        transaction.ReferenceNumber ?? string.Empty,
+                        transaction.Notes ?? string.Empty);
+                    
+                    ShowSuccess("Nhập kho thành công");
+                    return RedirectToAction("ProductWithInventory", "ProductsAdmin", new { area = "Admin", id = transaction.ProductId });
+                }
+                
+                var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
+                ViewBag.Product = product;
+                
+                await LoadSuppliersToViewBag();
+                
+                return View(transaction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding stock for product {ProductId}", transaction.ProductId);
+                ShowError("Có lỗi xảy ra khi nhập kho");
+                
+                var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
+                ViewBag.Product = product;
+                
+                await LoadSuppliersToViewBag();
+                
+                return View(transaction);
+            }
+        }
+        
+        // GET: Admin/InventoryAdmin/StockMovement/5
+        public async Task<IActionResult> StockMovement(int productId)
+        {
+            try
+            {
+                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                if (product == null)
+                {
+                    ShowError("Không tìm thấy sản phẩm");
+                    return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+                }
+                
+                ViewBag.Product = product;
+                var transaction = new InventoryTransaction
+                {
+                    ProductId = productId,
+                    TransactionType = InventoryTransactionType.Adjustment,
+                    TransactionDate = DateTime.Now
+                };
+                
+                return View(transaction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading stock movement form for product {ProductId}", productId);
+                ShowError("Có lỗi xảy ra khi tải form điều chỉnh kho");
+                return RedirectToAction("Index", "ProductsAdmin", new { area = "Admin" });
+            }
+        }
+        
+        // POST: Admin/InventoryAdmin/StockMovement
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StockMovement(InventoryTransaction transaction)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    transaction.TransactionType = InventoryTransactionType.Adjustment;
+                    transaction.TransactionDate = DateTime.Now;
+                    
+                    var result = await _inventoryService.RecordStockAdjustmentAsync(
+                        transaction.ProductId,
+                        transaction.Quantity,
+                        transaction.Notes ?? string.Empty);
+                    
+                    if (result.Success)
+                    {
+                        ShowSuccess("Điều chỉnh kho thành công");
+                    }
+                    else
+                    {
+                        ShowError(result.Message);
+                    }
+                    
+                    return RedirectToAction("ProductWithInventory", "ProductsAdmin", new { area = "Admin", id = transaction.ProductId });
+                }
+                
+                var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
+                ViewBag.Product = product;
+                
+                return View(transaction);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adjusting stock for product {ProductId}", transaction.ProductId);
+                ShowError("Có lỗi xảy ra khi điều chỉnh kho");
+                
+                var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
+                ViewBag.Product = product;
+                
+                return View(transaction);
+            }
+        }
+
         private async Task LoadProductsAndSuppliersToViewBag()
         {
             var products = await _unitOfWork.Products.GetAllAsync();
@@ -460,6 +745,16 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 Text = $"{p.Name} (Tồn: {p.StockQuantity})"
             });
 
+            ViewBag.Suppliers = suppliers.Select(s => new SelectListItem
+            {
+                Value = s.Id.ToString(),
+                Text = s.Name
+            });
+        }
+
+        private async Task LoadSuppliersToViewBag()
+        {
+            var suppliers = await _unitOfWork.Suppliers.GetActiveAsync();
             ViewBag.Suppliers = suppliers.Select(s => new SelectListItem
             {
                 Value = s.Id.ToString(),

@@ -53,21 +53,22 @@ class CartCache {
 }
 
 // Retry mechanism
-const withRetry = async <T>(
+function withRetry<T>(
   fn: () => Promise<T>, 
   retries: number = 3, 
   delay: number = 1000
-): Promise<T> => {
-  try {
-    return await fn();
-  } catch (error) {
+): Promise<T> {
+  return fn().catch((error) => {
     if (retries > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return withRetry(fn, retries - 1, delay * 1.5);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(withRetry(fn, retries - 1, delay * 1.5));
+        }, delay);
+      });
     }
     throw error;
-  }
-};
+  });
+}
 
 // Optimistic update types
 interface OptimisticAction {
@@ -159,26 +160,24 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Enhanced API call wrapper
-  const enhancedApiCall = useCallback(async <T>(
-    apiFunction: () => Promise<T>,
+  const enhancedApiCall = useCallback((
+    apiFunction: () => Promise<any>,
     cacheKey?: string,
     useCache: boolean = true
-  ): Promise<T> => {
+  ): Promise<any> => {
     const startTime = Date.now();
     
     // Check cache first
     if (cacheKey && useCache) {
-      const cached = cache.current.get<T>(cacheKey);
+      const cached = cache.current.get(cacheKey);
       if (cached) {
         setMetrics(prev => ({ ...prev, cacheHits: prev.cacheHits + 1 }));
-        return cached;
+        return Promise.resolve(cached);
       }
       setMetrics(prev => ({ ...prev, cacheMisses: prev.cacheMisses + 1 }));
     }
 
-    try {
-      const result = await withRetry(apiFunction);
-      
+    return withRetry(apiFunction).then((result) => {
       // Cache successful results
       if (cacheKey && useCache) {
         cache.current.set(cacheKey, result);
@@ -188,10 +187,10 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
       updateResponseTime(responseTime);
       
       return result;
-    } catch (error) {
+    }).catch((error) => {
       setMetrics(prev => ({ ...prev, retryCount: prev.retryCount + 1 }));
       throw error;
-    }
+    });
   }, [updateResponseTime]);
 
   // Fetch cart with caching
@@ -238,12 +237,14 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     // Create optimistic cart item
     const optimisticItem: CartItem = {
       id: `temp-${Date.now()}`,
+      productId: product.id,
       name: product.name,
       price: product.price,
       quantity,
       imageUrl: product.imageUrl,
       size,
-      color
+      color,
+      addedAt: new Date()
     };
 
     // Apply optimistic update
@@ -333,7 +334,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [items, enhancedApiCall, removeFromCart, applyOptimisticUpdate]);
+  }, [items, enhancedApiCall, applyOptimisticUpdate]);
 
   // Enhanced remove from cart
   const removeFromCart = useCallback(async (cartItemId: string): Promise<boolean> => {

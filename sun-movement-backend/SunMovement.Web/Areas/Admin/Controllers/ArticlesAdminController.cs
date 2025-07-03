@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Core.DTOs;
@@ -10,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class ArticlesAdminController : Controller
+    public class ArticlesAdminController : BaseAdminController
     {
         private readonly IArticleService _articleService;
         private readonly IFileUploadService _fileUploadService;

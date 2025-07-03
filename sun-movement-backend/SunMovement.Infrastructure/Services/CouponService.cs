@@ -547,5 +547,152 @@ namespace SunMovement.Infrastructure.Services
 
             return Math.Round(discountAmount, 0);
         }
+
+        public async Task<IEnumerable<int>> GetCouponProductIdsAsync(int couponId)
+        {
+            try
+            {
+                // Get product IDs associated with this coupon
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == couponId);
+                return couponProducts.Select(cp => cp.ProductId).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting product IDs for coupon {CouponId}", couponId);
+                return Enumerable.Empty<int>();
+            }
+        }
+
+        public async Task<bool> UpdateCouponProductsAsync(int couponId, IEnumerable<int> productIds)
+        {
+            try
+            {
+                // Validate coupon exists
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+                if (coupon == null)
+                {
+                    _logger.LogWarning("Attempted to update products for non-existent coupon {CouponId}", couponId);
+                    return false;
+                }
+
+                // Get existing product associations
+                var existingAssociations = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == couponId);
+                var existingProductIds = existingAssociations.Select(cp => cp.ProductId).ToList();
+
+                // Determine which associations to add and which to remove
+                var productIdsToAdd = productIds.Where(id => !existingProductIds.Contains(id)).ToList();
+                var associationsToRemove = existingAssociations.Where(cp => !productIds.Contains(cp.ProductId)).ToList();
+
+                // Remove associations that are no longer needed
+                foreach (var association in associationsToRemove)
+                {
+                    await _unitOfWork.CouponProducts.DeleteAsync(association);
+                }
+
+                // Add new associations
+                foreach (var productId in productIdsToAdd)
+                {
+                    var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                    if (product != null)
+                    {
+                        await _unitOfWork.CouponProducts.AddAsync(new CouponProduct
+                        {
+                            CouponId = couponId,
+                            ProductId = productId,
+                            CreatedAt = DateTime.UtcNow,
+                            CreatedBy = "System"
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Skipping association with non-existent product {ProductId}", productId);
+                    }
+                }
+
+                await _unitOfWork.CompleteAsync();
+                _logger.LogInformation("Updated products for coupon {CouponId}, added {AddCount}, removed {RemoveCount}", 
+                    couponId, productIdsToAdd.Count, associationsToRemove.Count);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating products for coupon {CouponId}", couponId);
+                return false;
+            }
+        }
+
+        public async Task<bool> ApplyCouponToProductAsync(int couponId, int productId)
+        {
+            try
+            {
+                // Check if association already exists
+                var existingAssociation = await _unitOfWork.CouponProducts.FindAsync(
+                    cp => cp.CouponId == couponId && cp.ProductId == productId);
+                
+                if (existingAssociation.Any())
+                {
+                    _logger.LogInformation("Coupon {CouponId} is already applied to product {ProductId}", couponId, productId);
+                    return true; // Already applied, consider it a success
+                }
+
+                // Verify both coupon and product exist
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+                var product = await _unitOfWork.Products.GetByIdAsync(productId);
+                
+                if (coupon == null || product == null)
+                {
+                    _logger.LogWarning("Failed to apply coupon {CouponId} to product {ProductId}: One or both entities don't exist", 
+                        couponId, productId);
+                    return false;
+                }
+
+                // Create association
+                await _unitOfWork.CouponProducts.AddAsync(new CouponProduct
+                {
+                    CouponId = couponId,
+                    ProductId = productId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "System"
+                });
+
+                await _unitOfWork.CompleteAsync();
+                _logger.LogInformation("Applied coupon {CouponId} to product {ProductId}", couponId, productId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error applying coupon {CouponId} to product {ProductId}", couponId, productId);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveCouponFromProductAsync(int couponId, int productId)
+        {
+            try
+            {
+                // Find the association
+                var association = await _unitOfWork.CouponProducts.FindAsync(
+                    cp => cp.CouponId == couponId && cp.ProductId == productId);
+
+                if (!association.Any())
+                {
+                    _logger.LogInformation("No association found between coupon {CouponId} and product {ProductId}", 
+                        couponId, productId);
+                    return false;
+                }
+
+                // Remove the association
+                await _unitOfWork.CouponProducts.DeleteAsync(association.First());
+                await _unitOfWork.CompleteAsync();
+                
+                _logger.LogInformation("Removed coupon {CouponId} from product {ProductId}", couponId, productId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing coupon {CouponId} from product {ProductId}", couponId, productId);
+                return false;
+            }
+        }
     }
 }

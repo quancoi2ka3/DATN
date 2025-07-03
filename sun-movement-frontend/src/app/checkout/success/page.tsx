@@ -136,7 +136,8 @@ export default function CheckoutSuccessPage() {
             Tiếp tục mua sắm
           </button>
           <button 
-            onClick={() => router.push('/account/orders')}            className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors border"
+            onClick={() => router.push('/orders')}
+            className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-200 transition-colors border"
           >
             Xem đơn hàng của tôi
           </button>

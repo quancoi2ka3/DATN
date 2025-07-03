@@ -1,0 +1,121 @@
+@model SunMovement.Core.Models.InventoryTransaction
+@{
+    ViewData["Title"] = "Nhập kho";
+    Layout = "_AdminLayout";
+    var product = ViewBag.Product as SunMovement.Core.Models.Product;
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-plus-circle me-2"></i>Nhập kho sản phẩm
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">Sản phẩm</a></li>
+        <li class="breadcrumb-item active">Nhập kho</li>
+    </ol>
+
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-box me-1"></i>
+                            Thông tin sản phẩm
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" class="img-fluid rounded mb-3" alt="@product.Name" />
+                            }
+                            else
+                            {
+                                <div class="text-center p-3 bg-light rounded mb-3">
+                                    <i class="fas fa-image fa-4x text-muted"></i>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h4>@product.Name</h4>
+                            <p class="small text-muted">SKU: @product.Sku</p>
+                            <hr />
+                            <div class="mb-2">
+                                <span class="badge bg-info">Tồn kho hiện tại: @product.StockQuantity</span>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-warning">Giá vốn hiện tại: @product.CostPrice.ToString("N0") VNĐ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-plus-square me-1"></i>
+                    Thông tin nhập kho
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddStock" method="post">
+                        <input type="hidden" asp-for="ProductId" />
+                        <input type="hidden" asp-for="TransactionType" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Quantity" class="form-label">Số lượng nhập</label>
+                                    <input asp-for="Quantity" class="form-control" type="number" min="1" required />
+                                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="UnitPrice" class="form-label">Giá nhập (VNĐ)</label>
+                                    <input asp-for="UnitPrice" class="form-control" type="number" min="0" step="1000" required />
+                                    <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="SupplierName" class="form-label">Nhà cung cấp</label>
+                            <input name="SupplierName" id="SupplierName" class="form-control" placeholder="Nhập tên nhà cung cấp (tùy chọn)" />
+                            <small class="form-text text-muted">Ví dụ: Công ty TNHH ABC, Nhà cung cấp XYZ...</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReferenceNumber" class="form-label">Số tham chiếu</label>
+                            <input asp-for="ReferenceNumber" class="form-control" placeholder="Số hóa đơn, phiếu nhập kho..." />
+                            <span asp-validation-for="ReferenceNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Ghi chú</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Lưu nhập kho
+                            </button>
+                            <a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="ProductWithInventory" asp-route-id="@Model.ProductId" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

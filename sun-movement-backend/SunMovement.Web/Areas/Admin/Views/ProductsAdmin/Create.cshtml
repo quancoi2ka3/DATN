@@ -159,10 +159,9 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label asp-for="SubCategory" class="control-label">Danh mục con</label>
-                                            <select asp-for="SubCategory" class="form-control" id="subCategorySelect">
-                                                <option value="">-- Chọn danh mục con --</option>
-                                            </select>
+                                            <input asp-for="SubCategory" class="form-control" placeholder="Nhập danh mục con (tùy chọn)" />
                                             <span asp-validation-for="SubCategory" class="text-danger"></span>
+                                            <small class="form-text text-muted">Ví dụ: Áo thun nam, Giày chạy bộ, Bình nước thể thao...</small>
                                         </div>
                                     </div>
                                 </div>

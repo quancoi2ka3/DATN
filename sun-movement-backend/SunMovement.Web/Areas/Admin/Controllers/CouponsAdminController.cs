@@ -15,7 +15,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = "Admin")]
-    public class CouponsAdminController : Controller
+    public class CouponsAdminController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICouponService _couponService;
@@ -691,115 +691,127 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         }
 
         // GET: Admin/CouponsAdmin/Analytics
-        public async Task<IActionResult> Analytics(int? id)
+        public async Task<IActionResult> Analytics(DateTime? from = null, DateTime? to = null)
         {
             try
             {
-                var today = DateTime.Today;
-                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+                from ??= DateTime.Now.AddMonths(-1);
+                to ??= DateTime.Now;
+
+                var couponAnalytics = await _analyticsService.GetCouponAnalyticsAsync(from.Value, to.Value);
                 
-                // Get coupon analytics data
-                var couponAnalytics = await _analyticsService.GetCouponAnalyticsAsync(startOfMonth, today);
+                ViewBag.FromDate = from.Value.ToString("yyyy-MM-dd");
+                ViewBag.ToDate = to.Value.ToString("yyyy-MM-dd");
                 
-                // If specific coupon is requested, get its metrics
-                CouponMetrics? specificCouponMetrics = null;
-                Coupon? specificCoupon = null;
-                
-                if (id.HasValue)
-                {
-                    specificCouponMetrics = await _analyticsService.GetCouponMetricsAsync(id, startOfMonth, today);
-                    specificCoupon = await _unitOfWork.Coupons.GetByIdAsync(id.Value);
-                    
-                    if (specificCoupon == null)
-                    {
-                        TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá.";
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-                
-                // Create a view model
-                var viewModel = new CouponAnalyticsViewModel
-                {
-                    CouponAnalytics = couponAnalytics,
-                    SpecificCouponMetrics = specificCouponMetrics,
-                    SpecificCoupon = specificCoupon
-                };
-                
-                // Get coupon list for dropdown
-                viewModel.AvailableCoupons = (await _unitOfWork.Coupons.GetAllAsync())
-                    .Where(c => c.IsActive)
-                    .OrderBy(c => c.Code)
-                    .ToList();
-                
-                return View(viewModel);
+                return View(couponAnalytics);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading coupon analytics");
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải phân tích mã giảm giá.";
+                ShowError("Có lỗi xảy ra khi tải phân tích mã giảm giá");
                 return RedirectToAction(nameof(Index));
             }
         }
         
-        // POST: Admin/CouponsAdmin/UpdateProductAvailability
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProductAvailability(int id, bool disableForOutOfStock)
+        // GET: Admin/CouponsAdmin/ApplyCouponToProducts
+        public async Task<IActionResult> ApplyCouponToProducts(int? couponId)
         {
             try
             {
-                var coupon = await _unitOfWork.Coupons.GetByIdAsync(id);
-                if (coupon == null)
+                if (!couponId.HasValue)
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá.";
-                    return RedirectToAction(nameof(Index));
-                }
-                
-                // Update the coupon's inventory relationship setting
-                coupon.DisableWhenProductsOutOfStock = disableForOutOfStock;
-                await _unitOfWork.Coupons.UpdateAsync(coupon);
-                await _unitOfWork.CompleteAsync();
-                
-                // If enabled, check product availability and update coupon status
-                if (disableForOutOfStock)
-                {
-                    // Get all products associated with this coupon
-                    var productCoupons = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == id);
-                    var productIds = productCoupons.Select(cp => cp.ProductId).ToList();
+                    // Hiển thị danh sách mã giảm giá để chọn
+                    var coupons = await _unitOfWork.Coupons.GetAllAsync();
+                    var activeCoupons = coupons.Where(c => c.IsActive && c.EndDate >= DateTime.Now).ToList();
                     
-                    // Check if any of these products are out of stock
-                    var anyOutOfStock = false;
-                    foreach (var productId in productIds)
+                    if (!activeCoupons.Any())
                     {
-                        var product = await _unitOfWork.Products.GetByIdAsync(productId);
-                        if (product != null && product.StockQuantity <= 0)
+                        ShowInfo("Không có mã giảm giá nào đang hoạt động. Hãy tạo mã giảm giá trước.");
+                        return RedirectToAction(nameof(Create));
+                    }
+                    
+                    ViewBag.Coupons = new SelectList(activeCoupons, "Id", "Code");
+                    return View();
+                }
+                else
+                {
+                    // Hiển thị form để chọn sản phẩm áp dụng cho mã giảm giá đã chọn
+                    var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId.Value);
+                    if (coupon == null)
+                    {
+                        ShowError("Không tìm thấy mã giảm giá");
+                        return RedirectToAction(nameof(Index));
+                    }
+                    
+                    var products = await _unitOfWork.Products.GetAllAsync();
+                    var activeProducts = products.Where(p => p.IsActive).ToList();
+                    
+                    // Lấy danh sách sản phẩm đã áp dụng mã giảm giá này
+                    var appliedProductIds = await _couponService.GetCouponProductIdsAsync(couponId.Value);
+                    
+                    var model = new ApplyCouponViewModel
+                    {
+                        CouponId = coupon.Id,
+                        CouponCode = coupon.Code,
+                        CouponDescription = coupon.Description,
+                        Products = activeProducts.Select(p => new ProductSelectionItem
                         {
-                            anyOutOfStock = true;
-                            break;
-                        }
-                    }
+                            ProductId = p.Id,
+                            ProductName = p.Name,
+                            ProductSku = p.Sku ?? string.Empty,
+                            ProductCategory = p.Category.ToString(),
+                            IsSelected = appliedProductIds.Contains(p.Id)
+                        }).ToList()
+                    };
                     
-                    // Update coupon status if needed
-                    if (anyOutOfStock && coupon.IsActive)
-                    {
-                        coupon.IsActive = false;
-                        coupon.DeactivationReason = "Deactivated automatically due to out of stock products";
-                        await _unitOfWork.Coupons.UpdateAsync(coupon);
-                        await _unitOfWork.CompleteAsync();
-                        
-                        TempData["WarningMessage"] = "Mã giảm giá đã bị tắt tự động vì có sản phẩm hết hàng.";
-                    }
+                    return View("SelectProducts", model);
                 }
-                
-                TempData["SuccessMessage"] = "Đã cập nhật thiết lập tồn kho cho mã giảm giá.";
-                return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating coupon product availability settings for ID: {CouponId}", id);
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật thiết lập tồn kho cho mã giảm giá.";
-                return RedirectToAction(nameof(Details), new { id });
+                _logger.LogError(ex, "Error loading apply coupon to products form");
+                ShowError("Có lỗi xảy ra khi tải form áp dụng mã giảm giá cho sản phẩm");
+                return RedirectToAction(nameof(Index));
             }
+        }
+        
+        // POST: Admin/CouponsAdmin/ApplyCouponToProducts
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyCouponToProducts(ApplyCouponViewModel model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var selectedProductIds = model.Products
+                        .Where(p => p.IsSelected)
+                        .Select(p => p.ProductId)
+                        .ToList();
+                    
+                    // Cập nhật danh sách sản phẩm áp dụng mã giảm giá
+                    await _couponService.UpdateCouponProductsAsync(model.CouponId, selectedProductIds);
+                    
+                    ShowSuccess($"Đã áp dụng mã giảm giá {model.CouponCode} cho {selectedProductIds.Count} sản phẩm");
+                    return RedirectToAction(nameof(Details), new { id = model.CouponId });
+                }
+                
+                return View("SelectProducts", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error applying coupon to products");
+                ShowError("Có lỗi xảy ra khi áp dụng mã giảm giá cho sản phẩm");
+                return View("SelectProducts", model);
+            }
+        }
+        
+        // POST: Admin/CouponsAdmin/SelectCoupon
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SelectCoupon(int couponId)
+        {
+            return RedirectToAction(nameof(ApplyCouponToProducts), new { couponId });
         }
 
         // Helper Methods

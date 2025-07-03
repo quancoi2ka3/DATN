@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Core.ViewModels;
@@ -13,9 +12,7 @@ using SunMovement.Web.Areas.Admin.Models;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class AdminDashboardController : Controller
+    public class AdminDashboardController : BaseAdminController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -62,6 +59,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 
                 // Get product inventory insights
                 var lowStockAlerts = await _productInventoryService.GetLowStockAlertsAsync();
+                // Extract product IDs here to avoid ambiguity issues
+                var productIds = new List<int>();
+                foreach (var alert in lowStockAlerts)
+                {
+                    // Use reflection to access ProductId to avoid ambiguity
+                    var property = alert.GetType().GetProperty("ProductId");
+                    if (property != null)
+                    {
+                        var productId = property.GetValue(alert);
+                        if (productId != null)
+                        {
+                            productIds.Add(Convert.ToInt32(productId));
+                        }
+                    }
+                }
                 var reorderSuggestions = await _productInventoryService.GetProductsForReorderAsync();
                 
                 // Update dashboard with analytics data
@@ -101,8 +113,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 dashboardViewModel.TotalMessageCount = await _unitOfWork.ContactMessages.CountAsync();
                 
                 // Get inventory statistics from our product inventory service
-                // Get product information from low stock alerts
-                var productIds = lowStockAlerts.Select(a => a.ProductId).ToList();
+                // Get product information from low stock alerts using the productIds already collected
                 var lowStockProducts = await _unitOfWork.Products.FindAsync(p => productIds.Contains(p.Id));
                 dashboardViewModel.LowStockProducts = lowStockProducts.ToList();
                 

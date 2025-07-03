@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using SunMovement.Core.Models;
 using SunMovement.Core.Interfaces;
@@ -12,9 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    [Authorize(Roles = "Admin")]
-    public class CustomersAdminController : Controller
+    public class CustomersAdminController : BaseAdminController
     {
         private readonly UserManager<ApplicationUser> _userManager;
 

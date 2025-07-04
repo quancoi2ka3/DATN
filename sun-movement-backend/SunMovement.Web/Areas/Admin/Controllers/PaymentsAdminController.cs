@@ -45,8 +45,48 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
 
             order.Status = status;
-            order.IsPaid = isPaid;
             order.UpdatedAt = DateTime.UtcNow;
+            
+            // Logic cập nhật thanh toán theo trạng thái đơn hàng
+            switch (status)
+            {
+                case OrderStatus.Completed:
+                case OrderStatus.Delivered:
+                case OrderStatus.Shipped:
+                case OrderStatus.Processing:
+                    // Các trạng thái này yêu cầu đã thanh toán
+                    order.IsPaid = true;
+                    order.PaymentStatus = PaymentStatus.Paid;
+                    if (order.PaymentDate == null)
+                    {
+                        order.PaymentDate = DateTime.UtcNow;
+                    }
+                    break;
+                    
+                case OrderStatus.Cancelled:
+                    // Đơn hàng bị hủy - có thể cần hoàn tiền
+                    if (order.IsPaid)
+                    {
+                        order.PaymentStatus = PaymentStatus.Refunded;
+                    }
+                    else
+                    {
+                        order.PaymentStatus = PaymentStatus.Cancelled;
+                    }
+                    break;
+                    
+                case OrderStatus.Pending:
+                case OrderStatus.AwaitingPayment:
+                    // Trạng thái chờ - chưa thanh toán
+                    order.IsPaid = isPaid; // Sử dụng giá trị được truyền vào
+                    order.PaymentStatus = isPaid ? PaymentStatus.Paid : PaymentStatus.Pending;
+                    break;
+                    
+                default:
+                    // Giữ nguyên trạng thái thanh toán hiện tại hoặc sử dụng giá trị được truyền
+                    order.IsPaid = isPaid;
+                    break;
+            }
             
             await _unitOfWork.Orders.UpdateAsync(order);
             await _unitOfWork.CompleteAsync();
@@ -65,8 +105,10 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
 
             order.IsPaid = true;
+            order.PaymentStatus = PaymentStatus.Paid; // Đồng bộ PaymentStatus
             order.Status = OrderStatus.Processing;
             order.UpdatedAt = DateTime.UtcNow;
+            order.PaymentDate = DateTime.UtcNow; // Cập nhật thời gian thanh toán
             
             if (!string.IsNullOrEmpty(transactionId))
             {

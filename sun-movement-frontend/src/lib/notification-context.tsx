@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useCallback, useState, ReactNode } from 'react';
-import { toast as hookToast } from '@/hooks/use-toast';
+import { createContext, useContext, useCallback, ReactNode } from 'react';
+import { useToast } from '@/components/ui/simple-toast';
 
 interface NotificationContextType {
   showSuccess: (message: string, title?: string) => void;
@@ -13,37 +13,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const showSuccess = useCallback((message: string, title = "Thành công") => {
-    hookToast({
-      variant: "success",
-      title,
-      description: message,
-    });
-  }, []);
-
-  const showError = useCallback((message: string, title = "Lỗi") => {
-    hookToast({
-      variant: "destructive",
-      title,
-      description: message,
-    });
-  }, []);
-
-  const showWarning = useCallback((message: string, title = "Cảnh báo") => {
-    hookToast({
-      variant: "warning",
-      title,
-      description: message,
-    });
-  }, []);
-
-  const showInfo = useCallback((message: string, title = "Thông tin") => {
-    hookToast({
-      variant: "info",
-      title,
-      description: message,
-    });
-  }, []);
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
 
   return (
     <NotificationContext.Provider value={{ showSuccess, showError, showWarning, showInfo }}>

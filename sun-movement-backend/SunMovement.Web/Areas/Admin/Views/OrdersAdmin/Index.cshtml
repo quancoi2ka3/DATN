@@ -1,5 +1,6 @@
 @model IEnumerable<SunMovement.Core.Models.Order>
 @using SunMovement.Core.Models
+@using SunMovement.Web.Helpers
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
     Layout = "_AdminLayout";
@@ -57,13 +58,33 @@
                         <option value="">-- Tất cả trạng thái --</option>
                         @foreach (var status in ViewBag.OrderStatuses)
                         {
+                            string statusText = status switch
+                            {
+                                OrderStatus.Pending => "Chờ xử lý",
+                                OrderStatus.AwaitingPayment => "Chờ thanh toán", 
+                                OrderStatus.Paid => "Đã thanh toán",
+                                OrderStatus.Processing => "Đang xử lý",
+                                OrderStatus.AwaitingFulfillment => "Đang đóng gói",
+                                OrderStatus.Shipped => "Đã giao vận",
+                                OrderStatus.PartiallyShipped => "Giao một phần",
+                                OrderStatus.Delivered => "Đã giao hàng",
+                                OrderStatus.Completed => "Hoàn thành",
+                                OrderStatus.Cancelled => "Đã hủy",
+                                OrderStatus.Refunded => "Đã hoàn tiền",
+                                OrderStatus.ReturnRequested => "Yêu cầu trả hàng",
+                                OrderStatus.ReturnProcessed => "Đã xử lý trả hàng",
+                                OrderStatus.Failed => "Thất bại",
+                                OrderStatus.OnHold => "Tạm giữ",
+                                _ => status.ToString()
+                            };
+                            
                             if (ViewBag.Status != null && ViewBag.Status.ToString() == status.ToString())
                             {
-                                <option value="@status" selected>@status.ToString()</option>
+                                <option value="@status" selected>@statusText</option>
                             }
                             else
                             {
-                                <option value="@status">@status.ToString()</option>
+                                <option value="@status">@statusText</option>
                             }
                         }
                     </select>
@@ -106,11 +127,37 @@
                                 OrderStatus.Pending => "bg-secondary text-white",
                                 OrderStatus.AwaitingPayment => "bg-warning",
                                 OrderStatus.Paid => "bg-info",
+                                OrderStatus.Processing => "bg-primary text-white",
+                                OrderStatus.AwaitingFulfillment => "bg-primary text-white",
                                 OrderStatus.Shipped => "bg-primary text-white",
+                                OrderStatus.PartiallyShipped => "bg-info text-white",
                                 OrderStatus.Delivered => "bg-success text-white",
                                 OrderStatus.Completed => "bg-success text-white",
                                 OrderStatus.Cancelled => "bg-danger text-white",
+                                OrderStatus.Refunded => "bg-warning text-dark",
+                                OrderStatus.Failed => "bg-danger text-white",
+                                OrderStatus.OnHold => "bg-secondary text-white",
                                 _ => "bg-secondary"
+                            };
+
+                            string statusText = order.Status switch
+                            {
+                                OrderStatus.Pending => "Chờ xử lý",
+                                OrderStatus.AwaitingPayment => "Chờ thanh toán", 
+                                OrderStatus.Paid => "Đã thanh toán",
+                                OrderStatus.Processing => "Đang xử lý",
+                                OrderStatus.AwaitingFulfillment => "Đang đóng gói",
+                                OrderStatus.Shipped => "Đã giao vận",
+                                OrderStatus.PartiallyShipped => "Giao một phần",
+                                OrderStatus.Delivered => "Đã giao hàng",
+                                OrderStatus.Completed => "Hoàn thành",
+                                OrderStatus.Cancelled => "Đã hủy",
+                                OrderStatus.Refunded => "Đã hoàn tiền",
+                                OrderStatus.ReturnRequested => "Yêu cầu trả hàng",
+                                OrderStatus.ReturnProcessed => "Đã xử lý trả hàng",
+                                OrderStatus.Failed => "Thất bại",
+                                OrderStatus.OnHold => "Tạm giữ",
+                                _ => order.Status.ToString()
                             };
                             
                             <tr>
@@ -125,7 +172,7 @@
                                 </td>
                                 <td class="text-end">@order.TotalAmount.ToString("N0") VNĐ</td>
                                 <td>
-                                    <span class="badge @statusClass">@order.Status</span>
+                                    <span class="badge @statusClass">@statusText</span>
                                 </td>
                                 <td>
                                     @if (order.IsPaid)

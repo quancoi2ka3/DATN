@@ -307,10 +307,48 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI();
+    
+    // Add API-specific exception handling for development
+    app.Use(async (context, next) =>
+    {
+        try
+        {
+            await next.Invoke();
+        }
+        catch (Exception ex)
+        {
+            // For API requests, return JSON error
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync($"{{\"success\": false, \"error\": \"Internal server error\", \"details\": \"{ex.Message}\"}}");
+                return;
+            }
+            throw; // Re-throw for non-API requests
+        }
+    });
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler(configure =>
+    {
+        configure.Run(async context =>
+        {
+            // Check if this is an API request
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsync("{\"success\": false, \"error\": \"Internal server error\"}");
+            }
+            else
+            {
+                // For non-API requests, redirect to error page
+                context.Response.Redirect("/Home/Error");
+            }
+        });
+    });
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }

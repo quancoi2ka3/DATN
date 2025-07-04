@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Minus, ShoppingCart, Star, Heart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
+import { useNotification } from "@/lib/notification-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ const QuickAddButton = memo(({
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
+  // Don't use notification here to avoid duplicate
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,11 +45,13 @@ const QuickAddButton = memo(({
     
     try {
       const success = await addToCart(product, 1);
-      if (success && onSuccess) {
-        onSuccess();
+      if (success) {
+        onSuccess?.();
+        // No notification here, let cart context handle it
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
+      // No notification here to avoid duplicate
     } finally {
       setIsAdding(false);
     }
@@ -139,9 +143,9 @@ export const OptimizedProductCard = memo(({
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
+  const { showError } = useNotification(); // Only keep showError for error handling
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
@@ -163,11 +167,11 @@ export const OptimizedProductCard = memo(({
       if (success) {
         setIsOpen(false);
         setQuantity(1);
-        setShowSuccessToast(true);
-        setTimeout(() => setShowSuccessToast(false), 3000);
+        // Don't show notification here, let cart context handle it
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
+      showError('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
     } finally {
       setIsAdding(false);
     }
@@ -177,16 +181,6 @@ export const OptimizedProductCard = memo(({
 
   return (
     <>
-      {/* Enhanced Success Toast */}
-      {showSuccessToast && (
-        <div className="fixed top-4 right-4 z-50 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg shadow-xl animate-in slide-in-from-right bounce-in">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">✅</span>
-            <span className="font-medium">Đã thêm {product.name} vào giỏ hàng!</span>
-          </div>
-        </div>
-      )}
-
       <div 
         className={cn(
           "product-card-enhanced force-enhanced-hover group relative bg-white rounded-xl overflow-hidden cursor-pointer border border-gray-100 hover:border-gray-200",
@@ -223,10 +217,6 @@ export const OptimizedProductCard = memo(({
           {/* Quick actions */}
           <QuickAddButton 
             product={product} 
-            onSuccess={() => {
-              setShowSuccessToast(true);
-              setTimeout(() => setShowSuccessToast(false), 3000);
-            }}
           />
           {showWishlist && <WishlistButton productId={product.id} />}
           

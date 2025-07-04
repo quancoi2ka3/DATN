@@ -1,0 +1,14 @@
+{
+  "shippingAddress": {
+    "fullName": "Test Customer Real",
+    "addressLine1": "123 Test Address Real",
+    "city": "Test City Real",
+    "province": "Test Province Real"
+  },
+  "contactInfo": {
+    "email": "realtest@example.com",
+    "phone": "0987654321",
+    "notes": "This is a real test order"
+  },
+  "paymentMethod": "cash_on_delivery"
+}

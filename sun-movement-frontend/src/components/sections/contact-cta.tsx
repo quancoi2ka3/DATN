@@ -121,17 +121,7 @@ export function ContactCTASection() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Nhập email của bạn"
-                    required
-                    disabled={isLoading}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                  />
-                </div>
+                
                 
                 <LoadingButton 
                   type="submit" 

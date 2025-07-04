@@ -1,0 +1,139 @@
+@startuml SunMovement_ERD_Core
+!define Table(name,desc) entity name as "desc"
+!define primary_key(x) <b>x</b>
+!define foreign_key(x) <i>x</i>
+!define unique(x) <u>x</u>
+
+' Các thực thể nghiệp vụ cốt lõi
+Table(NguoiDung, "NguoiDung") {
+  primary_key(Id) : string
+  --
+  unique(Email) : string
+  TenDangNhap : string
+  Ho : string
+  Ten : string
+  SoDienThoai : string
+  NgaySinh : DateTime?
+  DiaChi : string?
+  NgayTao : DateTime
+  NgayCapNhat : DateTime
+}
+
+Table(SanPham, "SanPham") {
+  primary_key(Id) : int
+  --
+  TenSanPham : string
+  MoTa : string?
+  Gia : decimal(18,2)
+  GiaGiam : decimal(18,2)?
+  GiaVon : decimal(18,2)
+  unique(MaSanPham) : string?
+  unique(DuongDanUrl) : string?
+  DanhMuc : string
+  SoLuongTon : int
+  KhoiLuong : decimal(18,3)?
+  DiemTrungBinh : decimal(3,2)
+  TongDanhGia : int
+  TrangThaiHoatDong : bool
+  NgayTao : DateTime
+  NgayCapNhat : DateTime
+}
+
+Table(DonHang, "DonHang") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdNguoiDung) : string?
+  MaDonHang : string
+  TongTien : decimal(18,2)
+  TrangThai : TrangThaiDonHang
+  TrangThaiThanhToan : TrangThaiThanhToan
+  PhuongThucThanhToan : string?
+  DiaChiGiaoHang : string
+  NgayDatHang : DateTime
+  NgayGiaoHang : DateTime?
+  NgayNhanHang : DateTime?
+}
+
+Table(ChiTietDonHang, "ChiTietDonHang") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdDonHang) : int
+  foreign_key(IdSanPham) : int
+  SoLuong : int
+  DonGia : decimal(18,2)
+  ThanhTien : decimal(18,2)
+}
+
+Table(GioHang, "GioHang") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdNguoiDung) : string
+  NgayTao : DateTime
+  NgayCapNhat : DateTime
+}
+
+Table(ChiTietGioHang, "ChiTietGioHang") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdGioHang) : int
+  foreign_key(IdSanPham) : int?
+  foreign_key(IdDichVu) : int?
+  SoLuong : int
+  DonGia : decimal(18,2)
+  NgayThem : DateTime
+}
+
+Table(DichVu, "DichVu") {
+  primary_key(Id) : int
+  --
+  TenDichVu : string
+  MoTa : string?
+  Gia : decimal(18,2)
+  ThoiGian : int
+  TrangThaiHoatDong : bool
+  NgayTao : DateTime
+  NgayCapNhat : DateTime
+}
+
+Table(DanhGiaSanPham, "DanhGiaSanPham") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdSanPham) : int
+  foreign_key(IdNguoiDung) : string
+  foreign_key(IdQuanTri) : string?
+  DiemDanhGia : int
+  TieuDe : string?
+  BinhLuan : string?
+  DaDuyet : bool
+  NgayTao : DateTime
+  NgayCapNhat : DateTime
+}
+
+Table(TuongTacNguoiDung, "TuongTacNguoiDung") {
+  primary_key(Id) : int
+  --
+  foreign_key(IdNguoiDung) : string
+  foreign_key(IdSanPham) : int
+  LoaiTuongTac : LoaiTuongTacNguoiDung
+  ThoiGianXem : int?
+  NgayTao : DateTime
+  DiaChiIP : string?
+  ThongTinTrinhDuyet : string?
+}
+
+' Các mối quan hệ
+NguoiDung ||--o{ DonHang : "dat_hang"
+NguoiDung ||--|| GioHang : "so_huu"
+NguoiDung ||--o{ DanhGiaSanPham : "viet_danh_gia"
+NguoiDung ||--o{ TuongTacNguoiDung : "thuc_hien"
+
+SanPham ||--o{ ChiTietDonHang : "duoc_dat"
+SanPham ||--o{ ChiTietGioHang : "duoc_them_vao"
+SanPham ||--o{ DanhGiaSanPham : "duoc_danh_gia"
+SanPham ||--o{ TuongTacNguoiDung : "duoc_tuong_tac"
+
+DonHang ||--o{ ChiTietDonHang : "bao_gom"
+GioHang ||--o{ ChiTietGioHang : "chua"
+DichVu ||--o{ ChiTietGioHang : "duoc_dat"
+
+@enduml

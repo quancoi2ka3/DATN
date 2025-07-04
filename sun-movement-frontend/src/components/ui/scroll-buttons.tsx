@@ -46,7 +46,7 @@ export default function ScrollButtons() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed right-6 bottom-6 z-40 flex flex-col gap-2">
+    <div className="fixed right-6 bottom-20 z-40 flex flex-col gap-2">
       {/* Scroll to Top Button */}
       <Button
         onClick={scrollToTop}

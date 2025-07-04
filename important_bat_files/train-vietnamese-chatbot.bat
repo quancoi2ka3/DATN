@@ -10,7 +10,13 @@ taskkill /f /im rasa.exe 2>nul
 timeout /t 3 /nobreak >nul
 
 echo [BƯỚC 2] Chuyển đến thư mục chatbot...
-cd /d d:\DATN\DATN\sun-movement-chatbot
+cd /d "d:\DATN\DATN\sun-movement-chatbot"
+if not exist "%CD%" (
+    echo Không tìm thấy thư mục chatbot tại %CD%
+    echo Lỗi khi khắc phục và retrain model
+    pause
+    exit /b 1
+)
 
 echo [BƯỚC 3] Kích hoạt môi trường...
 call rasa_env_310\Scripts\activate

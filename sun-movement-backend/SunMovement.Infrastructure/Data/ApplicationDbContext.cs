@@ -20,11 +20,9 @@ namespace SunMovement.Infrastructure.Data
         public DbSet<ContactMessage> ContactMessages { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
-        public DbSet<CustomerReview> CustomerReviews { get; set; }
         public DbSet<CustomerSearchStatistic> CustomerSearchStatistics { get; set; }
-        public DbSet<CustomerActivity> CustomerActivities { get; set; }
-        public DbSet<PendingUserRegistration> PendingUserRegistrations { get; set; }
         public DbSet<OtpVerification> OtpVerifications { get; set; }
+        public DbSet<PendingUserRegistration> PendingUserRegistrations { get; set; }
         public DbSet<Article> Articles { get; set; }
         
         // Thêm các DbSet mới cho quản lý kho và mã giảm giá
@@ -43,8 +41,6 @@ namespace SunMovement.Infrastructure.Data
         public DbSet<UserInteraction> UserInteractions { get; set; }
         public DbSet<ProductRecommendation> ProductRecommendations { get; set; }
         public DbSet<ProductReview> ProductReviews { get; set; }
-        public DbSet<ProductReviewHelpful> ProductReviewHelpfuls { get; set; }
-        public DbSet<ProductReviewImage> ProductReviewImages { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductVariantImage> ProductVariantImages { get; set; }
         public DbSet<Tag> Tags { get; set; }
@@ -214,49 +210,11 @@ namespace SunMovement.Infrastructure.Data
                 .Property(it => it.TotalCost)
                 .HasColumnType("decimal(18,2)");
 
-            // Configure CustomerReview relationships
-            builder.Entity<CustomerReview>()
-                .HasOne(cr => cr.User)
-                .WithMany()
-                .HasForeignKey(cr => cr.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<CustomerReview>()
-                .HasOne(cr => cr.Product)
-                .WithMany()
-                .HasForeignKey(cr => cr.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<CustomerReview>()
-                .HasOne(cr => cr.Service)
-                .WithMany()
-                .HasForeignKey(cr => cr.ServiceId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<CustomerReview>()
-                .HasOne(cr => cr.Order)
-                .WithMany()
-                .HasForeignKey(cr => cr.OrderId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<CustomerReview>()
-                .HasOne(cr => cr.Admin)
-                .WithMany()
-                .HasForeignKey(cr => cr.AdminId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Configure CustomerSearchStatistic relationships
             builder.Entity<CustomerSearchStatistic>()
                 .HasOne(css => css.User)
                 .WithMany()
                 .HasForeignKey(css => css.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure CustomerActivity relationships
-            builder.Entity<CustomerActivity>()
-                .HasOne(ca => ca.User)
-                .WithMany()
-                .HasForeignKey(ca => ca.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Configure Inventory Management relationships
@@ -360,26 +318,6 @@ namespace SunMovement.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
 
-            // Configure ProductReviewHelpful relationships
-            builder.Entity<ProductReviewHelpful>()
-                .HasOne(prh => prh.ProductReview)
-                .WithMany(pr => pr.HelpfulVotes)
-                .HasForeignKey(prh => prh.ProductReviewId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<ProductReviewHelpful>()
-                .HasOne(prh => prh.User)
-                .WithMany()
-                .HasForeignKey(prh => prh.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Configure ProductReviewImage relationships
-            builder.Entity<ProductReviewImage>()
-                .HasOne(pri => pri.ProductReview)
-                .WithMany(pr => pr.Images)
-                .HasForeignKey(pri => pri.ProductReviewId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             // Configure ProductImage relationships
             builder.Entity<ProductImage>()
                 .HasOne(pi => pi.Product)
@@ -450,10 +388,6 @@ namespace SunMovement.Infrastructure.Data
 
             builder.Entity<ProductReview>()
                 .HasIndex(pr => pr.CreatedAt);
-
-            builder.Entity<ProductReviewHelpful>()
-                .HasIndex(prh => new { prh.ProductReviewId, prh.UserId })
-                .IsUnique();
 
             builder.Entity<Tag>()
                 .HasIndex(t => t.Name)

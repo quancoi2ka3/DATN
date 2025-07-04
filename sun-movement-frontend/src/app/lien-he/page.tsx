@@ -12,7 +12,7 @@ export default function ContactPage() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white py-16">
         <div className="container">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Liên Hệ Với Chúng Tôi</h1>
+          <h1 className="text-4xl text-red-500 md:text-5xl font-bold mb-4">Liên Hệ Với Chúng Tôi</h1>
           <p className="text-xl text-slate-300 max-w-2xl">
             Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy chọn cách liên hệ phù hợp nhất.
           </p>

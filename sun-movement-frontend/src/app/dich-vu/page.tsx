@@ -292,26 +292,26 @@ const features = [
 
 const testimonials = [
   {
-    name: "Nguyễn Văn A",
+    name: "Nguyễn Cao Trang",
     role: "Thành viên 1 năm",
     comment: "Sun Movement đã thay đổi hoàn toàn cách tôi nhìn nhận về tập luyện. Sau 6 tháng, tôi không chỉ khỏe mạnh hơn mà còn tự tin hơn rất nhiều.",
-    avatar: "/images/testimonials/avatar1.jpg",
+    avatar: "/images/testimonials/nv1.webp",
     rating: 5,
     achievement: "Giảm 15kg, tăng 20% sức mạnh"
   },
   {
-    name: "Trần Thị B",
+    name: "Vũ Văn Hoàng",
     role: "Thành viên 2 năm",
     comment: "Các buổi tập Yoga tại đây thực sự khác biệt. Tôi cảm thấy cân bằng hơn cả về thể chất lẫn tinh thần, đặc biệt là sau những ngày làm việc căng thẳng.",
-    avatar: "/images/testimonials/avatar2.jpg",
+    avatar: "/images/testimonials/nv2.webp",
     rating: 5,
     achievement: "Cải thiện tư thế, giảm đau lưng"
   },
   {
-    name: "Lê Văn C",
+    name: "Lê Văn Nghĩa",
     role: "Thành viên 6 tháng",
     comment: "Từ một người chưa từng tập luyện, các HLV tại Sun đã giúp tôi từng bước xây dựng được thói quen tập luyện khoa học và hiệu quả.",
-    avatar: "/images/testimonials/avatar3.jpg",
+    avatar: "/images/testimonials/nv3.webp",
     rating: 5,
     achievement: "Từ 0 pull-up lên 10 pull-up"
   }
@@ -405,7 +405,7 @@ export default function ServicesPage() {
               </ConsultationButton>
               <Button variant="outline" className="border-slate-600 text-orange-500 hover:bg-slate-800 hover:text-white px-8 py-4 h-auto rounded-lg font-medium text-lg">
                 <Phone className="mr-2 h-5 w-5" />
-                Hotline: 0123.456.789
+                Hotline: 08999139393
               </Button>
             </div>
             
@@ -526,14 +526,7 @@ export default function ServicesPage() {
                     Đăng ký ngay - Tiết kiệm 40%
                   </Button>
                 </AuthModal>
-                <ConsultationButton 
-                  variant="outline" 
-                  intensity="gentle"
-                  className="w-full border-slate-600 text-blue-300 hover:bg-slate-800 hover:text-white text-sm"
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Tư vấn miễn phí
-                </ConsultationButton>
+                
               </CardFooter>
             </Card>
           ))}

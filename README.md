@@ -1,157 +1,141 @@
-# Sun Movement Project
+# SUN MOVEMENT - E-COMMERCE PLATFORM
 
-This repository contains the Sun Movement application which consists of a .NET Core backend, a Next.js frontend, and a Rasa chatbot.
+## 📋 Tổng quan dự án
 
-## Project Structure
-- `sun-movement-backend`: .NET Core backend application
-- `sun-movement-frontend`: Next.js frontend application
-- `sun-movement-chatbot`: Rasa-based Vietnamese chatbot
+Sun Movement là một nền tảng thương mại điện tử chuyên về các sản phẩm thể thao và sức khỏe, bao gồm:
+- 🛍️ Hệ thống bán hàng online
+- 🤖 Chatbot hỗ trợ khách hàng  
+- 📊 Hệ thống quản lý và phân tích
 
-## Getting Started
+## 🏗️ Kiến trúc hệ thống
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+```
+sun-movement-project/
+├── 🖥️  backend/           Backend API (.NET Core)
+├── 🌐  frontend/          Frontend Web App (Next.js)
+├── 🤖  chatbot/           AI Chatbot (RASA)
+├── 📚  docs/              Documentation
+├── 🔧  scripts/           Automation Scripts
+├── 📊  diagrams/          Architecture Diagrams
+├── 📝  logs/              System Logs
+└── 🗂️  temp/             Temporary Files
+```
 
-### Environment Setup
+## 🚀 Quick Start
 
-For detailed environment setup instructions, please refer to the [Environment Setup Guide](ENVIRONMENT_SETUP_GUIDE.md).
+### Yêu cầu hệ thống
+- Node.js 18+
+- .NET 8+
+- Python 3.10+
+- SQL Server
 
-### Prerequisites
+### Cài đặt và chạy
 
-- [Git](https://git-scm.com/downloads)
-- [.NET SDK 8.0 or later](https://dotnet.microsoft.com/download)
-- [Node.js 20.x or later](https://nodejs.org/)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) (or SQL Server Express)
-- A code editor such as [Visual Studio Code](https://code.visualstudio.com/) or [Visual Studio](https://visualstudio.microsoft.com/)
+1. **Backend**
+```bash
+cd sun-movement-backend
+dotnet restore
+dotnet run --project SunMovement.Web
+```
 
-### Cloning the Repository
+2. **Frontend**
+```bash
+cd sun-movement-frontend
+npm install
+npm run dev
+```
 
-1. Open a terminal or command prompt
-2. Clone the repository using Git:
-   ```
-   git clone https://github.com/quancoi2ka3/DATN.git
-   ```
-3. Navigate to the project directory:
-   ```
-   cd DATN
-   ```
+3. **Chatbot**
+```bash
+cd sun-movement-chatbot
+pip install -r requirements.txt
+rasa run --enable-api
+```
 
-## Running the Backend
+## 📚 Documentation
 
-1. Navigate to the backend project directory:
-   ```
-   cd sun-movement-backend
-   ```
+- 📋 [Guides & Tutorials](./docs/guides/)
+- 🏗️ [Architecture](./docs/architecture/)
+- 🔧 [Implementation](./docs/implementation/)
+- 🧪 [Testing](./docs/testing/)
+- 🤖 [Chatbot](./docs/chatbot/)
 
-2. Restore NuGet packages:
-   ```
-   dotnet restore SunMovement.sln
-   ```
+## 🔧 Scripts
 
-3. Update the database connection string in `SunMovement.Web/appsettings.json` to match your SQL Server instance.
+- 🖥️ [Backend Scripts](./scripts/backend/)
+- 🌐 [Frontend Scripts](./scripts/frontend/)
+- 🤖 [Chatbot Scripts](./scripts/chatbot/)
+- ⚙️ [System Scripts](./scripts/system/)
 
-4. Apply database migrations:
-   ```
-   cd SunMovement.Web
-   dotnet ef database update
-   ```
+## 🛠️ Công nghệ sử dụng
 
-5. Run the backend application:
-   ```
-   dotnet run
-   ```
-   The API should now be running at `https://localhost:5001` and `http://localhost:5000`.
+### Backend
+- **Framework**: ASP.NET Core 8
+- **Database**: SQL Server
+- **Authentication**: JWT + Identity
+- **Architecture**: Clean Architecture
 
-## Running the Frontend
+### Frontend
+- **Framework**: Next.js 15
+- **UI Library**: TailwindCSS + shadcn/ui
+- **State Management**: Redux Toolkit
+- **Type Safety**: TypeScript
 
-1. Navigate to the frontend project directory:
-   ```
-   cd sun-movement-frontend
-   ```
+### Chatbot
+- **Framework**: RASA 3.6
+- **NLU**: Vietnamese Language Support
+- **Deployment**: Docker Ready
 
-2. Install npm packages:
-   ```
-   npm install
-   ```
+## 📊 Features
 
-3. Start the development server:
-   ```
-   npm run dev
-   ```
-   The frontend should now be running at `http://localhost:3000`.
+### 🛍️ E-commerce
+- ✅ Product catalog & search
+- ✅ Shopping cart & checkout
+- ✅ Order management
+- ✅ Payment integration
+- ✅ User authentication
 
-## Making Changes and Updating GitHub
+### 🤖 AI Features
+- ✅ Vietnamese chatbot
+- ✅ Product recommendations
+- ✅ Customer support automation
+- ✅ User behavior analytics
 
-### Workflow for Making Changes
+### 📱 User Experience
+- ✅ Responsive design
+- ✅ Performance optimized
+- ✅ SEO friendly
+- ✅ Accessibility compliant
 
-1. Before starting work, always pull the latest changes:
-   ```
-   git pull
-   ```
+## 🧪 Testing
 
-2. Make your changes to the codebase.
+Xem [Testing Guide](./docs/testing/) để biết chi tiết về testing strategy.
 
-3. Stage the changes you want to commit:
-   ```
-   git add .
-   ```
-   Or to add specific files:
-   ```
-   git add path/to/file1 path/to/file2
-   ```
+## 📈 Development Status
 
-4. Commit your changes with a meaningful message:
-   ```
-   git commit -m "A clear description of the changes"
-   ```
+- 🟢 **Backend**: Production Ready
+- 🟢 **Frontend**: Production Ready  
+- 🟡 **Chatbot**: Active Development
+- 🟢 **Documentation**: Complete
 
-5. Push your changes to GitHub:
-   ```
-   git push
-   ```
+## 🤝 Contributing
 
-### Best Practices for Collaborative Development
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-1. **Create Feature Branches**:
-   ```
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Regular Updates**: Pull changes regularly to avoid conflicts:
-   ```
-   git pull origin master
-   ```
-
-3. **Meaningful Commits**: Write clear commit messages that explain what and why, not how.
-
-4. **Pull Requests**: Instead of pushing directly to master, create a pull request:
-   ```
-   git push origin feature/your-feature-name
-   ```
-   Then create a pull request on GitHub.
-
-5. **Code Review**: Have team members review your code before merging into master.
-
-## Continuous Integration/Continuous Deployment (CI/CD)
-
-This project is set up with GitHub Actions workflows that automatically build and test the code when changes are pushed. The workflows are located in the `.github/workflows` directory.
-
-- Backend workflow: `.github/workflows/backend.yml`
-- Frontend workflow: `.github/workflows/frontend.yml`
-
-These workflows will help ensure that code quality is maintained as the project evolves.
-
-## Troubleshooting
-
-### Common Backend Issues
-
-- Database connection issues: Verify the connection string in `appsettings.json`
-- Migration errors: Ensure you're running migrations from the correct directory
-
-### Common Frontend Issues
-
-- Node module issues: Try deleting the `node_modules` folder and running `npm install` again
-- Next.js build errors: Check that all imports are correct and that components are properly exported
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📞 Support
+
+- 📧 Email: support@sunmovement.com
+- 📱 Phone: +84 xxx xxx xxx
+- 💬 Chat: Available 24/7 via website
+
+---
+
+**Built with ❤️ by Sun Movement Team**

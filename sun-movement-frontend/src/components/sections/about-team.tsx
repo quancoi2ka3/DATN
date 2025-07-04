@@ -6,27 +6,27 @@ import { Star, Award, Users } from "lucide-react";
 export const TeamSection = () => {
   const teamMembers = [
     {
-      name: "Nguyễn Văn A",
-      role: "Founder & Head Coach",
+      name: "Nguyễn Đình Hùng",
+      role: "Founder & Head Calisthenics Coach",
       experience: "10+ năm kinh nghiệm",
       speciality: "Calisthenics & Strength Training",
-      image: "/images/team/coach1.jpg",
-      achievements: ["Certified Personal Trainer", "Nutrition Specialist", "Yoga Instructor"]
+      image: "/images/gioithieu/Thumb-Hung.webp",
+      achievements: ["Certified Personal Trainer", "Strength Specialist", "Calisthenics Coach"]
     },
     {
-      name: "Trần Thị B",
-      role: "Yoga Master",
+      name: "Nguyễn Đức Bình",
+      role: "Founder & Head Yoga Coach",
       experience: "8+ năm kinh nghiệm",
       speciality: "Hatha & Vinyasa Yoga",
-      image: "/images/team/coach2.jpg",
+      image: "/images/gioithieu/Thumb-Binh.webp",
       achievements: ["200hr YTT Certified", "Meditation Teacher", "Wellness Coach"]
     },
     {
-      name: "Lê Văn C",
-      role: "Strength Coach",
+      name: "Lê Hoàng Trung",
+      role: "Founder & Head Strength Coach",
       experience: "6+ năm kinh nghiệm",
       speciality: "Powerlifting & Functional Training",
-      image: "/images/team/coach3.jpg",
+      image: "/images/gioithieu/Thumb-Trung.webp",
       achievements: ["NSCA Certified", "Sports Nutrition", "Injury Prevention"]
     }
   ];

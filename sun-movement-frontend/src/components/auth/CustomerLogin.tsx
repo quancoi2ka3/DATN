@@ -82,7 +82,7 @@ export default function CustomerLogin({ onSuccess, onSwitchToRegister }: Custome
 
     try {
       const success = await login(formData.email, formData.password);
-        if (success) {
+      if (success) {
         // Store remember me preference if needed
         if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
@@ -91,9 +91,11 @@ export default function CustomerLogin({ onSuccess, onSwitchToRegister }: Custome
         // Call success callback first
         onSuccess?.();
         
-        // Then handle redirect for e-commerce flow
-        // This will redirect to return URL or homepage
-        redirectAfterLogin('/');
+        // Only redirect if no success callback is provided (standalone login page)
+        // If callback exists, it means we're in a dialog/modal and should not redirect
+        if (!onSuccess) {
+          redirectAfterLogin('/');
+        }
       } else {
         // Check user status to provide more specific error message
         const userStatus = await checkUserStatus(formData.email);

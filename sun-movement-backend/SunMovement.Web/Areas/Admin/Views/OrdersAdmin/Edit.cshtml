@@ -82,7 +82,26 @@
                             <select asp-for="Status" class="form-select">
                                 @foreach (var status in ViewBag.OrderStatuses)
                                 {
-                                    <option value="@status">@status.ToString()</option>
+                                    string statusText = status switch
+                                    {
+                                        OrderStatus.Pending => "Chờ xử lý",
+                                        OrderStatus.AwaitingPayment => "Chờ thanh toán", 
+                                        OrderStatus.Paid => "Đã thanh toán",
+                                        OrderStatus.Processing => "Đang xử lý",
+                                        OrderStatus.AwaitingFulfillment => "Đang đóng gói",
+                                        OrderStatus.Shipped => "Đã giao vận",
+                                        OrderStatus.PartiallyShipped => "Giao một phần",
+                                        OrderStatus.Delivered => "Đã giao hàng",
+                                        OrderStatus.Completed => "Hoàn thành",
+                                        OrderStatus.Cancelled => "Đã hủy",
+                                        OrderStatus.Refunded => "Đã hoàn tiền",
+                                        OrderStatus.ReturnRequested => "Yêu cầu trả hàng",
+                                        OrderStatus.ReturnProcessed => "Đã xử lý trả hàng",
+                                        OrderStatus.Failed => "Thất bại",
+                                        OrderStatus.OnHold => "Tạm giữ",
+                                        _ => status.ToString()
+                                    };
+                                    <option value="@status">@statusText</option>
                                 }
                             </select>
                             <span asp-validation-for="Status" class="text-danger"></span>

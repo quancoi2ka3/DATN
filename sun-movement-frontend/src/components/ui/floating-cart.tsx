@@ -47,7 +47,7 @@ export default function FloatingCart() {
   };
 
   return (
-    <div className="fixed bottom-20 left-6 z-50">
+    <div className="fixed bottom-32 left-6 z-50">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button

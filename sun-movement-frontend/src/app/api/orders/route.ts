@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7296';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:5001';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,21 +11,15 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const authCookie = cookieStore.get('auth-token');
     
-    if (!authCookie?.value) {
-      console.log('[ORDERS API] No auth token found');
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized - Please login to view orders' },
-        { status: 401 }
-      );
-    }
+    console.log('[ORDERS API] Auth token:', authCookie?.value ? 'found' : 'not found');
 
-    console.log('[ORDERS API] Auth token found');
-
-    // Try HTTPS first, then fallback to HTTP
+    // Try multiple API URLs
     const apiUrls = [
+      'http://localhost:5000', // Prioritize HTTP first
+      'https://localhost:5001',
       API_BASE_URL,
       API_BASE_URL.replace('https://', 'http://'),
-      'http://localhost:5000',
+      'http://localhost:5001', 
       'https://localhost:7296'
     ];
 
@@ -35,12 +29,38 @@ export async function GET(request: NextRequest) {
       try {
         console.log('[ORDERS API] Trying:', `${apiUrl}/api/orders`);
         
+        // Forward authentication headers from client request
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        };
+
+        // Forward cookies for authentication
+        const clientCookies = request.headers.get('cookie');
+        if (clientCookies) {
+          headers['Cookie'] = clientCookies;
+          console.log('[ORDERS API] Forwarding cookies to backend');
+        }
+
+        // Forward Authorization header if present
+        const authHeader = request.headers.get('authorization');
+        if (authHeader) {
+          headers['Authorization'] = authHeader;
+          console.log('[ORDERS API] Forwarding Authorization header to backend');
+        }
+        
+        // Add authorization header from cookie if available
+        if (authCookie?.value) {
+          headers['Authorization'] = `Bearer ${authCookie.value}`;
+          console.log('[ORDERS API] Using auth cookie as Bearer token');
+        }
+        
         const response = await fetch(`${apiUrl}/api/orders`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authCookie.value}`,
-          },
+          headers,
+          cache: 'no-store', // Prevent Next.js caching
         });
 
         console.log('[ORDERS API] Response status:', response.status);
@@ -53,6 +73,12 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({
               success: true,
               orders: []
+            }, {
+              headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+              }
             });
           }
 
@@ -60,6 +86,12 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({
             success: true,
             orders: data.orders || data || []
+          }, {
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
           });
         } else {
           const errorText = await response.text();

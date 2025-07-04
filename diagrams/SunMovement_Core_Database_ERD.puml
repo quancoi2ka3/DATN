@@ -1,0 +1,337 @@
+@startuml SunMovement_Core_Database_ERD
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam entity {
+    BackgroundColor #E8F4FD
+    BorderColor #2196F3
+    FontColor #1976D2
+}
+skinparam linetype ortho
+
+title "SUN MOVEMENT - ERD CORE TABLES (20 Essential Tables)"
+
+' ====== NHÓM 1: NGƯỜI DÙNG (3 bảng) ======
+entity "NguoiDung" as users {
+    * Id : string <<PK>>
+    --
+    * UserName : string
+    * Email : string
+    * PasswordHash : string
+    * FirstName : string
+    * LastName : string
+    * PhoneNumber : string
+    * Address : string
+    * DateOfBirth : datetime
+    * CreatedAt : datetime
+    * LastLogin : datetime
+    * IsActive : bool
+}
+
+entity "VaiTro" as roles {
+    * Id : string <<PK>>
+    --
+    * Name : string
+    * NormalizedName : string
+}
+
+entity "NguoiDung_VaiTro" as user_roles {
+    * UserId : string <<FK>>
+    * RoleId : string <<FK>>
+}
+
+' ====== NHÓM 2: SẢN PHẨM (4 bảng) ======
+entity "SanPham" as products {
+    * Id : int <<PK>>
+    --
+    * Name : string
+    * Description : string
+    * ImageUrl : string
+    * Price : decimal
+    * DiscountPrice : decimal
+    * CostPrice : decimal
+    * StockQuantity : int
+    * Category : enum
+    * Status : enum
+    * Sku : string
+    * Slug : string
+    * IsActive : bool
+    * CreatedAt : datetime
+    * UpdatedAt : datetime
+}
+
+entity "BienTheSanPham" as product_variants {
+    * Id : int <<PK>>
+    --
+    * ProductId : int <<FK>>
+    * Name : string
+    * Sku : string
+    * Price : decimal
+    * DiscountPrice : decimal
+    * StockQuantity : int
+    * Size : string
+    * Color : string
+    * Weight : decimal
+    * IsActive : bool
+}
+
+entity "HinhAnhSanPham" as product_images {
+    * Id : int <<PK>>
+    --
+    * ProductId : int <<FK>>
+    * ImageUrl : string
+    * AltText : string
+    * SortOrder : int
+    * IsMain : bool
+    * CreatedAt : datetime
+}
+
+entity "DanhGiaSanPham" as product_reviews {
+    * Id : int <<PK>>
+    --
+    * ProductId : int <<FK>>
+    * UserId : string <<FK>>
+    * OrderId : int <<FK>>
+    * Rating : int
+    * Content : string
+    * Title : string
+    * IsApproved : bool
+    * IsVerifiedPurchase : bool
+    * CreatedAt : datetime
+}
+
+' ====== NHÓM 3: DỊCH VỤ (2 bảng) ======
+entity "DichVu" as services {
+    * Id : int <<PK>>
+    --
+    * Name : string
+    * Description : string
+    * ImageUrl : string
+    * Price : decimal
+    * Type : enum
+    * Features : string
+    * IsActive : bool
+    * CreatedAt : datetime
+    * UpdatedAt : datetime
+}
+
+entity "LichDichVu" as service_schedules {
+    * Id : int <<PK>>
+    --
+    * ServiceId : int <<FK>>
+    * DayOfWeek : enum
+    * StartTime : time
+    * EndTime : time
+    * Instructor : string
+    * Location : string
+    * Capacity : int
+    * Notes : string
+    * IsActive : bool
+}
+
+' ====== NHÓM 4: ĐƠN HÀNG (4 bảng) ======
+entity "DonHang" as orders {
+    * Id : int <<PK>>
+    --
+    * UserId : string <<FK>>
+    * OrderDate : datetime
+    * TotalAmount : decimal
+    * SubtotalAmount : decimal
+    * ShippingAmount : decimal
+    * TaxAmount : decimal
+    * DiscountAmount : decimal
+    * Status : enum
+    * PaymentStatus : enum
+    * ShippingAddress : string
+    * BillingAddress : string
+    * Notes : string
+    * CreatedAt : datetime
+    * UpdatedAt : datetime
+}
+
+entity "ChiTietDonHang" as order_items {
+    * Id : int <<PK>>
+    --
+    * OrderId : int <<FK>>
+    * ProductId : int <<FK>>
+    * ProductName : string
+    * Quantity : int
+    * UnitPrice : decimal
+    * Subtotal : decimal
+    * ProductOptions : string
+}
+
+entity "LichSuTrangThaiDon" as order_status_history {
+    * Id : int <<PK>>
+    --
+    * OrderId : int <<FK>>
+    * Status : enum
+    * Notes : string
+    * ChangedAt : datetime
+    * ChangedBy : string
+}
+
+entity "ThanhToanDonHang" as order_payments {
+    * Id : int <<PK>>
+    --
+    * OrderId : int <<FK>>
+    * PaymentMethod : enum
+    * Amount : decimal
+    * TransactionId : string
+    * Status : enum
+    * PaymentDate : datetime
+    * CreatedAt : datetime
+}
+
+' ====== NHÓM 5: GIỎ HÀNG (2 bảng) ======
+entity "GioHang" as shopping_carts {
+    * Id : int <<PK>>
+    --
+    * UserId : string
+    * CreatedAt : datetime
+    * UpdatedAt : datetime
+}
+
+entity "ChiTietGioHang" as cart_items {
+    * Id : int <<PK>>
+    --
+    * ShoppingCartId : int <<FK>>
+    * ProductId : int <<FK>>
+    * ServiceId : int <<FK>>
+    * Quantity : int
+    * UnitPrice : decimal
+    * AddedAt : datetime
+}
+
+' ====== NHÓM 6: QUẢN LÝ KHO (2 bảng) ======
+entity "NhaCungCap" as suppliers {
+    * Id : int <<PK>>
+    --
+    * Name : string
+    * ContactPerson : string
+    * Email : string
+    * Phone : string
+    * Address : string
+    * IsActive : bool
+    * CreatedAt : datetime
+}
+
+entity "GiaoDichKho" as inventory_transactions {
+    * Id : int <<PK>>
+    --
+    * ProductId : int <<FK>>
+    * ProductVariantId : int <<FK>>
+    * SupplierId : int <<FK>>
+    * OrderId : int <<FK>>
+    * Type : enum
+    * Quantity : int
+    * UnitPrice : decimal
+    * TotalCost : decimal
+    * Notes : string
+    * TransactionDate : datetime
+}
+
+' ====== NHÓM 7: MÃ GIẢM GIÁ (2 bảng) ======
+entity "MaGiamGia" as coupons {
+    * Id : int <<PK>>
+    --
+    * Code : string
+    * Type : enum
+    * Value : decimal
+    * ApplicationType : enum
+    * MinimumOrderAmount : decimal
+    * MaximumDiscountAmount : decimal
+    * UsageLimit : int
+    * UsedCount : int
+    * StartDate : datetime
+    * EndDate : datetime
+    * IsActive : bool
+    * CreatedAt : datetime
+}
+
+entity "LichSuSuDungMa" as coupon_usage_history {
+    * Id : int <<PK>>
+    --
+    * CouponId : int <<FK>>
+    * OrderId : int <<FK>>
+    * UserId : string <<FK>>
+    * DiscountAmount : decimal
+    * UsedAt : datetime
+}
+
+' ====== NHÓM 8: HỖ TRỢ & PHÂN TÍCH (2 bảng) ======
+entity "TinNhanLienHe" as contact_messages {
+    * Id : int <<PK>>
+    --
+    * Name : string
+    * Email : string
+    * Subject : string
+    * Message : string
+    * IsRead : bool
+    * CreatedAt : datetime
+    * ReadAt : datetime
+    * Response : string
+    * RespondedAt : datetime
+}
+
+entity "TuongTacNguoiDung" as user_interactions {
+    * Id : int <<PK>>
+    --
+    * UserId : string <<FK>>
+    * ProductId : int <<FK>>
+    * InteractionType : enum
+    * ViewTimeSeconds : int
+    * Clicked : bool
+    * AddedToCart : bool
+    * Purchased : bool
+    * Rating : int
+    * CreatedAt : datetime
+}
+
+' ========== CORE RELATIONSHIPS ==========
+
+' Người dùng và vai trò
+users ||--o{ user_roles
+roles ||--o{ user_roles
+
+' Sản phẩm cốt lõi
+products ||--o{ product_variants
+products ||--o{ product_images
+products ||--o{ product_reviews
+
+' Dịch vụ
+services ||--o{ service_schedules
+
+' Đơn hàng cốt lõi
+users ||--o{ orders
+orders ||--o{ order_items
+orders ||--o{ order_status_history
+orders ||--o{ order_payments
+products ||--o{ order_items
+
+' Giỏ hàng
+users ||--o{ shopping_carts
+shopping_carts ||--o{ cart_items
+products ||--o{ cart_items
+services ||--o{ cart_items
+
+' Quản lý kho cốt lõi
+suppliers ||--o{ inventory_transactions
+products ||--o{ inventory_transactions
+product_variants ||--o{ inventory_transactions
+orders ||--o{ inventory_transactions
+
+' Mã giảm giá cốt lõi
+coupons ||--o{ coupon_usage_history
+orders ||--o{ coupon_usage_history
+users ||--o{ coupon_usage_history
+
+' Đánh giá cốt lõi
+products ||--o{ product_reviews
+users ||--o{ product_reviews
+orders ||--o{ product_reviews
+
+' Tương tác người dùng
+users ||--o{ user_interactions
+products ||--o{ user_interactions
+
+@enduml

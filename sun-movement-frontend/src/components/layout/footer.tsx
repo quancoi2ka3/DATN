@@ -104,7 +104,7 @@ export function Footer() {
 
           {/* Column 2 - Links */}
           <div>
-            <h3 className="text-lg font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
+            <h3 className="text-lg text-red-500 font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
               Dịch Vụ
             </h3>
             <ul className="space-y-3">
@@ -158,7 +158,7 @@ export function Footer() {
 
           {/* Column 3 - Shop */}
           <div>
-            <h3 className="text-lg font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
+            <h3 className="text-lg text-red-500 font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
               Shop
             </h3>
             <ul className="space-y-3">
@@ -194,7 +194,7 @@ export function Footer() {
 
           {/* Column 4 - Gallery */}
           <div>
-            <h3 className="text-lg font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
+            <h3 className="text-lg text-red-500 font-bold mb-6 relative after:absolute after:bottom-0 after:left-0 after:w-12 after:h-0.5 after:bg-red-500 pb-3">
               Hình ảnh
             </h3>
             <div className="grid grid-cols-3 gap-2">

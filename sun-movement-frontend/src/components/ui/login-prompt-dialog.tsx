@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { UserRoundIcon, ArrowRight, LogIn, UserPlus } from "lucide-react";
+import CustomerLogin from "@/components/auth/CustomerLogin";
+import CustomerRegister from "@/components/auth/CustomerRegister";
 
 interface LoginPromptDialogProps {
   isOpen: boolean;
@@ -19,21 +20,68 @@ export function LoginPromptDialog({
   message = "Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng",
   returnUrl = window.location.pathname
 }: LoginPromptDialogProps) {
-  const router = useRouter();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
-  const handleLogin = () => {
-    setIsRedirecting(true);
-    // Save the current URL to redirect back after login
-    sessionStorage.setItem('returnUrl', returnUrl);
-    router.push('/login');
+  const handleOpenLogin = () => {
+    setAuthMode('login');
+    setShowAuthForm(true);
   };
 
-  const handleRegister = () => {
-    setIsRedirecting(true);
-    sessionStorage.setItem('returnUrl', returnUrl);
-    router.push('/register');
+  const handleOpenRegister = () => {
+    setAuthMode('register');
+    setShowAuthForm(true);
   };
+
+  const handleAuthSuccess = () => {
+    setShowAuthForm(false);
+    onOpenChange(false);
+    // Don't reload or redirect - just close the dialog
+    // The user will stay on the current page (sportswear/supplements)
+    // and can continue their actions (add to cart, view details, etc.)
+  };
+
+  const handleBackToPrompt = () => {
+    setShowAuthForm(false);
+  };
+
+  if (showAuthForm) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px] border-2 border-primary/10 shadow-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-center">
+              {authMode === 'login' ? 'Đăng nhập' : 'Đăng ký tài khoản'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {authMode === 'login' ? (
+              <CustomerLogin
+                onSuccess={handleAuthSuccess}
+                onSwitchToRegister={() => setAuthMode('register')}
+              />
+            ) : (
+              <CustomerRegister
+                onSuccess={handleAuthSuccess}
+                onSwitchToLogin={() => setAuthMode('login')}
+              />
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="ghost" 
+              onClick={handleBackToPrompt}
+              className="w-full sm:w-auto"
+            >
+              ← Quay lại
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -50,9 +98,8 @@ export function LoginPromptDialog({
         
         <div className="flex flex-col gap-4 py-4">
           <Button 
-            onClick={handleLogin} 
+            onClick={handleOpenLogin} 
             className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90" 
-            disabled={isRedirecting}
           >
             <LogIn className="h-4 w-4" />
             Đăng nhập ngay
@@ -72,9 +119,8 @@ export function LoginPromptDialog({
           
           <Button 
             variant="outline" 
-            onClick={handleRegister} 
+            onClick={handleOpenRegister} 
             className="flex items-center justify-center gap-2"
-            disabled={isRedirecting}
           >
             <UserPlus className="h-4 w-4" />
             Tạo tài khoản mới

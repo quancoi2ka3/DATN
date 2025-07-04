@@ -15,7 +15,7 @@ import { AlertCircle, CheckCircle2, Lock } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthModal from "@/components/auth/AuthModal";
-import { toast } from "@/hooks/use-toast";
+import { useNotification } from "@/lib/notification-context";
 
 // Loading skeleton components for better UX
 const CheckoutFormSkeleton = () => (

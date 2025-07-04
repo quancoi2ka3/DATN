@@ -1,0 +1,174 @@
+@startuml SunMovement_Database_Schema_Core
+
+!define primary_key(x) <b><color:red>PK</color></b> x
+!define foreign_key(x) <b><color:blue>FK</color></b> x
+!define unique_key(x) <b><color:green>UK</color></b> x
+
+entity "NguoiDung" {
+  primary_key(Id) : nvarchar(450)
+  --
+  unique_key(Email) : nvarchar(256)
+  unique_key(TenDangNhap) : nvarchar(256)
+  Ho : nvarchar(max)
+  Ten : nvarchar(max)
+  SoDienThoai : nvarchar(max)
+  NgaySinh : datetime2
+  DiaChi : nvarchar(max)
+  NgayTao : datetime2
+  NgayCapNhat : datetime2
+  EmailDaXacNhan : bit
+  SoDienThoaiDaXacNhan : bit
+  BatXacThucHaiBuoc : bit
+  BatKhoaTaiKhoan : bit
+  SoLanDangNhapSai : int
+}
+
+entity "SanPham" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  TenSanPham : nvarchar(max)
+  MoTa : nvarchar(max)
+  Gia : decimal(18,2)
+  GiaGiam : decimal(18,2)
+  GiaVon : decimal(18,2)
+  unique_key(MaSanPham) : nvarchar(450)
+  unique_key(DuongDanUrl) : nvarchar(450)
+  DanhMuc : nvarchar(max)
+  SoLuongTon : int
+  KhoiLuong : decimal(18,3)
+  DiemTrungBinh : decimal(3,2)
+  TongDanhGia : int
+  TrangThaiHoatDong : bit
+  NgayTao : datetime2
+  NgayCapNhat : datetime2
+}
+
+entity "DonHang" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdNguoiDung) : nvarchar(450)
+  MaDonHang : nvarchar(max)
+  TongTien : decimal(18,2)
+  TrangThai : int
+  TrangThaiThanhToan : int
+  PhuongThucThanhToan : nvarchar(max)
+  DiaChiGiaoHang : nvarchar(max)
+  NgayDatHang : datetime2
+  NgayGiaoHang : datetime2
+  NgayNhanHang : datetime2
+}
+
+entity "ChiTietDonHang" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdDonHang) : int
+  foreign_key(IdSanPham) : int
+  SoLuong : int
+  DonGia : decimal(18,2)
+  ThanhTien : decimal(18,2)
+}
+
+entity "GioHang" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdNguoiDung) : nvarchar(450)
+  NgayTao : datetime2
+  NgayCapNhat : datetime2
+}
+
+entity "ChiTietGioHang" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdGioHang) : int
+  foreign_key(IdSanPham) : int
+  foreign_key(IdDichVu) : int
+  SoLuong : int
+  DonGia : decimal(18,2)
+  NgayThem : datetime2
+}
+
+entity "DichVu" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  TenDichVu : nvarchar(max)
+  MoTa : nvarchar(max)
+  Gia : decimal(18,2)
+  ThoiGian : int
+  TrangThaiHoatDong : bit
+  NgayTao : datetime2
+  NgayCapNhat : datetime2
+}
+
+entity "DanhGiaSanPham" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdSanPham) : int
+  foreign_key(IdNguoiDung) : nvarchar(450)
+  foreign_key(IdQuanTri) : nvarchar(450)
+  DiemDanhGia : int
+  TieuDe : nvarchar(max)
+  BinhLuan : nvarchar(max)
+  DaDuyet : bit
+  NgayTao : datetime2
+  NgayCapNhat : datetime2
+}
+
+entity "TuongTacNguoiDung" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdNguoiDung) : nvarchar(450)
+  foreign_key(IdSanPham) : int
+  LoaiTuongTac : int
+  ThoiGianXem : int
+  NgayTao : datetime2
+  DiaChiIP : nvarchar(max)
+  ThongTinTrinhDuyet : nvarchar(max)
+}
+
+entity "HinhAnhSanPham" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdSanPham) : int
+  DuongDanHinhAnh : nvarchar(max)
+  VanBanThayThe : nvarchar(max)
+  LaHinhChinh : bit
+  ThuTuHienThi : int
+}
+
+entity "LichSuTrangThaiDonHang" {
+  primary_key(Id) : int IDENTITY(1,1)
+  --
+  foreign_key(IdDonHang) : int
+  TrangThai : int
+  NgayCapNhat : datetime2
+  GhiChu : nvarchar(max)
+}
+
+' Quan hệ Primary Key to Foreign Key
+NguoiDung ||--o{ DonHang : "IdNguoiDung"
+NguoiDung ||--|| GioHang : "IdNguoiDung"
+NguoiDung ||--o{ DanhGiaSanPham : "IdNguoiDung"
+NguoiDung ||--o{ DanhGiaSanPham : "IdQuanTri"
+NguoiDung ||--o{ TuongTacNguoiDung : "IdNguoiDung"
+
+SanPham ||--o{ ChiTietDonHang : "IdSanPham"
+SanPham ||--o{ ChiTietGioHang : "IdSanPham"
+SanPham ||--o{ DanhGiaSanPham : "IdSanPham"
+SanPham ||--o{ TuongTacNguoiDung : "IdSanPham"
+SanPham ||--o{ HinhAnhSanPham : "IdSanPham"
+
+DonHang ||--o{ ChiTietDonHang : "IdDonHang"
+DonHang ||--o{ LichSuTrangThaiDonHang : "IdDonHang"
+
+GioHang ||--o{ ChiTietGioHang : "IdGioHang"
+
+DichVu ||--o{ ChiTietGioHang : "IdDichVu"
+
+' Indexes (được hiển thị dưới dạng ghi chú)
+note right of SanPham : "IX_SanPham_MaSanPham (UNIQUE)\nIX_SanPham_DuongDanUrl (UNIQUE)\nIX_SanPham_DanhMuc\nIX_SanPham_TrangThaiHoatDong"
+
+note right of DanhGiaSanPham : "IX_DanhGiaSanPham_IdSanPham\nIX_DanhGiaSanPham_IdNguoiDung\nIX_DanhGiaSanPham_DaDuyet\nIX_DanhGiaSanPham_NgayTao"
+
+note right of NguoiDung : "IX_NguoiDung_Email (UNIQUE)\nIX_NguoiDung_TenDangNhap (UNIQUE)"
+
+@enduml

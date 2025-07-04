@@ -188,7 +188,7 @@ if %errorlevel% equ 0 (
         echo.
         echo [THỰC HIỆN] Mở hướng dẫn chi tiết...
         
-        set GUIDE_PATH=d:\DATN\DATN\PENDING_MODEL_CHANGES_GUIDE.md
+        set GUIDE_PATH=d:\DATN\DATN\docs\guides\PENDING_MODEL_CHANGES_GUIDE.md
         
         if exist "%GUIDE_PATH%" (
             start "" "%GUIDE_PATH%"

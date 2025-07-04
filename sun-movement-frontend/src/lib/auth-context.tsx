@@ -2,6 +2,7 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { isTokenExpired } from './token-utils';
+import { setCookie, getCookie, deleteCookie } from './cookie-utils';
 
 interface User {
   id: string;
@@ -72,6 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user,
           token,
         });
+        
+        // Also set cookie for API routes if not already set
+        if (!getCookie("auth-token")) {
+          setCookie("auth-token", token, 7);
+          console.log('[AUTH] Cookie restored for token:', token.substring(0, 20) + '...');
+        }
       } catch (error) {
         // If there's an error parsing user data, clear local storage
         localStorage.removeItem("token");
@@ -132,6 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      
+      // Also set cookie for API routes
+      setCookie("auth-token", token, 7);
+      console.log('[AUTH] Cookie set for token:', token.substring(0, 20) + '...');
       
       setAuthState({
         isAuthenticated: true,
@@ -200,6 +211,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Clear auth data
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    
+    // Clear auth cookie
+    deleteCookie("auth-token");
     
     // Preserve shopping cart during logout (for guest checkout)
     // Don't clear cart data - let user continue shopping as guest

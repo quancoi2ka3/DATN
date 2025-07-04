@@ -1,0 +1,454 @@
+@startuml SunMovement_Class_Diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam class {
+    BackgroundColor #E8F4FD
+    BorderColor #2196F3
+    FontColor #1976D2
+    ArrowColor #1976D2
+}
+
+title "SUN MOVEMENT - CLASS DIAGRAM (Core Business Objects)"
+
+package "Quản lý người dùng" {
+    class NguoiDung {
+        +Id: string
+        +UserName: string
+        +Email: string
+        +FirstName: string
+        +LastName: string
+        +PhoneNumber: string
+        +Address: string
+        +DateOfBirth: DateTime
+        +CreatedAt: DateTime
+        +LastLogin: DateTime?
+        +IsActive: bool
+        --
+        +DanhSachDonHang: List<DonHang>
+        +TuongTacNguoiDung: List<TuongTacNguoiDung>
+        --
+        +GetFullName(): string
+        +GetTotalSpent(): decimal
+        +GetOrderCount(): int
+    }
+    
+    enum VaiTro {
+        Admin
+        Customer
+        Staff
+    }
+}
+
+package "Sản phẩm và dịch vụ" {
+    class SanPham {
+        +Id: int
+        +Name: string
+        +Description: string
+        +ImageUrl: string?
+        +Price: decimal
+        +DiscountPrice: decimal?
+        +CostPrice: decimal
+        +StockQuantity: int
+        +Category: DanhMucSanPham
+        +Status: TrangThaiSanPham
+        +Sku: string?
+        +Slug: string?
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +BienTheSanPham: List<BienTheSanPham>
+        +HinhAnhSanPham: List<HinhAnhSanPham>
+        +DanhGiaSanPham: List<DanhGiaSanPham>
+        +GiaoDichKho: List<GiaoDichKho>
+        --
+        +GetDiscountedPrice(): decimal
+        +GetAverageRating(): decimal
+        +IsInStock(): bool
+        +ApplyDiscount(amount: decimal): void
+    }
+    
+    class BienTheSanPham {
+        +Id: int
+        +ProductId: int
+        +Name: string
+        +Sku: string?
+        +Price: decimal
+        +DiscountPrice: decimal?
+        +StockQuantity: int
+        +Size: string?
+        +Color: string?
+        +Weight: decimal?
+        +IsActive: bool
+        --
+        +SanPham: SanPham
+        +HinhAnhBienThe: List<HinhAnhBienThe>
+        --
+        +GetDisplayName(): string
+        +IsAvailable(): bool
+    }
+    
+    class DichVu {
+        +Id: int
+        +Name: string
+        +Description: string
+        +ImageUrl: string?
+        +Price: decimal
+        +Type: LoaiDichVu
+        +Features: string?
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +LichDichVu: List<LichDichVu>
+        --
+        +GetAvailableSchedules(): List<LichDichVu>
+        +HasCapacity(date: DateTime): bool
+    }
+    
+    class LichDichVu {
+        +Id: int
+        +ServiceId: int
+        +DayOfWeek: ThuTrongTuan
+        +StartTime: TimeSpan?
+        +EndTime: TimeSpan?
+        +Instructor: string
+        +Location: string
+        +Capacity: int
+        +Notes: string?
+        +IsActive: bool
+        --
+        +DichVu: DichVu
+        --
+        +GetDuration(): TimeSpan
+        +IsTimeSlotAvailable(): bool
+    }
+    
+    enum DanhMucSanPham {
+        Sportswear
+        Supplements
+        Equipment
+        Accessories
+        Nutrition
+    }
+    
+    enum LoaiDichVu {
+        Calisthenics
+        Strength
+        Yoga
+    }
+    
+    enum TrangThaiSanPham {
+        Active
+        Inactive
+        OutOfStock
+        Discontinued
+    }
+}
+
+package "Đơn hàng và thanh toán" {
+    class DonHang {
+        +Id: int
+        +UserId: string?
+        +OrderDate: DateTime
+        +TotalAmount: decimal
+        +SubtotalAmount: decimal
+        +ShippingAmount: decimal
+        +TaxAmount: decimal
+        +DiscountAmount: decimal
+        +Status: TrangThaiDonHang
+        +PaymentStatus: TrangThaiThanhToan
+        +ShippingAddress: string
+        +BillingAddress: string
+        +Notes: string?
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +NguoiDung: NguoiDung?
+        +ChiTietDonHang: List<ChiTietDonHang>
+        +LichSuTrangThai: List<LichSuTrangThaiDon>
+        +ThanhToanDonHang: List<ThanhToanDonHang>
+        --
+        +CalculateTotal(): decimal
+        +AddItem(product: SanPham, quantity: int): void
+        +UpdateStatus(status: TrangThaiDonHang): void
+        +CanCancel(): bool
+        +ApplyCoupon(coupon: MaGiamGia): bool
+    }
+    
+    class ChiTietDonHang {
+        +Id: int
+        +OrderId: int
+        +ProductId: int
+        +ProductName: string
+        +Quantity: int
+        +UnitPrice: decimal
+        +Subtotal: decimal
+        +ProductOptions: string?
+        --
+        +DonHang: DonHang
+        +SanPham: SanPham
+        --
+        +CalculateSubtotal(): decimal
+        +GetTotalWeight(): decimal
+    }
+    
+    class GioHang {
+        +Id: int
+        +UserId: string
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +ChiTietGioHang: List<ChiTietGioHang>
+        --
+        +GetTotalAmount(): decimal
+        +GetItemCount(): int
+        +AddItem(product: SanPham, quantity: int): void
+        +RemoveItem(itemId: int): void
+        +Clear(): void
+        +ConvertToOrder(): DonHang
+    }
+    
+    class ChiTietGioHang {
+        +Id: int
+        +ShoppingCartId: int
+        +ProductId: int?
+        +ServiceId: int?
+        +Quantity: int
+        +UnitPrice: decimal
+        +AddedAt: DateTime
+        --
+        +GioHang: GioHang
+        +SanPham: SanPham?
+        +DichVu: DichVu?
+        --
+        +GetSubtotal(): decimal
+        +UpdateQuantity(quantity: int): void
+    }
+    
+    enum TrangThaiDonHang {
+        Pending
+        AwaitingPayment
+        Paid
+        Processing
+        Shipped
+        Delivered
+        Completed
+        Cancelled
+        Refunded
+    }
+    
+    enum TrangThaiThanhToan {
+        Pending
+        Paid
+        PartiallyPaid
+        Refunded
+        Failed
+        Cancelled
+    }
+}
+
+package "Quản lý kho" {
+    class NhaCungCap {
+        +Id: int
+        +Name: string
+        +ContactPerson: string
+        +Email: string
+        +Phone: string
+        +Address: string
+        +IsActive: bool
+        +CreatedAt: DateTime
+        --
+        +GiaoDichKho: List<GiaoDichKho>
+        +SanPham_NhaCungCap: List<SanPham_NhaCungCap>
+        --
+        +GetTotalTransactions(): int
+        +GetTotalValue(): decimal
+    }
+    
+    class GiaoDichKho {
+        +Id: int
+        +ProductId: int
+        +ProductVariantId: int?
+        +SupplierId: int?
+        +OrderId: int?
+        +Type: LoaiGiaoDichKho
+        +Quantity: int
+        +UnitPrice: decimal
+        +TotalCost: decimal
+        +Notes: string?
+        +TransactionDate: DateTime
+        --
+        +SanPham: SanPham
+        +BienTheSanPham: BienTheSanPham?
+        +NhaCungCap: NhaCungCap?
+        +DonHang: DonHang?
+        --
+        +CalculateTotalCost(): decimal
+        +IsInbound(): bool
+        +IsOutbound(): bool
+    }
+    
+    enum LoaiGiaoDichKho {
+        Purchase
+        Sale
+        Return
+        Adjustment
+        Transfer
+        Damage
+        Loss
+    }
+}
+
+package "Mã giảm giá" {
+    class MaGiamGia {
+        +Id: int
+        +Code: string
+        +Type: LoaiMaGiamGia
+        +Value: decimal
+        +ApplicationType: LoaiApDung
+        +MinimumOrderAmount: decimal?
+        +MaximumDiscountAmount: decimal?
+        +UsageLimit: int?
+        +UsedCount: int
+        +StartDate: DateTime
+        +EndDate: DateTime
+        +IsActive: bool
+        +CreatedAt: DateTime
+        --
+        +LichSuSuDung: List<LichSuSuDungMa>
+        +SanPham_MaGiamGia: List<SanPham_MaGiamGia>
+        +DanhMuc_MaGiamGia: List<DanhMuc_MaGiamGia>
+        --
+        +IsValid(): bool
+        +CanUse(orderAmount: decimal): bool
+        +CalculateDiscount(orderAmount: decimal): decimal
+        +GetRemainingUsage(): int
+    }
+    
+    enum LoaiMaGiamGia {
+        Percentage
+        FixedAmount
+        FreeShipping
+        BuyOneGetOne
+    }
+    
+    enum LoaiApDung {
+        All
+        Category
+        Product
+        FirstTimeCustomer
+        LoyalCustomer
+    }
+}
+
+package "Hệ thống đánh giá" {
+    class DanhGiaSanPham {
+        +Id: int
+        +ProductId: int
+        +UserId: string
+        +OrderId: int?
+        +Rating: int
+        +Content: string
+        +Title: string?
+        +IsApproved: bool
+        +IsVerifiedPurchase: bool
+        +HelpfulCount: int
+        +CreatedAt: DateTime
+        +AdminResponse: string?
+        +AdminResponseDate: DateTime?
+        --
+        +SanPham: SanPham
+        +NguoiDung: NguoiDung
+        +DonHang: DonHang?
+        +HinhAnhDanhGia: List<HinhAnhDanhGia>
+        --
+        +IsHelpful(): bool
+        +MarkAsHelpful(): void
+        +Approve(): void
+        +AddAdminResponse(response: string): void
+    }
+    
+    class TuongTacNguoiDung {
+        +Id: int
+        +UserId: string
+        +ProductId: int
+        +InteractionType: LoaiTuongTac
+        +ViewTimeSeconds: int
+        +Clicked: bool
+        +AddedToCart: bool
+        +Purchased: bool
+        +Rating: int
+        +CreatedAt: DateTime
+        --
+        +NguoiDung: NguoiDung
+        +SanPham: SanPham
+        --
+        +GetEngagementScore(): decimal
+        +IsHighEngagement(): bool
+    }
+    
+    enum LoaiTuongTac {
+        View
+        Click
+        AddToCart
+        Purchase
+        Review
+        Share
+        Wishlist
+    }
+}
+
+package "Hỗ trợ khách hàng" {
+    class TinNhanLienHe {
+        +Id: int
+        +Name: string
+        +Email: string
+        +Subject: string
+        +Message: string
+        +IsRead: bool
+        +CreatedAt: DateTime
+        +ReadAt: DateTime?
+        +Response: string?
+        +RespondedAt: DateTime?
+        --
+        +MarkAsRead(): void
+        +AddResponse(response: string): void
+        +GetResponseTime(): TimeSpan?
+    }
+}
+
+' ========== RELATIONSHIPS ==========
+
+' Người dùng
+NguoiDung ||--o{ DonHang : "1 người dùng có nhiều đơn hàng"
+NguoiDung ||--o{ GioHang : "1 người dùng có 1 giỏ hàng"
+NguoiDung ||--o{ DanhGiaSanPham : "1 người dùng có nhiều đánh giá"
+NguoiDung ||--o{ TuongTacNguoiDung : "1 người dùng có nhiều tương tác"
+
+' Sản phẩm
+SanPham ||--o{ BienTheSanPham : "1 sản phẩm có nhiều biến thể"
+SanPham ||--o{ ChiTietDonHang : "1 sản phẩm có trong nhiều đơn hàng"
+SanPham ||--o{ ChiTietGioHang : "1 sản phẩm có trong nhiều giỏ hàng"
+SanPham ||--o{ DanhGiaSanPham : "1 sản phẩm có nhiều đánh giá"
+SanPham ||--o{ GiaoDichKho : "1 sản phẩm có nhiều giao dịch kho"
+SanPham ||--o{ TuongTacNguoiDung : "1 sản phẩm có nhiều tương tác"
+
+' Dịch vụ
+DichVu ||--o{ LichDichVu : "1 dịch vụ có nhiều lịch"
+DichVu ||--o{ ChiTietGioHang : "1 dịch vụ có trong nhiều giỏ hàng"
+
+' Đơn hàng
+DonHang ||--o{ ChiTietDonHang : "1 đơn hàng có nhiều chi tiết"
+DonHang ||--o{ GiaoDichKho : "1 đơn hàng tạo nhiều giao dịch kho"
+
+' Giỏ hàng
+GioHang ||--o{ ChiTietGioHang : "1 giỏ hàng có nhiều chi tiết"
+
+' Quản lý kho
+NhaCungCap ||--o{ GiaoDichKho : "1 nhà cung cấp có nhiều giao dịch"
+
+' Mã giảm giá
+MaGiamGia ||--o{ LichSuSuDungMa : "1 mã có nhiều lần sử dụng"
+
+@enduml

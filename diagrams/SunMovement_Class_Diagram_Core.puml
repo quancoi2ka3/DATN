@@ -1,0 +1,227 @@
+@startuml SunMovement_Class_Diagram_Core
+
+' Người dùng và Xác thực
+class NguoiDung {
+  +Id : string
+  +Email : string
+  +TenDangNhap : string
+  +Ho : string
+  +Ten : string
+  +SoDienThoai : string
+  +NgaySinh : DateTime?
+  +DiaChi : string?
+  +NgayTao : DateTime
+  +NgayCapNhat : DateTime
+  --
+  +DanhSachDonHang : List<DonHang>
+  +TuongTacNguoiDung : List<TuongTacNguoiDung>
+  +GioHang : GioHang
+  --
+  +LayHoTen() : string
+  +TinhTuoi() : int?
+}
+
+' Sản phẩm cốt lõi
+class SanPham {
+  +Id : int
+  +TenSanPham : string
+  +MoTa : string?
+  +Gia : decimal
+  +GiaGiam : decimal?
+  +GiaVon : decimal
+  +MaSanPham : string?
+  +DuongDanUrl : string?
+  +DanhMuc : string
+  +SoLuongTon : int
+  +KhoiLuong : decimal?
+  +DiemTrungBinh : decimal
+  +TongDanhGia : int
+  +TrangThaiHoatDong : bool
+  +NgayTao : DateTime
+  +NgayCapNhat : DateTime
+  --
+  +ChiTietDonHang : List<ChiTietDonHang>
+  +DanhGia : List<DanhGiaSanPham>
+  +TuongTacNguoiDung : List<TuongTacNguoiDung>
+  +HinhAnh : List<HinhAnhSanPham>
+  +PhienBan : List<PhienBanSanPham>
+  --
+  +TinhPhanTramGiam() : decimal?
+  +KiemTraTonKho() : bool
+  +CapNhatDiemTrungBinh() : void
+}
+
+' Quản lý đơn hàng
+class DonHang {
+  +Id : int
+  +IdNguoiDung : string?
+  +MaDonHang : string
+  +TongTien : decimal
+  +TrangThai : TrangThaiDonHang
+  +TrangThaiThanhToan : TrangThaiThanhToan
+  +PhuongThucThanhToan : string?
+  +DiaChiGiaoHang : string
+  +NgayDatHang : DateTime
+  +NgayGiaoHang : DateTime?
+  +NgayNhanHang : DateTime?
+  --
+  +NguoiDung : NguoiDung?
+  +ChiTiet : List<ChiTietDonHang>
+  +LichSuTrangThai : List<LichSuTrangThaiDonHang>
+  --
+  +TinhTongTien() : decimal
+  +CoTheHuyDon() : bool
+  +CapNhatTrangThai(trangThai: TrangThaiDonHang) : void
+}
+
+class ChiTietDonHang {
+  +Id : int
+  +IdDonHang : int
+  +IdSanPham : int
+  +SoLuong : int
+  +DonGia : decimal
+  +ThanhTien : decimal
+  --
+  +DonHang : DonHang
+  +SanPham : SanPham
+  --
+  +TinhThanhTien() : void
+}
+
+' Giỏ hàng
+class GioHang {
+  +Id : int
+  +IdNguoiDung : string
+  +NgayTao : DateTime
+  +NgayCapNhat : DateTime
+  --
+  +NguoiDung : NguoiDung
+  +ChiTiet : List<ChiTietGioHang>
+  --
+  +LayTongTien() : decimal
+  +DemSoMat() : int
+  +XoaGioHang() : void
+}
+
+class ChiTietGioHang {
+  +Id : int
+  +IdGioHang : int
+  +IdSanPham : int?
+  +IdDichVu : int?
+  +SoLuong : int
+  +DonGia : decimal
+  +NgayThem : DateTime
+  --
+  +SanPham : SanPham?
+  +DichVu : DichVu?
+  --
+  +LayThanhTien() : decimal
+}
+
+' Dịch vụ
+class DichVu {
+  +Id : int
+  +TenDichVu : string
+  +MoTa : string?
+  +Gia : decimal
+  +ThoiGian : int
+  +TrangThaiHoatDong : bool
+  +NgayTao : DateTime
+  +NgayCapNhat : DateTime
+  --
+  +LichTrinh : List<LichTrinhDichVu>
+  --
+  +KiemTraCoSan() : bool
+}
+
+' Hệ thống đánh giá
+class DanhGiaSanPham {
+  +Id : int
+  +IdSanPham : int
+  +IdNguoiDung : string
+  +IdQuanTri : string?
+  +DiemDanhGia : int
+  +TieuDe : string?
+  +BinhLuan : string?
+  +DaDuyet : bool
+  +NgayTao : DateTime
+  +NgayCapNhat : DateTime
+  --
+  +SanPham : SanPham
+  +NguoiDung : NguoiDung
+  +QuanTri : NguoiDung?
+  --
+  +PheDuyet() : void
+  +TuChoi() : void
+}
+
+' Theo dõi tương tác người dùng
+class TuongTacNguoiDung {
+  +Id : int
+  +IdNguoiDung : string
+  +IdSanPham : int
+  +LoaiTuongTac : LoaiTuongTacNguoiDung
+  +ThoiGianXem : int?
+  +NgayTao : DateTime
+  +DiaChiIP : string?
+  +ThongTinTrinhDuyet : string?
+  --
+  +NguoiDung : NguoiDung
+  +SanPham : SanPham
+  --
+  +LaTuongTacGanDay() : bool
+}
+
+' Enums
+enum TrangThaiDonHang {
+  DangCho
+  DaXacNhan
+  DangXuLy
+  DaGiao
+  DaNhan
+  DaHuy
+  DaTraLai
+}
+
+enum TrangThaiThanhToan {
+  DangCho
+  DaThanhToan
+  ThatBai
+  DaHoanTien
+}
+
+enum LoaiTuongTacNguoiDung {
+  Xem
+  ThemVaoGio
+  XoaKhoiGio
+  MuaHang
+  DanhGia
+  ChiaSeR
+  YeuThich
+}
+
+' Relationships với ký tự chuẩn UML
+' Composition (◆——): Đối tượng cha mất → đối tượng con mất
+NguoiDung *-- GioHang : "sở hữu"
+GioHang *-- ChiTietGioHang : "chứa"
+DonHang *-- ChiTietDonHang : "bao gồm"
+SanPham *-- DanhGiaSanPham : "được đánh giá"
+SanPham *-- TuongTacNguoiDung : "được tương tác"
+
+' Aggregation (◇——): Đối tượng cha mất → đối tượng con vẫn tồn tại
+NguoiDung o-- DonHang : "đặt hàng"
+SanPham o-- ChiTietDonHang : "có trong"
+SanPham o-- ChiTietGioHang : "được thêm vào"
+DichVu o-- ChiTietGioHang : "được đặt"
+
+' Association (——): Mối quan hệ đơn giản
+NguoiDung -- DanhGiaSanPham : "viết"
+NguoiDung -- TuongTacNguoiDung : "thực hiện"
+NguoiDung -- DanhGiaSanPham : "phê duyệt >"
+
+' Dependency (- - ->): Phụ thuộc tạm thời
+DonHang ..> TrangThaiDonHang : "sử dụng"
+DonHang ..> TrangThaiThanhToan : "sử dụng"
+TuongTacNguoiDung ..> LoaiTuongTacNguoiDung : "sử dụng"
+
+@enduml

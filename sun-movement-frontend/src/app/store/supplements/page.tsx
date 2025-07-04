@@ -1,39 +1,31 @@
-import { Metadata } from "next";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import Image from "next/image";
-import { ProductCard } from "@/components/ui/product-card";
-import { Button } from "@/components/ui/button";
-import { Filter, SlidersHorizontal, ChevronDown, AlertCircle } from "lucide-react";
-import SupplementsTopControls from "@/components/ui/SupplementsTopControls";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Thực phẩm bổ sung | Sun Movement",
-  description: "Các sản phẩm thực phẩm bổ sung chất lượng cao tại Sun Movement",
-};
+import { useState, useEffect, useMemo } from "react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { ProductCard } from "@/components/ui/product-card";
+import { AlertCircle } from "lucide-react";
+import SupplementsTopControls from "@/components/ui/SupplementsTopControls";
+import { SupplementsSidebar } from "@/components/ui/SupplementsSidebar";
+import { ProductList } from "@/components/ui/ProductList";
+import { Pagination } from "@/components/ui/Pagination";
 
 import { Product } from "@/lib/types";
 import { ProductDto } from "@/lib/adapters";
 
-// Server-side data fetching function with improved error handling
+// Client-side data fetching function with improved error handling
 async function getSupplementsProducts(): Promise<{products: Product[], error?: string}> {
   try {
     // For development, use HTTPS with custom agent to handle self-signed certificates
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
     
     // Create a custom fetch with SSL verification disabled for development
     const fetchOptions: RequestInit = {
-      next: { revalidate: 3600 }, // Cache for 1 hour
+      cache: 'no-store', // Disable cache for client-side fetching
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
     };
-
-    // Disable SSL verification for development
-    if (process.env.NODE_ENV === 'development') {
-      // @ts-ignore - This is a Node.js specific property
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    }
     
     const response = await fetch(`${backendUrl}/api/products/category/supplements`, fetchOptions);
     
@@ -57,6 +49,9 @@ async function getSupplementsProducts(): Promise<{products: Product[], error?: s
         category: item.category.toString(),
         subCategory: item.subCategory || "General",
         isBestseller: item.isFeatured ?? false,
+        rating: 4.5, // Default rating since backend doesn't provide it
+        reviews: Math.floor(Math.random() * 50) + 10, // Mock reviews
+        isNew: Math.random() > 0.7, // Random new flag
       })),
       error: undefined
     };
@@ -162,7 +157,7 @@ const fallbackSupplementsData: Product[] = [
     description: "Dầu cá omega-3 hỗ trợ sức khỏe tim mạch và giảm viêm sau tập luyện.",
     price: 320000,
     salePrice: null,
-    imageUrl: "/images/supplements/protein.jpg", // placeholder image
+    imageUrl: "/images/supplements/omega3.jpg",
     category: "vitamins",
     subCategory: "Sun Wellness",
     rating: 4.7,
@@ -176,7 +171,7 @@ const fallbackSupplementsData: Product[] = [
     description: "Hỗ trợ giấc ngủ sâu và phục hồi cơ bắp với kẽm, magiê và vitamin B6.",
     price: 380000,
     salePrice: 349000,
-    imageUrl: "/images/supplements/pre-workout.jpg", // placeholder image
+    imageUrl: "/images/supplements/zma.jpg",
     category: "recovery",
     subCategory: "Sun Performance",
     rating: 4.5,
@@ -186,48 +181,54 @@ const fallbackSupplementsData: Product[] = [
   },
 ];
 
-// Function to calculate category counts from products
-function getCategoryOptions(products: Product[]) {
-  return [
-    { value: "all", label: "Tất cả", count: products.length },
-    { value: "protein", label: "Protein", count: products.filter(p => p.category === "protein").length },
-    { value: "pre-workout", label: "Pre-Workout", count: products.filter(p => p.category === "pre-workout").length },
-    { value: "amino-acids", label: "Amino Acids", count: products.filter(p => p.category === "amino-acids").length },
-    { value: "vitamins", label: "Vitamin & Minerals", count: products.filter(p => p.category === "vitamins").length },
-    { value: "performance", label: "Hiệu suất", count: products.filter(p => p.category === "performance").length },
-    { value: "weight-gain", label: "Tăng cân", count: products.filter(p => p.category === "weight-gain").length },
-    { value: "recovery", label: "Phục hồi", count: products.filter(p => p.category === "recovery").length },
-  ];
-}
+export default function SupplementsPage() {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1500000]);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
 
-// Function to extract unique brands from products
-function getBrandOptions(products: Product[]) {
-  const uniqueBrands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)));
-  return [
-    { value: "all", label: "Tất cả" },
-    ...uniqueBrands.map(brand => ({ value: brand as string, label: brand as string })),
-  ];
-}
+  // Fetch products on component mount
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        setIsLoading(true);
+        const { products, error } = await getSupplementsProducts();
+        setAllProducts(products);
+        setFilteredProducts(products);
+        setError(error || null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        setAllProducts(fallbackSupplementsData);
+        setFilteredProducts(fallbackSupplementsData);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-// Sort options
-const sortOptions = [
-  { value: "default", label: "Mặc định" },
-  { value: "price-asc", label: "Giá: Thấp đến cao" },
-  { value: "price-desc", label: "Giá: Cao đến thấp" },
-  { value: "name-asc", label: "Tên: A-Z" },
-  { value: "name-desc", label: "Tên: Z-A" },
-  { value: "rating", label: "Đánh giá cao nhất" },
-  { value: "newest", label: "Mới nhất" },
-];
+    fetchProducts();
+  }, []);
 
-export default async function SupplementsPage() {
-  // Fetch supplements from the API
-  const { products, error } = await getSupplementsProducts();
-  
-  // Generate category and brand options based on available products
-  const categories = getCategoryOptions(products);
-  const brands = getBrandOptions(products);
-  
+  // Handle filter changes and update filtered products
+  const handleFilteredProductsChange = (products: Product[]) => {
+    setFilteredProducts(products);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Calculate pagination
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Error display if API call failed */}
@@ -236,7 +237,7 @@ export default async function SupplementsPage() {
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center gap-3 text-red-500 mb-6">
             <AlertCircle className="h-5 w-5" />
             <div>
-              <p className="font-medium">Error loading products</p>
+              <p className="font-medium">Lỗi tải sản phẩm</p>
               <p className="text-sm opacity-80">{error}</p>
             </div>
           </div>
@@ -283,299 +284,81 @@ export default async function SupplementsPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <div className="w-full lg:w-1/4 xl:w-1/5">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 sticky top-24">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">Bộ lọc</h3>
-                <SlidersHorizontal className="w-5 h-5 text-slate-400" />
-              </div>
-              
-              {/* Categories */}
-              <div className="mb-8">
-                <h4 className="text-white font-medium mb-3">Danh mục</h4>
-                <div className="space-y-2">
-                  {categories.map((category) => (
-                    <div key={category.value} className="flex items-center justify-between">
-                      <label className="flex items-center text-slate-300 hover:text-white cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="w-4 h-4 mr-2 accent-red-500" 
-                          defaultChecked={category.value === "all"}
-                        />
-                        {category.label}
-                      </label>
-                      <span className="text-sm text-slate-500">({category.count})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Price Range */}
-              <div className="mb-8">
-                <h4 className="text-white font-medium mb-3">Khoảng giá</h4>
-                <div className="px-2">
-                  <div className="h-1 bg-slate-700 rounded-full mb-2 relative">
-                    <div className="absolute h-1 bg-gradient-to-r from-red-500 to-amber-500 rounded-full w-2/3"></div>
-                    <div className="absolute w-4 h-4 bg-white rounded-full border-2 border-red-500 -top-1.5 left-0"></div>
-                    <div className="absolute w-4 h-4 bg-white rounded-full border-2 border-amber-500 -top-1.5 left-2/3"></div>
-                  </div>
-                  <div className="flex justify-between text-sm text-slate-400">
-                    <span>300.000₫</span>
-                    <span>900.000₫</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Brands */}
-              <div className="mb-8">
-                <h4 className="text-white font-medium mb-3">Thương hiệu</h4>
-                <div className="space-y-2">
-                  {brands.map((brand) => (
-                    <div key={brand.value} className="flex items-center">
-                      <label className="flex items-center text-slate-300 hover:text-white cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="w-4 h-4 mr-2 accent-red-500" 
-                          defaultChecked={brand.value === "all"}
-                        />
-                        {brand.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Rating */}
-              <div className="mb-8">
-                <h4 className="text-white font-medium mb-3">Đánh giá</h4>
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <div key={rating} className="flex items-center">
-                      <label className="flex items-center text-slate-300 hover:text-white cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          className="w-4 h-4 mr-2 accent-red-500" 
-                        />
-                        <div className="flex items-center">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg 
-                              key={i} 
-                              className={`w-4 h-4 ${i < rating ? 'text-amber-500' : 'text-slate-600'}`} 
-                              fill="currentColor" 
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                          {rating === 1 && <span className="ml-1 text-slate-400">trở lên</span>}
-                        </div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Apply Filters Button */}
-              <Button className="w-full bg-gradient-to-r from-red-600 to-amber-500 hover:opacity-90 text-white">
-                Áp dụng bộ lọc
-              </Button>
-            </div>
+            <SupplementsSidebar
+              products={allProducts}
+              selectedCategories={selectedCategories}
+              onCategoryChange={setSelectedCategories}
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              selectedRatings={selectedRatings}
+              onRatingChange={setSelectedRatings}
+            />
           </div>
           
           {/* Product Listing */}
           <div className="w-full lg:w-3/4 xl:w-4/5">
             {/* Top Controls */}
-{/* Top Controls */}
-<SupplementsTopControls />
-              {/* Featured Products */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Sản phẩm nổi bật</h3>
-                <a href="#" className="text-red-500 hover:text-red-400 flex items-center gap-1 text-sm font-medium">
-                  Xem tất cả <ChevronDown className="w-4 h-4 rotate-270" />
-                </a>
+            <SupplementsTopControls
+              products={allProducts}
+              onFilteredProductsChange={handleFilteredProductsChange}
+              selectedCategories={selectedCategories}
+              onCategoryChange={setSelectedCategories}
+              priceRange={priceRange}
+              onPriceRangeChange={setPriceRange}
+              selectedRatings={selectedRatings}
+              onRatingChange={setSelectedRatings}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              itemsPerPage={itemsPerPage}
+            />
+
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+                <span className="ml-3 text-slate-400">Đang tải sản phẩm...</span>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.filter(p => p.isBestseller).slice(0, 3).map((product) => (
-                  <div 
-                    key={product.id} 
-                    className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/50 transition-all duration-300"
-                  >
-                    <div className="relative h-60 overflow-hidden">
-                      {product.salePrice && (
-                        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-sm font-medium px-2 py-1 rounded">
-                          Sale
-                        </div>
-                      )}
-                      {product.isNew && (
-                        <div className="absolute top-3 right-3 z-10 bg-amber-500 text-white text-sm font-medium px-2 py-1 rounded">
-                          Mới
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute bottom-4 left-4 right-4 z-20">
-                        <div className="flex items-center gap-1 mb-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg 
-                              key={i} 
-                              className={`w-4 h-4 ${i < Math.floor(product.rating ?? 0) ? 'text-amber-500' : 'text-slate-600'}`} 
-                              fill="currentColor" 
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                          <span className="text-slate-400 text-sm ml-1">({product.reviews})</span>
-                        </div>
-                        <div className="text-red-500 text-sm font-medium">
-                          {product.brand}
-                        </div>
-                      </div>
+            ) : (
+              <>
+                {/* Products List */}
+                <ProductList 
+                  products={paginatedProducts}
+                  viewMode={viewMode}
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                />
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
+
+                {/* No results message */}
+                {filteredProducts.length === 0 && !isLoading && (
+                  <div className="text-center py-12">
+                    <div className="text-slate-400 text-lg mb-4">
+                      Không tìm thấy sản phẩm nào phù hợp với bộ lọc của bạn
                     </div>
-                    
-                    <div className="p-4">
-                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-red-500 transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          {product.salePrice ? (
-                            <>
-                              <span className="text-lg font-bold text-white">{new Intl.NumberFormat('vi-VN').format(product.salePrice)}₫</span>
-                              <span className="text-sm text-slate-500 line-through">{new Intl.NumberFormat('vi-VN').format(product.price)}₫</span>
-                            </>
-                          ) : (
-                            <span className="text-lg font-bold text-white">{new Intl.NumberFormat('vi-VN').format(product.price)}₫</span>
-                          )}
-                        </div>
-                        <button className="p-2 rounded-full bg-slate-800 hover:bg-red-500 text-white transition-colors">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedCategories([]);
+                        setSelectedRatings([]);
+                        setPriceRange([0, 1500000]);
+                        setCurrentPage(1);
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                      Xóa bộ lọc
+                    </button>
                   </div>
-                ))}
-              </div>
-            </div>
-              {/* All Products */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Tất cả sản phẩm</h3>
-                <div className="text-sm text-slate-400">
-                  Hiển thị {products.length} sản phẩm
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <div 
-                    key={product.id} 
-                    className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden group hover:border-red-500/50 transition-all duration-300"
-                  >
-                    <div className="relative h-60 overflow-hidden">
-                      {product.salePrice && (
-                        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-sm font-medium px-2 py-1 rounded">
-                          Sale
-                        </div>
-                      )}
-                      {product.isNew && (
-                        <div className="absolute top-3 right-3 z-10 bg-amber-500 text-white text-sm font-medium px-2 py-1 rounded">
-                          Mới
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10"></div>
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute bottom-4 left-4 right-4 z-20">
-                        <div className="flex items-center gap-1 mb-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <svg 
-                              key={i} 
-                              className={`w-4 h-4 ${i < Math.floor(product.rating ?? 0) ? 'text-amber-500' : 'text-slate-600'}`} 
-                              fill="currentColor" 
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          ))}
-                          <span className="text-slate-400 text-sm ml-1">({product.reviews})</span>
-                        </div>
-                        <div className="text-red-500 text-sm font-medium">
-                          {product.brand}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-4">
-                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-red-500 transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-slate-400 text-sm mb-4 line-clamp-2">
-                        {product.description}
-                      </p>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          {product.salePrice ? (
-                            <>
-                              <span className="text-lg font-bold text-white">{new Intl.NumberFormat('vi-VN').format(product.salePrice)}₫</span>
-                              <span className="text-sm text-slate-500 line-through">{new Intl.NumberFormat('vi-VN').format(product.price)}₫</span>
-                            </>
-                          ) : (
-                            <span className="text-lg font-bold text-white">{new Intl.NumberFormat('vi-VN').format(product.price)}₫</span>
-                          )}
-                        </div>
-                        <button className="p-2 rounded-full bg-slate-800 hover:bg-red-500 text-white transition-colors">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Pagination */}
-              <div className="flex justify-center mt-12">
-                <div className="flex items-center gap-2">
-                  <button className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-white hover:bg-red-500 disabled:opacity-50 disabled:hover:bg-slate-800" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                  <button className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white">
-                    1
-                  </button>
-                  <button className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-white hover:bg-red-500">
-                    2
-                  </button>
-                  <button className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-white hover:bg-red-500">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

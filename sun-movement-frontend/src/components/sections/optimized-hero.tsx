@@ -266,13 +266,7 @@ export function OptimizedHeroSection() {
         onSlideChange={changeSlide}
       />
 
-      {/* Scroll down indicator with simple animation */}
-      <div className="absolute bottom-8 right-8 z-20 animate-bounce">
-        <div className="flex flex-col items-center text-white/70 hover:text-white transition-colors cursor-pointer">
-          <span className="text-sm mb-2">Cuộn xuống</span>
-          <ArrowRight className="w-4 h-4 rotate-90" />
-        </div>
-      </div>
+     
     </section>
   );
 }

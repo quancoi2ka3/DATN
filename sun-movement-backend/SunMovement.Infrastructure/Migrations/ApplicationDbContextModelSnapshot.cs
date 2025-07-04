@@ -636,114 +636,6 @@ namespace SunMovement.Infrastructure.Migrations
                     b.ToTable("CouponUsageHistory");
                 });
 
-            modelBuilder.Entity("SunMovement.Core.Models.CustomerActivity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActivityType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AdditionalData")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CustomerActivities");
-                });
-
-            modelBuilder.Entity("SunMovement.Core.Models.CustomerReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdminId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AdminResponse")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("AdminResponseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVerifiedPurchase")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ServiceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdminId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CustomerReviews");
-                });
-
             modelBuilder.Entity("SunMovement.Core.Models.CustomerSearchStatistic", b =>
                 {
                     b.Property<int>("Id")
@@ -1652,70 +1544,6 @@ namespace SunMovement.Infrastructure.Migrations
                     b.ToTable("ProductReviews");
                 });
 
-            modelBuilder.Entity("SunMovement.Core.Models.ProductReviewHelpful", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsHelpful")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ProductReviewId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("ProductReviewHelpfuls");
-                });
-
-            modelBuilder.Entity("SunMovement.Core.Models.ProductReviewImage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AltText")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ProductReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductReviewId");
-
-                    b.ToTable("ProductReviewImages");
-                });
-
             modelBuilder.Entity("SunMovement.Core.Models.ProductSupplier", b =>
                 {
                     b.Property<int>("Id")
@@ -2287,56 +2115,6 @@ namespace SunMovement.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("SunMovement.Core.Models.CustomerActivity", b =>
-                {
-                    b.HasOne("SunMovement.Core.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SunMovement.Core.Models.CustomerReview", b =>
-                {
-                    b.HasOne("SunMovement.Core.Models.ApplicationUser", "Admin")
-                        .WithMany()
-                        .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SunMovement.Core.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SunMovement.Core.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SunMovement.Core.Models.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SunMovement.Core.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Admin");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Service");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("SunMovement.Core.Models.CustomerSearchStatistic", b =>
                 {
                     b.HasOne("SunMovement.Core.Models.ApplicationUser", "User")
@@ -2508,36 +2286,6 @@ namespace SunMovement.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SunMovement.Core.Models.ProductReviewHelpful", b =>
-                {
-                    b.HasOne("SunMovement.Core.Models.ProductReview", "ProductReview")
-                        .WithMany("HelpfulVotes")
-                        .HasForeignKey("ProductReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SunMovement.Core.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ProductReview");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SunMovement.Core.Models.ProductReviewImage", b =>
-                {
-                    b.HasOne("SunMovement.Core.Models.ProductReview", "ProductReview")
-                        .WithMany("Images")
-                        .HasForeignKey("ProductReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProductReview");
-                });
-
             modelBuilder.Entity("SunMovement.Core.Models.ProductSupplier", b =>
                 {
                     b.HasOne("SunMovement.Core.Models.Product", "Product")
@@ -2678,13 +2426,6 @@ namespace SunMovement.Infrastructure.Migrations
                     b.Navigation("UserInteractions");
 
                     b.Navigation("Variants");
-                });
-
-            modelBuilder.Entity("SunMovement.Core.Models.ProductReview", b =>
-                {
-                    b.Navigation("HelpfulVotes");
-
-                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("SunMovement.Core.Models.ProductVariant", b =>

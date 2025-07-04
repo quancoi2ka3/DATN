@@ -10,12 +10,12 @@ import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { MixpanelProvider } from "@/lib/mixpanel-context";
 import { NotificationProvider } from "@/lib/notification-context";
+import { ToastProvider } from "@/components/ui/simple-toast";
 import { ReduxProvider } from "@/store/ReduxProvider";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
 
 import FloatingCart from "@/components/ui/floating-cart";
 import ScrollButtons from "@/components/ui/scroll-buttons";
-import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 
 export const viewport: Viewport = {
@@ -126,9 +126,10 @@ export default function RootLayout({
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
           <ReduxProvider>
-            <NotificationProvider>
-              <AuthProvider>
-                <CartProvider>
+            <ToastProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <CartProvider>
                 <Header />
                 <main className="flex-grow">
                   <Suspense fallback={<LoadingSpinner />}>
@@ -136,12 +137,12 @@ export default function RootLayout({
                   </Suspense>
                 </main>
                 <Footer />
-                <RasaChatbot />                  <FloatingCart />
-                  <ScrollButtons />
-                  <Toaster />
-                </CartProvider>
-              </AuthProvider>
-            </NotificationProvider>
+                <RasaChatbot />                    <FloatingCart />
+                    <ScrollButtons />
+                  </CartProvider>
+                </AuthProvider>
+              </NotificationProvider>
+            </ToastProvider>
           </ReduxProvider>
         </Suspense>
       </body>

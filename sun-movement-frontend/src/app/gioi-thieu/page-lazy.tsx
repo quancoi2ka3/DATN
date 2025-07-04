@@ -100,7 +100,7 @@ export default function AboutPageLazy() {
                   Liên Hệ Ngay
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-slate-900 transition-all duration-300" asChild>
+              <Button size="lg" variant="outline" className="border-white text-red-600 hover:bg-white hover:text-slate-900 transition-all duration-300" asChild>
                 <Link href="/dich-vu">
                   Khám Phá Dịch Vụ
                 </Link>

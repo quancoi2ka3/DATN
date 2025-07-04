@@ -1,7 +1,8 @@
 "use client";
 
-import { Building, Wifi, Car, Coffee, Music, Shield, Dumbbell, Users, Heart, Clock } from "lucide-react";
+import { Building, Wifi, Car, Coffee, Music, Shield, Dumbbell, Users, Heart, Clock, Bath } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export const FacilitiesSection = () => {
   const facilities = [
@@ -9,28 +10,28 @@ export const FacilitiesSection = () => {
       icon: Dumbbell,
       title: "Phòng Gym Hiện Đại",
       description: "Trang bị máy móc tiên tiến từ các thương hiệu hàng đầu thế giới",
-      image: "/images/gioithieu/gym-room.webp",
+      image: "/images/gioithieu/khuvucstrength.webp",
       color: "from-red-500 to-red-400"
     },
     {
       icon: Heart,
       title: "Phòng Yoga & Meditation",
       description: "Không gian yên tĩnh cho việc thư giãn và rèn luyện tinh thần",
-      image: "/images/gioithieu/yoga-room.webp",
+      image: "/images/gioithieu/khuvucyoga.webp",
       color: "from-emerald-500 to-emerald-400"
     },
     {
       icon: Users,
       title: "Sân Tập Nhóm",
       description: "Khu vực rộng rãi cho các hoạt động tập luyện theo nhóm",
-      image: "/images/gioithieu/group-training.webp",
+      image: "/images/gioithieu/khonggiancalis.webp",
       color: "from-blue-500 to-blue-400"
     },
     {
-      icon: Clock,
+      icon: Bath,
       title: "Phòng Tắm & Thay Đồ",
       description: "Tiện nghi đầy đủ với tủ khóa an toàn và vòi sen nước nóng",
-      image: "/images/gioithieu/locker-room.webp",
+      image: "/images/gioithieu/phongtam.webp",
       color: "from-purple-500 to-purple-400"
     }
   ];
@@ -170,10 +171,7 @@ export const FacilitiesSection = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 hover:transform hover:scale-105">
-                Đăng Ký Tham Quan
-              </button>
-              <button className="border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300">
-                Xem Bảng Giá
+                <Link href={"https://www.messenger.com/t/112565973590004/?messaging_source=source%3Apages%3Amessage_shortlink&source_id=1441792&recurring_notification=0"}>Đăng Ký Tham Quan</Link>
               </button>
             </div>
           </div>

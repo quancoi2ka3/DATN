@@ -104,7 +104,6 @@ export function ResourcePreloader() {
     // Preload critical images
     const criticalImages = [
       '/images/logo-white.svg',
-      '/images/store-banner.jpg',
     ];
 
     criticalImages.forEach(src => {

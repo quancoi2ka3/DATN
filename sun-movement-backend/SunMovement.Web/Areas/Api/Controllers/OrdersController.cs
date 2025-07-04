@@ -434,6 +434,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
         // GET: api/orders
         [HttpGet]
+        [AllowAnonymous] // Allow anonymous access for guest orders
         public async Task<ActionResult<object>> GetUserOrders()
         {
             try
@@ -442,21 +443,37 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 
-                if (string.IsNullOrEmpty(userId))
-                {
-                    Console.WriteLine("[ORDERS API] User not authenticated");
-                    return BadRequest(new { success = false, error = "User not authenticated" });
-                }
-
-                Console.WriteLine($"[ORDERS API] Getting orders for user: {userId}");
+                // For now, let's allow both authenticated users and check guest orders by email
+                // In production, you should implement proper session management for guest orders
+                
+                Console.WriteLine($"[ORDERS API] Getting orders for user: {userId ?? "guest"}");
 
                 var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
-                var orders = await dbContext.Orders
-                    .Where(o => o.UserId == userId)
-                    .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product)
-                    .OrderByDescending(o => o.OrderDate)
-                    .ToListAsync();
+                
+                List<Order> orders;
+                
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    // Get orders for authenticated user
+                    orders = await dbContext.Orders
+                        .Where(o => o.UserId == userId)
+                        .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .OrderByDescending(o => o.OrderDate)
+                        .ToListAsync();
+                }
+                else
+                {
+                    // For guest users, return recent orders (last 10) for demo purposes
+                    // In production, you should use session/email-based identification
+                    orders = await dbContext.Orders
+                        .Where(o => string.IsNullOrEmpty(o.UserId))
+                        .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
+                        .OrderByDescending(o => o.OrderDate)
+                        .Take(10)
+                        .ToListAsync();
+                }
 
                 Console.WriteLine($"[ORDERS API] Found {orders.Count} orders");
 
@@ -491,24 +508,83 @@ namespace SunMovement.Web.Areas.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"[ORDERS API ERROR] {ex.Message}");
-                return StatusCode(500, new { success = false, error = "Internal server error" });
+                Console.WriteLine($"[ORDERS API ERROR] Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { success = false, error = "Internal server error", message = ex.Message });
+            }
+        }
+
+        // GET: api/orders/debug-orders
+        [HttpGet("debug-orders")]
+        [AllowAnonymous]
+        public async Task<ActionResult<object>> DebugOrders()
+        {
+            try
+            {
+                Console.WriteLine("[DEBUG ORDERS] Getting recent orders for debugging");
+                
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                
+                // Get recent orders with detailed info
+                var recentOrders = await dbContext.Orders
+                    .OrderByDescending(o => o.Id)
+                    .Take(10)
+                    .Select(o => new {
+                        o.Id,
+                        o.UserId,
+                        o.Email,
+                        o.Status,
+                        o.PaymentStatus,
+                        o.TotalAmount,
+                        o.PaymentMethod,
+                        o.OrderDate,
+                        o.CreatedAt,
+                        ItemCount = o.OrderItems.Count()
+                    })
+                    .ToListAsync();
+                
+                Console.WriteLine($"[DEBUG ORDERS] Found {recentOrders.Count} recent orders");
+                
+                return Ok(new { 
+                    success = true, 
+                    totalOrders = await dbContext.Orders.CountAsync(),
+                    recentOrders = recentOrders
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG ORDERS ERROR] {ex.Message}");
+                return StatusCode(500, new { success = false, error = ex.Message });
             }
         }
 
         // GET: api/orders/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous] // Allow anonymous access for guest orders
         public async Task<ActionResult<object>> GetOrderById(string id)
         {
             try
             {
                 Console.WriteLine($"[ORDER DETAIL API] GetOrderById called with ID: {id}");
                 
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
-                if (string.IsNullOrEmpty(userId))
+                // Debug authentication headers
+                Console.WriteLine($"[ORDER DETAIL API] Request headers:");
+                foreach (var header in Request.Headers)
                 {
-                    Console.WriteLine("[ORDER DETAIL API] User not authenticated");
-                    return BadRequest(new { success = false, error = "User not authenticated" });
+                    if (header.Key.ToLower().Contains("auth") || header.Key.ToLower().Contains("cookie"))
+                    {
+                        Console.WriteLine($"  {header.Key}: {header.Value}");
+                    }
+                }
+                
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine($"[ORDER DETAIL API] User authenticated: {User.Identity?.IsAuthenticated}");
+                Console.WriteLine($"[ORDER DETAIL API] User ID: {userId ?? "null"}");
+                Console.WriteLine($"[ORDER DETAIL API] User claims count: {User.Claims.Count()}");
+                
+                // Debug user claims
+                foreach (var claim in User.Claims.Take(5))
+                {
+                    Console.WriteLine($"  Claim: {claim.Type} = {claim.Value}");
                 }
 
                 if (!int.TryParse(id, out int orderId))
@@ -518,8 +594,19 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 }
 
                 var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                
+                // Debug: Check database connection
+                Console.WriteLine($"[ORDER DETAIL API] Database context initialized");
+                
+                // Debug: Count total orders in database
+                var totalOrders = await dbContext.Orders.CountAsync();
+                Console.WriteLine($"[ORDER DETAIL API] Total orders in database: {totalOrders}");
+                
+                // Find the order by ID first
+                Console.WriteLine($"[ORDER DETAIL API] Searching for order ID: {orderId}");
+                
                 var order = await dbContext.Orders
-                    .Where(o => o.Id == orderId && o.UserId == userId)
+                    .Where(o => o.Id == orderId)
                     .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
                     .FirstOrDefaultAsync();
@@ -527,10 +614,49 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 if (order == null)
                 {
                     Console.WriteLine($"[ORDER DETAIL API] Order not found: {orderId}");
+                    
+                    // Debug: List recent orders
+                    var recentOrders = await dbContext.Orders
+                        .OrderByDescending(o => o.Id)
+                        .Take(5)
+                        .Select(o => new { o.Id, o.Status, o.Email })
+                        .ToListAsync();
+                    
+                    Console.WriteLine($"[ORDER DETAIL API] Recent orders in database:");
+                    foreach (var recentOrder in recentOrders)
+                    {
+                        Console.WriteLine($"  Order ID: {recentOrder.Id}, Status: {recentOrder.Status}, Email: {recentOrder.Email}");
+                    }
+                    
                     return NotFound(new { success = false, error = "Order not found" });
                 }
 
-                Console.WriteLine($"[ORDER DETAIL API] Order found: {orderId}");
+                Console.WriteLine($"[ORDER DETAIL API] Order found - ID: {order.Id}, Status: {order.Status}, UserId: {order.UserId ?? "null"}");
+
+                // Check ownership - allow if user is the owner OR if it's a guest order
+                bool canAccess = false;
+                
+                if (!string.IsNullOrEmpty(userId) && order.UserId == userId)
+                {
+                    // Authenticated user accessing their order
+                    canAccess = true;
+                    Console.WriteLine($"[ORDER DETAIL API] Authenticated user access granted");
+                }
+                else if (string.IsNullOrEmpty(order.UserId))
+                {
+                    // Guest order - for demo purposes, allow access
+                    // In production, you should check session/email/phone
+                    canAccess = true;
+                    Console.WriteLine($"[ORDER DETAIL API] Guest order access granted");
+                }
+                
+                if (!canAccess)
+                {
+                    Console.WriteLine($"[ORDER DETAIL API] Access denied - Order {orderId} belongs to user {order.UserId}, current user: {userId}");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                Console.WriteLine($"[ORDER DETAIL API] Access granted, returning order details");
 
                 var orderDto = new
                 {
@@ -565,7 +691,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"[ORDER DETAIL API ERROR] {ex.Message}");
-                return StatusCode(500, new { success = false, error = "Internal server error" });
+                Console.WriteLine($"[ORDER DETAIL API ERROR] Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { success = false, error = "Internal server error", message = ex.Message });
             }
         }
 
@@ -791,5 +918,248 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 });
             }
         }
+
+        // POST: api/orders/{id}/cancel
+        [HttpPost("{id}/cancel")]
+        public async Task<ActionResult<object>> CancelOrder(string id)
+        {
+            try
+            {
+                Console.WriteLine($"[ORDER CANCEL API] CancelOrder called with ID: {id}");
+                
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Console.WriteLine("[ORDER CANCEL API] User not authenticated");
+                    return Unauthorized(new { success = false, error = "Unauthorized - Please login to cancel order" });
+                }
+
+                if (!int.TryParse(id, out int orderId))
+                {
+                    Console.WriteLine($"[ORDER CANCEL API] Invalid order ID format: {id}");
+                    return BadRequest(new { success = false, error = "Invalid order ID" });
+                }
+
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                
+                // Find the order
+                var order = await dbContext.Orders
+                    .Where(o => o.Id == orderId)
+                    .FirstOrDefaultAsync();
+
+                if (order == null)
+                {
+                    Console.WriteLine($"[ORDER CANCEL API] Order not found: {orderId}");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                // Check ownership - allow if user is the owner OR if it's a guest order (userId is null/empty)
+                bool canAccess = order.UserId == userId || string.IsNullOrEmpty(order.UserId);
+                
+                if (!canAccess)
+                {
+                    Console.WriteLine($"[ORDER CANCEL API] Access denied - Order {orderId} belongs to different user");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                // Check if order can be cancelled
+                if (!order.CanBeCancelled)
+                {
+                    Console.WriteLine($"[ORDER CANCEL API] Order {orderId} cannot be cancelled - Status: {order.Status}");
+                    return BadRequest(new { 
+                        success = false, 
+                        error = "Đơn hàng này không thể hủy. Chỉ có thể hủy đơn hàng đang chờ xử lý hoặc chờ thanh toán." 
+                    });
+                }
+
+                // Update order status to cancelled
+                order.Status = OrderStatus.Cancelled;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // Add status history
+                var statusHistory = new OrderStatusHistory
+                {
+                    OrderId = order.Id,
+                    FromStatus = order.Status, // This will be the previous status
+                    ToStatus = OrderStatus.Cancelled,
+                    ChangedBy = userId,
+                    ChangedByName = User.Identity?.Name ?? "Customer",
+                    ChangedAt = DateTime.UtcNow,
+                    Notes = "Đơn hàng đã được hủy bởi khách hàng",
+                    Reason = "Customer cancellation",
+                    IsSystemGenerated = false
+                };
+
+                dbContext.OrderStatusHistories.Add(statusHistory);
+                await dbContext.SaveChangesAsync();
+
+                Console.WriteLine($"[ORDER CANCEL API] Order {orderId} cancelled successfully");
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Đơn hàng đã được hủy thành công",
+                    orderId = order.Id.ToString(),
+                    status = order.Status.ToString().ToLower()
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ORDER CANCEL API ERROR] {ex.Message}");
+                return StatusCode(500, new { success = false, error = "Internal server error" });
+            }
+        }
+
+        // POST: api/orders/{id}/confirm-received
+        [HttpPost("{id}/confirm-received")]
+        [AllowAnonymous] // Allow anonymous access for guest orders
+        public async Task<ActionResult<object>> ConfirmOrderReceived(string id)
+        {
+            try
+            {
+                Console.WriteLine($"[CONFIRM RECEIVED API] ConfirmOrderReceived called with ID: {id}");
+                
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                Console.WriteLine($"[CONFIRM RECEIVED API] User ID: {userId ?? "guest"}");
+
+                if (!int.TryParse(id, out int orderId))
+                {
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Invalid order ID format: {id}");
+                    return BadRequest(new { success = false, error = "Invalid order ID" });
+                }
+
+                var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+                
+                // Find the order with items
+                var order = await dbContext.Orders
+                    .Where(o => o.Id == orderId)
+                    .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Product)
+                    .FirstOrDefaultAsync();
+
+                if (order == null)
+                {
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Order not found: {orderId}");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                // Check ownership
+                bool canAccess = false;
+                if (!string.IsNullOrEmpty(userId) && order.UserId == userId)
+                {
+                    canAccess = true;
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Authenticated user access granted");
+                }
+                else if (string.IsNullOrEmpty(order.UserId))
+                {
+                    canAccess = true;
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Guest order access granted");
+                }
+                
+                if (!canAccess)
+                {
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Access denied - Order {orderId}");
+                    return NotFound(new { success = false, error = "Order not found" });
+                }
+
+                // Validate order status - can only confirm if delivered
+                if (order.Status != OrderStatus.Delivered)
+                {
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Invalid status for confirmation - Current: {order.Status}");
+                    return BadRequest(new { 
+                        success = false, 
+                        error = "Chỉ có thể xác nhận nhận hàng khi đơn hàng ở trạng thái 'Đã giao'" 
+                    });
+                }
+
+                var oldStatus = order.Status;
+                var oldPaymentStatus = order.PaymentStatus;
+
+                // Update order status to completed
+                order.Status = OrderStatus.Completed;
+                order.PaymentStatus = PaymentStatus.Paid; // Must be paid when completed
+                order.IsPaid = true;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.DeliveredDate = DateTime.UtcNow;
+                
+                if (order.PaymentDate == null)
+                {
+                    order.PaymentDate = DateTime.UtcNow;
+                }
+
+                Console.WriteLine($"[CONFIRM RECEIVED API] Status: {oldStatus} -> {order.Status}");
+                Console.WriteLine($"[CONFIRM RECEIVED API] Payment: {oldPaymentStatus} -> {order.PaymentStatus}");
+
+                // **CRITICAL: Trừ tồn kho sản phẩm**
+                foreach (var orderItem in order.OrderItems)
+                {
+                    if (orderItem.Product != null)
+                    {
+                        var product = orderItem.Product;
+                        var oldStock = product.StockQuantity;
+                        
+                        // Trừ tồn kho
+                        product.StockQuantity = Math.Max(0, product.StockQuantity - orderItem.Quantity);
+                        
+                        Console.WriteLine($"[INVENTORY UPDATE] Product {product.Id}: Stock {oldStock} -> {product.StockQuantity} (reduced by {orderItem.Quantity})");
+                        
+                        dbContext.Products.Update(product);
+                    }
+                }
+
+                // Save all changes in a transaction
+                using var transaction = await dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    dbContext.Orders.Update(order);
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    
+                    Console.WriteLine($"[CONFIRM RECEIVED API] Transaction committed successfully for Order {orderId}");
+                }
+                catch (Exception saveException)
+                {
+                    await transaction.RollbackAsync();
+                    Console.WriteLine($"[CONFIRM RECEIVED API ERROR] Failed to save changes: {saveException.Message}");
+                    Console.WriteLine($"[CONFIRM RECEIVED API ERROR] Stack trace: {saveException.StackTrace}");
+                    throw;
+                }
+
+                Console.WriteLine($"[CONFIRM RECEIVED API] Order {orderId} confirmed as received and completed");
+                Console.WriteLine($"[CONFIRM RECEIVED API] Inventory updated for {order.OrderItems.Count} items");
+
+                // Verify order still exists after transaction
+                var verifyOrder = await dbContext.Orders.FindAsync(orderId);
+                if (verifyOrder == null)
+                {
+                    Console.WriteLine($"[CONFIRM RECEIVED API ERROR] Order {orderId} disappeared after transaction!");
+                    return StatusCode(500, new { success = false, error = "Order verification failed after update" });
+                }
+                
+                Console.WriteLine($"[CONFIRM RECEIVED API] Order {orderId} verification successful - Status: {verifyOrder.Status}");
+
+                return Ok(new { 
+                    success = true, 
+                    message = "Đơn hàng đã được xác nhận hoàn thành và tồn kho đã được cập nhật",
+                    order = new 
+                    {
+                        id = order.Id,
+                        status = order.Status.ToString().ToLower(),
+                        paymentStatus = order.PaymentStatus.ToString().ToLower(),
+                        isPaid = order.IsPaid,
+                        updatedAt = order.UpdatedAt,
+                        completedAt = order.DeliveredDate
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CONFIRM RECEIVED API ERROR] {ex.Message}");
+                Console.WriteLine($"[CONFIRM RECEIVED API ERROR] Stack trace: {ex.StackTrace}");
+                return StatusCode(500, new { success = false, error = "Internal server error", message = ex.Message });
+            }
+        }
+
+
     }
 }

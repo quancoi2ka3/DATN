@@ -101,7 +101,7 @@ export default function AboutPageLazy() {
                   Liên Hệ Ngay
                 </a>
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-slate-900 transition-all duration-300" asChild>
+              <Button size="lg" variant="outline" className="border-white text-red-600 hover:bg-white hover:text-slate-900 transition-all duration-300" asChild>
                 <Link href="/dich-vu">
                   Khám Phá Dịch Vụ
                 </Link>
@@ -175,7 +175,7 @@ export default function AboutPageLazy() {
                   Địa Chỉ
                 </h3>
                 <p className="text-slate-300">
-                  Số 8 Tôn Thất Thuyết, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội
+                 Tầng 11, số 300 Đê La Thành nhỏ, Thổ Quan, Đống Đa, Hà Nội
                 </p>
               </div>
 
@@ -185,10 +185,10 @@ export default function AboutPageLazy() {
                   Liên Hệ
                 </h3>
                 <p className="text-slate-300">
-                  Hotline: <a href="tel:0123456789" className="text-red-400 hover:text-red-300">0123 456 789</a>
+                  Hotline: <a href="tel:08999139393" className="text-red-400 hover:text-red-300">0123 456 789</a>
                 </p>
                 <p className="text-slate-300">
-                  Email: <a href="mailto:info@sunmovement.vn" className="text-red-400 hover:text-red-300">info@sunmovement.vn</a>
+                  Email: <a href="mailto:contact@sunmovement.vn" className="text-red-400 hover:text-red-300">info@sunmovement.vn</a>
                 </p>
               </div>
 

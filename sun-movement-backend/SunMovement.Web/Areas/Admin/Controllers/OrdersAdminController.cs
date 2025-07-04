@@ -156,6 +156,40 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     order.Status = status;
                     order.UpdatedAt = DateTime.UtcNow;
 
+                    // Đồng bộ trạng thái thanh toán theo trạng thái đơn hàng (chuẩn TMĐT)
+                    switch (status)
+                    {
+                        case OrderStatus.Completed:
+                        case OrderStatus.Delivered:
+                        case OrderStatus.Shipped:
+                        case OrderStatus.Processing:
+                            // Các trạng thái này yêu cầu đã thanh toán
+                            order.IsPaid = true;
+                            order.PaymentStatus = PaymentStatus.Paid;
+                            if (order.PaymentDate == null)
+                            {
+                                order.PaymentDate = DateTime.UtcNow;
+                            }
+                            break;
+                            
+                        case OrderStatus.Cancelled:
+                            // Đơn hàng bị hủy - xử lý hoàn tiền
+                            if (order.IsPaid)
+                            {
+                                order.PaymentStatus = PaymentStatus.Refunded;
+                            }
+                            else
+                            {
+                                order.PaymentStatus = PaymentStatus.Cancelled;
+                            }
+                            break;
+                            
+                        case OrderStatus.Pending:
+                        case OrderStatus.AwaitingPayment:
+                            // Trạng thái chờ - giữ nguyên trạng thái thanh toán hiện tại
+                            break;
+                    }
+
                     // Update status-specific dates
                     if (status == OrderStatus.Shipped && order.ShippedDate == null)
                     {
@@ -172,7 +206,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     await _unitOfWork.Orders.UpdateAsync(order);
                     await _unitOfWork.CompleteAsync();
 
-                    return Json(new { success = true, message = $"Order status updated from {oldStatus} to {status}" });
+                    return Json(new { success = true, message = $"Order status updated from {oldStatus} to {status}, Payment status: {order.PaymentStatus}" });
                 }
             }
             catch (Exception ex)

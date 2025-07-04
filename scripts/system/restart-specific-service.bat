@@ -80,9 +80,9 @@ goto menu
 :restart_all
 echo.
 echo Đang khởi động lại tất cả các dịch vụ...
-call d:\DATN\DATN\stop-all-services.bat
+call d:\DATN\DATN\scripts\system\stop-all-services.bat
 timeout /t 3 > nul
-call d:\DATN\DATN\start-full-system.bat
+call d:\DATN\DATN\scripts\system\start-full-system.bat
 goto menu
 
 :end

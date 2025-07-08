@@ -1,0 +1,520 @@
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Quản lý chiến dịch email mã giảm giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-envelope me-2"></i>Quản lý chiến dịch email mã giảm giá
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">Chiến dịch email</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Campaign Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Mã chào mừng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#welcomeCouponModal">
+                                    <i class="fas fa-gift"></i> Gửi mã chào mừng
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Chiến dịch theo mùa</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#seasonalCampaignModal">
+                                    <i class="fas fa-calendar-alt"></i> Tạo chiến dịch
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-snowflake fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Sinh nhật khách hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#birthdayCouponModal">
+                                    <i class="fas fa-birthday-cake"></i> Gửi mã sinh nhật
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-birthday-cake fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Khách hàng VIP</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#loyaltyCouponModal">
+                                    <i class="fas fa-crown"></i> Tri ân VIP
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-gem fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Campaign Options -->
+    <div class="row mb-4">
+        <div class="col-xl-6 col-md-6">
+            <div class="card border-left-dark shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                Giỏ hàng bỏ lỡ</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#abandonedCartModal">
+                                    <i class="fas fa-shopping-cart"></i> Nhắc nhở giỏ hàng
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                Chiến dịch tùy chỉnh</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#customCampaignModal">
+                                    <i class="fas fa-bullhorn"></i> Tạo chiến dịch custom
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bullhorn fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-tools me-1"></i>
+            Công cụ hỗ trợ
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>🧪 Test Email</h5>
+                    <p>Gửi email test để kiểm tra cấu hình email server</p>
+                    <a asp-action="TestEmail" class="btn btn-outline-primary">
+                        <i class="fas fa-paper-plane"></i> Test Email
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <h5>📊 Thống kê Campaign</h5>
+                    <p>Xem báo cáo hiệu quả các chiến dịch email đã gửi</p>
+                    <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="CouponStatistics" class="btn btn-outline-info">
+                        <i class="fas fa-chart-bar"></i> Xem thống kê
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Welcome Coupon -->
+<div class="modal fade" id="welcomeCouponModal" tabindex="-1" aria-labelledby="welcomeCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="SendWelcomeCoupon" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="welcomeCouponModalLabel">
+                        <i class="fas fa-gift me-2"></i>Gửi mã giảm giá chào mừng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="welcomeEmail" class="form-label">Email khách hàng</label>
+                        <input type="email" class="form-control" id="welcomeEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="welcomeCustomerName" class="form-label">Tên khách hàng</label>
+                        <input type="text" class="form-control" id="welcomeCustomerName" name="customerName" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6>📋 Thông tin mã giảm giá:</h6>
+                        <ul class="mb-0">
+                            <li>Giảm 15% cho đơn hàng đầu tiên</li>
+                            <li>Đơn hàng tối thiểu: 100,000 VNĐ</li>
+                            <li>Có hiệu lực trong 30 ngày</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Gửi email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Seasonal Campaign -->
+<div class="modal fade" id="seasonalCampaignModal" tabindex="-1" aria-labelledby="seasonalCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-action="SendSeasonalCampaign" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="seasonalCampaignModalLabel">
+                        <i class="fas fa-calendar-alt me-2"></i>Tạo chiến dịch theo mùa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="seasonalOccasion" class="form-label">Dịp đặc biệt</label>
+                        <select class="form-select" id="seasonalOccasion" name="occasion" required>
+                            <option value="">-- Chọn dịp --</option>
+                            <option value="Tết Nguyên Đán">Tết Nguyên Đán</option>
+                            <option value="Quốc tế Phụ nữ">Quốc tế Phụ nữ 8/3</option>
+                            <option value="Giỗ tổ Hùng Vương">Giỗ tổ Hùng Vương</option>
+                            <option value="Quốc khánh">Quốc khánh 2/9</option>
+                            <option value="Black Friday">Black Friday</option>
+                            <option value="Noel">Noel</option>
+                            <option value="Mùa hè">Mùa hè</option>
+                            <option value="Khai trường">Khai trường</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="seasonalEmails" class="form-label">Danh sách email khách hàng</label>
+                        <textarea class="form-control" id="seasonalEmails" name="customerEmails" rows="5" 
+                                  placeholder="Nhập email khách hàng, mỗi email một dòng hoặc cách nhau bằng dấu phẩy" required></textarea>
+                        <div class="form-text">Hỗ trợ định dạng: email1@example.com, email2@example.com hoặc mỗi email một dòng</div>
+                    </div>
+                    <div class="alert alert-success">
+                        <h6>🎉 Thông tin chiến dịch:</h6>
+                        <ul class="mb-0">
+                            <li>Tự động tạo mã giảm giá 20% theo dịp</li>
+                            <li>Thời gian hiệu lực: 15 ngày</li>
+                            <li>Template email chuyên nghiệp bằng tiếng Việt</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-rocket"></i> Khởi chạy chiến dịch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Birthday Coupon -->
+<div class="modal fade" id="birthdayCouponModal" tabindex="-1" aria-labelledby="birthdayCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="SendBirthdayCoupon" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="birthdayCouponModalLabel">
+                        <i class="fas fa-birthday-cake me-2"></i>Gửi mã giảm giá sinh nhật
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="birthdayEmail" class="form-label">Email khách hàng</label>
+                        <input type="email" class="form-control" id="birthdayEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="birthdayCustomerName" class="form-label">Tên khách hàng</label>
+                        <input type="text" class="form-control" id="birthdayCustomerName" name="customerName" required>
+                    </div>
+                    <div class="alert alert-warning">
+                        <h6>🎂 Đặc biệt sinh nhật:</h6>
+                        <ul class="mb-0">
+                            <li>Giảm 25% - Ưu đãi sinh nhật đặc biệt</li>
+                            <li>Đơn hàng tối thiểu: 200,000 VNĐ</li>
+                            <li>Có hiệu lực trong 7 ngày</li>
+                            <li>Chỉ sử dụng được 1 lần</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-gift"></i> Gửi quà sinh nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Loyalty Coupon -->
+<div class="modal fade" id="loyaltyCouponModal" tabindex="-1" aria-labelledby="loyaltyCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="SendLoyaltyCoupon" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loyaltyCouponModalLabel">
+                        <i class="fas fa-crown me-2"></i>Tri ân khách hàng VIP
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="loyaltyEmail" class="form-label">Email khách hàng VIP</label>
+                        <input type="email" class="form-control" id="loyaltyEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="loyaltyCustomerName" class="form-label">Tên khách hàng</label>
+                        <input type="text" class="form-control" id="loyaltyCustomerName" name="customerName" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="loyaltyOrderCount" class="form-label">Số đơn hàng đã mua</label>
+                                <input type="number" class="form-control" id="loyaltyOrderCount" name="orderCount" min="1" max="1000" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="loyaltyTotalSpent" class="form-label">Tổng chi tiêu (VNĐ)</label>
+                                <input type="number" class="form-control" id="loyaltyTotalSpent" name="totalSpent" min="0" step="1000" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-dark">
+                        <h6>💎 Hệ thống tier VIP:</h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Bronze (15%):</strong> < 5 đơn hàng hoặc < 2M VNĐ</li>
+                            <li><strong>Silver (20%):</strong> 5+ đơn hàng hoặc 2M+ VNĐ</li>
+                            <li><strong>Gold (25%):</strong> 10+ đơn hàng hoặc 5M+ VNĐ</li>
+                            <li><strong>VIP (30%):</strong> 20+ đơn hàng hoặc 10M+ VNĐ</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-gem"></i> Gửi ưu đãi VIP
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Abandoned Cart -->
+<div class="modal fade" id="abandonedCartModal" tabindex="-1" aria-labelledby="abandonedCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="SendAbandonedCartCoupon" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="abandonedCartModalLabel">
+                        <i class="fas fa-shopping-cart me-2"></i>Nhắc nhở giỏ hàng bỏ lỡ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cartEmail" class="form-label">Email khách hàng</label>
+                        <input type="email" class="form-control" id="cartEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cartCustomerName" class="form-label">Tên khách hàng</label>
+                        <input type="text" class="form-control" id="cartCustomerName" name="customerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cartValue" class="form-label">Giá trị giỏ hàng (VNĐ)</label>
+                        <input type="number" class="form-control" id="cartValue" name="cartValue" min="0" step="1000" required>
+                        <div class="form-text">Giá trị hiện tại của giỏ hàng chưa thanh toán</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <h6>🛒 Cơ chế mã giảm giá:</h6>
+                        <ul class="mb-0">
+                            <li>Giảm 10% giá trị giỏ hàng (tối đa 200,000 VNĐ)</li>
+                            <li>Đơn hàng tối thiểu: 80% giá trị giỏ hàng ban đầu</li>
+                            <li>Có hiệu lực trong 48 giờ (tạo sự khẩn cấp)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-dark">
+                        <i class="fas fa-bell"></i> Gửi nhắc nhở
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Custom Campaign -->
+<div class="modal fade" id="customCampaignModal" tabindex="-1" aria-labelledby="customCampaignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-action="SendCustomCampaign" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customCampaignModalLabel">
+                        <i class="fas fa-bullhorn me-2"></i>Tạo chiến dịch tùy chỉnh
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="customCouponId" class="form-label">Chọn mã giảm giá</label>
+                        <select class="form-select" id="customCouponId" name="couponId" required>
+                            <option value="">-- Chọn mã giảm giá --</option>
+                            @if (ViewBag.ActiveCoupons != null)
+                            {
+                                @foreach (var coupon in ViewBag.ActiveCoupons)
+                                {
+                                    <option value="@coupon.Id">@coupon.Code - @coupon.Name (@coupon.Value@(coupon.Type == CouponType.Percentage ? "%" : " VNĐ"))</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customCampaignName" class="form-label">Tên chiến dịch</label>
+                        <input type="text" class="form-control" id="customCampaignName" name="campaignName" 
+                               placeholder="VD: Flash Sale cuối tuần" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customCampaignDescription" class="form-label">Mô tả chiến dịch</label>
+                        <textarea class="form-control" id="customCampaignDescription" name="campaignDescription" rows="3"
+                                  placeholder="Mô tả ngắn gọn về chiến dịch để hiển thị trong email" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customEmails" class="form-label">Danh sách email khách hàng</label>
+                        <textarea class="form-control" id="customEmails" name="customerEmails" rows="6" 
+                                  placeholder="Nhập email khách hàng, mỗi email một dòng hoặc cách nhau bằng dấu phẩy" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Gửi chiến dịch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-format email lists
+            $('textarea[name="customerEmails"]').on('blur', function() {
+                var emails = $(this).val();
+                if (emails) {
+                    // Clean up email format
+                    var cleanedEmails = emails
+                        .split(/[,;\n\r]+/)
+                        .map(email => email.trim())
+                        .filter(email => email.length > 0)
+                        .join('\n');
+                    $(this).val(cleanedEmails);
+                }
+            });
+
+            // Form validation enhancement
+            $('form').on('submit', function(e) {
+                var emailField = $(this).find('input[type="email"]');
+                if (emailField.length > 0 && !emailField.val().includes('@@')) {
+                    e.preventDefault();
+                    alert('Vui lòng nhập email hợp lệ');
+                    emailField.focus();
+                    return false;
+                }
+
+                var emailList = $(this).find('textarea[name="customerEmails"]');
+                if (emailList.length > 0) {
+                    var emails = emailList.val().split(/[,;\n\r]+/);
+                    var validEmails = emails.filter(function(email) { 
+                        return email.trim().includes('@@'); 
+                    });
+                    if (validEmails.length === 0) {
+                        e.preventDefault();
+                        alert('Vui lòng nhập ít nhất một email hợp lệ');
+                        emailList.focus();
+                        return false;
+                    }
+                }
+            });
+        });
+    </script>
+}

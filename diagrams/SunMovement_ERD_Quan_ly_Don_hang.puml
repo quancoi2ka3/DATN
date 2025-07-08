@@ -1,0 +1,110 @@
+@startuml SunMovement_ERD_Quan_ly_Don_hang
+!define RECTANGLE class
+
+package "Quản lý Đơn hàng" {
+    entity "DonHang" as Order {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * OrderDate : datetime2
+        * TotalAmount : decimal(18,2)
+        * SubtotalAmount : decimal(18,2)
+        * TaxAmount : decimal(18,2)
+        * ShippingAmount : decimal(18,2)
+        * DiscountAmount : decimal(18,2)
+        * Status : int
+        * PaymentStatus : int
+        * ShippingAddress : varchar(500)
+        * BillingAddress : varchar(500)
+        * PhoneNumber : varchar(20)
+        * Email : varchar(100)
+        * CouponCode : varchar(50)
+        * PaymentMethod : varchar(50)
+        * IsPaid : bit
+        * PaymentTransactionId : varchar(100)
+        * PaymentDate : datetime2
+        * TransactionId : varchar(100)
+        * TrackingNumber : varchar(100)
+        * ShippingMethod : varchar(100)
+        * ShippedDate : datetime2
+        * DeliveredDate : datetime2
+        * EstimatedDeliveryDate : datetime2
+        * Notes : varchar(1000)
+        * InternalNotes : varchar(1000)
+        * CustomerName : varchar(200)
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * IsUrgent : bit
+        * Priority : int
+    }
+
+    entity "ChiTietDonHang" as OrderItem {
+        * Id : int <<PK>>
+        --
+        * OrderId : int <<FK>>
+        * ProductId : int <<FK>>
+        * ServiceId : int <<FK>>
+        * ProductName : varchar(200)
+        * Quantity : int
+        * UnitPrice : decimal(18,2)
+        * Subtotal : decimal(18,2)
+        * CreatedAt : datetime2
+    }
+
+    entity "LichSuTrangThaiDonHang" as OrderStatusHistory {
+        * Id : int <<PK>>
+        --
+        * OrderId : int <<FK>>
+        * OldStatus : int
+        * NewStatus : int
+        * ChangedBy : varchar(450)
+        * ChangeReason : varchar(500)
+        * Notes : varchar(1000)
+        * CreatedAt : datetime2
+    }
+
+    entity "ThanhToanDonHang" as OrderPayment {
+        * Id : int <<PK>>
+        --
+        * OrderId : int <<FK>>
+        * PaymentMethod : varchar(50)
+        * PaymentAmount : decimal(18,2)
+        * PaymentStatus : int
+        * TransactionId : varchar(100)
+        * PaymentDate : datetime2
+        * PaymentReference : varchar(200)
+        * PaymentGateway : varchar(50)
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "GioHang" as ShoppingCart {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "ChiTietGioHang" as CartItem {
+        * Id : int <<PK>>
+        --
+        * ShoppingCartId : int <<FK>>
+        * ProductId : int <<FK>>
+        * ServiceId : int <<FK>>
+        * ItemName : varchar(max)
+        * ItemImageUrl : varchar(max)
+        * Quantity : int
+        * UnitPrice : decimal(18,2)
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+}
+
+' Relationships trong package
+Order ||--o{ OrderItem : "có nhiều chi tiết"
+Order ||--o{ OrderStatusHistory : "có lịch sử trạng thái"
+Order ||--o{ OrderPayment : "có nhiều thanh toán"
+ShoppingCart ||--o{ CartItem : "có nhiều mục"
+
+@enduml

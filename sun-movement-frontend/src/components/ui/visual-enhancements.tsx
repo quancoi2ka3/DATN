@@ -1,6 +1,18 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+
+// Throttle function for performance
+const throttle = <T extends (...args: any[]) => any>(func: T, limit: number): T => {
+  let inThrottle: boolean;
+  return ((...args: any[]) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  }) as T;
+};
 
 // Smooth page transitions
 export function PageTransition() {
@@ -30,17 +42,23 @@ export function PageTransition() {
 export function ScrollProgress() {
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  useEffect(() => {
-    const updateScrollProgress = () => {
+  const updateScrollProgress = useCallback(
+    throttle(() => {
       const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
       const scrolled = window.scrollY;
-      const progress = (scrolled / scrollHeight) * 100;
-      setScrollProgress(progress);
-    };
+      const progress = scrollHeight > 0 ? (scrolled / scrollHeight) * 100 : 0;
+      setScrollProgress(Math.min(Math.max(progress, 0), 100));
+    }, 16), // 60fps throttling
+    []
+  );
 
+  useEffect(() => {
     window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    // Call once to set initial value
+    updateScrollProgress();
+    
     return () => window.removeEventListener('scroll', updateScrollProgress);
-  }, []);
+  }, []); // Remove updateScrollProgress from dependencies
 
   return (
     <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">

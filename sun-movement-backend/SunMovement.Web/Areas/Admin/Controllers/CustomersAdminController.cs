@@ -141,8 +141,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     InactiveCustomers = customers.Count(c => !c.IsActive),
                     NewCustomersThisMonth = customers.Count(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-30)),
                     NewCustomersThisWeek = customers.Count(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-7)),
-                    CustomersWithOrders = GetRandomStat(20, customers.Count),
-                    AverageAge = 28,
+                    CustomersWithOrders = 0, // Set to 0 instead of random data - should be calculated from real orders
+                    AverageAge = 0, // Set to 0 instead of hardcoded value - should be calculated from real data
                     RecentCustomers = customers.OrderByDescending(c => c.CreatedAt).Take(10).ToList(),
                     MonthlyRegistrations = GetMonthlyRegistrations(customers)
                 };
@@ -176,12 +176,6 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
             
             return result;
-        }
-
-        private static int GetRandomStat(int min, int max)
-        {
-            var random = new Random();
-            return random.Next(min, max);
         }
 
         [HttpGet]

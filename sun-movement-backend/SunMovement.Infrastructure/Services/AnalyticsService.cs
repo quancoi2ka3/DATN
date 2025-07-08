@@ -856,5 +856,74 @@ namespace SunMovement.Infrastructure.Services
                 return new SalesTrend();
             }
         }
+        
+        /// <summary>
+        /// Get top search queries from Mixpanel analytics
+        /// </summary>
+        public async Task<List<Core.ViewModels.SearchQueryAnalytics>> GetTopSearchQueriesAsync(int limit = 10)
+        {
+            try
+            {
+                var result = new List<Core.ViewModels.SearchQueryAnalytics>();
+                
+                // Try to get search data from Mixpanel
+                var searchData = await _mixpanelService.GetEventDataAsync("search", DateTime.UtcNow.AddDays(-30), DateTime.UtcNow);
+                
+                if (searchData != null && searchData.Count > 0)
+                {
+                    var searchAnalytics = ProcessSearchAnalytics(searchData);
+                    result = searchAnalytics.Take(limit).ToList();
+                }
+                
+                // If no Mixpanel data, return empty list
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to get top search queries from Mixpanel");
+                return new List<Core.ViewModels.SearchQueryAnalytics>();
+            }
+        }
+        
+        private List<Core.ViewModels.SearchQueryAnalytics> ProcessSearchAnalytics(List<Dictionary<string, object>> searchData)
+        {
+            var searchQueries = new Dictionary<string, Core.ViewModels.SearchQueryAnalytics>();
+            
+            try
+            {
+                foreach (var item in searchData)
+                {
+                    if (item.TryGetValue("properties", out var properties) && properties is Dictionary<string, object> propDict)
+                    {
+                        if (propDict.TryGetValue("search_query", out var queryObj))
+                        {
+                            var query = queryObj?.ToString()?.ToLower()?.Trim();
+                            if (!string.IsNullOrEmpty(query))
+                            {
+                                if (searchQueries.ContainsKey(query))
+                                {
+                                    searchQueries[query].Count++;
+                                }
+                                else
+                                {
+                                    searchQueries[query] = new Core.ViewModels.SearchQueryAnalytics
+                                    {
+                                        Query = query,
+                                        Count = 1,
+                                        ResultCount = 0 // Would need additional logic to determine result count
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error processing search analytics data");
+            }
+            
+            return searchQueries.Values.OrderByDescending(x => x.Count).ToList();
+        }
     }
 }

@@ -13,6 +13,7 @@ import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/components/ui/simple-toast";
 import { ReduxProvider } from "@/store/ReduxProvider";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import FloatingCart from "@/components/ui/floating-cart";
 import ScrollButtons from "@/components/ui/scroll-buttons";
@@ -114,6 +115,10 @@ export default function RootLayout({
         <script src="/scroll-progress.js" defer></script>
         {/* UI Enhancement Script */}
         <script src="/ui-enhancements.js" defer></script>
+        {/* Chunk loading fix */}
+        <script src="/chunk-fix.js" defer></script>
+        {/* Service Worker for chunk fallback */}
+        <script src="/sw-register.js" defer></script>
       </head>
       <body className="min-h-screen bg-sunbg flex flex-col optimize-text smooth-scroll">
         {/* Enhanced scroll progress bar */}
@@ -124,27 +129,29 @@ export default function RootLayout({
         <ResourcePreloader />
         <PerformanceMonitor />
         <ScrollToTop />
-        <Suspense fallback={<LoadingSpinner />}>
-          <ReduxProvider>
-            <ToastProvider>
-              <NotificationProvider>
-                <AuthProvider>
-                  <CartProvider>
-                <Header />
-                <main className="flex-grow">
-                  <Suspense fallback={<LoadingSpinner />}>
-                    {children}
-                  </Suspense>
-                </main>
-                <Footer />
-                <RasaChatbot />                    <FloatingCart />
-                    <ScrollButtons />
-                  </CartProvider>
-                </AuthProvider>
-              </NotificationProvider>
-            </ToastProvider>
-          </ReduxProvider>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ReduxProvider>
+              <ToastProvider>
+                <NotificationProvider>
+                  <AuthProvider>
+                    <CartProvider>
+                  <Header />
+                  <main className="flex-grow">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {children}
+                    </Suspense>
+                  </main>
+                  <Footer />
+                  <RasaChatbot />                    <FloatingCart />
+                      <ScrollButtons />
+                    </CartProvider>
+                  </AuthProvider>
+                </NotificationProvider>
+              </ToastProvider>
+            </ReduxProvider>
+          </Suspense>
+        </ErrorBoundary>
       </body>
     </html>
   );

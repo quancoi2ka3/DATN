@@ -1,0 +1,87 @@
+@startuml SunMovement_ERD_Quan_ly_Ma_giam_gia
+!define RECTANGLE class
+
+package "Quản lý Mã giảm giá" {
+    entity "MaGiamGia" as Coupon {
+        * Id : int <<PK>>
+        --
+        * Code : varchar(50)
+        * Name : varchar(200)
+        * Description : varchar(500)
+        * Type : int
+        * Value : decimal(18,2)
+        * MinimumOrderAmount : decimal(18,2)
+        * MaximumDiscountAmount : decimal(18,2)
+        * StartDate : datetime2
+        * EndDate : datetime2
+        * IsActive : bit
+        * UsageLimit : int
+        * CurrentUsageCount : int
+        * UsageLimitPerCustomer : int
+        * ApplicationType : int
+        * ApplicationValue : varchar(500)
+        * IsFirstOrderOnly : bit
+        * RequiresEmail : bit
+        * IsPublic : bit
+        * CreatedBy : varchar(200)
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * CanStackWithOthers : bit
+        * AutoApply : bit
+        * AutoApplyPriority : int
+        * DisableWhenProductsOutOfStock : bit
+        * DeactivationReason : varchar(500)
+        * LastAutoDeactivation : datetime2
+        * TimesDisabledDueToInventory : int
+    }
+
+    entity "LichSuSuDungMaGiamGia" as CouponUsageHistory {
+        * Id : int <<PK>>
+        --
+        * CouponId : int <<FK>>
+        * OrderId : int <<FK>>
+        * UserId : varchar(450) <<FK>>
+        * DiscountAmount : decimal(18,2)
+        * OrderTotal : decimal(18,2)
+        * UsedAt : datetime2
+        * CreatedAt : datetime2
+    }
+
+    entity "MaGiamGia_SanPham" as CouponProduct {
+        * Id : int <<PK>>
+        --
+        * CouponId : int <<FK>>
+        * ProductId : int <<FK>>
+        * CreatedAt : datetime2
+    }
+
+    entity "MaGiamGia_DanhMuc" as CouponCategory {
+        * Id : int <<PK>>
+        --
+        * CouponId : int <<FK>>
+        * Category : int
+        * CreatedAt : datetime2
+    }
+
+    entity "ThongKeMaGiamGia" as CouponStatistics {
+        * Id : int <<PK>>
+        --
+        * CouponId : int <<FK>>
+        * Date : datetime2
+        * UsageCount : int
+        * TotalDiscountAmount : decimal(18,2)
+        * TotalOrderValue : decimal(18,2)
+        * UniqueCustomers : int
+        * ConversionRate : decimal(5,2)
+        * AverageOrderValue : decimal(18,2)
+        * CreatedAt : datetime2
+    }
+}
+
+' Relationships trong package
+Coupon ||--o{ CouponUsageHistory : "có lịch sử sử dụng"
+Coupon ||--o{ CouponProduct : "áp dụng cho sản phẩm"
+Coupon ||--o{ CouponCategory : "áp dụng cho danh mục"
+Coupon ||--o{ CouponStatistics : "có thống kê"
+
+@enduml

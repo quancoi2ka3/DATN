@@ -59,6 +59,11 @@ namespace SunMovement.Core.Interfaces
         /// Lấy dữ liệu xu hướng bán hàng theo thời gian
         /// </summary>
         Task<SalesTrend> GetSalesTrendAsync(string period = "day", int days = 30);
+
+        /// <summary>
+        /// Lấy danh sách từ khóa tìm kiếm phổ biến từ Mixpanel
+        /// </summary>
+        Task<List<Core.ViewModels.SearchQueryAnalytics>> GetTopSearchQueriesAsync(int limit = 10);
     }
 
     public class DashboardMetrics

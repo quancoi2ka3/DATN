@@ -4,30 +4,26 @@
  * Utilities for enhancing UI elements with animations and interactions
  */
 
-// Header scroll effect
+// Header scroll effect - NOT USED when React handles scroll
 export const enhanceHeader = () => {
-  const header = document.querySelector('header');
-  const topBar = document.querySelector('.top-bar');
-  
-  if (!header || !topBar) return;
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header.classList.add('header-scrolled');
-      topBar.classList.add('top-bar-hidden');
-    } else {
-      header.classList.remove('header-scrolled');
-      topBar.classList.remove('top-bar-hidden');
-    }
-  });
+  // This function is now disabled to avoid conflicts with React scroll handler
+  console.warn('enhanceHeader is disabled to prevent conflicts with React scroll handler');
+  return;
 };
 
 // Button ripple effect
 export const addButtonEffects = () => {
+  // Use a flag to prevent multiple initializations
+  if (window.buttonEffectsInitialized) return;
+  
   const buttons = document.querySelectorAll('.btn, .btn-primary-enhanced');
   
   buttons.forEach(button => {
+    // Skip if already enhanced
+    if (button.dataset.enhanced) return;
+    
     button.classList.add('btn-ripple');
+    button.dataset.enhanced = 'true';
     
     button.addEventListener('click', function(e) {
       const rect = this.getBoundingClientRect();
@@ -43,27 +39,37 @@ export const addButtonEffects = () => {
       
       // Remove ripple after animation completes
       setTimeout(() => {
-        ripple.remove();
+        if (ripple && ripple.parentNode) {
+          ripple.remove();
+        }
       }, 600);
     });
   });
+  
+  window.buttonEffectsInitialized = true;
 };
 
 // Initialize enhanced navigation
 export const enhanceNavigation = () => {
+  // Use a flag to prevent multiple initializations
+  if (window.navigationEnhanced) return;
+  
   const navItems = document.querySelectorAll('.nav-item, [href]');
   
   navItems.forEach(item => {
-    if (item.tagName.toLowerCase() === 'a') {
+    if (item.tagName.toLowerCase() === 'a' && !item.dataset.enhanced) {
       item.classList.add('header-nav-item');
+      item.dataset.enhanced = 'true';
     }
   });
+  
+  window.navigationEnhanced = true;
 };
 
-// Initialize all UI enhancements
+// Initialize all UI enhancements (excluding header scroll to avoid conflicts)
 export const initUIEnhancements = () => {
   if (typeof window !== 'undefined') {
-    enhanceHeader();
+    // Don't call enhanceHeader() to avoid scroll listener conflicts
     addButtonEffects();
     enhanceNavigation();
   }

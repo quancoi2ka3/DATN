@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProductCard } from "@/components/ui/product-card";
 import { AlertCircle } from "lucide-react";
@@ -214,20 +214,46 @@ export default function SupplementsPage() {
     fetchProducts();
   }, []);
 
-  // Handle filter changes and update filtered products
-  const handleFilteredProductsChange = (products: Product[]) => {
+  // Create stable callback functions to prevent infinite re-renders
+  const handleFilteredProductsChange = useCallback((products: Product[]) => {
     setFilteredProducts(products);
     setCurrentPage(1); // Reset to first page when filters change
-  };
+  }, []);
 
-  // Calculate pagination
-  const paginatedProducts = useMemo(() => {
+  const handleCategoryChange = useCallback((categories: string[]) => {
+    setSelectedCategories(categories);
+  }, []);
+
+  const handlePriceRangeChange = useCallback((range: [number, number]) => {
+    setPriceRange(range);
+  }, []);
+
+  const handleRatingChange = useCallback((ratings: number[]) => {
+    setSelectedRatings(ratings);
+  }, []);
+
+  const handleViewModeChange = useCallback((mode: "grid" | "list") => {
+    setViewMode(mode);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  // Calculate pagination with useMemo to prevent unnecessary recalculations
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return filteredProducts.slice(startIndex, endIndex);
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+    
+    return {
+      totalPages,
+      paginatedProducts,
+      showingCount: Math.min(filteredProducts.length, itemsPerPage),
+      totalCount: filteredProducts.length
+    };
   }, [filteredProducts, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
@@ -287,11 +313,11 @@ export default function SupplementsPage() {
             <SupplementsSidebar
               products={allProducts}
               selectedCategories={selectedCategories}
-              onCategoryChange={setSelectedCategories}
+              onCategoryChange={handleCategoryChange}
               priceRange={priceRange}
-              onPriceRangeChange={setPriceRange}
+              onPriceRangeChange={handlePriceRangeChange}
               selectedRatings={selectedRatings}
-              onRatingChange={setSelectedRatings}
+              onRatingChange={handleRatingChange}
             />
           </div>
           
@@ -302,15 +328,15 @@ export default function SupplementsPage() {
               products={allProducts}
               onFilteredProductsChange={handleFilteredProductsChange}
               selectedCategories={selectedCategories}
-              onCategoryChange={setSelectedCategories}
+              onCategoryChange={handleCategoryChange}
               priceRange={priceRange}
-              onPriceRangeChange={setPriceRange}
+              onPriceRangeChange={handlePriceRangeChange}
               selectedRatings={selectedRatings}
-              onRatingChange={setSelectedRatings}
+              onRatingChange={handleRatingChange}
               viewMode={viewMode}
-              onViewModeChange={setViewMode}
+              onViewModeChange={handleViewModeChange}
               currentPage={currentPage}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
               itemsPerPage={itemsPerPage}
             />
 
@@ -323,18 +349,18 @@ export default function SupplementsPage() {
               <>
                 {/* Products List */}
                 <ProductList 
-                  products={paginatedProducts}
+                  products={paginationData.paginatedProducts}
                   viewMode={viewMode}
                   currentPage={currentPage}
                   itemsPerPage={itemsPerPage}
                 />
                 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {paginationData.totalPages > 1 && (
                   <Pagination
                     currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
+                    totalPages={paginationData.totalPages}
+                    onPageChange={handlePageChange}
                   />
                 )}
 
@@ -346,10 +372,10 @@ export default function SupplementsPage() {
                     </div>
                     <button 
                       onClick={() => {
-                        setSelectedCategories([]);
-                        setSelectedRatings([]);
-                        setPriceRange([0, 1500000]);
-                        setCurrentPage(1);
+                        handleCategoryChange([]);
+                        handleRatingChange([]);
+                        handlePriceRangeChange([0, 1500000]);
+                        handlePageChange(1);
                       }}
                       className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
                     >

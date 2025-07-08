@@ -1,0 +1,225 @@
+@startuml SunMovement_Class_Diagram_Quan_ly_Kho_hang
+!define RECTANGLE class
+
+package "Quản lý Kho hàng" {
+    
+    class NhaCungCap {
+        +Id: int
+        +Name: string
+        +ContactPerson: string
+        +Email: string
+        +PhoneNumber: string
+        +Address: string
+        +Website: string
+        +Description: string
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +ProductSuppliers: ICollection<SanPham_NhaCungCap>
+        +InventoryTransactions: ICollection<GiaoDichKho>
+        --
+        +GetSuppliedProductCount(): int
+        +GetTotalTransactionValue(): decimal
+        +IsReliableSupplier(): bool
+    }
+
+    class SanPham_NhaCungCap {
+        +Id: int
+        +ProductId: int
+        +SupplierId: int
+        +SupplierProductCode: string?
+        +LeadTimeDays: int
+        +MinimumOrderQuantity: int
+        +UnitCost: decimal
+        +IsPreferred: bool
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +Product: SanPham
+        +Supplier: NhaCungCap
+        --
+        +CalculateOrderCost(quantity: int): decimal
+        +IsMinimumOrderMet(quantity: int): bool
+    }
+
+    class GiaoDichKho {
+        +Id: int
+        +ProductId: int
+        +ProductVariantId: int?
+        +SupplierId: int?
+        +OrderId: int?
+        +TransactionType: InventoryTransactionType
+        +Quantity: int
+        +UnitPrice: decimal
+        +TotalCost: decimal
+        +ReferenceNumber: string?
+        +TransactionDate: DateTime
+        +Notes: string?
+        +CreatedBy: string?
+        +CreatedAt: DateTime
+        +BatchNumber: string?
+        +ExpiryDate: DateTime?
+        +Location: string?
+        --
+        +Product: SanPham?
+        +ProductVariant: BienTheSanPham?
+        +Supplier: NhaCungCap?
+        +Order: DonHang?
+        --
+        +TransactionDescription: string {readonly}
+        --
+        +IsStockIncrease(): bool
+        +IsStockDecrease(): bool
+        +CalculateImpactOnStock(): int
+        +GetTransactionValue(): decimal
+    }
+
+    class VatPhamKho {
+        +Id: int
+        +Name: string
+        +Description: string
+        +Sku: string
+        +Quantity: int
+        +CostPrice: decimal
+        +Location: string
+        +ReceiptDate: DateTime
+        +ExpiryDate: DateTime?
+        +Status: InventoryStatus
+        +SupplierId: int
+        +Notes: string?
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        +CreatedBy: string?
+        +UpdatedBy: string?
+        --
+        +Supplier: NhaCungCap
+        +Transactions: ICollection<GiaoDichKho>
+        --
+        +IsExpired: bool {readonly}
+        +IsExpiringSoon: bool {readonly}
+        +DaysUntilExpiry: int {readonly}
+        --
+        +UpdateQuantity(newQuantity: int): void
+        +MarkAsUsed(): void
+        +MarkAsExpired(): void
+        +GetRemainingShelfLife(): TimeSpan?
+    }
+
+    class ThongKeTimKiem {
+        +Id: int
+        +UserId: string?
+        +SearchTerm: string
+        +SearchDate: DateTime
+        +ResultsCount: int
+        +ClickedProductId: int?
+        +ClickedAt: DateTime?
+        +SearchSource: string?
+        +UserAgent: string?
+        +IpAddress: string?
+        +SessionId: string?
+        --
+        +User: NguoiDung?
+        --
+        +HasClickthrough: bool {readonly}
+        +GetSearchEffectiveness(): decimal
+    }
+
+    interface IKhoHangService {
+        +AddStockAsync(productId: int, quantity: int, unitCost: decimal, supplierId: int?): Task<GiaoDichKho>
+        +ReduceStockAsync(productId: int, quantity: int, orderId: int?): Task<GiaoDichKho>
+        +AdjustStockAsync(productId: int, newQuantity: int, reason: string): Task<GiaoDichKho>
+        +GetProductTransactionHistoryAsync(productId: int): Task<IEnumerable<GiaoDichKho>>
+        +GetLowStockProductsAsync(): Task<IEnumerable<SanPham>>
+        +GetInventoryValueAsync(): Task<decimal>
+        +GetReorderSuggestionsAsync(): Task<IEnumerable<dynamic>>
+        +ProcessStockMovementAsync(transaction: GiaoDichKho): Task<bool>
+    }
+
+    interface INhaCungCapService {
+        +GetAllSuppliersAsync(): Task<IEnumerable<NhaCungCap>>
+        +GetSupplierByIdAsync(id: int): Task<NhaCungCap>
+        +CreateSupplierAsync(supplier: NhaCungCap): Task<NhaCungCap>
+        +UpdateSupplierAsync(supplier: NhaCungCap): Task<NhaCungCap>
+        +DeleteSupplierAsync(id: int): Task<bool>
+        +GetSupplierProductsAsync(supplierId: int): Task<IEnumerable<SanPham>>
+        +GetSupplierStatisticsAsync(supplierId: int): Task<SupplierStatistics>
+    }
+
+    class KhoHangService {
+        -_inventoryRepository: IKhoHangRepository
+        -_productRepository: ISanPhamRepository
+        -_logger: ILogger
+        --
+        +AddStockAsync(productId: int, quantity: int, unitCost: decimal, supplierId: int?): Task<GiaoDichKho>
+        +ReduceStockAsync(productId: int, quantity: int, orderId: int?): Task<GiaoDichKho>
+        +AdjustStockAsync(productId: int, newQuantity: int, reason: string): Task<GiaoDichKho>
+        +GetLowStockProductsAsync(): Task<IEnumerable<SanPham>>
+        +CalculateInventoryValueAsync(): Task<decimal>
+        +ValidateStockTransactionAsync(transaction: GiaoDichKho): Task<bool>
+    }
+
+    class NhaCungCapService {
+        -_supplierRepository: INhaCungCapRepository
+        -_logger: ILogger
+        --
+        +GetAllSuppliersAsync(): Task<IEnumerable<NhaCungCap>>
+        +CreateSupplierAsync(supplier: NhaCungCap): Task<NhaCungCap>
+        +UpdateSupplierAsync(supplier: NhaCungCap): Task<NhaCungCap>
+        +DeleteSupplierAsync(id: int): Task<bool>
+        +ValidateSupplierAsync(supplier: NhaCungCap): Task<bool>
+    }
+
+    class KhoHangController {
+        -_inventoryService: IKhoHangService
+        -_supplierService: INhaCungCapService
+        -_mapper: IMapper
+        --
+        +Index(): Task<ActionResult>
+        +StockIn(): ActionResult
+        +StockIn(model: StockInModel): Task<ActionResult>
+        +StockOut(): ActionResult
+        +StockOut(model: StockOutModel): Task<ActionResult>
+        +Adjustment(): ActionResult
+        +LowStockReport(): Task<ActionResult>
+        +InventoryValue(): Task<ActionResult>
+    }
+
+    enum InventoryTransactionType {
+        Purchase
+        Sale
+        Return
+        Adjustment
+        Transfer
+        Damaged
+        Expired
+        Promotion
+    }
+
+    enum InventoryStatus {
+        Available
+        Reserved
+        Damaged
+        Expired
+        InTransit
+        OnHold
+    }
+}
+
+' Relationships
+NhaCungCap ||--o{ SanPham_NhaCungCap : "cung cấp sản phẩm"
+NhaCungCap ||--o{ GiaoDichKho : "có giao dịch"
+NhaCungCap ||--o{ VatPhamKho : "cung cấp vật phẩm"
+VatPhamKho ||--o{ GiaoDichKho : "có giao dịch"
+
+GiaoDichKho --> InventoryTransactionType : "có loại giao dịch"
+VatPhamKho --> InventoryStatus : "có trạng thái"
+
+IKhoHangService <|-- KhoHangService
+INhaCungCapService <|-- NhaCungCapService
+
+KhoHangController --> IKhoHangService : "sử dụng"
+KhoHangController --> INhaCungCapService : "sử dụng"
+
+@enduml

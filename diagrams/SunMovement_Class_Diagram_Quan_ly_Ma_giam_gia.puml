@@ -1,0 +1,211 @@
+@startuml SunMovement_Class_Diagram_Quan_ly_Ma_giam_gia
+!define RECTANGLE class
+
+package "Quản lý Mã giảm giá" {
+    
+    class MaGiamGia {
+        +Id: int
+        +Code: string
+        +Name: string
+        +Description: string
+        +Type: CouponType
+        +Value: decimal
+        +MinimumOrderAmount: decimal
+        +MaximumDiscountAmount: decimal
+        +StartDate: DateTime
+        +EndDate: DateTime
+        +IsActive: bool
+        +UsageLimit: int
+        +CurrentUsageCount: int
+        +UsageLimitPerCustomer: int
+        +ApplicationType: DiscountApplicationType
+        +ApplicationValue: string?
+        +IsFirstOrderOnly: bool
+        +RequiresEmail: bool
+        +IsPublic: bool
+        +CreatedBy: string?
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        +CanStackWithOthers: bool
+        +AutoApply: bool
+        +AutoApplyPriority: int
+        +DisableWhenProductsOutOfStock: bool
+        +DeactivationReason: string?
+        +LastAutoDeactivation: DateTime?
+        +TimesDisabledDueToInventory: int
+        --
+        +UsageHistory: ICollection<LichSuSuDungMaGiamGia>
+        +CouponProducts: ICollection<MaGiamGia_SanPham>
+        +CouponCategories: ICollection<MaGiamGia_DanhMuc>
+        --
+        +IsValid: bool {readonly}
+        +IsExpired: bool {readonly}
+        +IsUsageLimitReached: bool {readonly}
+        +TypeDisplayName: string {readonly}
+        +ApplicationTypeDisplayName: string {readonly}
+        --
+        +CalculateDiscount(orderAmount: decimal): decimal
+        +CanApplyToOrder(order: DonHang): bool
+        +CanApplyToProduct(productId: int): bool
+        +IncrementUsage(): void
+        +ValidateUsageRules(userId: string): bool
+        +GetRemainingUsage(): int
+    }
+
+    class LichSuSuDungMaGiamGia {
+        +Id: int
+        +CouponId: int
+        +OrderId: int
+        +UserId: string?
+        +DiscountAmount: decimal
+        +OrderTotal: decimal
+        +UsedAt: DateTime
+        +CreatedAt: DateTime
+        --
+        +Coupon: MaGiamGia
+        +Order: DonHang
+        +User: NguoiDung?
+        --
+        +GetDiscountPercentage(): decimal
+        +GetSavingsAmount(): decimal
+    }
+
+    class MaGiamGia_SanPham {
+        +Id: int
+        +CouponId: int
+        +ProductId: int
+        +CreatedAt: DateTime
+        --
+        +Coupon: MaGiamGia
+        +Product: SanPham
+    }
+
+    class MaGiamGia_DanhMuc {
+        +Id: int
+        +CouponId: int
+        +Category: ProductCategory
+        +CreatedAt: DateTime
+        --
+        +Coupon: MaGiamGia
+        --
+        +GetCategoryDisplayName(): string
+    }
+
+    class ThongKeMaGiamGia {
+        +Id: int
+        +CouponId: int
+        +Date: DateTime
+        +UsageCount: int
+        +TotalDiscountAmount: decimal
+        +TotalOrderValue: decimal
+        +UniqueCustomers: int
+        +ConversionRate: decimal
+        +AverageOrderValue: decimal
+        +CreatedAt: DateTime
+        --
+        +Coupon: MaGiamGia
+        --
+        +GetROI(): decimal
+        +GetCustomerAcquisitionCost(): decimal
+        +GetEffectivenessScore(): decimal
+    }
+
+    interface IMaGiamGiaService {
+        +GetAllCouponsAsync(): Task<IEnumerable<MaGiamGia>>
+        +GetCouponByIdAsync(id: int): Task<MaGiamGia>
+        +GetCouponByCodeAsync(code: string): Task<MaGiamGia>
+        +CreateCouponAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +UpdateCouponAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +DeleteCouponAsync(id: int): Task<bool>
+        +ValidateCouponAsync(code: string, userId: string?, orderAmount: decimal): Task<CouponValidationResult>
+        +ApplyCouponToOrderAsync(couponCode: string, order: DonHang): Task<bool>
+        +GetActiveCouponsAsync(): Task<IEnumerable<MaGiamGia>>
+        +GetExpiredCouponsAsync(): Task<IEnumerable<MaGiamGia>>
+        +GetCouponStatisticsAsync(couponId: int): Task<ThongKeMaGiamGia>
+    }
+
+    interface IMaGiamGiaRepository {
+        +GetByIdAsync(id: int): Task<MaGiamGia>
+        +GetByCodeAsync(code: string): Task<MaGiamGia>
+        +GetAllAsync(): Task<IEnumerable<MaGiamGia>>
+        +GetActiveAsync(): Task<IEnumerable<MaGiamGia>>
+        +AddAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +UpdateAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +DeleteAsync(id: int): Task<bool>
+        +GetUsageHistoryAsync(couponId: int): Task<IEnumerable<LichSuSuDungMaGiamGia>>
+    }
+
+    class MaGiamGiaService {
+        -_couponRepository: IMaGiamGiaRepository
+        -_orderService: IDonHangService
+        -_logger: ILogger
+        --
+        +GetCouponByCodeAsync(code: string): Task<MaGiamGia>
+        +ValidateCouponAsync(code: string, userId: string?, orderAmount: decimal): Task<CouponValidationResult>
+        +ApplyCouponToOrderAsync(couponCode: string, order: DonHang): Task<bool>
+        +CreateCouponAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +UpdateCouponAsync(coupon: MaGiamGia): Task<MaGiamGia>
+        +CalculateDiscountAmountAsync(coupon: MaGiamGia, orderAmount: decimal): Task<decimal>
+        +ValidateCouponRulesAsync(coupon: MaGiamGia, userId: string?): Task<bool>
+    }
+
+    class MaGiamGiaController {
+        -_couponService: IMaGiamGiaService
+        -_mapper: IMapper
+        --
+        +Index(): Task<ActionResult>
+        +Details(id: int): Task<ActionResult>
+        +Create(): ActionResult
+        +Create(model: CreateCouponModel): Task<ActionResult>
+        +Edit(id: int): Task<ActionResult>
+        +Edit(model: EditCouponModel): Task<ActionResult>
+        +Delete(id: int): Task<ActionResult>
+        +ValidateCoupon(code: string): Task<JsonResult>
+        +GetStatistics(id: int): Task<ActionResult>
+    }
+
+    class CouponValidationResult {
+        +IsValid: bool
+        +ErrorMessage: string?
+        +DiscountAmount: decimal
+        +Coupon: MaGiamGia?
+        --
+        +GetValidationStatus(): string
+    }
+
+    enum CouponType {
+        Percentage
+        FixedAmount
+        FreeShipping
+        BuyOneGetOne
+        FixedPriceDiscount
+    }
+
+    enum DiscountApplicationType {
+        All
+        Category
+        Product
+        AgedInventory
+        FirstTimeCustomer
+        LoyalCustomer
+    }
+}
+
+' Relationships
+MaGiamGia ||--o{ LichSuSuDungMaGiamGia : "có lịch sử sử dụng"
+MaGiamGia ||--o{ MaGiamGia_SanPham : "áp dụng cho sản phẩm"
+MaGiamGia ||--o{ MaGiamGia_DanhMuc : "áp dụng cho danh mục"
+MaGiamGia ||--o{ ThongKeMaGiamGia : "có thống kê"
+
+MaGiamGia --> CouponType : "có loại"
+MaGiamGia --> DiscountApplicationType : "có kiểu áp dụng"
+
+IMaGiamGiaService <|-- MaGiamGiaService
+IMaGiamGiaRepository <|-- MaGiamGiaRepository
+
+MaGiamGiaService --> IMaGiamGiaRepository : "sử dụng"
+MaGiamGiaController --> IMaGiamGiaService : "sử dụng"
+
+MaGiamGiaService --> CouponValidationResult : "tạo"
+
+@enduml

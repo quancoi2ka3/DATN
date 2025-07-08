@@ -1,53 +1,95 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   
-  // Performance optimizations
+  // Basic optimizations
   experimental: {
     optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog'],
+    // Removed esmExternals for Turbopack compatibility
+    serverComponentsExternalPackages: [], // Prevent external package issues
   },
   
-  // Tối ưu cho lazy loading
-  serverExternalPackages: [],
+  // Optimize loading
+  poweredByHeader: false,
   
   // Compression
   compress: true,
   
-  // Bundle optimization cho lazy loading
-  webpack: (config, { dev, isServer }) => {
-    // Tối ưu chunk splitting
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-          sections: {
-            test: /[\\/]src[\\/]components[\\/]sections[\\/]/,
-            name: 'sections',
-            chunks: 'async',
-            minSize: 10000,
-          },
-          ui: {
-            test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
-            name: 'ui-components',
-            chunks: 'async',
-            minSize: 5000,
+  // Webpack configuration to fix chunk loading (only for non-Turbopack builds)
+  webpack: (config, { isServer, dev }) => {
+    // Skip webpack customization if using Turbopack
+    if (process.env.NEXT_RUNTIME === 'turbopack') {
+      return config;
+    }
+    
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    // Only apply chunk optimization in development
+    if (dev) {
+      // Optimize chunk splitting
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
+          cacheGroups: {
+            default: {
+              minChunks: 1,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+              chunks: 'all',
+            },
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              name: 'react',
+              priority: 20,
+              chunks: 'all',
+            },
           },
         },
+      };
+      
+      // Set publicPath to fix chunk loading
+      config.output = {
+        ...config.output,
+        publicPath: '/_next/',
       };
     }
     
     return config;
   },
   
+  // Add development server configuration
+  devIndicators: {
+    buildActivity: false,
+  },
+  
+  // Optimize for development
+  ...(process.env.NODE_ENV === 'development' && {
+    swcMinify: false,
+    optimizeFonts: false,
+  }),
+  
+  // Output configuration for better stability
+  output: 'standalone',
+  
   // Environment variables
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || 'https://localhost:5001',
+    BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000',
   },
   
   // Image optimization
@@ -60,11 +102,16 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     
     remotePatterns: [
-      // HTTPS patterns for port 5001
       {
         protocol: 'https',
         hostname: 'localhost',
         port: '5001',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
         pathname: '/uploads/**',
       },
       {
@@ -74,55 +121,31 @@ const nextConfig = {
         pathname: '/images/**',
       },
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'localhost',
-        port: '5001',
+        port: '5000',
+        pathname: '/images/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
         pathname: '/**',
       },
-      // HTTP patterns for port 5001 (fallback)
       {
-        protocol: 'http',
+        protocol: 'https',
         hostname: 'localhost',
         port: '5001',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/images/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5001',
-        pathname: '/**',
-      },
-      // HTTP patterns for port 5000 (legacy support)
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5000',
-        pathname: '/images/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '5000',
         pathname: '/**',
       },
     ],
-  },async rewrites() {
+  },
+  
+  async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://localhost:5001/api/:path*', // Use your backend HTTPS port
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}/api/:path*`,
       },
     ];
   },

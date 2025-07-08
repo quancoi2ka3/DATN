@@ -1,0 +1,150 @@
+@startuml SunMovement_ERD_Quan_ly_San_pham
+!define RECTANGLE class
+
+package "Quản lý Sản phẩm" {
+    entity "SanPham" as Product {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(200)
+        * Description : varchar(2000)
+        * ImageUrl : varchar(max)
+        * Price : decimal(18,2)
+        * DiscountPrice : decimal(18,2)
+        * CostPrice : decimal(18,2)
+        * StockQuantity : int
+        * FirstStockDate : datetime2
+        * LastStockUpdateDate : datetime2
+        * MinimumStockLevel : int
+        * OptimalStockLevel : int
+        * Sku : varchar(50)
+        * Barcode : varchar(50)
+        * Category : int
+        * SubCategory : varchar(100)
+        * Specifications : varchar(max)
+        * IsFeatured : bit
+        * IsActive : bit
+        * Status : int
+        * SortOrder : int
+        * Weight : decimal(18,3)
+        * Dimensions : varchar(100)
+        * MetaTitle : varchar(200)
+        * MetaDescription : varchar(500)
+        * MetaKeywords : varchar(200)
+        * Slug : varchar(200)
+        * TrackInventory : bit
+        * AllowBackorder : bit
+        * AverageRating : decimal(3,2)
+        * ReviewCount : int
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "BienTheSanPham" as ProductVariant {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * Name : varchar(200)
+        * Sku : varchar(50)
+        * Price : decimal(18,2)
+        * DiscountPrice : decimal(18,2)
+        * CostPrice : decimal(18,2)
+        * StockQuantity : int
+        * Weight : decimal(18,3)
+        * Dimensions : varchar(100)
+        * Attributes : varchar(max)
+        * IsActive : bit
+        * SortOrder : int
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "HinhAnhSanPham" as ProductImage {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * ImageUrl : varchar(500)
+        * AltText : varchar(200)
+        * IsPrimary : bit
+        * SortOrder : int
+        * CreatedAt : datetime2
+    }
+
+    entity "HinhAnhBienTheSanPham" as ProductVariantImage {
+        * Id : int <<PK>>
+        --
+        * ProductVariantId : int <<FK>>
+        * ImageUrl : varchar(500)
+        * AltText : varchar(200)
+        * IsPrimary : bit
+        * SortOrder : int
+        * CreatedAt : datetime2
+    }
+
+    entity "DanhGiaSanPham" as ProductReview {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * UserId : varchar(450) <<FK>>
+        * AdminId : varchar(450) <<FK>>
+        * Rating : int
+        * ReviewText : varchar(2000)
+        * IsApproved : bit
+        * ApprovedAt : datetime2
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "TheTag" as Tag {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(100)
+        * Slug : varchar(100)
+        * Description : varchar(500)
+        * IsActive : bit
+        * CreatedAt : datetime2
+    }
+
+    entity "SanPham_Tag" as ProductTag {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * TagId : int <<FK>>
+        * CreatedAt : datetime2
+    }
+
+    entity "TuongTacNguoiDung" as UserInteraction {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * ProductId : int <<FK>>
+        * InteractionType : int
+        * Value : decimal(18,2)
+        * CreatedAt : datetime2
+    }
+
+    entity "DeXuatSanPham" as ProductRecommendation {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * ProductId : int <<FK>>
+        * SourceProductId : int <<FK>>
+        * RecommendationType : int
+        * Score : decimal(18,4)
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+}
+
+' Relationships trong package
+Product ||--o{ ProductVariant : "có nhiều biến thể"
+Product ||--o{ ProductImage : "có nhiều hình ảnh"
+ProductVariant ||--o{ ProductVariantImage : "có nhiều hình ảnh"
+Product ||--o{ ProductReview : "có nhiều đánh giá"
+Product ||--o{ ProductTag : "có nhiều tag"
+Tag ||--o{ ProductTag : "được gán cho nhiều sản phẩm"
+Product ||--o{ UserInteraction : "có nhiều tương tác"
+Product ||--o{ ProductRecommendation : "được đề xuất cho"
+Product ||--o{ ProductRecommendation : "là nguồn đề xuất cho"
+
+@enduml

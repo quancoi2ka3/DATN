@@ -1,8 +1,150 @@
-@model IEnumerable<SunMovement.Core.Models.Product>
+@model IEnumerable<SunMovement.Web.Areas.Admin.Models.ProductWithLatestCostViewModel>
 @{
     ViewData["Title"] = "Quản Lý Sản Phẩm";
     Layout = "_AdminLayout";
 }
+
+<style>
+/* Styling for cost price columns */
+.cost-price-avg {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    font-weight: 500;
+}
+
+.cost-price-latest {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4caf50;
+    font-weight: 500;
+}
+
+.cost-price-header {
+    font-weight: 700;
+    text-align: center;
+    font-size: 0.9em;
+    padding: 8px 4px;
+}
+
+.cost-price-header i {
+    color: #fff;
+    margin-right: 4px;
+}
+
+/* Table improvements */
+#productsTable th {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 0.85em;
+    padding: 12px 8px;
+}
+
+#productsTable td {
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+
+.cost-comparison {
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: 600;
+    background-color: rgba(255,255,255,0.8);
+}
+
+/* Comparison column styling */
+.comparison-column {
+    background-color: #f8f9fa;
+    border-left: 3px solid #6c757d;
+    min-width: 120px;
+}
+
+/* Badge improvements for comparison */
+.badge {
+    font-size: 0.8em;
+    padding: 4px 8px;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Cost price specific styling */
+.cost-price-avg strong {
+    font-size: 0.95em;
+    display: block;
+}
+
+.cost-price-latest strong {
+    font-size: 0.95em;
+    display: block;
+}
+
+/* Tooltips for cost price columns */
+.cost-price-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.cost-price-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.cost-price-tooltip:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% - 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #333;
+    z-index: 1001;
+}
+
+/* Header tooltips */
+th[title] {
+    cursor: help;
+    position: relative;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .cost-price-header {
+        font-size: 0.8em;
+        padding: 6px 2px;
+    }
+    
+    #productsTable td {
+        padding: 8px 4px;
+        font-size: 0.85em;
+    }
+    
+    .cost-comparison {
+        font-size: 0.7em;
+    }
+}
+</style>
 
 <div class="container-fluid px-4">
     <h1 class="mt-4">Quản Lý Sản Phẩm</h1>    
@@ -27,7 +169,24 @@
                         <th>Mã</th>
                         <th>Hình Ảnh</th>
                         <th>Tên</th>
-                        <th>Giá Vốn</th>
+                        <th class="cost-price-header cost-price-avg" 
+                            title="Giá vốn trung bình được tính theo bình quân gia quyền của tất cả lần nhập hàng">
+                            <i class="fas fa-calculator me-1"></i>
+                            <div>Giá Vốn TB</div>
+                            <small>(Bình quân)</small>
+                        </th>
+                        <th class="cost-price-header cost-price-latest"
+                            title="Giá nhập gần nhất từ lần nhập kho mới nhất">
+                            <i class="fas fa-receipt me-1"></i>
+                            <div>Giá Nhập Gần Nhất</div>
+                            <small>(Lần nhập cuối)</small>
+                        </th>
+                        <th class="cost-price-header" style="background-color: #6c757d;"
+                            title="So sánh giữa giá vốn trung bình và giá nhập gần nhất">
+                            <i class="fas fa-exchange-alt me-1"></i>
+                            <div>So Sánh</div>
+                            <small>(% Chênh lệch)</small>
+                        </th>
                         <th>Giá Bán</th>
                         <th>Lợi Nhuận</th>
                         <th>Số Lượng</th>
@@ -39,11 +198,11 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.Id</td>
+                            <td>@item.Product.Id</td>
                             <td class="text-center">
-                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
                                 {
-                                    <img src="@Url.Content(item.ImageUrl)" alt="@item.Name" 
+                                    <img src="@Url.Content(item.Product.ImageUrl)" alt="@item.Product.Name" 
                                          class="img-thumbnail" 
                                          style="height: 50px; width: 50px; object-fit: cover;"
                                          onerror="this.src='/images/no-image.png'; this.alt='Image not available';" />
@@ -54,22 +213,69 @@
                                          style="height: 50px; width: 50px; object-fit: cover;" />
                                 }
                             </td>
-                            <td>@item.Name</td>
-                            <td>@item.CostPrice.ToString("N0") VND</td>
-                            <td>
+                            <td>@item.Product.Name</td>
+                            <td class="text-center cost-price-avg">
                                 @{
-                                    var sellingPrice = item.DiscountPrice ?? item.Price;
+                                    var avgCostPrice = item.Product.CostPrice;
                                 }
-                                @sellingPrice.ToString("N0") VND
-                                @if (item.DiscountPrice.HasValue)
+                                <strong class="text-primary">@avgCostPrice.ToString("N0") VND</strong>
+                                <br><small class="text-muted">Bình quân gia quyền</small>
+                            </td>
+                            <td class="text-center cost-price-latest">
+                                @if (item.HasRecentPurchase)
                                 {
-                                    <br><small class="text-muted"><s>@item.Price.ToString("N0") VND</s></small>
+                                    <strong class="text-success">@item.LatestPurchasePrice?.ToString("N0") VND</strong>
+                                    <br><small class="text-muted">@item.LatestPurchaseDate?.ToString("dd/MM/yyyy")</small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có dữ liệu</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (item.HasRecentPurchase)
+                                {
+                                    var avgCost = item.Product.CostPrice;
+                                    var latestCost = item.LatestPurchasePrice ?? 0;
+                                    if (avgCost > 0 && latestCost > 0)
+                                    {
+                                        var difference = latestCost - avgCost;
+                                        var percentDiff = (difference / avgCost) * 100;
+                                        var diffClass = difference > 0 ? "text-danger" : difference < 0 ? "text-success" : "text-muted";
+                                        var arrow = difference > 0 ? "↑" : difference < 0 ? "↓" : "=";
+                                        var bgClass = difference > 0 ? "bg-danger" : difference < 0 ? "bg-success" : "bg-secondary";
+                                        
+                                        <span class="badge @bgClass">
+                                            @arrow @Math.Abs(percentDiff).ToString("F1")%
+                                        </span>
+                                        <br><small class="text-muted">
+                                            @((difference > 0 ? "+" : "") + difference.ToString("N0")) VND
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không có dữ liệu</span>
                                 }
                             </td>
                             <td>
                                 @{
-                                    var profit = sellingPrice - item.CostPrice;
-                                    var profitPercent = item.CostPrice > 0 ? (profit / item.CostPrice) * 100 : 0;
+                                    var sellingPrice = item.Product.DiscountPrice ?? item.Product.Price;
+                                }
+                                @sellingPrice.ToString("N0") VND
+                                @if (item.Product.DiscountPrice.HasValue)
+                                {
+                                    <br><small class="text-muted"><s>@item.Product.Price.ToString("N0") VND</s></small>
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    var profit = sellingPrice - item.Product.CostPrice;
+                                    var profitPercent = item.Product.CostPrice > 0 ? (profit / item.Product.CostPrice) * 100 : 0;
                                     var profitClass = profitPercent < 15 ? "text-danger" : profitPercent > 50 ? "text-success" : "text-info";
                                 }
                                 <span class="@profitClass">
@@ -77,9 +283,9 @@
                                     <small>(@profitPercent.ToString("F1")%)</small>
                                 </span>
                             </td>
-                            <td>@item.StockQuantity</td>
+                            <td>@item.Product.StockQuantity</td>
                             <td>
-                                @if (item.IsActive)
+                                @if (item.Product.IsActive)
                                 {
                                     <span class="badge bg-success">Hoạt Động</span>
                                 }
@@ -90,13 +296,13 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
+                                    <a asp-action="Edit" asp-route-id="@item.Product.Id" class="btn btn-primary btn-sm">
                                         <i class="fas fa-edit"></i> Sửa
                                     </a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                    <a asp-action="Details" asp-route-id="@item.Product.Id" class="btn btn-info btn-sm">
                                         <i class="fas fa-info-circle"></i> Chi Tiết
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                                    <a asp-action="Delete" asp-route-id="@item.Product.Id" class="btn btn-danger btn-sm">
                                         <i class="fas fa-trash"></i> Xóa
                                     </a>
                                 </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useScroll } from "@/lib/useScrollOptimized";
 import { CartIcon } from "@/components/ui/cart-icon";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -198,22 +199,20 @@ function MobileAuthSection() {
 
 export function Header() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
+  const { scrolled } = useScroll({ threshold: 50 });
   
-  // Handle scroll effect and initialize UI enhancements
+  // Initialize UI enhancements once
   useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setScrolled(offset > 50);
-    };
-    
-    window.addEventListener("scroll", handleScroll);
-    
-    // Initialize enhanced UI interactions
-    initUIEnhancements();
-    
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (typeof window !== 'undefined') {
+      try {
+        const { addButtonEffects, enhanceNavigation } = require("@/lib/ui-enhancements");
+        addButtonEffects();
+        enhanceNavigation();
+      } catch (error) {
+        console.warn('UI enhancements could not be loaded:', error);
+      }
+    }
+  }, []); // Empty dependency array - only run once
 
   return (
     <header 

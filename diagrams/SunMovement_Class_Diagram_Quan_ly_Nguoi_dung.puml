@@ -1,0 +1,285 @@
+@startuml SunMovement_Class_Diagram_Quan_ly_Nguoi_dung
+
+package "Quản lý Người dùng" {
+    
+    class NguoiDung {
+        - id: string
+        - email: string
+        - userName: string
+        - firstName: string
+        - lastName: string
+        - phoneNumber: string
+        - dateOfBirth: DateTime
+        - address: string
+        - createdAt: DateTime
+        - lastLogin: DateTime
+        - isActive: bool
+        __
+        + getId(): string
+        + setId(id: string): void
+        + getEmail(): string
+        + setEmail(email: string): void
+        + getUserName(): string
+        + setUserName(userName: string): void
+        + getFirstName(): string
+        + setFirstName(firstName: string): void
+        + getLastName(): string
+        + setLastName(lastName: string): void
+        + getPhoneNumber(): string
+        + setPhoneNumber(phoneNumber: string): void
+        + getDateOfBirth(): DateTime
+        + setDateOfBirth(dateOfBirth: DateTime): void
+        + getAddress(): string
+        + setAddress(address: string): void
+        + getCreatedAt(): DateTime
+        + getLastLogin(): DateTime
+        + setLastLogin(lastLogin: DateTime): void
+        + getIsActive(): bool
+        + setIsActive(isActive: bool): void
+        __
+        + getOrderCount(): int
+        + getTotalSpent(): decimal
+        + getLastOrderDate(): DateTime
+        + getFullName(): string
+        + updateLastLogin(): void
+        + isEligibleForDiscount(): bool
+        + validateUserData(): bool
+    }
+
+    class DangKyChoXacThuc {
+        - id: int
+        - email: string
+        - firstName: string
+        - lastName: string
+        - phoneNumber: string
+        - password: string
+        - verificationCode: string
+        - expiryTime: DateTime
+        - isVerified: bool
+        - createdAt: DateTime
+        __
+        + getId(): int
+        + getEmail(): string
+        + setEmail(email: string): void
+        + getFirstName(): string
+        + setFirstName(firstName: string): void
+        + getLastName(): string
+        + setLastName(lastName: string): void
+        + getPhoneNumber(): string
+        + setPhoneNumber(phoneNumber: string): void
+        + getPassword(): string
+        + setPassword(password: string): void
+        + getVerificationCode(): string
+        + setVerificationCode(code: string): void
+        + getExpiryTime(): DateTime
+        + setExpiryTime(expiryTime: DateTime): void
+        + getIsVerified(): bool
+        + setIsVerified(isVerified: bool): void
+        + getCreatedAt(): DateTime
+        __
+        + isExpired(): bool
+        + generateVerificationCode(): string
+        + verifyCode(code: string): bool
+        + validateRegistrationData(): bool
+    }
+
+    class XacThucOTP {
+        - id: int
+        - email: string
+        - phoneNumber: string
+        - otpCode: string
+        - purpose: string
+        - expiryTime: DateTime
+        - isUsed: bool
+        - createdAt: DateTime
+        __
+        + getId(): int
+        + getEmail(): string
+        + setEmail(email: string): void
+        + getPhoneNumber(): string
+        + setPhoneNumber(phoneNumber: string): void
+        + getOtpCode(): string
+        + setOtpCode(otpCode: string): void
+        + getPurpose(): string
+        + setPurpose(purpose: string): void
+        + getExpiryTime(): DateTime
+        + setExpiryTime(expiryTime: DateTime): void
+        + getIsUsed(): bool
+        + setIsUsed(isUsed: bool): void
+        + getCreatedAt(): DateTime
+        __
+        + isExpired(): bool
+        + isValid(): bool
+        + markAsUsed(): void
+        + generateOTP(): string
+        + validateOTP(inputOtp: string): bool
+    }
+
+    interface INguoiDungService {
+        + getUserByIdAsync(id: string): Task<NguoiDung>
+        + getUserByEmailAsync(email: string): Task<NguoiDung>
+        + getAllUsersAsync(): Task<IEnumerable<NguoiDung>>
+        + createUserAsync(user: NguoiDung): Task<NguoiDung>
+        + updateUserAsync(user: NguoiDung): Task<NguoiDung>
+        + deleteUserAsync(id: string): Task<bool>
+        + getUserOrdersAsync(userId: string): Task<IEnumerable<DonHang>>
+        + updateUserProfileAsync(userId: string, profile: UserProfile): Task<bool>
+        + getUserStatisticsAsync(userId: string): Task<UserStatistics>
+        + activateUserAsync(userId: string): Task<bool>
+        + deactivateUserAsync(userId: string): Task<bool>
+        + changePasswordAsync(userId: string, oldPassword: string, newPassword: string): Task<bool>
+    }
+
+    interface INguoiDungRepository {
+        + getByIdAsync(id: string): Task<NguoiDung>
+        + getByEmailAsync(email: string): Task<NguoiDung>
+        + getByUserNameAsync(userName: string): Task<NguoiDung>
+        + getAllAsync(): Task<IEnumerable<NguoiDung>>
+        + getActiveUsersAsync(): Task<IEnumerable<NguoiDung>>
+        + addAsync(user: NguoiDung): Task<NguoiDung>
+        + updateAsync(user: NguoiDung): Task<NguoiDung>
+        + deleteAsync(id: string): Task<bool>
+        + searchUsersAsync(searchTerm: string): Task<IEnumerable<NguoiDung>>
+    }
+
+    class NguoiDungService {
+        - nguoiDungRepository: INguoiDungRepository
+        - logger: ILogger
+        - emailService: IEmailService
+        __
+        + NguoiDungService(nguoiDungRepository: INguoiDungRepository, logger: ILogger, emailService: IEmailService)
+        __
+        + getUserByIdAsync(id: string): Task<NguoiDung>
+        + getUserByEmailAsync(email: string): Task<NguoiDung>
+        + getAllUsersAsync(): Task<IEnumerable<NguoiDung>>
+        + createUserAsync(user: NguoiDung): Task<NguoiDung>
+        + updateUserAsync(user: NguoiDung): Task<NguoiDung>
+        + deleteUserAsync(id: string): Task<bool>
+        + getUserOrdersAsync(userId: string): Task<IEnumerable<DonHang>>
+        + updateUserProfileAsync(userId: string, profile: UserProfile): Task<bool>
+        + getUserStatisticsAsync(userId: string): Task<UserStatistics>
+        + activateUserAsync(userId: string): Task<bool>
+        + deactivateUserAsync(userId: string): Task<bool>
+        + changePasswordAsync(userId: string, oldPassword: string, newPassword: string): Task<bool>
+        __
+        - validateUserAsync(user: NguoiDung): Task<bool>
+        - sendWelcomeEmailAsync(user: NguoiDung): Task<void>
+        - hashPassword(password: string): string
+        - verifyPassword(password: string, hash: string): bool
+    }
+
+    class NguoiDungRepository {
+        - context: ApplicationDbContext
+        __
+        + NguoiDungRepository(context: ApplicationDbContext)
+        __
+        + getByIdAsync(id: string): Task<NguoiDung>
+        + getByEmailAsync(email: string): Task<NguoiDung>
+        + getByUserNameAsync(userName: string): Task<NguoiDung>
+        + getAllAsync(): Task<IEnumerable<NguoiDung>>
+        + getActiveUsersAsync(): Task<IEnumerable<NguoiDung>>
+        + addAsync(user: NguoiDung): Task<NguoiDung>
+        + updateAsync(user: NguoiDung): Task<NguoiDung>
+        + deleteAsync(id: string): Task<bool>
+        + searchUsersAsync(searchTerm: string): Task<IEnumerable<NguoiDung>>
+        __
+        - buildUserQuery(): IQueryable<NguoiDung>
+    }
+
+    class NguoiDungController {
+        - nguoiDungService: INguoiDungService
+        - mapper: IMapper
+        - logger: ILogger
+        __
+        + NguoiDungController(nguoiDungService: INguoiDungService, mapper: IMapper, logger: ILogger)
+        __
+        + getProfile(): Task<ActionResult>
+        + updateProfile(model: UpdateProfileModel): Task<ActionResult>
+        + getOrderHistory(): Task<ActionResult>
+        + changePassword(model: ChangePasswordModel): Task<ActionResult>
+        + deleteAccount(): Task<ActionResult>
+        + getUsersList(): Task<ActionResult>
+        + getUserDetails(id: string): Task<ActionResult>
+        + activateUser(id: string): Task<ActionResult>
+        + deactivateUser(id: string): Task<ActionResult>
+        __
+        - validateProfileModel(model: UpdateProfileModel): bool
+        - mapUserToViewModel(user: NguoiDung): UserViewModel
+    }
+
+    enum UserStatus {
+        ACTIVE
+        INACTIVE
+        SUSPENDED
+        DELETED
+        PENDING_VERIFICATION
+    }
+
+    enum OTPPurpose {
+        REGISTRATION
+        PASSWORD_RESET
+        TWO_FACTOR_AUTH
+        EMAIL_VERIFICATION
+        PHONE_VERIFICATION
+        LOGIN_VERIFICATION
+    }
+
+    ' Model Classes
+    class UserProfile {
+        - firstName: string
+        - lastName: string
+        - phoneNumber: string
+        - dateOfBirth: DateTime
+        - address: string
+        __
+        + getFirstName(): string
+        + setFirstName(firstName: string): void
+        + getLastName(): string
+        + setLastName(lastName: string): void
+        + getPhoneNumber(): string
+        + setPhoneNumber(phoneNumber: string): void
+        + getDateOfBirth(): DateTime
+        + setDateOfBirth(dateOfBirth: DateTime): void
+        + getAddress(): string
+        + setAddress(address: string): void
+        __
+        + validate(): bool
+    }
+
+    class UserStatistics {
+        - totalOrders: int
+        - totalSpent: decimal
+        - averageOrderValue: decimal
+        - lastOrderDate: DateTime
+        - registrationDate: DateTime
+        - loyaltyPoints: int
+        __
+        + getTotalOrders(): int
+        + getTotalSpent(): decimal
+        + getAverageOrderValue(): decimal
+        + getLastOrderDate(): DateTime
+        + getRegistrationDate(): DateTime
+        + getLoyaltyPoints(): int
+        __
+        + calculateLoyaltyTier(): string
+        + isVIPCustomer(): bool
+    }
+}
+
+' Relationships
+NguoiDung --> UserStatus : "có trạng thái"
+XacThucOTP --> OTPPurpose : "có mục đích"
+
+' Associations
+NguoiDung ..> UserProfile : "có profile"
+NguoiDung ..> UserStatistics : "có thống kê"
+
+' Dependencies
+NguoiDungController ..> INguoiDungService : "uses"
+NguoiDungService ..> INguoiDungRepository : "uses"
+
+' Inheritance/Implementation
+INguoiDungService <|.. NguoiDungService : "implements"
+INguoiDungRepository <|.. NguoiDungRepository : "implements"
+
+@enduml

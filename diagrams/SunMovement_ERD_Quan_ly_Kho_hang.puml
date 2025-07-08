@@ -1,0 +1,98 @@
+@startuml SunMovement_ERD_Quan_ly_Kho_hang
+!define RECTANGLE class
+
+package "Quản lý Kho hàng" {
+    entity "NhaCungCap" as Supplier {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(200)
+        * ContactPerson : varchar(100)
+        * Email : varchar(100)
+        * PhoneNumber : varchar(20)
+        * Address : varchar(500)
+        * Website : varchar(max)
+        * Description : varchar(1000)
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "SanPham_NhaCungCap" as ProductSupplier {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * SupplierId : int <<FK>>
+        * SupplierProductCode : varchar(100)
+        * LeadTimeDays : int
+        * MinimumOrderQuantity : int
+        * UnitCost : decimal(18,2)
+        * IsPreferred : bit
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "GiaoDichKho" as InventoryTransaction {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * ProductVariantId : int <<FK>>
+        * SupplierId : int <<FK>>
+        * OrderId : int <<FK>>
+        * TransactionType : int
+        * Quantity : int
+        * UnitPrice : decimal(18,2)
+        * TotalCost : decimal(18,2)
+        * ReferenceNumber : varchar(100)
+        * TransactionDate : datetime2
+        * Notes : varchar(500)
+        * CreatedBy : varchar(100)
+        * CreatedAt : datetime2
+        * BatchNumber : varchar(50)
+        * ExpiryDate : datetime2
+        * Location : varchar(100)
+    }
+
+    entity "VatPhamKho" as InventoryItem {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(200)
+        * Description : varchar(1000)
+        * Sku : varchar(50)
+        * Quantity : int
+        * CostPrice : decimal(18,2)
+        * Location : varchar(100)
+        * ReceiptDate : datetime2
+        * ExpiryDate : datetime2
+        * Status : int
+        * SupplierId : int <<FK>>
+        * Notes : varchar(500)
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * CreatedBy : varchar(100)
+        * UpdatedBy : varchar(100)
+    }
+
+    entity "ThongKeTimKiem" as CustomerSearchStatistic {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * SearchTerm : varchar(200)
+        * SearchDate : datetime2
+        * ResultsCount : int
+        * ClickedProductId : int
+        * ClickedAt : datetime2
+        * SearchSource : varchar(50)
+        * UserAgent : varchar(500)
+        * IpAddress : varchar(45)
+        * SessionId : varchar(100)
+    }
+}
+
+' Relationships trong package
+Supplier ||--o{ ProductSupplier : "cung cấp nhiều sản phẩm"
+Supplier ||--o{ InventoryTransaction : "có nhiều giao dịch"
+Supplier ||--o{ InventoryItem : "cung cấp nhiều vật phẩm"
+InventoryItem ||--o{ InventoryTransaction : "có nhiều giao dịch"
+
+@enduml

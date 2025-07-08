@@ -1,5 +1,6 @@
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SunMovement.Web.Areas.Api.Models
@@ -50,6 +51,41 @@ namespace SunMovement.Web.Areas.Api.Models
         }
 
         public Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendCouponEmailAsync(string email, string customerName, Coupon coupon, string campaignType = "general")
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendCouponCampaignEmailAsync(string email, string customerName, IEnumerable<Coupon> coupons, string campaignName, string campaignDescription)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendWelcomeCouponEmailAsync(string email, string customerName, Coupon welkomeCoupon)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendSeasonalCouponEmailAsync(string email, string customerName, Coupon seasonalCoupon, string occasion)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendBirthdayCouponEmailAsync(string email, string customerName, Coupon birthdayCoupon)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendAbandonedCartCouponEmailAsync(string email, string customerName, Coupon coupon, decimal cartValue)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> SendCustomerLoyaltyCouponEmailAsync(string email, string customerName, Coupon loyaltyCoupon, int orderCount, decimal totalSpent)
         {
             return Task.FromResult(true);
         }

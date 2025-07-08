@@ -60,8 +60,8 @@ rasa train
 
 ```bash
 # Chạy Rasa server
-rasa run --enable-api --cors "*" --port 5005
 
+rasa run --enable-api --cors "*" --port 5005
 # Trong một terminal khác, chạy action server
 rasa run actions --port 5055
 ```

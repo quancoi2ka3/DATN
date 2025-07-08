@@ -82,6 +82,22 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 dashboardViewModel.OrderCount = dashboardMetrics.TotalOrders;
                 dashboardViewModel.UserCount = _userManager.Users.Count();
                 
+                // Calculate growth percentages
+                var lastMonth = startOfMonth.AddMonths(-1);
+                var lastMonthEnd = startOfMonth.AddDays(-1);
+                
+                // Calculate previous month metrics for comparison
+                var lastMonthProducts = await _unitOfWork.Products.CountAsync(p => p.CreatedAt < startOfMonth);
+                var lastMonthServices = await _unitOfWork.Services.CountAsync(s => s.CreatedAt < startOfMonth);
+                var lastMonthOrders = await _unitOfWork.Orders.CountAsync(o => o.OrderDate >= lastMonth && o.OrderDate <= lastMonthEnd);
+                var lastMonthUsers = _userManager.Users.Count(u => u.Id != null); // Fallback for users without CreatedDate
+                
+                // Calculate growth percentages
+                ViewBag.ProductGrowthPercentage = CalculateGrowthPercentage(lastMonthProducts, dashboardViewModel.ProductCount);
+                ViewBag.ServiceGrowthPercentage = CalculateGrowthPercentage(lastMonthServices, dashboardViewModel.ServiceCount);
+                ViewBag.OrderGrowthPercentage = CalculateGrowthPercentage(lastMonthOrders, dashboardViewModel.OrderCount);
+                ViewBag.UserGrowthPercentage = CalculateGrowthPercentage(lastMonthUsers, dashboardViewModel.UserCount);
+                
                 dashboardViewModel.TotalVisits = dashboardMetrics.TotalVisits;
                 dashboardViewModel.ConversionRate = dashboardMetrics.ConversionRate;
                 dashboardViewModel.AverageOrderValue = dashboardMetrics.AverageOrderValue;
@@ -157,10 +173,10 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     // Log exception
                     _logger.LogError(ex, "Error calculating revenue metrics");
                     
-                    // Use placeholder data
-                    dashboardViewModel.TodayRevenue = GetRandomRevenue(1000, 5000);
-                    dashboardViewModel.WeekRevenue = GetRandomRevenue(8000, 25000);
-                    dashboardViewModel.MonthlyRevenue = GetRandomRevenue(30000, 80000);
+                    // Set to 0 instead of random data when calculation fails
+                    dashboardViewModel.TodayRevenue = 0;
+                    dashboardViewModel.WeekRevenue = 0;
+                    dashboardViewModel.MonthlyRevenue = 0;
                 }
                 
                 // Set sales by category from dashboard metrics
@@ -184,6 +200,104 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 ViewBag.TodayRevenue = dashboardViewModel.TodayRevenue.ToString("N0");
                 ViewBag.WeekRevenue = dashboardViewModel.WeekRevenue.ToString("N0");
                 ViewBag.MonthlyRevenue = dashboardViewModel.MonthlyRevenue.ToString("N0");
+                
+                // Add missing ViewBag values that the view expects
+                ViewBag.TodayPageViews = dashboardMetrics.TotalVisits > 0 ? dashboardMetrics.TotalVisits / 30 : 0;
+                ViewBag.TodaySearches = 0; // Set to 0 instead of fake data - needs Mixpanel search tracking
+                ViewBag.PendingPayments = dashboardViewModel.PendingOrderCount; // Use pending orders as pending payments
+                
+                // Add chart data for JavaScript
+                ViewBag.RevenueChartData = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    labels = new[] { "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6" },
+                    data = new[] { 0, 0, 0, 0, 0, (int)dashboardViewModel.MonthlyRevenue } // Real current month, others 0
+                });
+                
+                ViewBag.SalesSourceData = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    labels = new[] { "Sản Phẩm", "Dịch Vụ" },
+                    data = new[] { dashboardViewModel.ProductCount, dashboardViewModel.ServiceCount }
+                });
+                
+                // Calculate order status percentages for progress bar
+                var totalOrders = dashboardViewModel.OrderCount;
+                if (totalOrders > 0)
+                {
+                    var completedOrders = dashboardMetrics.OrdersByStatus.GetValueOrDefault("Completed", 0);
+                    var pendingOrders = dashboardMetrics.OrdersByStatus.GetValueOrDefault("Pending", 0);
+                    var cancelledOrders = dashboardMetrics.OrdersByStatus.GetValueOrDefault("Cancelled", 0);
+                    
+                    ViewBag.CompletedPercentage = (int)Math.Round((double)completedOrders / totalOrders * 100);
+                    ViewBag.PendingPercentage = (int)Math.Round((double)pendingOrders / totalOrders * 100);
+                    ViewBag.CancelledPercentage = (int)Math.Round((double)cancelledOrders / totalOrders * 100);
+                }
+                else
+                {
+                    ViewBag.CompletedPercentage = 0;
+                    ViewBag.PendingPercentage = 0;
+                    ViewBag.CancelledPercentage = 0;
+                }
+                
+                // Get real search analytics data from Mixpanel
+                try
+                {
+                    var topSearchQueries = await _analyticsService.GetTopSearchQueriesAsync(5);
+                    ViewBag.TopSearchQueries = topSearchQueries.Select(q => new
+                    {
+                        Query = q.Query,
+                        Count = q.Count,
+                        ResultCount = q.ResultCount ?? 0
+                    }).ToList();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load search analytics data");
+                    ViewBag.TopSearchQueries = new List<object>();
+                }
+                
+                // Get real recent activities
+                try
+                {
+                    var recentActivities = await GetRecentActivitiesAsync();
+                    ViewBag.RecentActivities = recentActivities;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load recent activities");
+                    ViewBag.RecentActivities = new List<Core.ViewModels.RecentActivity>();
+                }
+                
+                // Get real notifications
+                try
+                {
+                    var notifications = await GetNotificationsAsync();
+                    ViewBag.Notifications = notifications;
+                    ViewBag.NotificationCount = notifications.Count(n => !n.IsRead);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load notifications");
+                    ViewBag.Notifications = new List<Core.ViewModels.AdminNotification>();
+                    ViewBag.NotificationCount = 0;
+                }
+                
+                // Get growth statistics
+                try
+                {
+                    var growthStats = await GetGrowthStatisticsAsync();
+                    ViewBag.GrowthStatistics = growthStats;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load growth statistics");
+                    ViewBag.GrowthStatistics = new
+                    {
+                        ProductGrowth = 0m,
+                        ServiceGrowth = 0m,
+                        OrderGrowth = 0m,
+                        RevenueGrowth = 0m
+                    };
+                }
                 
                 return View(dashboardViewModel);
             }
@@ -232,17 +346,236 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             
             return orders.Sum(o => o.TotalAmount);
         }
-
-        private static int GetRandomStat(int min, int max)
+        
+        /// <summary>
+        /// Lấy danh sách hoạt động gần đây từ hệ thống
+        /// </summary>
+        private async Task<List<Core.ViewModels.RecentActivity>> GetRecentActivitiesAsync()
         {
-            var random = new Random();
-            return random.Next(min, max);
+            var activities = new List<Core.ViewModels.RecentActivity>();
+            
+            try
+            {
+                // Get recent orders (last 5)
+                var recentOrders = await _unitOfWork.Orders.GetAllAsync();
+                var latestOrders = recentOrders.OrderByDescending(o => o.OrderDate).Take(3);
+                
+                foreach (var order in latestOrders)
+                {
+                    activities.Add(new Core.ViewModels.RecentActivity
+                    {
+                        Title = "Đơn Hàng Mới",
+                        Description = $"Đơn hàng #{order.Id} - {order.TotalAmount:N0} VND",
+                        Type = "success",
+                        TimeAgo = GetTimeAgo(order.OrderDate),
+                        Link = $"/Admin/OrdersAdmin/Details/{order.Id}"
+                    });
+                }
+                
+                // Get recent user registrations (last 2)
+                var recentUsers = _userManager.Users.OrderByDescending(u => u.Id).Take(2);
+                foreach (var user in recentUsers)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Customer"))
+                    {
+                        activities.Add(new Core.ViewModels.RecentActivity
+                        {
+                            Title = "Người Dùng Mới",
+                            Description = $"{user.Email} đã đăng ký tài khoản",
+                            Type = "info",
+                            TimeAgo = "Gần đây",
+                            Link = $"/Admin/CustomersAdmin/Details/{user.Id}"
+                        });
+                    }
+                }
+                
+                // Get recent contact messages (last 2)
+                var recentMessages = await _unitOfWork.ContactMessages.GetAllAsync();
+                var latestMessages = recentMessages.OrderByDescending(m => m.CreatedAt).Take(2);
+                
+                foreach (var message in latestMessages)
+                {
+                    activities.Add(new Core.ViewModels.RecentActivity
+                    {
+                        Title = "Tin Nhắn Mới",
+                        Description = $"Từ {message.Name}: {message.Subject}",
+                        Type = message.IsRead ? "primary" : "warning",
+                        TimeAgo = GetTimeAgo(message.CreatedAt),
+                        Link = $"/Admin/ContactMessagesAdmin/Details/{message.Id}"
+                    });
+                }
+                
+                return activities.OrderByDescending(a => a.CreatedAt).Take(5).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting recent activities");
+                return new List<Core.ViewModels.RecentActivity>();
+            }
         }
-
-        private static decimal GetRandomRevenue(decimal min, decimal max)
+        
+        /// <summary>
+        /// Lấy danh sách thông báo cho admin
+        /// </summary>
+        private async Task<List<Core.ViewModels.AdminNotification>> GetNotificationsAsync()
         {
-            var random = new Random();
-            return Math.Round((decimal)(random.NextDouble() * (double)(max - min) + (double)min), 0);
+            var notifications = new List<Core.ViewModels.AdminNotification>();
+            
+            try
+            {
+                // Check for low stock products
+                var lowStockProducts = await _unitOfWork.Products.FindAsync(p => p.StockQuantity <= 10); // Assume 10 as low stock threshold
+                if (lowStockProducts.Any())
+                {
+                    notifications.Add(new Core.ViewModels.AdminNotification
+                    {
+                        Message = $"Có {lowStockProducts.Count()} sản phẩm sắp hết hàng!",
+                        Type = "warning",
+                        Icon = "fa-exclamation-triangle",
+                        Link = "/Admin/InventoryDashboard",
+                        IsRead = false
+                    });
+                }
+                
+                // Check for unread contact messages
+                var unreadMessages = await _unitOfWork.ContactMessages.CountAsync(m => !m.IsRead);
+                if (unreadMessages > 0)
+                {
+                    notifications.Add(new Core.ViewModels.AdminNotification
+                    {
+                        Message = $"Có {unreadMessages} tin nhắn chưa đọc!",
+                        Type = "info",
+                        Icon = "fa-envelope",
+                        Link = "/Admin/ContactMessagesAdmin",
+                        IsRead = false
+                    });
+                }
+                
+                // Check for pending orders
+                var pendingOrders = await _unitOfWork.Orders.CountAsync(o => o.Status == OrderStatus.Pending);
+                if (pendingOrders > 0)
+                {
+                    notifications.Add(new Core.ViewModels.AdminNotification
+                    {
+                        Message = $"Có {pendingOrders} đơn hàng cần xử lý!",
+                        Type = "primary",
+                        Icon = "fa-shopping-cart",
+                        Link = "/Admin/OrdersAdmin",
+                        IsRead = false
+                    });
+                }
+                
+                return notifications.Take(5).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting notifications");
+                return new List<Core.ViewModels.AdminNotification>();
+            }
+        }
+        
+        /// <summary>
+        /// Helper method để tính thời gian đã trôi qua
+        /// </summary>
+        private string GetTimeAgo(DateTime dateTime)
+        {
+            var timeSpan = DateTime.UtcNow - dateTime;
+            
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days} ngày trước";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours} giờ trước";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes} phút trước";
+            else
+                return "Vừa xong";
+        }
+        
+        /// <summary>
+        /// Helper method để tính toán phần trăm tăng trưởng
+        /// </summary>
+        private decimal CalculateGrowthPercentage(int previousValue, int currentValue)
+        {
+            if (previousValue == 0)
+            {
+                return currentValue > 0 ? 100 : 0;
+            }
+            
+            return Math.Round(((decimal)(currentValue - previousValue) / previousValue) * 100, 1);
+        }
+        
+        /// <summary>
+        /// Helper method để format hiển thị phần trăm tăng trưởng
+        /// </summary>
+        private string FormatGrowthPercentage(decimal percentage)
+        {
+            if (percentage > 0)
+                return $"+{percentage}%";
+            else if (percentage < 0)
+                return $"{percentage}%";
+            else
+                return "0%";
+        }
+        
+        /// <summary>
+        /// Tính phần trăm tăng trưởng so với kỳ trước
+        /// </summary>
+        private decimal CalculateGrowthPercentage(decimal currentValue, decimal previousValue)
+        {
+            if (previousValue == 0)
+                return currentValue > 0 ? 100 : 0;
+            
+            return Math.Round(((currentValue - previousValue) / previousValue) * 100, 1);
+        }
+        
+        /// <summary>
+        /// Lấy dữ liệu tăng trưởng thống kê
+        /// </summary>
+        private async Task<object> GetGrowthStatisticsAsync()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var currentMonthStart = new DateTime(today.Year, today.Month, 1);
+                var previousMonthStart = currentMonthStart.AddMonths(-1);
+                var previousMonthEnd = currentMonthStart.AddDays(-1);
+                
+                // Lấy dữ liệu tháng hiện tại
+                var currentMonthProducts = await _unitOfWork.Products.CountAsync();
+                var currentMonthServices = await _unitOfWork.Services.CountAsync();
+                var currentMonthOrders = await _unitOfWork.Orders.CountAsync(o => o.OrderDate >= currentMonthStart);
+                var currentMonthOrdersCompleted = await _unitOfWork.Orders.FindAsync(o => 
+                    o.OrderDate >= currentMonthStart && o.Status == OrderStatus.Completed);
+                var currentMonthRevenue = currentMonthOrdersCompleted.Sum(o => o.TotalAmount);
+                
+                // Lấy dữ liệu tháng trước
+                var previousMonthOrders = await _unitOfWork.Orders.CountAsync(o => 
+                    o.OrderDate >= previousMonthStart && o.OrderDate <= previousMonthEnd);
+                var previousMonthOrdersCompleted = await _unitOfWork.Orders.FindAsync(o => 
+                    o.OrderDate >= previousMonthStart && 
+                    o.OrderDate <= previousMonthEnd && 
+                    o.Status == OrderStatus.Completed);
+                var previousMonthRevenue = previousMonthOrdersCompleted.Sum(o => o.TotalAmount);
+                
+                return new
+                {
+                    ProductGrowth = 0m, // Sản phẩm không thay đổi theo tháng, luôn là 0
+                    ServiceGrowth = 0m, // Dịch vụ không thay đổi theo tháng, luôn là 0  
+                    OrderGrowth = CalculateGrowthPercentage(currentMonthOrders, previousMonthOrders),
+                    RevenueGrowth = CalculateGrowthPercentage(currentMonthRevenue, previousMonthRevenue)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calculating growth statistics");
+                return new
+                {
+                    ProductGrowth = 0m,
+                    ServiceGrowth = 0m,
+                    OrderGrowth = 0m,
+                    RevenueGrowth = 0m
+                };
+            }
         }
     }
 }

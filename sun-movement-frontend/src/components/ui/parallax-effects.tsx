@@ -15,13 +15,17 @@ export function ParallaxSection({
 }: ParallaxSectionProps) {
   const [offsetY, setOffsetY] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  const speedRef = useRef(speed);
+  
+  // Update speed ref when prop changes
+  speedRef.current = speed;
 
   useEffect(() => {
     const handleScroll = () => {
       if (ref.current) {
         const rect = ref.current.getBoundingClientRect();
         const scrolled = window.pageYOffset;
-        const rate = scrolled * -speed;
+        const rate = scrolled * -speedRef.current;
         
         if (rect.bottom >= 0 && rect.top <= window.innerHeight) {
           setOffsetY(rate);
@@ -31,7 +35,7 @@ export function ParallaxSection({
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [speed]);
+  }, []); // Empty dependency array
 
   return (
     <div 

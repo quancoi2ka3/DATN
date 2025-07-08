@@ -37,7 +37,8 @@
                         </div>
                     </div>
 
-                    <form id="updateStatusForm" action="@Url.Action("UpdateStatus", "OrdersAdmin", new { id = Model.Id })" method="post">
+                    <form id="updateStatusForm" action="@Url.Action("UpdateStatus", "OrdersAdmin")" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id" />
 
                         <div class="mb-3">
@@ -150,9 +151,14 @@
                             <a href="@Url.Action("Details", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Quay lại
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Cập nhật trạng thái
-                            </button>
+                            <div>
+                                <button type="button" id="updateStatusAjax" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-sync-alt"></i> Cập nhật nhanh
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Cập nhật trạng thái
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -236,7 +242,74 @@
             // Kiểm tra ban đầu
             updateStatusWarnings();
             
-            // Xác nhận trước khi gửi form
+            // AJAX Update for Real-time Experience
+            $("#updateStatusAjax").on("click", function() {
+                const selectedStatus = $("#status").val();
+                const currentStatus = "@Model.Status";
+                const orderId = @Model.Id;
+                
+                if (selectedStatus === currentStatus) {
+                    alert("Trạng thái mới giống với trạng thái hiện tại.");
+                    return;
+                }
+                
+                // Confirm for critical status changes
+                if (selectedStatus === "Cancelled" && currentStatus !== "Cancelled") {
+                    if (!confirm("Bạn có chắc chắn muốn HỦY đơn hàng này?")) {
+                        return;
+                    }
+                }
+                
+                if (selectedStatus === "Completed" && currentStatus !== "Completed") {
+                    if (!confirm("Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái HOÀN THÀNH?")) {
+                        return;
+                    }
+                }
+                
+                // Show loading state
+                const $btn = $(this);
+                const originalText = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...');
+                
+                // AJAX call
+                $.ajax({
+                    url: '@Url.Action("UpdateStatusAjax", "OrdersAdmin")',
+                    type: 'POST',
+                    data: {
+                        id: orderId,
+                        status: selectedStatus,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            const alertHtml = `
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Thành công!</strong> ${response.message}
+                                    <br><small>Trạng thái thanh toán: ${response.paymentStatus} | Cập nhật: ${response.updatedAt}</small>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            `;
+                            $('.card-body').prepend(alertHtml);
+                            
+                            // Update current status display
+                            location.reload(); // Refresh to show updated status
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái: ' + error);
+                    },
+                    complete: function() {
+                        // Restore button state
+                        $btn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+            
+            // Xác nhận trước khi gửi form (traditional submit)
             $("#updateStatusForm").on("submit", function(e) {
                 var selectedStatus = $("#status").val();
                 var currentStatus = "@Model.Status";

@@ -12,17 +12,20 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IInventoryService _inventoryService;
         private readonly ICouponService _couponService;
+        private readonly IAnalyticsService _analyticsService;
         private readonly ILogger<InventoryDashboardController> _logger;
 
         public InventoryDashboardController(
             IUnitOfWork unitOfWork,
             IInventoryService inventoryService,
             ICouponService couponService,
+            IAnalyticsService analyticsService,
             ILogger<InventoryDashboardController> logger)
         {
             _unitOfWork = unitOfWork;
             _inventoryService = inventoryService;
             _couponService = couponService;
+            _analyticsService = analyticsService;
             _logger = logger;
         }
 
@@ -89,9 +92,23 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                var products = await _unitOfWork.Products.GetAllAsync();
-                var topProducts = products.OrderByDescending(p => p.StockQuantity).Take(count);
-                return Json(new { success = true, data = topProducts });
+                // Get top selling products from analytics service with real data
+                var from = DateTime.Now.AddDays(-30);
+                var to = DateTime.Now;
+                var topSellingProducts = await _analyticsService.GetTopSellingProductsAsync(count, from, to);
+                
+                // Get product details for the top selling products
+                var productIds = topSellingProducts.Select(t => t.ProductId).ToList();
+                var products = await _unitOfWork.Products.FindAsync(p => productIds.Contains(p.Id));
+                
+                var result = products.Select(p => new { 
+                    p.Id, 
+                    p.Name, 
+                    p.StockQuantity, 
+                    QuantitySold = topSellingProducts.FirstOrDefault(t => t.ProductId == p.Id)?.QuantitySold ?? 0 
+                });
+                
+                return Json(new { success = true, data = result });
             }
             catch (Exception ex)
             {

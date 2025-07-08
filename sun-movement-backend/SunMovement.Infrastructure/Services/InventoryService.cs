@@ -28,8 +28,12 @@ namespace SunMovement.Infrastructure.Services
             if (product == null)
                 throw new ArgumentException($"Không tìm thấy sản phẩm có ID {productId}");
 
-            // Tính giá vốn trung bình theo phương pháp bình quân gia quyền
+            // TÙYCHỌN: Tính giá vốn trung bình theo phương pháp bình quân gia quyền
+            // Comment dòng này nếu muốn giữ nguyên giá vốn ban đầu
             await RecalculateAverageCostWithNewStock(product, quantity, unitCost);
+            
+            // TÙYCHỌN: Hoặc cập nhật giá vốn bằng giá nhập mới nhất
+            // product.CostPrice = unitCost;
 
             // Cập nhật số lượng tồn kho
             product.StockQuantity += quantity;

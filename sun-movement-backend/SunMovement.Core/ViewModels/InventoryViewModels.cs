@@ -56,4 +56,41 @@ namespace SunMovement.Core.ViewModels
             IsSelected = false;
         }
     }
+    
+    /// <summary>
+    /// Class để lưu thông tin phân tích tìm kiếm
+    /// </summary>
+    public class SearchQueryAnalytics
+    {
+        public string Query { get; set; } = "";
+        public int Count { get; set; }
+        public int? ResultCount { get; set; }
+        public DateTime LastSearched { get; set; } = DateTime.UtcNow;
+    }
+    
+    /// <summary>
+    /// Class để lưu thông tin hoạt động gần đây
+    /// </summary>
+    public class RecentActivity
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Type { get; set; } = "info"; // success, info, warning, danger, primary
+        public string TimeAgo { get; set; } = "";
+        public string? Link { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+    
+    /// <summary>
+    /// Class để lưu thông tin thông báo
+    /// </summary>
+    public class AdminNotification
+    {
+        public string Message { get; set; } = "";
+        public string Type { get; set; } = "info"; // primary, success, info, warning, danger
+        public string Icon { get; set; } = "fa-info-circle";
+        public string? Link { get; set; }
+        public bool IsRead { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
 }

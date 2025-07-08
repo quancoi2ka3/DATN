@@ -185,10 +185,10 @@ export default function AboutPageLazy() {
                   Liên Hệ
                 </h3>
                 <p className="text-slate-300">
-                  Hotline: <a href="tel:08999139393" className="text-red-400 hover:text-red-300">0123 456 789</a>
+                  Hotline: <a href="tel:08999139393" className="text-red-400 hover:text-red-300">08999139393</a>
                 </p>
                 <p className="text-slate-300">
-                  Email: <a href="mailto:contact@sunmovement.vn" className="text-red-400 hover:text-red-300">info@sunmovement.vn</a>
+                  Email: <a href="mailto:contact@sunmovement.vn" className="text-red-400 hover:text-red-300">contact@sunmovement.vn</a>
                 </p>
               </div>
 

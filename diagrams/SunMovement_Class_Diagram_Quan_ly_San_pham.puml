@@ -1,0 +1,224 @@
+@startuml SunMovement_Class_Diagram_Quan_ly_San_pham
+!define RECTANGLE class
+
+package "Quản lý Sản phẩm" {
+    
+    class SanPham {
+        +Id: int
+        +Name: string
+        +Description: string
+        +ImageUrl: string
+        +Price: decimal
+        +DiscountPrice: decimal?
+        +CostPrice: decimal
+        +StockQuantity: int
+        +MinimumStockLevel: int
+        +OptimalStockLevel: int
+        +Sku: string
+        +Barcode: string
+        +Category: ProductCategory
+        +SubCategory: string
+        +IsFeatured: bool
+        +IsActive: bool
+        +Status: ProductStatus
+        +Weight: decimal
+        +AverageRating: decimal
+        +ReviewCount: int
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +Variants: ICollection<BienTheSanPham>
+        +Images: ICollection<HinhAnhSanPham>
+        +Reviews: ICollection<DanhGiaSanPham>
+        +ProductTags: ICollection<SanPham_Tag>
+        +InventoryTransactions: ICollection<GiaoDichKho>
+        +ProductSuppliers: ICollection<SanPham_NhaCungCap>
+        --
+        +IsInStock: bool {readonly}
+        +IsLowStock: bool {readonly}
+        +IsOutOfStock: bool {readonly}
+        +DiscountPercentage: decimal {readonly}
+        +EffectivePrice: decimal {readonly}
+        --
+        +UpdateStock(quantity: int): void
+        +ApplyDiscount(percentage: decimal): void
+        +CalculateProfit(): decimal
+        +GetPrimaryImage(): string
+    }
+
+    class BienTheSanPham {
+        +Id: int
+        +ProductId: int
+        +Name: string
+        +Sku: string
+        +Price: decimal
+        +DiscountPrice: decimal?
+        +CostPrice: decimal
+        +StockQuantity: int
+        +Weight: decimal
+        +Attributes: string
+        +IsActive: bool
+        +SortOrder: int
+        +CreatedAt: DateTime
+        --
+        +Product: SanPham
+        +Images: ICollection<HinhAnhBienTheSanPham>
+        --
+        +IsInStock: bool {readonly}
+        +EffectivePrice: decimal {readonly}
+        --
+        +UpdateStock(quantity: int): void
+        +GetDisplayName(): string
+    }
+
+    class DanhGiaSanPham {
+        +Id: int
+        +ProductId: int
+        +UserId: string
+        +AdminId: string?
+        +Rating: int
+        +ReviewText: string
+        +IsApproved: bool
+        +ApprovedAt: DateTime?
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime?
+        --
+        +Product: SanPham
+        +User: NguoiDung
+        +Admin: NguoiDung?
+        --
+        +Approve(): void
+        +Reject(reason: string): void
+        +IsValidRating(): bool
+    }
+
+    class TheTag {
+        +Id: int
+        +Name: string
+        +Slug: string
+        +Description: string
+        +IsActive: bool
+        +CreatedAt: DateTime
+        --
+        +ProductTags: ICollection<SanPham_Tag>
+        --
+        +GenerateSlug(): string
+        +GetProductCount(): int
+    }
+
+    class SanPham_Tag {
+        +Id: int
+        +ProductId: int
+        +TagId: int
+        +CreatedAt: DateTime
+        --
+        +Product: SanPham
+        +Tag: TheTag
+    }
+
+    class TuongTacNguoiDung {
+        +Id: int
+        +UserId: string
+        +ProductId: int
+        +InteractionType: UserInteractionType
+        +Value: decimal
+        +CreatedAt: DateTime
+        --
+        +User: NguoiDung
+        +Product: SanPham
+        --
+        +GetInteractionScore(): decimal
+    }
+
+    interface ISanPhamService {
+        +GetAllProductsAsync(): Task<IEnumerable<SanPham>>
+        +GetProductByIdAsync(id: int): Task<SanPham>
+        +GetProductsByCategoryAsync(category: ProductCategory): Task<IEnumerable<SanPham>>
+        +SearchProductsAsync(query: string): Task<IEnumerable<SanPham>>
+        +CreateProductAsync(product: SanPham): Task<SanPham>
+        +UpdateProductAsync(product: SanPham): Task<SanPham>
+        +DeleteProductAsync(id: int): Task<bool>
+        +GetFeaturedProductsAsync(): Task<IEnumerable<SanPham>>
+        +UpdateStockAsync(productId: int, quantity: int): Task<bool>
+    }
+
+    interface ISanPhamRepository {
+        +GetByIdAsync(id: int): Task<SanPham>
+        +GetAllAsync(): Task<IEnumerable<SanPham>>
+        +GetByCategoryAsync(category: ProductCategory): Task<IEnumerable<SanPham>>
+        +SearchAsync(query: string): Task<IEnumerable<SanPham>>
+        +AddAsync(product: SanPham): Task<SanPham>
+        +UpdateAsync(product: SanPham): Task<SanPham>
+        +DeleteAsync(id: int): Task<bool>
+        +GetFeaturedAsync(): Task<IEnumerable<SanPham>>
+    }
+
+    class SanPhamService {
+        -_repository: ISanPhamRepository
+        -_logger: ILogger
+        --
+        +GetAllProductsAsync(): Task<IEnumerable<SanPham>>
+        +GetProductByIdAsync(id: int): Task<SanPham>
+        +CreateProductAsync(product: SanPham): Task<SanPham>
+        +UpdateProductAsync(product: SanPham): Task<SanPham>
+        +DeleteProductAsync(id: int): Task<bool>
+        +ValidateProductAsync(product: SanPham): Task<bool>
+        +UpdateInventoryAsync(productId: int, quantity: int): Task<void>
+    }
+
+    class SanPhamController {
+        -_productService: ISanPhamService
+        -_mapper: IMapper
+        --
+        +Index(): Task<ActionResult>
+        +Details(id: int): Task<ActionResult>
+        +Create(): ActionResult
+        +Create(model: CreateProductModel): Task<ActionResult>
+        +Edit(id: int): Task<ActionResult>
+        +Edit(model: EditProductModel): Task<ActionResult>
+        +Delete(id: int): Task<ActionResult>
+    }
+
+    enum ProductCategory {
+        Sportswear
+        Supplements
+        Equipment
+        Accessories
+        Nutrition
+    }
+
+    enum ProductStatus {
+        Active
+        Inactive
+        OutOfStock
+        Discontinued
+    }
+
+    enum UserInteractionType {
+        View
+        Purchase
+        AddToCart
+        AddToWishlist
+        Review
+        Share
+    }
+}
+
+' Relationships
+SanPham ||--o{ BienTheSanPham : "có nhiều biến thể"
+SanPham ||--o{ DanhGiaSanPham : "có nhiều đánh giá"
+SanPham ||--o{ SanPham_Tag : "có nhiều tag"
+SanPham ||--o{ TuongTacNguoiDung : "có nhiều tương tác"
+TheTag ||--o{ SanPham_Tag : "được gán cho nhiều sản phẩm"
+
+SanPham --> ProductCategory : "thuộc danh mục"
+SanPham --> ProductStatus : "có trạng thái"
+TuongTacNguoiDung --> UserInteractionType : "có loại tương tác"
+
+ISanPhamService <|-- SanPhamService
+ISanPhamRepository <|-- SanPhamRepository
+
+SanPhamService --> ISanPhamRepository : "sử dụng"
+SanPhamController --> ISanPhamService : "sử dụng"
+
+@enduml

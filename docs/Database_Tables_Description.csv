@@ -1,0 +1,211 @@
+STT,Tên Bảng,Tên Cột,Kiểu Dữ Liệu,Độ Dài,Null,Khóa,Mặc Định,Mô Tả
+1,AspNetUsers,Id,nvarchar,450,NO,PK,,Khóa chính - ID người dùng
+2,AspNetUsers,Email,nvarchar,256,YES,UQ,,Email đăng nhập
+3,AspNetUsers,UserName,nvarchar,256,YES,UQ,,Tên đăng nhập
+4,AspNetUsers,NormalizedEmail,nvarchar,256,YES,,,Email chuẩn hóa
+5,AspNetUsers,NormalizedUserName,nvarchar,256,YES,,,Tên đăng nhập chuẩn hóa
+6,AspNetUsers,EmailConfirmed,bit,,NO,,0,Xác nhận email
+7,AspNetUsers,PasswordHash,nvarchar,max,YES,,,Mật khẩu đã mã hóa
+8,AspNetUsers,SecurityStamp,nvarchar,max,YES,,,Stamp bảo mật
+9,AspNetUsers,ConcurrencyStamp,nvarchar,max,YES,,,Stamp đồng thời
+10,AspNetUsers,PhoneNumber,nvarchar,max,YES,,,Số điện thoại
+11,AspNetUsers,PhoneNumberConfirmed,bit,,NO,,0,Xác nhận số điện thoại
+12,AspNetUsers,TwoFactorEnabled,bit,,NO,,0,Kích hoạt xác thực 2 bước
+13,AspNetUsers,LockoutEnd,datetimeoffset,,YES,,,Thời gian kết thúc khóa tài khoản
+14,AspNetUsers,LockoutEnabled,bit,,NO,,0,Cho phép khóa tài khoản
+15,AspNetUsers,AccessFailedCount,int,,NO,,0,Số lần đăng nhập thất bại
+16,AspNetUsers,FirstName,nvarchar,max,NO,,,Tên
+17,AspNetUsers,LastName,nvarchar,max,NO,,,Họ
+18,AspNetUsers,DateOfBirth,datetime2,,NO,,,Ngày sinh
+19,AspNetUsers,Address,nvarchar,max,NO,,,Địa chỉ
+20,AspNetUsers,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo tài khoản
+21,AspNetUsers,LastLogin,datetime2,,YES,,,Lần đăng nhập cuối
+22,AspNetUsers,IsActive,bit,,NO,,1,Trạng thái hoạt động
+23,Products,Id,int,,NO,PK,,Khóa chính - ID sản phẩm
+24,Products,Name,nvarchar,200,NO,,,Tên sản phẩm
+25,Products,Description,nvarchar,2000,NO,,,Mô tả sản phẩm
+26,Products,ImageUrl,nvarchar,max,YES,,,URL hình ảnh sản phẩm
+27,Products,Price,decimal,"18,2",NO,,,Giá bán
+28,Products,DiscountPrice,decimal,"18,2",YES,,,Giá giảm
+29,Products,CostPrice,decimal,"18,2",NO,,0,Giá nhập
+30,Products,StockQuantity,int,,NO,,0,Số lượng tồn kho
+31,Products,FirstStockDate,datetime2,,NO,,GETUTCDATE(),Ngày nhập hàng đầu tiên
+32,Products,LastStockUpdateDate,datetime2,,NO,,GETUTCDATE(),Ngày cập nhật kho cuối
+33,Products,MinimumStockLevel,int,,NO,,5,Ngưỡng tồn kho tối thiểu
+34,Products,OptimalStockLevel,int,,NO,,50,Ngưỡng tồn kho tối ưu
+35,Products,Sku,nvarchar,50,YES,UQ,,Mã SKU sản phẩm
+36,Products,Barcode,nvarchar,50,YES,,,Mã vạch
+37,Products,Category,int,,NO,,,Danh mục sản phẩm (enum)
+38,Products,SubCategory,nvarchar,100,NO,,,Danh mục con
+39,Products,Specifications,nvarchar,max,YES,,,Thông số kỹ thuật (JSON)
+40,Products,IsFeatured,bit,,NO,,0,Sản phẩm nổi bật
+41,Products,IsActive,bit,,NO,,1,Trạng thái hoạt động
+42,Products,Status,int,,NO,,0,Trạng thái sản phẩm (enum)
+43,Products,SortOrder,int,,NO,,0,Thứ tự sắp xếp
+44,Products,Weight,decimal,"18,3",NO,,0,Trọng lượng (gram)
+45,Products,Dimensions,nvarchar,100,YES,,,Kích thước (L x W x H)
+46,Products,MetaTitle,nvarchar,200,YES,,,Tiêu đề SEO
+47,Products,MetaDescription,nvarchar,500,YES,,,Mô tả SEO
+48,Products,MetaKeywords,nvarchar,200,YES,,,Từ khóa SEO
+49,Products,Slug,nvarchar,200,YES,UQ,,URL thân thiện
+50,Products,TrackInventory,bit,,NO,,1,Theo dõi tồn kho
+51,Products,AllowBackorder,bit,,NO,,0,Cho phép đặt hàng khi hết
+52,Products,AverageRating,decimal,"3,2",NO,,0,Điểm đánh giá trung bình
+53,Products,ReviewCount,int,,NO,,0,Số lượng đánh giá
+54,Products,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+55,Products,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+56,Orders,Id,int,,NO,PK,,Khóa chính - ID đơn hàng
+57,Orders,UserId,nvarchar,450,YES,FK,,ID người dùng
+58,Orders,OrderDate,datetime2,,NO,,GETUTCDATE(),Ngày đặt hàng
+59,Orders,TotalAmount,decimal,"18,2",NO,,,Tổng tiền
+60,Orders,SubtotalAmount,decimal,"18,2",NO,,0,Tiền hàng
+61,Orders,TaxAmount,decimal,"18,2",NO,,0,Tiền thuế
+62,Orders,ShippingAmount,decimal,"18,2",NO,,0,Phí vận chuyển
+63,Orders,DiscountAmount,decimal,"18,2",NO,,0,Số tiền giảm
+64,Orders,Status,int,,NO,,0,Trạng thái đơn hàng (enum)
+65,Orders,PaymentStatus,int,,NO,,0,Trạng thái thanh toán (enum)
+66,Orders,ShippingAddress,nvarchar,500,NO,,,Địa chỉ giao hàng
+67,Orders,BillingAddress,nvarchar,500,YES,,,Địa chỉ thanh toán
+68,Orders,PhoneNumber,nvarchar,20,NO,,,Số điện thoại
+69,Orders,Email,nvarchar,100,NO,,,Email liên hệ
+70,Orders,CouponCode,nvarchar,50,YES,,,Mã giảm giá
+71,Orders,PaymentMethod,nvarchar,50,YES,,,Phương thức thanh toán
+72,Orders,IsPaid,bit,,NO,,0,Đã thanh toán
+73,Orders,PaymentTransactionId,nvarchar,100,YES,,,ID giao dịch thanh toán
+74,Orders,PaymentDate,datetime2,,YES,,,Ngày thanh toán
+75,Orders,TransactionId,nvarchar,100,YES,,,ID giao dịch
+76,Orders,TrackingNumber,nvarchar,100,YES,,,Mã vận đơn
+77,Orders,ShippingMethod,nvarchar,100,YES,,,Phương thức vận chuyển
+78,Orders,ShippedDate,datetime2,,YES,,,Ngày gửi hàng
+79,Orders,DeliveredDate,datetime2,,YES,,,Ngày giao hàng
+80,Orders,EstimatedDeliveryDate,datetime2,,YES,,,Ngày giao dự kiến
+81,Orders,Notes,nvarchar,1000,YES,,,Ghi chú
+82,Orders,InternalNotes,nvarchar,1000,YES,,,Ghi chú nội bộ
+83,Orders,CustomerName,nvarchar,200,YES,,,Tên khách hàng (khách vãng lai)
+84,Orders,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+85,Orders,UpdatedAt,datetime2,,NO,,GETUTCDATE(),Ngày cập nhật
+86,Orders,IsUrgent,bit,,NO,,0,Đơn hàng cấp bách
+87,Orders,Priority,int,,NO,,0,Độ ưu tiên
+88,OrderItems,Id,int,,NO,PK,,Khóa chính - ID chi tiết đơn hàng
+89,OrderItems,OrderId,int,,NO,FK,,ID đơn hàng
+90,OrderItems,ProductId,int,,YES,FK,,ID sản phẩm
+91,OrderItems,ServiceId,int,,YES,FK,,ID dịch vụ
+92,OrderItems,ProductName,nvarchar,200,NO,,,Tên sản phẩm/dịch vụ
+93,OrderItems,Quantity,int,,NO,,,Số lượng
+94,OrderItems,UnitPrice,decimal,"18,2",NO,,,Đơn giá
+95,OrderItems,Subtotal,decimal,"18,2",NO,,,Thành tiền
+96,OrderItems,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+97,ShoppingCarts,Id,int,,NO,PK,,Khóa chính - ID giỏ hàng
+98,ShoppingCarts,UserId,nvarchar,450,NO,FK,,ID người dùng
+99,ShoppingCarts,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+100,ShoppingCarts,UpdatedAt,datetime2,,NO,,GETUTCDATE(),Ngày cập nhật
+101,CartItems,Id,int,,NO,PK,,Khóa chính - ID mục trong giỏ
+102,CartItems,ShoppingCartId,int,,NO,FK,,ID giỏ hàng
+103,CartItems,ProductId,int,,YES,FK,,ID sản phẩm
+104,CartItems,ServiceId,int,,YES,FK,,ID dịch vụ
+105,CartItems,ItemName,nvarchar,max,NO,,,Tên sản phẩm/dịch vụ
+106,CartItems,ItemImageUrl,nvarchar,max,NO,,,URL hình ảnh
+107,CartItems,Quantity,int,,NO,,,Số lượng
+108,CartItems,UnitPrice,decimal,"18,2",NO,,,Đơn giá
+109,CartItems,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+110,CartItems,UpdatedAt,datetime2,,NO,,GETUTCDATE(),Ngày cập nhật
+111,Services,Id,int,,NO,PK,,Khóa chính - ID dịch vụ
+112,Services,Name,nvarchar,max,NO,,,Tên dịch vụ
+113,Services,Description,nvarchar,max,NO,,,Mô tả dịch vụ
+114,Services,ImageUrl,nvarchar,max,YES,,,URL hình ảnh
+115,Services,Price,decimal,"18,2",NO,,,Giá dịch vụ
+116,Services,Type,int,,NO,,,Loại dịch vụ (enum)
+117,Services,Features,nvarchar,max,YES,,,Tính năng (JSON)
+118,Services,IsActive,bit,,NO,,1,Trạng thái hoạt động
+119,Services,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+120,Services,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+121,Suppliers,Id,int,,NO,PK,,Khóa chính - ID nhà cung cấp
+122,Suppliers,Name,nvarchar,200,NO,,,Tên nhà cung cấp
+123,Suppliers,ContactPerson,nvarchar,100,NO,,,Người liên hệ
+124,Suppliers,Email,nvarchar,100,NO,,,Email
+125,Suppliers,PhoneNumber,nvarchar,20,NO,,,Số điện thoại
+126,Suppliers,Address,nvarchar,500,NO,,,Địa chỉ
+127,Suppliers,Website,nvarchar,max,NO,,,Website
+128,Suppliers,Description,nvarchar,1000,NO,,,Mô tả
+129,Suppliers,IsActive,bit,,NO,,1,Trạng thái hoạt động
+130,Suppliers,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+131,Suppliers,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+132,InventoryTransactions,Id,int,,NO,PK,,Khóa chính - ID giao dịch kho
+133,InventoryTransactions,ProductId,int,,NO,FK,,ID sản phẩm
+134,InventoryTransactions,ProductVariantId,int,,YES,FK,,ID biến thể sản phẩm
+135,InventoryTransactions,SupplierId,int,,YES,FK,,ID nhà cung cấp
+136,InventoryTransactions,OrderId,int,,YES,FK,,ID đơn hàng
+137,InventoryTransactions,TransactionType,int,,NO,,,Loại giao dịch (enum)
+138,InventoryTransactions,Quantity,int,,NO,,,Số lượng (+/-)
+139,InventoryTransactions,UnitPrice,decimal,"18,2",NO,,0,Đơn giá
+140,InventoryTransactions,TotalCost,decimal,"18,2",NO,,0,Tổng chi phí
+141,InventoryTransactions,ReferenceNumber,nvarchar,100,YES,,,Số tham chiếu
+142,InventoryTransactions,TransactionDate,datetime2,,NO,,GETUTCDATE(),Ngày giao dịch
+143,InventoryTransactions,Notes,nvarchar,500,YES,,,Ghi chú
+144,InventoryTransactions,CreatedBy,nvarchar,100,YES,,,Người tạo
+145,InventoryTransactions,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+146,InventoryTransactions,BatchNumber,nvarchar,50,YES,,,Số lô
+147,InventoryTransactions,ExpiryDate,datetime2,,YES,,,Ngày hết hạn
+148,InventoryTransactions,Location,nvarchar,100,YES,,,Vị trí kho
+149,Coupons,Id,int,,NO,PK,,Khóa chính - ID mã giảm giá
+150,Coupons,Code,nvarchar,50,NO,UQ,,Mã giảm giá
+151,Coupons,Name,nvarchar,200,NO,,,Tên mã giảm giá
+152,Coupons,Description,nvarchar,500,NO,,,Mô tả
+153,Coupons,Type,int,,NO,,,Loại giảm giá (enum)
+154,Coupons,Value,decimal,"18,2",NO,,,Giá trị giảm
+155,Coupons,MinimumOrderAmount,decimal,"18,2",NO,,0,Giá trị đơn hàng tối thiểu
+156,Coupons,MaximumDiscountAmount,decimal,"18,2",NO,,0,Số tiền giảm tối đa
+157,Coupons,StartDate,datetime2,,NO,,GETUTCDATE(),Ngày bắt đầu
+158,Coupons,EndDate,datetime2,,NO,,,Ngày kết thúc
+159,Coupons,IsActive,bit,,NO,,1,Trạng thái hoạt động
+160,Coupons,UsageLimit,int,,NO,,0,Giới hạn sử dụng (0=không giới hạn)
+161,Coupons,CurrentUsageCount,int,,NO,,0,Số lần đã sử dụng
+162,Coupons,UsageLimitPerCustomer,int,,NO,,1,Giới hạn mỗi khách hàng
+163,Coupons,ApplicationType,int,,NO,,0,Kiểu áp dụng (enum)
+164,Coupons,ApplicationValue,nvarchar,500,YES,,,Giá trị áp dụng
+165,Coupons,IsFirstOrderOnly,bit,,NO,,0,Chỉ đơn hàng đầu tiên
+166,Coupons,RequiresEmail,bit,,NO,,0,Yêu cầu email
+167,Coupons,IsPublic,bit,,NO,,1,Hiển thị công khai
+168,Coupons,CreatedBy,nvarchar,200,YES,,,Người tạo
+169,Coupons,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+170,Coupons,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+171,Coupons,CanStackWithOthers,bit,,NO,,0,Có thể kết hợp với mã khác
+172,Coupons,AutoApply,bit,,NO,,0,Tự động áp dụng
+173,Coupons,AutoApplyPriority,int,,NO,,0,Độ ưu tiên tự động
+174,Events,Id,int,,NO,PK,,Khóa chính - ID sự kiện
+175,Events,Title,nvarchar,max,NO,,,Tiêu đề sự kiện
+176,Events,Description,nvarchar,max,NO,,,Mô tả sự kiện
+177,Events,ImageUrl,nvarchar,max,YES,,,URL hình ảnh
+178,Events,EventDate,datetime2,,NO,,,Ngày diễn ra sự kiện
+179,Events,Location,nvarchar,max,NO,,,Địa điểm
+180,Events,OrganizedBy,nvarchar,max,NO,,,Người tổ chức
+181,Events,IsActive,bit,,NO,,1,Trạng thái hoạt động
+182,Events,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+183,Events,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+184,Events,RegistrationLink,nvarchar,max,YES,,,Link đăng ký
+185,Events,IsFeatured,bit,,NO,,0,Sự kiện nổi bật
+186,Events,StartTime,time,,YES,,,Giờ bắt đầu
+187,Events,EndTime,time,,YES,,,Giờ kết thúc
+188,Events,Capacity,int,,YES,,,Sức chứa
+189,Articles,Id,int,,NO,PK,,Khóa chính - ID bài viết
+190,Articles,Title,nvarchar,max,NO,,,Tiêu đề bài viết
+191,Articles,Content,nvarchar,max,NO,,,Nội dung bài viết
+192,Articles,ImageUrl,nvarchar,max,YES,,,URL hình ảnh
+193,Articles,IsActive,bit,,NO,,1,Trạng thái hoạt động
+194,Articles,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+195,Articles,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+196,FAQs,Id,int,,NO,PK,,Khóa chính - ID câu hỏi
+197,FAQs,Question,nvarchar,max,NO,,,Câu hỏi
+198,FAQs,Answer,nvarchar,max,NO,,,Câu trả lời
+199,FAQs,IsActive,bit,,NO,,1,Trạng thái hoạt động
+200,FAQs,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+201,FAQs,UpdatedAt,datetime2,,YES,,,Ngày cập nhật
+202,ContactMessages,Id,int,,NO,PK,,Khóa chính - ID tin nhắn liên hệ
+203,ContactMessages,Name,nvarchar,max,NO,,,Tên người gửi
+204,ContactMessages,Email,nvarchar,max,NO,,,Email người gửi
+205,ContactMessages,PhoneNumber,nvarchar,max,YES,,,Số điện thoại
+206,ContactMessages,Subject,nvarchar,max,NO,,,Tiêu đề
+207,ContactMessages,Message,nvarchar,max,NO,,,Nội dung tin nhắn
+208,ContactMessages,IsRead,bit,,NO,,0,Đã đọc
+209,ContactMessages,CreatedAt,datetime2,,NO,,GETUTCDATE(),Ngày tạo
+210,ContactMessages,UpdatedAt,datetime2,,YES,,,Ngày cập nhật

@@ -79,18 +79,42 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     products = products.Where(p => p.IsActive == isActive.Value);
                 }
 
-                _logger.LogInformation($"Found {products.Count()} products");
+                // Tạo ViewModel với thông tin giá nhập gần nhất
+                var productViewModels = new List<ProductWithLatestCostViewModel>();
+                
+                foreach (var product in products.OrderByDescending(p => p.CreatedAt))
+                {
+                    // Lấy giao dịch nhập kho gần nhất (chỉ lấy giao dịch Purchase)
+                    var latestPurchase = await _unitOfWork.InventoryTransactions
+                        .FindAsync(t => t.ProductId == product.Id && 
+                                       t.TransactionType == InventoryTransactionType.Purchase &&
+                                       t.UnitPrice > 0); // Đảm bảo có giá hợp lệ
+                                       
+                    var mostRecentPurchase = latestPurchase
+                        .OrderByDescending(t => t.TransactionDate)
+                        .ThenByDescending(t => t.Id) // Thêm sắp xếp theo ID để đảm bảo tính nhất quán
+                        .FirstOrDefault();
+                    
+                    productViewModels.Add(new ProductWithLatestCostViewModel
+                    {
+                        Product = product,
+                        LatestPurchasePrice = mostRecentPurchase?.UnitPrice,
+                        LatestPurchaseDate = mostRecentPurchase?.TransactionDate
+                    });
+                }
+
+                _logger.LogInformation($"Found {productViewModels.Count} products");
                 ViewBag.SearchString = searchString;
                 ViewBag.Category = category;
                 ViewBag.IsActive = isActive;
                 
-                return View(products.OrderByDescending(p => p.CreatedAt));
+                return View(productViewModels);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading products");
                 TempData["ErrorMessage"] = "Có lỗi khi tải danh sách sản phẩm: " + ex.Message;
-                return View(new List<Product>());
+                return View(new List<ProductWithLatestCostViewModel>());
             }
         }
 
@@ -116,21 +140,50 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 var startOfMonth = new DateTime(today.Year, today.Month, 1);
                 var productMetrics = await _analyticsService.GetProductMetricsAsync(id.Value, startOfMonth, today);
                 
-                // Thêm thông tin phân tích vào ProductWithInventoryViewModel
-                productWithInventory.ViewCount = productMetrics.TotalViews;
-                productWithInventory.CartAddCount = productMetrics.AddToCarts;
-                productWithInventory.PurchaseCount = productMetrics.Purchases;
-                productWithInventory.ConversionRate = productMetrics.ConversionRate;
+                // Lấy thông tin đơn hàng liên quan đến sản phẩm
+                var productOrders = await GetProductOrdersAsync(id.Value);
                 
-                // Load related coupons
-                productWithInventory.AppliedCoupons = (await _couponService.GetProductCouponsAsync(id.Value)).ToList();
+                // Tạo ViewModel mới với thông tin đơn hàng
+                var viewModel = new Models.ProductWithOrdersViewModel
+                {
+                    Product = productWithInventory.Product,
+                    InventoryTransactions = productWithInventory.InventoryTransactions,
+                    AppliedCoupons = (await _couponService.GetProductCouponsAsync(id.Value)).ToList(),
+                    CurrentStock = productWithInventory.CurrentStock,
+                    TotalCost = productWithInventory.TotalCost,
+                    ReorderPoint = productWithInventory.ReorderPoint,
+                    LastRestock = productWithInventory.LastRestock,
+                    AverageCostPrice = productWithInventory.AverageCostPrice,
+                    OptimalStockLevel = productWithInventory.OptimalStockLevel,
+                    SuggestedReorderQuantity = productWithInventory.SuggestedReorderQuantity,
+                    DaysInStock = productWithInventory.DaysInStock,
+                    AverageDailySales = productWithInventory.AverageDailySales,
+                    EstimatedDaysToOutOfStock = productWithInventory.EstimatedDaysToOutOfStock,
+                    
+                    // Thông tin phân tích
+                    ViewCount = productMetrics.TotalViews,
+                    CartAddCount = productMetrics.AddToCarts,
+                    PurchaseCount = productMetrics.Purchases,
+                    ConversionRate = productMetrics.ConversionRate,
+                    
+                    // Thông tin đơn hàng
+                    ProductOrders = productOrders,
+                    TotalOrdersCount = productOrders.Count,
+                    TotalQuantitySold = productOrders.Sum(o => o.Quantity),
+                    TotalRevenue = productOrders.Sum(o => o.TotalPrice),
+                    TotalProfit = productOrders.Sum(o => o.TotalPrice - (o.Quantity * productWithInventory.AverageCostPrice)),
+                    FirstOrderDate = productOrders.FirstOrDefault()?.OrderDate,
+                    LastOrderDate = productOrders.LastOrDefault()?.OrderDate,
+                    AverageOrderValue = productOrders.Any() ? productOrders.Average(o => o.TotalPrice) : 0,
+                    
+                    // Thống kê theo trạng thái
+                    OrdersByStatus = productOrders.GroupBy(o => o.OrderStatus)
+                        .ToDictionary(g => g.Key, g => g.Count()),
+                    OrdersByMonth = productOrders.GroupBy(o => o.OrderDate.ToString("MM/yyyy"))
+                        .ToDictionary(g => g.Key, g => g.Count())
+                };
                 
-                // Pass ViewBag for backward compatibility
-                ViewBag.ProductCoupons = productWithInventory.AppliedCoupons;
-                ViewBag.Product = productWithInventory.Product;
-                ViewBag.HasInventoryData = true;
-                
-                return View(productWithInventory);
+                return View(viewModel);
             }
             catch (Exception ex)
             {
@@ -828,6 +881,52 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 _logger.LogError(ex, "Error occurred while getting product with inventory details");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi lấy thông tin sản phẩm và kho hàng";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // Helper method to get orders for a specific product
+        private async Task<List<Models.ProductOrderDetailViewModel>> GetProductOrdersAsync(int productId)
+        {
+            try
+            {
+                // Lấy tất cả OrderItems chứa sản phẩm này
+                var orderItems = await _unitOfWork.OrderItems.FindAsync(oi => oi.ProductId == productId);
+                
+                var productOrders = new List<Models.ProductOrderDetailViewModel>();
+                
+                // Load Orders để tránh vấn đề null reference
+                foreach (var orderItem in orderItems)
+                {
+                    // Lấy thông tin Order đầy đủ
+                    var order = await _unitOfWork.Orders.GetByIdAsync(orderItem.OrderId);
+                    if (order == null) continue;
+                    
+                    productOrders.Add(new Models.ProductOrderDetailViewModel
+                    {
+                        OrderId = order.Id,
+                        OrderNumber = $"ORD-{order.Id:D6}", // Tạo order number từ ID
+                        OrderDate = order.OrderDate,
+                        OrderStatus = order.Status,
+                        CustomerName = order.CustomerName ?? "Khách hàng",
+                        CustomerEmail = order.Email ?? "Không có email",
+                        Quantity = orderItem.Quantity,
+                        UnitPrice = orderItem.UnitPrice,
+                        TotalPrice = orderItem.Subtotal, // Sử dụng Subtotal thay vì TotalPrice
+                        DiscountAmount = null, // OrderItem không có trường này, sẽ tính từ Order
+                        CouponCode = order.CouponCode,
+                        ShippedDate = order.ShippedDate,
+                        CompletedDate = order.DeliveredDate, // Sử dụng DeliveredDate thay vì CompletedDate
+                        ShippingAddress = order.ShippingAddress
+                    });
+                }
+                
+                // Sắp xếp theo ngày đặt hàng giảm dần
+                return productOrders.OrderByDescending(po => po.OrderDate).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading orders for product {ProductId}", productId);
+                return new List<Models.ProductOrderDetailViewModel>();
             }
         }
     }

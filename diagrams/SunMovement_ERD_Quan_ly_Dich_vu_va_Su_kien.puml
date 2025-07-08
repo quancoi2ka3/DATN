@@ -1,0 +1,111 @@
+@startuml SunMovement_ERD_Quan_ly_Dich_vu_va_Su_kien
+!define RECTANGLE class
+
+package "Quản lý Dịch vụ và Sự kiện" {
+    entity "DichVu" as Service {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(max)
+        * Description : varchar(max)
+        * ImageUrl : varchar(max)
+        * Price : decimal(18,2)
+        * Type : int
+        * Features : varchar(max)
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "LichDichVu" as ServiceSchedule {
+        * Id : int <<PK>>
+        --
+        * ServiceId : int <<FK>>
+        * DayOfWeek : int
+        * StartTime : time
+        * EndTime : time
+        * MaxParticipants : int
+        * CurrentParticipants : int
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+
+    entity "SuKien" as Event {
+        * Id : int <<PK>>
+        --
+        * Title : varchar(max)
+        * Description : varchar(max)
+        * ImageUrl : varchar(max)
+        * EventDate : datetime2
+        * Location : varchar(max)
+        * OrganizedBy : varchar(max)
+        * IsActive : bit
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * RegistrationLink : varchar(max)
+        * IsFeatured : bit
+        * StartTime : time
+        * EndTime : time
+        * Capacity : int
+    }
+
+    entity "BaiViet" as Article {
+        * Id : int <<PK>>
+        --
+        * Title : varchar(200)
+        * Content : varchar(max)
+        * Summary : varchar(500)
+        * Slug : varchar(200)
+        * FeaturedImageUrl : varchar(500)
+        * AuthorId : varchar(450) <<FK>>
+        * Category : varchar(100)
+        * Tags : varchar(500)
+        * IsPublished : bit
+        * IsFeatured : bit
+        * PublishedAt : datetime2
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * ViewCount : int
+        * MetaTitle : varchar(200)
+        * MetaDescription : varchar(500)
+        * MetaKeywords : varchar(200)
+        * SortOrder : int
+    }
+
+    entity "CauHoiThuongGap" as FAQ {
+        * Id : int <<PK>>
+        --
+        * Question : varchar(500)
+        * Answer : varchar(2000)
+        * Category : varchar(100)
+        * IsActive : bit
+        * SortOrder : int
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+        * ViewCount : int
+        * IsHelpful : bit
+        * HelpfulCount : int
+    }
+
+    entity "TinNhanLienHe" as ContactMessage {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(100)
+        * Email : varchar(100)
+        * Subject : varchar(200)
+        * Message : varchar(2000)
+        * IsRead : bit
+        * IsResolved : bit
+        * CreatedAt : datetime2
+        * ResponseMessage : varchar(2000)
+        * RespondedAt : datetime2
+        * RespondedBy : varchar(450)
+        * Priority : int
+        * Source : varchar(50)
+    }
+}
+
+' Relationships trong package
+Service ||--o{ ServiceSchedule : "có nhiều lịch trình"
+
+@enduml

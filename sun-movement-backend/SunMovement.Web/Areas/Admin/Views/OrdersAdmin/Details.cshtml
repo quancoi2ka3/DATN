@@ -6,6 +6,7 @@
 }
 
 <div class="container-fluid px-4">
+    @Html.AntiForgeryToken()
     <h1 class="mt-4">Chi tiết đơn hàng #@Model.Id</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
@@ -190,6 +191,50 @@
                             <i class="fas fa-sync-alt"></i> Cập nhật trạng thái
                         </a>
                     </div>
+                    
+                    <!-- Quick Status Actions -->
+                    @if (Model.Status != OrderStatus.Completed && Model.Status != OrderStatus.Cancelled)
+                    {
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-light text-success">
+                                <h6 class="mb-0"><i class="fas fa-bolt me-1"></i> Thao tác nhanh</h6>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.AwaitingPayment)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-info w-100 mb-2 quick-status-btn" 
+                                            data-status="Processing" data-status-text="Đang xử lý">
+                                        <i class="fas fa-play"></i> Chuyển sang "Đang xử lý"
+                                    </button>
+                                }
+                                
+                                @if (Model.Status == OrderStatus.Processing || Model.Status == OrderStatus.AwaitingFulfillment)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100 mb-2 quick-status-btn" 
+                                            data-status="Shipped" data-status-text="Đã giao vận">
+                                        <i class="fas fa-truck"></i> Chuyển sang "Đã giao vận"
+                                    </button>
+                                }
+                                
+                                @if (Model.Status == OrderStatus.Shipped)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-success w-100 mb-2 quick-status-btn" 
+                                            data-status="Delivered" data-status-text="Đã giao hàng">
+                                        <i class="fas fa-box-open"></i> Chuyển sang "Đã giao hàng"
+                                    </button>
+                                }
+                                
+                                @if (Model.Status == OrderStatus.Delivered)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-success w-100 mb-2 quick-status-btn" 
+                                            data-status="Completed" data-status-text="Hoàn thành">
+                                        <i class="fas fa-check-circle"></i> Hoàn thành đơn hàng
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
                     <div class="d-grid gap-2 mb-3">
                         <a href="@Url.Action("UpdateTracking", "OrdersAdmin", new { id = Model.Id })" class="btn btn-secondary">
                             <i class="fas fa-truck"></i> Cập nhật vận chuyển
@@ -335,6 +380,59 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
+            // Quick Status Update functionality
+            $('.quick-status-btn').click(function() {
+                const $btn = $(this);
+                const status = $btn.data('status');
+                const statusText = $btn.data('status-text');
+                const orderId = @Model.Id;
+                
+                // Confirm status change
+                if (!confirm(`Bạn có chắc chắn muốn chuyển đơn hàng sang trạng thái "${statusText}" không?`)) {
+                    return;
+                }
+                
+                // Show loading state
+                const originalHtml = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang cập nhật...');
+                
+                // AJAX call to update status
+                $.ajax({
+                    url: '@Url.Action("UpdateStatusAjax", "OrdersAdmin")',
+                    type: 'POST',
+                    data: {
+                        id: orderId,
+                        status: status,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success notification
+                            const alertHtml = `
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>Cập nhật thành công!</strong> ${response.message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            `;
+                            $('.container-fluid').prepend(alertHtml);
+                            
+                            // Auto-refresh page after 1.5 seconds to show updated status
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            alert('Lỗi: ' + response.message);
+                            $btn.prop('disabled', false).html(originalHtml);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Có lỗi xảy ra khi cập nhật trạng thái: ' + error);
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
+            
             // Xử lý xóa đơn hàng
             $("#btnConfirmDelete").click(function() {
                 $.ajax({

@@ -130,7 +130,7 @@ export default function SportswearTopControls({
 
     setShowResults(filtered.length);
     onFilteredProductsChange(filtered);
-  }, [products, searchValue, selectedCategories, priceRange, selectedRatings, sortValue, onFilteredProductsChange]);
+  }, [products, searchValue, selectedCategories, priceRange, selectedRatings, sortValue]);
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 mb-8">

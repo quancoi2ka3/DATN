@@ -1,0 +1,218 @@
+@startuml SunMovement_Database_Schema_Chi_tiet_San_pham
+!define RECTANGLE class
+
+title Sơ đồ Chi tiết Cơ sở dữ liệu - Quản lý Sản phẩm
+
+package "Product Core Tables" <<Database>> {
+    
+    table(Products) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        Name : nvarchar(200) NOT NULL
+        Description : nvarchar(2000) NOT NULL
+        ImageUrl : nvarchar(max) NULL
+        Price : decimal(18,2) NOT NULL
+        DiscountPrice : decimal(18,2) NULL
+        CostPrice : decimal(18,2) NOT NULL DEFAULT(0)
+        StockQuantity : int NOT NULL DEFAULT(0)
+        FirstStockDate : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        LastStockUpdateDate : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        MinimumStockLevel : int NOT NULL DEFAULT(5)
+        OptimalStockLevel : int NOT NULL DEFAULT(50)
+        Sku : nvarchar(50) NULL
+        Barcode : nvarchar(50) NULL
+        Category : int NOT NULL
+        SubCategory : nvarchar(100) NOT NULL DEFAULT('')
+        Specifications : nvarchar(max) NULL
+        IsFeatured : bit NOT NULL DEFAULT(0)
+        IsActive : bit NOT NULL DEFAULT(1)
+        Status : int NOT NULL DEFAULT(0)
+        SortOrder : int NOT NULL DEFAULT(0)
+        Weight : decimal(18,3) NOT NULL DEFAULT(0)
+        Dimensions : nvarchar(100) NULL
+        MetaTitle : nvarchar(200) NULL
+        MetaDescription : nvarchar(500) NULL
+        MetaKeywords : nvarchar(200) NULL
+        Slug : nvarchar(200) NULL
+        TrackInventory : bit NOT NULL DEFAULT(1)
+        AllowBackorder : bit NOT NULL DEFAULT(0)
+        AverageRating : decimal(3,2) NOT NULL DEFAULT(0)
+        ReviewCount : int NOT NULL DEFAULT(0)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        UpdatedAt : datetime2 NULL
+        --
+        constraint_unique(Sku) : [Sku] IS NOT NULL
+        constraint_unique(Slug) : [Slug] IS NOT NULL
+        index(Category)
+        index(IsActive)
+        index(IsFeatured)
+        index(Status)
+        index(CreatedAt)
+    }
+
+    table(ProductVariants) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        Name : nvarchar(200) NOT NULL
+        Sku : nvarchar(50) NULL
+        Price : decimal(18,2) NOT NULL
+        DiscountPrice : decimal(18,2) NULL
+        CostPrice : decimal(18,2) NOT NULL DEFAULT(0)
+        StockQuantity : int NOT NULL DEFAULT(0)
+        Weight : decimal(18,3) NOT NULL DEFAULT(0)
+        Dimensions : nvarchar(100) NULL
+        Attributes : nvarchar(max) NULL
+        IsActive : bit NOT NULL DEFAULT(1)
+        SortOrder : int NOT NULL DEFAULT(0)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        UpdatedAt : datetime2 NULL
+        --
+        constraint_unique(Sku) : [Sku] IS NOT NULL
+        index(ProductId)
+        index(IsActive)
+    }
+
+    table(ProductImages) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        ImageUrl : nvarchar(500) NOT NULL
+        AltText : nvarchar(200) NULL
+        IsPrimary : bit NOT NULL DEFAULT(0)
+        SortOrder : int NOT NULL DEFAULT(0)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        --
+        index(ProductId)
+        index(IsPrimary)
+    }
+
+    table(ProductVariantImages) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(ProductVariantId) : int NOT NULL REFERENCES ProductVariants(Id) ON DELETE CASCADE
+        ImageUrl : nvarchar(500) NOT NULL
+        AltText : nvarchar(200) NULL
+        IsPrimary : bit NOT NULL DEFAULT(0)
+        SortOrder : int NOT NULL DEFAULT(0)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        --
+        index(ProductVariantId)
+        index(IsPrimary)
+    }
+
+    table(Tags) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        Name : nvarchar(100) NOT NULL
+        Slug : nvarchar(100) NULL
+        Description : nvarchar(500) NULL
+        IsActive : bit NOT NULL DEFAULT(1)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        --
+        constraint_unique(Name)
+        constraint_unique(Slug) : [Slug] IS NOT NULL
+        index(IsActive)
+    }
+
+    table(ProductTags) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        foreign_key(TagId) : int NOT NULL REFERENCES Tags(Id) ON DELETE CASCADE
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        --
+        index(ProductId)
+        index(TagId)
+        constraint_unique(ProductId, TagId)
+    }
+}
+
+package "Product Interaction Tables" <<Database>> {
+    
+    table(ProductReviews) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        foreign_key(UserId) : nvarchar(450) NOT NULL REFERENCES AspNetUsers(Id) ON DELETE RESTRICT
+        foreign_key(AdminId) : nvarchar(450) NULL REFERENCES AspNetUsers(Id) ON DELETE RESTRICT
+        Rating : int NOT NULL CHECK(Rating >= 1 AND Rating <= 5)
+        ReviewText : nvarchar(2000) NULL
+        IsApproved : bit NOT NULL DEFAULT(0)
+        ApprovedAt : datetime2 NULL
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        UpdatedAt : datetime2 NULL
+        --
+        index(ProductId)
+        index(UserId)
+        index(IsApproved)
+        index(CreatedAt)
+        index(Rating)
+    }
+
+    table(UserInteractions) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(UserId) : nvarchar(450) NOT NULL REFERENCES AspNetUsers(Id) ON DELETE CASCADE
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        InteractionType : int NOT NULL
+        Value : decimal(18,2) NOT NULL DEFAULT(0)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        --
+        index(UserId)
+        index(ProductId)
+        index(InteractionType)
+        index(CreatedAt)
+    }
+
+    table(ProductRecommendations) {
+        primary_key(Id) : int IDENTITY(1,1)
+        --
+        foreign_key(UserId) : nvarchar(450) NOT NULL REFERENCES AspNetUsers(Id) ON DELETE CASCADE
+        foreign_key(ProductId) : int NOT NULL REFERENCES Products(Id) ON DELETE CASCADE
+        foreign_key(SourceProductId) : int NULL REFERENCES Products(Id) ON DELETE RESTRICT
+        RecommendationType : int NOT NULL
+        Score : decimal(18,4) NOT NULL
+        IsActive : bit NOT NULL DEFAULT(1)
+        CreatedAt : datetime2 NOT NULL DEFAULT(GETUTCDATE())
+        UpdatedAt : datetime2 NULL
+        --
+        index(UserId)
+        index(ProductId)
+        index(SourceProductId)
+        index(Score)
+        index(IsActive)
+    }
+}
+
+' Constraints và Business Rules
+note top of Products
+  Business Rules:
+  - Price > 0
+  - StockQuantity >= 0
+  - MinimumStockLevel >= 0
+  - OptimalStockLevel >= MinimumStockLevel
+  - AverageRating between 0 and 5
+  - ReviewCount >= 0
+end note
+
+note top of ProductReviews
+  Business Rules:
+  - Rating between 1 and 5
+  - Approved reviews update Product.AverageRating
+  - ReviewCount increments when approved
+end note
+
+' Relationships
+Products ||--o{ ProductVariants : "1:N"
+Products ||--o{ ProductImages : "1:N"
+Products ||--o{ ProductReviews : "1:N"
+Products ||--o{ ProductTags : "1:N"
+Products ||--o{ UserInteractions : "1:N"
+Products ||--o{ ProductRecommendations : "1:N (as target)"
+Products ||--o{ ProductRecommendations : "1:N (as source)"
+
+ProductVariants ||--o{ ProductVariantImages : "1:N"
+Tags ||--o{ ProductTags : "1:N"
+
+@enduml

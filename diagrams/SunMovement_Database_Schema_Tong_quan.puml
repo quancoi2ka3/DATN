@@ -1,0 +1,290 @@
+@startuml SunMovement_Database_Schema_Tong_quan
+!define RECTANGLE class
+
+' Schema tổng quan của toàn bộ hệ thống
+title Sơ đồ Cấu trúc Cơ sở dữ liệu - Hệ thống Sun Movement
+
+package "Core Identity Schema" <<Database>> {
+    
+    table(AspNetUsers) {
+        primary_key(Id) : varchar(450)
+        --
+        Email : varchar(256)
+        UserName : varchar(256)
+        NormalizedEmail : varchar(256)
+        NormalizedUserName : varchar(256)
+        EmailConfirmed : bit
+        PasswordHash : varchar(max)
+        SecurityStamp : varchar(max)
+        ConcurrencyStamp : varchar(max)
+        PhoneNumber : varchar(max)
+        PhoneNumberConfirmed : bit
+        TwoFactorEnabled : bit
+        LockoutEnd : datetimeoffset
+        LockoutEnabled : bit
+        AccessFailedCount : int
+        --
+        FirstName : varchar(max)
+        LastName : varchar(max)
+        DateOfBirth : datetime2
+        Address : varchar(max)
+        CreatedAt : datetime2
+        LastLogin : datetime2
+        IsActive : bit
+    }
+
+    table(AspNetRoles) {
+        primary_key(Id) : varchar(450)
+        --
+        Name : varchar(256)
+        NormalizedName : varchar(256)
+        ConcurrencyStamp : varchar(max)
+    }
+
+    table(AspNetUserRoles) {
+        primary_key(UserId, RoleId) : varchar(450), varchar(450)
+        --
+        foreign_key(UserId) : AspNetUsers(Id)
+        foreign_key(RoleId) : AspNetRoles(Id)
+    }
+}
+
+package "Product Management Schema" <<Database>> {
+    
+    table(Products) {
+        primary_key(Id) : int
+        --
+        Name : varchar(200)
+        Description : varchar(2000)
+        ImageUrl : varchar(max)
+        Price : decimal(18,2)
+        DiscountPrice : decimal(18,2)
+        CostPrice : decimal(18,2)
+        StockQuantity : int
+        MinimumStockLevel : int
+        OptimalStockLevel : int
+        Sku : varchar(50)
+        Barcode : varchar(50)
+        Category : int
+        SubCategory : varchar(100)
+        IsFeatured : bit
+        IsActive : bit
+        Status : int
+        Weight : decimal(18,3)
+        AverageRating : decimal(3,2)
+        ReviewCount : int
+        CreatedAt : datetime2
+        UpdatedAt : datetime2
+        --
+        unique_index(Sku)
+        index(Category)
+        index(IsActive)
+    }
+
+    table(ProductVariants) {
+        primary_key(Id) : int
+        --
+        foreign_key(ProductId) : Products(Id)
+        Name : varchar(200)
+        Sku : varchar(50)
+        Price : decimal(18,2)
+        DiscountPrice : decimal(18,2)
+        StockQuantity : int
+        IsActive : bit
+        CreatedAt : datetime2
+        --
+        unique_index(Sku)
+        index(ProductId)
+    }
+
+    table(ProductReviews) {
+        primary_key(Id) : int
+        --
+        foreign_key(ProductId) : Products(Id)
+        foreign_key(UserId) : AspNetUsers(Id)
+        foreign_key(AdminId) : AspNetUsers(Id)
+        Rating : int
+        ReviewText : varchar(2000)
+        IsApproved : bit
+        CreatedAt : datetime2
+        --
+        index(ProductId)
+        index(UserId)
+        index(IsApproved)
+    }
+}
+
+package "Order Management Schema" <<Database>> {
+    
+    table(Orders) {
+        primary_key(Id) : int
+        --
+        foreign_key(UserId) : AspNetUsers(Id)
+        OrderDate : datetime2
+        TotalAmount : decimal(18,2)
+        Status : int
+        PaymentStatus : int
+        ShippingAddress : varchar(500)
+        PhoneNumber : varchar(20)
+        Email : varchar(100)
+        CreatedAt : datetime2
+        UpdatedAt : datetime2
+        --
+        index(UserId)
+        index(OrderDate)
+        index(Status)
+    }
+
+    table(OrderItems) {
+        primary_key(Id) : int
+        --
+        foreign_key(OrderId) : Orders(Id)
+        foreign_key(ProductId) : Products(Id)
+        ProductName : varchar(200)
+        Quantity : int
+        UnitPrice : decimal(18,2)
+        Subtotal : decimal(18,2)
+        CreatedAt : datetime2
+        --
+        index(OrderId)
+        index(ProductId)
+    }
+
+    table(ShoppingCarts) {
+        primary_key(Id) : int
+        --
+        foreign_key(UserId) : AspNetUsers(Id)
+        CreatedAt : datetime2
+        UpdatedAt : datetime2
+        --
+        index(UserId)
+    }
+
+    table(CartItems) {
+        primary_key(Id) : int
+        --
+        foreign_key(ShoppingCartId) : ShoppingCarts(Id)
+        foreign_key(ProductId) : Products(Id)
+        ItemName : varchar(max)
+        Quantity : int
+        UnitPrice : decimal(18,2)
+        CreatedAt : datetime2
+        --
+        index(ShoppingCartId)
+        index(ProductId)
+    }
+}
+
+package "Inventory Management Schema" <<Database>> {
+    
+    table(Suppliers) {
+        primary_key(Id) : int
+        --
+        Name : varchar(200)
+        ContactPerson : varchar(100)
+        Email : varchar(100)
+        PhoneNumber : varchar(20)
+        Address : varchar(500)
+        IsActive : bit
+        CreatedAt : datetime2
+        --
+        index(Name)
+        index(IsActive)
+    }
+
+    table(InventoryTransactions) {
+        primary_key(Id) : int
+        --
+        foreign_key(ProductId) : Products(Id)
+        foreign_key(SupplierId) : Suppliers(Id)
+        foreign_key(OrderId) : Orders(Id)
+        TransactionType : int
+        Quantity : int
+        UnitPrice : decimal(18,2)
+        TotalCost : decimal(18,2)
+        TransactionDate : datetime2
+        Notes : varchar(500)
+        CreatedAt : datetime2
+        --
+        index(ProductId)
+        index(TransactionDate)
+        index(TransactionType)
+    }
+
+    table(ProductSuppliers) {
+        primary_key(Id) : int
+        --
+        foreign_key(ProductId) : Products(Id)
+        foreign_key(SupplierId) : Suppliers(Id)
+        SupplierProductCode : varchar(100)
+        UnitCost : decimal(18,2)
+        IsPreferred : bit
+        IsActive : bit
+        CreatedAt : datetime2
+        --
+        index(ProductId)
+        index(SupplierId)
+    }
+}
+
+package "Coupon Management Schema" <<Database>> {
+    
+    table(Coupons) {
+        primary_key(Id) : int
+        --
+        Code : varchar(50)
+        Name : varchar(200)
+        Type : int
+        Value : decimal(18,2)
+        MinimumOrderAmount : decimal(18,2)
+        StartDate : datetime2
+        EndDate : datetime2
+        IsActive : bit
+        UsageLimit : int
+        CurrentUsageCount : int
+        CreatedAt : datetime2
+        --
+        unique_index(Code)
+        index(StartDate, EndDate)
+        index(IsActive)
+    }
+
+    table(CouponUsageHistory) {
+        primary_key(Id) : int
+        --
+        foreign_key(CouponId) : Coupons(Id)
+        foreign_key(OrderId) : Orders(Id)
+        foreign_key(UserId) : AspNetUsers(Id)
+        DiscountAmount : decimal(18,2)
+        UsedAt : datetime2
+        CreatedAt : datetime2
+        --
+        index(CouponId)
+        index(OrderId)
+        index(UserId)
+    }
+}
+
+' Các mối quan hệ chính
+AspNetUsers ||--o{ Orders : "1:N"
+AspNetUsers ||--o{ ShoppingCarts : "1:N"
+AspNetUsers ||--o{ ProductReviews : "1:N"
+
+Products ||--o{ ProductVariants : "1:N"
+Products ||--o{ ProductReviews : "1:N"
+Products ||--o{ OrderItems : "1:N"
+Products ||--o{ CartItems : "1:N"
+Products ||--o{ InventoryTransactions : "1:N"
+
+Orders ||--o{ OrderItems : "1:N"
+Orders ||--o{ CouponUsageHistory : "1:N"
+Orders ||--o{ InventoryTransactions : "1:N"
+
+ShoppingCarts ||--o{ CartItems : "1:N"
+
+Suppliers ||--o{ InventoryTransactions : "1:N"
+Suppliers ||--o{ ProductSuppliers : "1:N"
+
+Coupons ||--o{ CouponUsageHistory : "1:N"
+
+@enduml

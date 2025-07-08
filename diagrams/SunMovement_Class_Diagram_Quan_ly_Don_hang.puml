@@ -1,0 +1,375 @@
+@startuml SunMovement_Class_Diagram_Quan_ly_Don_hang
+
+package "Quản lý Đơn hàng" {
+    
+    class DonHang {
+        - id: int
+        - userId: string
+        - orderDate: DateTime
+        - totalAmount: decimal
+        - subtotalAmount: decimal
+        - taxAmount: decimal
+        - shippingAmount: decimal
+        - discountAmount: decimal
+        - status: OrderStatus
+        - paymentStatus: PaymentStatus
+        - shippingAddress: string
+        - billingAddress: string
+        - phoneNumber: string
+        - email: string
+        - couponCode: string
+        - paymentMethod: string
+        - isPaid: bool
+        - paymentTransactionId: string
+        - trackingNumber: string
+        - shippingMethod: string
+        - customerName: string
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        - isUrgent: bool
+        - priority: int
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getUserId(): string
+        + setUserId(userId: string): void
+        + getOrderDate(): DateTime
+        + setOrderDate(date: DateTime): void
+        + getTotalAmount(): decimal
+        + setTotalAmount(amount: decimal): void
+        + getStatus(): OrderStatus
+        + setStatus(status: OrderStatus): void
+        + getPaymentStatus(): PaymentStatus
+        + setPaymentStatus(status: PaymentStatus): void
+        __
+        + getDisplayCustomerName(): string
+        + canBeCancelled(): bool
+        + canBeRefunded(): bool
+        + getStatusDisplayName(): string
+        __
+        + calculateTotal(): decimal
+        + updateStatus(status: OrderStatus): void
+        + addStatusHistory(oldStatus: OrderStatus, newStatus: OrderStatus): void
+        + canUpdateStatus(newStatus: OrderStatus): bool
+        + validateOrder(): bool
+    }
+
+    class ChiTietDonHang {
+        - id: int
+        - orderId: int
+        - productId: int
+        - serviceId: int
+        - productName: string
+        - quantity: int
+        - unitPrice: decimal
+        - subtotal: decimal
+        - createdAt: DateTime
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getOrderId(): int
+        + setOrderId(orderId: int): void
+        + getProductId(): int
+        + setProductId(productId: int): void
+        + getServiceId(): int
+        + setServiceId(serviceId: int): void
+        + getProductName(): string
+        + setProductName(name: string): void
+        + getQuantity(): int
+        + setQuantity(quantity: int): void
+        + getUnitPrice(): decimal
+        + setUnitPrice(price: decimal): void
+        + getSubtotal(): decimal
+        __
+        + calculateSubtotal(): decimal
+        + getItemDisplayName(): string
+        + validateQuantity(): bool
+    }
+
+    class LichSuTrangThaiDonHang {
+        - id: int
+        - orderId: int
+        - oldStatus: OrderStatus
+        - newStatus: OrderStatus
+        - changedBy: string
+        - changeReason: string
+        - notes: string
+        - createdAt: DateTime
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getOrderId(): int
+        + setOrderId(orderId: int): void
+        + getOldStatus(): OrderStatus
+        + setOldStatus(status: OrderStatus): void
+        + getNewStatus(): OrderStatus
+        + setNewStatus(status: OrderStatus): void
+        + getChangedBy(): string
+        + setChangedBy(changedBy: string): void
+        + getChangeReason(): string
+        + setChangeReason(reason: string): void
+        + getNotes(): string
+        + setNotes(notes: string): void
+        + getCreatedAt(): DateTime
+        __
+        + getStatusChangeName(): string
+        + isValidStatusChange(): bool
+    }
+
+    class ThanhToanDonHang {
+        - id: int
+        - orderId: int
+        - paymentMethod: string
+        - paymentAmount: decimal
+        - paymentStatus: PaymentStatus
+        - transactionId: string
+        - paymentDate: DateTime
+        - paymentReference: string
+        - paymentGateway: string
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getOrderId(): int
+        + setOrderId(orderId: int): void
+        + getPaymentMethod(): string
+        + setPaymentMethod(method: string): void
+        + getPaymentAmount(): decimal
+        + setPaymentAmount(amount: decimal): void
+        + getPaymentStatus(): PaymentStatus
+        + setPaymentStatus(status: PaymentStatus): void
+        + getTransactionId(): string
+        + setTransactionId(transactionId: string): void
+        + getPaymentDate(): DateTime
+        + setPaymentDate(date: DateTime): void
+        __
+        + isSuccessful(): bool
+        + markAsPaid(): void
+        + processRefund(amount: decimal): void
+        + validatePayment(): bool
+    }
+
+    class GioHang {
+        - id: int
+        - userId: string
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getUserId(): string
+        + setUserId(userId: string): void
+        + getCreatedAt(): DateTime
+        + setCreatedAt(date: DateTime): void
+        + getUpdatedAt(): DateTime
+        + setUpdatedAt(date: DateTime): void
+        __
+        + getTotalAmount(): decimal
+        + getTotalItems(): int
+        __
+        + addItem(item: ChiTietGioHang): void
+        + removeItem(itemId: int): void
+        + updateItemQuantity(itemId: int, quantity: int): void
+        + clearItems(): void
+        + convertToOrder(): DonHang
+        + validateCart(): bool
+    }
+
+    class ChiTietGioHang {
+        - id: int
+        - shoppingCartId: int
+        - productId: int
+        - serviceId: int
+        - itemName: string
+        - itemImageUrl: string
+        - quantity: int
+        - unitPrice: decimal
+        - createdAt: DateTime
+        - updatedAt: DateTime
+        __
+        + getId(): int
+        + setId(id: int): void
+        + getShoppingCartId(): int
+        + setShoppingCartId(cartId: int): void
+        + getProductId(): int
+        + setProductId(productId: int): void
+        + getServiceId(): int
+        + setServiceId(serviceId: int): void
+        + getItemName(): string
+        + setItemName(name: string): void
+        + getItemImageUrl(): string
+        + setItemImageUrl(url: string): void
+        + getQuantity(): int
+        + setQuantity(quantity: int): void
+        + getUnitPrice(): decimal
+        + setUnitPrice(price: decimal): void
+        __
+        + getSubtotal(): decimal
+        + updateQuantity(quantity: int): void
+        + convertToOrderItem(): ChiTietDonHang
+        + validateItem(): bool
+    }
+
+    interface IDonHangService {
+        + getOrderByIdAsync(id: int): Task<DonHang>
+        + getOrdersByUserIdAsync(userId: string): Task<IEnumerable<DonHang>>
+        + createOrderAsync(order: DonHang): Task<DonHang>
+        + updateOrderAsync(order: DonHang): Task<DonHang>
+        + updateOrderStatusAsync(orderId: int, status: OrderStatus): Task<bool>
+        + cancelOrderAsync(orderId: int, reason: string): Task<bool>
+        + processPaymentAsync(orderId: int, paymentInfo: PaymentInfo): Task<bool>
+        + getOrderStatisticsAsync(): Task<OrderStatistics>
+        + validateOrderAsync(order: DonHang): Task<bool>
+        + calculateOrderTotalAsync(order: DonHang): Task<decimal>
+    }
+
+    interface IGioHangService {
+        + getOrCreateCartAsync(userId: string): Task<GioHang>
+        + getCartWithItemsAsync(userId: string): Task<GioHang>
+        + addItemToCartAsync(userId: string, item: ChiTietGioHang): Task<void>
+        + updateCartItemQuantityAsync(userId: string, itemId: int, quantity: int): Task<void>
+        + removeItemFromCartAsync(userId: string, itemId: int): Task<void>
+        + clearCartAsync(userId: string): Task<void>
+        + getCartItemCountAsync(userId: string): Task<int>
+        + validateCartAsync(userId: string): Task<bool>
+    }
+
+    class DonHangService {
+        - orderRepository: IDonHangRepository
+        - inventoryService: IInventoryService
+        - logger: ILogger
+        __
+        + DonHangService(orderRepository: IDonHangRepository, inventoryService: IInventoryService, logger: ILogger)
+        __
+        + getOrderByIdAsync(id: int): Task<DonHang>
+        + getOrdersByUserIdAsync(userId: string): Task<IEnumerable<DonHang>>
+        + createOrderAsync(order: DonHang): Task<DonHang>
+        + updateOrderAsync(order: DonHang): Task<DonHang>
+        + updateOrderStatusAsync(orderId: int, status: OrderStatus): Task<bool>
+        + cancelOrderAsync(orderId: int, reason: string): Task<bool>
+        + processPaymentAsync(orderId: int, paymentInfo: PaymentInfo): Task<bool>
+        + getOrderStatisticsAsync(): Task<OrderStatistics>
+        + validateOrderAsync(order: DonHang): Task<bool>
+        + calculateOrderTotalAsync(order: DonHang): Task<decimal>
+        __
+        - validateOrderItems(items: ICollection<ChiTietDonHang>): bool
+        - updateInventoryForOrder(order: DonHang): Task<void>
+        - sendOrderConfirmationEmail(order: DonHang): Task<void>
+    }
+
+    class GioHangService {
+        - cartRepository: IGioHangRepository
+        - logger: ILogger
+        __
+        + GioHangService(cartRepository: IGioHangRepository, logger: ILogger)
+        __
+        + getOrCreateCartAsync(userId: string): Task<GioHang>
+        + getCartWithItemsAsync(userId: string): Task<GioHang>
+        + addItemToCartAsync(userId: string, item: ChiTietGioHang): Task<void>
+        + updateCartItemQuantityAsync(userId: string, itemId: int, quantity: int): Task<void>
+        + removeItemFromCartAsync(userId: string, itemId: int): Task<void>
+        + clearCartAsync(userId: string): Task<void>
+        + getCartItemCountAsync(userId: string): Task<int>
+        + validateCartAsync(userId: string): Task<bool>
+        __
+        - validateCartItem(item: ChiTietGioHang): bool
+        - checkProductAvailability(productId: int, quantity: int): Task<bool>
+    }
+
+    class DonHangController {
+        - orderService: IDonHangService
+        - cartService: IGioHangService
+        - mapper: IMapper
+        - logger: ILogger
+        __
+        + DonHangController(orderService: IDonHangService, cartService: IGioHangService, mapper: IMapper, logger: ILogger)
+        __
+        + index(): Task<ActionResult>
+        + details(id: int): Task<ActionResult>
+        + create(): ActionResult
+        + create(model: CreateOrderModel): Task<ActionResult>
+        + edit(id: int): Task<ActionResult>
+        + edit(model: EditOrderModel): Task<ActionResult>
+        + updateStatus(id: int, status: OrderStatus): Task<ActionResult>
+        + cancel(id: int): Task<ActionResult>
+        + checkout(): Task<ActionResult>
+        + checkout(model: CheckoutModel): Task<ActionResult>
+        __
+        - validateOrderModel(model: CreateOrderModel): bool
+        - mapOrderModel(model: CreateOrderModel): DonHang
+    }
+
+    enum OrderStatus {
+        PENDING
+        AWAITING_PAYMENT
+        PAID
+        PROCESSING
+        AWAITING_FULFILLMENT
+        SHIPPED
+        PARTIALLY_SHIPPED
+        DELIVERED
+        COMPLETED
+        CANCELLED
+        REFUNDED
+        RETURN_REQUESTED
+        RETURN_PROCESSED
+        FAILED
+        ON_HOLD
+    }
+
+    enum PaymentStatus {
+        PENDING
+        PAID
+        PARTIALLY_PAID
+        REFUNDED
+        PARTIALLY_REFUNDED
+        FAILED
+        CANCELLED
+    }
+
+    ' Repository Interfaces
+    interface IDonHangRepository {
+        + getByIdAsync(id: int): Task<DonHang>
+        + getAllAsync(): Task<IEnumerable<DonHang>>
+        + getByUserIdAsync(userId: string): Task<IEnumerable<DonHang>>
+        + addAsync(order: DonHang): Task<DonHang>
+        + updateAsync(order: DonHang): Task<DonHang>
+        + deleteAsync(id: int): Task<bool>
+        + getByStatusAsync(status: OrderStatus): Task<IEnumerable<DonHang>>
+    }
+
+    interface IGioHangRepository {
+        + getByUserIdAsync(userId: string): Task<GioHang>
+        + addAsync(cart: GioHang): Task<GioHang>
+        + updateAsync(cart: GioHang): Task<GioHang>
+        + deleteAsync(id: int): Task<bool>
+        + getCartItemAsync(itemId: int): Task<ChiTietGioHang>
+        + addCartItemAsync(item: ChiTietGioHang): Task<ChiTietGioHang>
+        + updateCartItemAsync(item: ChiTietGioHang): Task<ChiTietGioHang>
+        + removeCartItemAsync(itemId: int): Task<bool>
+    }
+}
+
+' Relationships - Composition và Aggregation
+DonHang *-- ChiTietDonHang : "bao gồm"
+DonHang *-- LichSuTrangThaiDonHang : "bao gồm"
+DonHang *-- ThanhToanDonHang : "bao gồm"
+GioHang *-- ChiTietGioHang : "bao gồm"
+
+' Associations
+DonHang --> OrderStatus : "có trạng thái"
+DonHang --> PaymentStatus : "có trạng thái thanh toán"
+ThanhToanDonHang --> PaymentStatus : "có trạng thái"
+
+' Inheritance/Implementation
+IDonHangService <|.. DonHangService : "implements"
+IGioHangService <|.. GioHangService : "implements"
+
+' Dependencies
+DonHangController ..> IDonHangService : "uses"
+DonHangController ..> IGioHangService : "uses"
+DonHangService ..> IDonHangRepository : "uses"
+GioHangService ..> IGioHangRepository : "uses"
+
+@enduml

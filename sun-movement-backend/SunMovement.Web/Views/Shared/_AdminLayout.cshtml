@@ -11,91 +11,271 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/admin-enhancements.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/admin-extras.css" asp-append-version="true" />    <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-extras.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    
     <style>
-        /* Enhanced fixed header and sidebar */
-        body {
-            padding-top: 56px; /* Height of the navbar */
+        /* CRITICAL: Reset and prevent any CSS interference */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
         }
         
+        *, *:before, *:after {
+            box-sizing: border-box !important;
+        }
+        
+        /* Body with fixed nav */
+        .sb-nav-fixed {
+            padding-top: 56px !important;
+            margin: 0 !important;
+        }
+        
+        /* CRITICAL: Fixed top navigation - must be absolute positioned */
         .sb-topnav {
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: 56px;
-            z-index: 1030;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: 56px !important;
+            z-index: 1030 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
+        /* CRITICAL: Layout container - must be block, not flex */
+        #layoutSidenav {
+            position: relative !important;
+            display: block !important;
+            width: 100% !important;
+            min-height: calc(100vh - 56px) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+        
+        /* CRITICAL: Sidebar navigation - must be completely fixed and isolated */
         #layoutSidenav_nav {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            width: 225px;
-            height: calc(100vh - 56px);
-            z-index: 1020;
-            overflow-y: auto;
-            transition: transform 0.15s ease-in-out;
+            position: fixed !important;
+            top: 56px !important;
+            left: 0 !important;
+            width: 225px !important;
+            height: calc(100vh - 56px) !important;
+            z-index: 1020 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            transition: transform 0.15s ease-in-out !important;
+            transform: translateX(0) !important;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-color: #212529 !important;
         }
         
+        /* CRITICAL: Main content area - must have exact left margin to match sidebar width */
         #layoutSidenav_content {
-            margin-left: 225px;
-            padding-top: 1rem;
-            transition: margin-left 0.15s ease-in-out;
+            position: relative !important;
+            margin-left: 225px !important;
+            margin-top: 0 !important;
+            margin-right: 0 !important;
+            margin-bottom: 0 !important;
+            padding: 0 !important;
+            width: auto !important;
+            min-height: calc(100vh - 56px) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            transition: margin-left 0.15s ease-in-out !important;
+            overflow: visible !important;
         }
         
+        /* Main content and footer layout */
+        main {
+            flex: 1 0 auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+        }
+        
+        footer {
+            flex-shrink: 0 !important;
+            margin-top: auto !important;
+            width: 100% !important;
+        }
+        
+        /* CRITICAL: Sidebar toggle states */
         .sb-sidenav-toggled #layoutSidenav_nav {
-            transform: translateX(-225px);
+            transform: translateX(-225px) !important;
         }
         
         .sb-sidenav-toggled #layoutSidenav_content {
-            margin-left: 0;
+            margin-left: 0 !important;
         }
         
-        /* Improve scrollbar for sidebar */
+        /* CRITICAL: Mobile responsive behavior */
+        @@media (max-width: 991.98px) {
+            #layoutSidenav_nav {
+                transform: translateX(-225px) !important;
+            }
+            
+            #layoutSidenav_content {
+                margin-left: 0 !important;
+            }
+            
+            .sb-sidenav-toggled #layoutSidenav_nav {
+                transform: translateX(0) !important;
+            }
+        }
+        
+        /* Sidebar navigation styling */
+        .sb-sidenav {
+            background-color: #212529 !important;
+            height: 100% !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu {
+            padding: 0 !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu .nav-link {
+            display: flex !important;
+            align-items: center !important;
+            padding: 0.75rem !important;
+            position: relative !important;
+            color: rgba(255, 255, 255, 0.5) !important;
+            text-decoration: none !important;
+            border: none !important;
+            margin: 0 !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu .nav-link:hover {
+            color: #fff !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu .nav-link.active {
+            color: #fff !important;
+            background-color: rgba(255, 255, 255, 0.15) !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu .nav-link .sb-nav-link-icon {
+            width: 1rem !important;
+            font-size: 0.9rem !important;
+            margin-right: 0.5rem !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-menu .sb-sidenav-menu-heading {
+            padding: 1.75rem 1rem 0.75rem !important;
+            font-size: 0.75rem !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            color: #adb5bd !important;
+        }
+        
+        /* Nested navigation */
+        .sb-sidenav .sb-sidenav-menu .sb-sidenav-menu-nested {
+            margin-left: 1rem !important;
+        }
+        
+        .sb-sidenav .sb-sidenav-collapse-arrow {
+            margin-left: auto !important;
+            transition: transform 0.15s ease-in-out !important;
+        }
+        
+        /* Custom scrollbar for sidebar */
         #layoutSidenav_nav::-webkit-scrollbar {
-            width: 5px;
+            width: 5px !important;
         }
         
         #layoutSidenav_nav::-webkit-scrollbar-track {
-            background: #343a40;
+            background: #343a40 !important;
         }
         
         #layoutSidenav_nav::-webkit-scrollbar-thumb {
-            background: #495057;
-            border-radius: 3px;
+            background: #495057 !important;
+            border-radius: 3px !important;
+        }
+        
+        /* CRITICAL: Override any Bootstrap or external CSS that might interfere */
+        .container-fluid {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        /* Ensure no margin/padding interference from Bootstrap */
+        .navbar {
+            margin-bottom: 0 !important;
+        }
+        
+        /* Fix any potential z-index conflicts */
+        .modal {
+            z-index: 1050 !important;
+        }
+        
+        .tooltip {
+            z-index: 1070 !important;
+        }
+        
+        .popover {
+            z-index: 1060 !important;
         }
         
         #layoutSidenav_nav::-webkit-scrollbar-thumb:hover {
             background: #6c757d;
         }
         
-        /* Footer at the bottom */
-        #layoutSidenav_content {
-            min-height: calc(100vh - 56px);
-            display: flex;
-            flex-direction: column;
+        /* Fix container overflow */
+        .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
         }
         
-        main {
-            flex: 1 0 auto;
+        /* Dropdown arrow for collapsible menus */
+        .sb-sidenav-collapse-arrow {
+            display: inline-block;
+            margin-left: auto;
+            transition: transform 0.15s ease;
         }
         
-        footer {
-            flex-shrink: 0;
+        .nav-link[aria-expanded="true"] .sb-sidenav-collapse-arrow {
+            transform: rotate(180deg);
         }
         
-        @@media (max-width: 991.98px) {
-            #layoutSidenav_content {
-                margin-left: 0;
-            }
+        /* Nested navigation styling */
+        .sb-sidenav-menu-nested {
+            margin-left: 1rem;
+        }
+        
+        .sb-sidenav-menu-nested .nav-link {
+            padding-left: 2.25rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Active link styling */
+        .sb-sidenav .sb-sidenav-menu .nav-link.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Footer styling */
+        .sb-sidenav-footer {
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
+
 <body class="sb-nav-fixed">
-    <!-- Header section -->
-    <header class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Top Navigation -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand -->
         <a class="navbar-brand ps-3" href="/admin">Quản Trị SunMovement</a>
         
@@ -104,10 +284,10 @@
             <i class="fas fa-bars"></i>
         </button>
         
-        <!-- Search Box -->
+        <!-- Navbar Search -->
         <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
             <div class="input-group">
-                <input class="form-control" type="text" id="quickSearch" placeholder="Tìm kiếm..." aria-label="Tìm kiếm..." aria-describedby="btnNavbarSearch" />
+                <input class="form-control" type="text" placeholder="Tìm kiếm..." aria-label="Tìm kiếm..." aria-describedby="btnNavbarSearch" />
                 <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
             </div>
         </form>
@@ -116,35 +296,22 @@
         <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-bell fa-fw"></i>
-                    <span id="notificationBadge" class="badge bg-danger badge-counter">3+</span>
-                </a>
-                <ul id="notificationDropdown" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <div class="dropdown-header">Thông báo</div>
-                    <li><a class="dropdown-item notification-item unread" href="#!"><i class="fas fa-file-alt me-2 text-primary"></i>Đơn hàng mới đã được đặt!</a></li>
-                    <li><a class="dropdown-item notification-item unread" href="#!"><i class="fas fa-user me-2 text-success"></i>Người dùng mới đã đăng ký!</a></li>
-                    <li><a class="dropdown-item notification-item unread" href="#!"><i class="fas fa-comment me-2 text-info"></i>Bình luận mới cần xét duyệt!</a></li>
-                    <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item text-center small text-muted" href="#">Xem tất cả thông báo</a></li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-user fa-fw"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="#!">Cài đặt</a></li>
                     <li><a class="dropdown-item" href="#!">Nhật ký hoạt động</a></li>
                     <li><hr class="dropdown-divider" /></li>
-                    <li><form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout">
-                        <button type="submit" class="dropdown-item">Đăng xuất</button>
-                    </form></li>
+                    <li>
+                        <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout">
+                            <button type="submit" class="dropdown-item">Đăng xuất</button>
+                        </form>
+                    </li>
                 </ul>
             </li>
         </ul>
-    </header>
-
-    <!-- Sidebar navigation -->
+    </nav>
+    
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -157,7 +324,6 @@
                         </a>
                         
                         <div class="sb-sidenav-menu-heading">Quản lý</div>
-                        <!-- Product Management Dropdown -->
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseProducts" aria-expanded="false" aria-controls="collapseProducts">
                             <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
                             Quản lý sản phẩm
@@ -177,17 +343,14 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-cubes"></i></div>
                                     Kho hàng
                                 </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Analytics">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
-                                    Phân tích sản phẩm
-                                </a>
                             </nav>
-                        </div>                        <a class="nav-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-concierge-bell"></i></div>
-                            Quản lý dịch vụ
+                        </div>
+                        
+                        <a class="nav-link" asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Quản lý đơn hàng
                         </a>
                         
-                        <!-- Customer Management Dropdown -->
                         <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCustomers" aria-expanded="false" aria-controls="collapseCustomers">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Quản lý khách hàng
@@ -203,81 +366,6 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
                                     Thống kê khách hàng
                                 </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="CustomersAdmin" asp-action="SearchStatistics">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-search"></i></div>
-                                    Thống kê tìm kiếm
-                                </a>
-                            </nav>
-                        </div>
-                        
-                        <a class="nav-link" asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
-                            Quản lý đơn hàng
-                        </a>
-                        
-                        <!-- Combined Product & Inventory Management -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseIntegrated" aria-expanded="false" aria-controls="collapseIntegrated">
-                            <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
-                            Hệ thống tích hợp
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseIntegrated" aria-labelledby="headingIntegrated" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="Index">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                    Tổng quan tích hợp
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="InventoryDashboard">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-warehouse"></i></div>
-                                    Tổng quan kho hàng
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="ProductCoupons">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                    Sản phẩm & Mã giảm giá
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="IntegratedSystem" asp-action="BatchInventoryUpdate">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-cubes"></i></div>
-                                    Cập nhật kho hàng loạt
-                                </a>
-                            </nav>
-                        </div>
-                        </a>
-                        <div class="collapse" id="collapseInventory" aria-labelledby="headingInventory" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-controller="SuppliersAdmin" asp-action="Index">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-truck"></i></div>
-                                    Nhà cung cấp
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="InventoryAdmin" asp-action="Index">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-exchange-alt"></i></div>
-                                    Giao dịch kho
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                    Mã giảm giá
-                                </a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="InventoryDashboard" asp-action="Index">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
-                                    Dashboard kho
-                                </a>
-                            </nav>
-                        </div>
-                        
-                        <a class="nav-link" asp-area="Admin" asp-controller="UsersAdmin" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                            Quản lý người dùng
-                        </a>
-                        
-                        <div class="sb-sidenav-menu-heading">Nội dung</div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Quản lý nội dung
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">                        <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" asp-area="Admin" asp-controller="ArticlesAdmin" asp-action="Index">Bài viết</a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="FAQsAdmin" asp-action="Index">Câu hỏi thường gặp</a>
-                                <a class="nav-link" asp-area="Admin" asp-controller="ContactMessagesAdmin" asp-action="Index">Tin nhắn liên hệ</a>
                             </nav>
                         </div>
                         
@@ -285,10 +373,6 @@
                         <a class="nav-link" asp-area="Admin" asp-controller="AnalyticsAdmin" asp-action="Index">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                             Phân tích dữ liệu
-                        </a>
-                        <a class="nav-link" asp-area="Admin" asp-controller="ReportsAdmin" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Báo cáo
                         </a>
                         
                         <div class="sb-sidenav-menu-heading">Cấu hình</div>
@@ -305,16 +389,46 @@
             </nav>
         </div>
         
-        <!-- Main content -->
         <div id="layoutSidenav_content">
             <main>
-                <div class="container-fluid px-4 mt-3">
-                    <partial name="_Notifications" />
+                <div class="container-fluid px-4">
+                    <!-- Notifications -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["WarningMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (TempData["InfoMessage"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                            <i class="fas fa-info-circle me-2"></i> @TempData["InfoMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    
+                    @RenderBody()
                 </div>
-                @RenderBody()
             </main>
             
-            <!-- Footer -->
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
@@ -330,39 +444,6 @@
         </div>
     </div>
     
-    <!-- Feedback Modal -->
-    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="feedbackModalLabel">Gửi phản hồi</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="feedbackForm">
-                        <div class="mb-3">
-                            <label for="feedbackType" class="form-label">Loại phản hồi</label>
-                            <select class="form-select" id="feedbackType" required>
-                                <option value="">Chọn loại...</option>
-                                <option value="bug">Báo lỗi</option>
-                                <option value="feature">Yêu cầu tính năng</option>
-                                <option value="comment">Nhận xét chung</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="feedbackMessage" class="form-label">Nội dung</label>
-                            <textarea class="form-control" id="feedbackMessage" rows="4" required placeholder="Vui lòng mô tả chi tiết phản hồi của bạn..."></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="submitFeedback">Gửi phản hồi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -374,6 +455,104 @@
     <script src="~/js/admin-enhancements.js" asp-append-version="true"></script>
     <script src="~/js/admin-datatables.js" asp-append-version="true"></script>
     <script src="~/js/admin.js" asp-append-version="true"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // CRITICAL: Ensure body has proper class for layout
+            $('body').addClass('sb-nav-fixed');
+            
+            // Sidebar toggle functionality
+            $('#sidebarToggle').click(function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('body').toggleClass('sb-sidenav-toggled');
+                
+                // Store state in localStorage
+                var isToggled = $('body').hasClass('sb-sidenav-toggled');
+                localStorage.setItem('sb|sidebar-toggle', isToggled.toString());
+                
+                console.log('Sidebar toggled:', isToggled);
+            });
+            
+            // Restore sidebar state from localStorage
+            try {
+                var storedState = localStorage.getItem('sb|sidebar-toggle');
+                if (storedState === 'true') {
+                    $('body').addClass('sb-sidenav-toggled');
+                } else if (storedState === 'false') {
+                    $('body').removeClass('sb-sidenav-toggled');
+                }
+            } catch (e) {
+                console.log('localStorage access failed:', e);
+            }
+            
+            // Handle mobile behavior
+            function handleMobileLayout() {
+                var windowWidth = $(window).width();
+                
+                if (windowWidth < 992) {
+                    // Mobile: sidebar should be hidden by default
+                    if (!localStorage.getItem('sb|sidebar-toggle')) {
+                        $('body').addClass('sb-sidenav-toggled');
+                    }
+                    
+                    // Auto-close sidebar when clicking on content in mobile
+                    $('#layoutSidenav_content').off('click.mobileSidebar').on('click.mobileSidebar', function(e) {
+                        if (!$(e.target).closest('#sidebarToggle').length) {
+                            $('body').addClass('sb-sidenav-toggled');
+                        }
+                    });
+                } else {
+                    // Desktop: respect user preference
+                    $('#layoutSidenav_content').off('click.mobileSidebar');
+                    
+                    // Only apply stored state if exists
+                    var storedState = localStorage.getItem('sb|sidebar-toggle');
+                    if (storedState === 'true') {
+                        $('body').addClass('sb-sidenav-toggled');
+                    } else if (storedState === 'false') {
+                        $('body').removeClass('sb-sidenav-toggled');
+                    }
+                }
+            }
+            
+            // Initial mobile layout handling
+            handleMobileLayout();
+            
+            // Handle window resize
+            $(window).resize(function() {
+                handleMobileLayout();
+            });
+            
+            // Initialize toastr notifications
+            if (typeof toastr !== 'undefined') {
+                toastr.options = {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+            }
+            
+            // Debug layout state
+            console.log('Layout initialized');
+            console.log('Body classes:', $('body').attr('class'));
+            console.log('Window width:', $(window).width());
+            console.log('Stored sidebar state:', localStorage.getItem('sb|sidebar-toggle'));
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

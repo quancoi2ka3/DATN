@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Tách Cột Giá Vốn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styling for cost price columns */
+        .cost-price-avg {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            font-weight: 500;
+        }
+
+        .cost-price-latest {
+            background-color: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            font-weight: 500;
+        }
+
+        .cost-price-header {
+            font-weight: 700;
+            text-align: center;
+            font-size: 0.9em;
+            padding: 8px 4px;
+        }
+
+        .cost-price-header i {
+            color: #fff;
+            margin-right: 4px;
+        }
+
+        /* Table improvements */
+        #productsTable th {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 0.85em;
+            padding: 12px 8px;
+        }
+
+        #productsTable td {
+            vertical-align: middle;
+            padding: 10px 8px;
+        }
+
+        /* Comparison column styling */
+        .comparison-column {
+            background-color: #f8f9fa;
+            border-left: 3px solid #6c757d;
+            min-width: 120px;
+        }
+
+        /* Badge improvements for comparison */
+        .badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+        }
+
+        .bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-secondary {
+            background-color: #6c757d !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid px-4 mt-4">
+        <h1 class="mt-4">Demo: Tách Cột Hiển Thị Giá Vốn</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i> Danh Sách Sản Phẩm - Hiển Thị Giá Vốn Tách Biệt
+            </div>
+            <div class="card-body">
+                <table id="productsTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th class="cost-price-header cost-price-avg" 
+                                title="Giá vốn trung bình được tính theo bình quân gia quyền của tất cả lần nhập hàng">
+                                <i class="fas fa-calculator me-1"></i>
+                                <div>Giá Vốn TB</div>
+                                <small>(Bình quân)</small>
+                            </th>
+                            <th class="cost-price-header cost-price-latest"
+                                title="Giá nhập gần nhất từ lần nhập kho mới nhất">
+                                <i class="fas fa-receipt me-1"></i>
+                                <div>Giá Nhập Gần Nhất</div>
+                                <small>(Lần nhập cuối)</small>
+                            </th>
+                            <th class="cost-price-header" style="background-color: #6c757d;"
+                                title="So sánh giữa giá vốn trung bình và giá nhập gần nhất">
+                                <i class="fas fa-exchange-alt me-1"></i>
+                                <div>So Sánh</div>
+                                <small>(% Chênh lệch)</small>
+                            </th>
+                            <th>Giá Bán</th>
+                            <th>Lợi Nhuận</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sản phẩm 1: Giá nhập gần nhất cao hơn giá vốn TB -->
+                        <tr>
+                            <td>SP001</td>
+                            <td>Áo thể thao Nike</td>
+                            <td class="text-center cost-price-avg">
+                                <strong class="text-primary">95,000 VND</strong>
+                                <br><small class="text-muted">Bình quân gia quyền</small>
+                            </td>
+                            <td class="text-center cost-price-latest">
+                                <strong class="text-success">120,000 VND</strong>
+                                <br><small class="text-muted">15/01/2024</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger">
+                                    ↑ 26.3%
+                                </span>
+                                <br><small class="text-muted">+25,000 VND</small>
+                            </td>
+                            <td>150,000 VND</td>
+                            <td>
+                                <span class="text-success">
+                                    55,000 VND<br>
+                                    <small>(57.9%)</small>
+                                </span>
+                            </td>
+                        </tr>
+                        
+                        <!-- Sản phẩm 2: Giá nhập gần nhất thấp hơn giá vốn TB -->
+                        <tr>
+                            <td>SP002</td>
+                            <td>Giày chạy bộ Adidas</td>
+                            <td class="text-center cost-price-avg">
+                                <strong class="text-primary">800,000 VND</strong>
+                                <br><small class="text-muted">Bình quân gia quyền</small>
+                            </td>
+                            <td class="text-center cost-price-latest">
+                                <strong class="text-success">750,000 VND</strong>
+                                <br><small class="text-muted">10/01/2024</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">
+                                    ↓ 6.3%
+                                </span>
+                                <br><small class="text-muted">-50,000 VND</small>
+                            </td>
+                            <td>1,200,000 VND</td>
+                            <td>
+                                <span class="text-success">
+                                    400,000 VND<br>
+                                    <small>(50.0%)</small>
+                                </span>
+                            </td>
+                        </tr>
+                        
+                        <!-- Sản phẩm 3: Chưa có dữ liệu nhập gần nhất -->
+                        <tr>
+                            <td>SP003</td>
+                            <td>Thảm yoga cao cấp</td>
+                            <td class="text-center cost-price-avg">
+                                <strong class="text-primary">200,000 VND</strong>
+                                <br><small class="text-muted">Bình quân gia quyền</small>
+                            </td>
+                            <td class="text-center cost-price-latest">
+                                <span class="text-muted">Chưa có dữ liệu</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="text-muted">Không có dữ liệu</span>
+                            </td>
+                            <td>350,000 VND</td>
+                            <td>
+                                <span class="text-success">
+                                    150,000 VND<br>
+                                    <small>(75.0%)</small>
+                                </span>
+                            </td>
+                        </tr>
+                        
+                        <!-- Sản phẩm 4: Giá nhập gần nhất bằng giá vốn TB -->
+                        <tr>
+                            <td>SP004</td>
+                            <td>Tạ tay 5kg</td>
+                            <td class="text-center cost-price-avg">
+                                <strong class="text-primary">180,000 VND</strong>
+                                <br><small class="text-muted">Bình quân gia quyền</small>
+                            </td>
+                            <td class="text-center cost-price-latest">
+                                <strong class="text-success">180,000 VND</strong>
+                                <br><small class="text-muted">12/01/2024</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">
+                                    = 0.0%
+                                </span>
+                                <br><small class="text-muted">0 VND</small>
+                            </td>
+                            <td>280,000 VND</td>
+                            <td>
+                                <span class="text-success">
+                                    100,000 VND<br>
+                                    <small>(55.6%)</small>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle me-2"></i>Giải thích các cột giá vốn:</h5>
+            <ul class="mb-0">
+                <li><strong>Giá Vốn TB (Bình quân):</strong> Được tính theo phương pháp bình quân gia quyền từ tất cả các lần nhập hàng</li>
+                <li><strong>Giá Nhập Gần Nhất:</strong> Giá của lần nhập kho mới nhất, giúp theo dõi xu hướng giá nguyên liệu</li>
+                <li><strong>So Sánh:</strong> Hiển thị phần trăm và giá trị chênh lệch giữa hai loại giá vốn
+                    <ul>
+                        <li><span class="badge bg-danger">↑</span> Giá nhập gần nhất cao hơn (xu hướng tăng giá)</li>
+                        <li><span class="badge bg-success">↓</span> Giá nhập gần nhất thấp hơn (xu hướng giảm giá)</li>
+                        <li><span class="badge bg-secondary">=</span> Giá không đổi</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

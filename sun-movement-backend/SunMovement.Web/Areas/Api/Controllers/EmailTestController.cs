@@ -80,7 +80,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogInformation("Verification email sent successfully to: {Email}", request.Email);
                     return Ok(new { 
                         success = true, 
-                        message = $"Verification email sent successfully to {request.Email}",
+                        message = $"Email xác thực đã được gửi thành công tới {request.Email}",
                         verificationCode = request.VerificationCode ?? "123456"
                     });
                 }
@@ -89,7 +89,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogWarning("Failed to send verification email to: {Email}", request.Email);
                     return StatusCode(500, new { 
                         success = false, 
-                        message = "Failed to send verification email" 
+                        message = "Không thể gửi email xác thực" 
                     });
                 }
             }
@@ -98,7 +98,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 _logger.LogError(ex, "Error testing verification email for: {Email}", request.Email);
                 return StatusCode(500, new { 
                     success = false, 
-                    message = "Error sending verification email", 
+                    message = "Lỗi khi gửi email xác thực", 
                     error = ex.Message 
                 });
             }
@@ -124,7 +124,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogInformation("Welcome email sent successfully to: {Email}", request.Email);
                     return Ok(new { 
                         success = true, 
-                        message = $"Welcome email sent successfully to {request.Email}"
+                        message = $"Email chào mừng đã được gửi thành công tới {request.Email}"
                     });
                 }
                 else
@@ -132,7 +132,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogWarning("Failed to send welcome email to: {Email}", request.Email);
                     return StatusCode(500, new { 
                         success = false, 
-                        message = "Failed to send welcome email" 
+                        message = "Không thể gửi email chào mừng" 
                     });
                 }
             }
@@ -141,7 +141,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 _logger.LogError(ex, "Error testing welcome email for: {Email}", request.Email);
                 return StatusCode(500, new { 
                     success = false, 
-                    message = "Error sending welcome email", 
+                    message = "Lỗi khi gửi email chào mừng", 
                     error = ex.Message 
                 });
             }
@@ -168,7 +168,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogInformation("Password reset email sent successfully to: {Email}", request.Email);
                     return Ok(new { 
                         success = true, 
-                        message = $"Password reset email sent successfully to {request.Email}",
+                        message = $"Email đặt lại mật khẩu đã được gửi thành công tới {request.Email}",
                         resetUrl = request.ResetUrl ?? "http://localhost:3000/reset-password?token=test123"
                     });
                 }
@@ -177,7 +177,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogWarning("Failed to send password reset email to: {Email}", request.Email);
                     return StatusCode(500, new { 
                         success = false, 
-                        message = "Failed to send password reset email" 
+                        message = "Không thể gửi email đặt lại mật khẩu" 
                     });
                 }
             }
@@ -186,7 +186,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 _logger.LogError(ex, "Error testing password reset email for: {Email}", request.Email);
                 return StatusCode(500, new { 
                     success = false, 
-                    message = "Error sending password reset email", 
+                    message = "Lỗi khi gửi email đặt lại mật khẩu", 
                     error = ex.Message 
                 });
             }

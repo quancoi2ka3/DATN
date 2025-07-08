@@ -12,11 +12,13 @@ namespace SunMovement.Infrastructure.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<CouponService> _logger;
+        private readonly IEmailService _emailService;
 
-        public CouponService(IUnitOfWork unitOfWork, ILogger<CouponService> logger)
+        public CouponService(IUnitOfWork unitOfWork, ILogger<CouponService> logger, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _emailService = emailService;
         }
 
         public async Task<IEnumerable<Coupon>> GetAllActiveCouponsAsync()
@@ -693,6 +695,296 @@ namespace SunMovement.Infrastructure.Services
                 _logger.LogError(ex, "Error removing coupon {CouponId} from product {ProductId}", couponId, productId);
                 return false;
             }
+        }
+
+        // ================== EMAIL CAMPAIGN METHODS ==================
+
+        public async Task<bool> SendWelcomeCouponEmailAsync(string email, string customerName)
+        {
+            try
+            {
+                // Tạo mã giảm giá chào mừng
+                var welcomeCoupon = await GenerateWelcomeCouponAsync(email, 15); // 15% discount for new customers
+                
+                // Gửi email với mã giảm giá
+                var emailSent = await _emailService.SendWelcomeCouponEmailAsync(email, customerName, welcomeCoupon);
+                
+                if (emailSent)
+                {
+                    _logger.LogInformation("Welcome coupon email sent successfully to {Email} with coupon {CouponCode}", 
+                        email, welcomeCoupon.Code);
+                }
+                
+                return emailSent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending welcome coupon email to {Email}", email);
+                return false;
+            }
+        }
+
+        public async Task<bool> SendSeasonalCouponCampaignAsync(string occasion, IEnumerable<string> customerEmails)
+        {
+            try
+            {
+                // Tạo mã giảm giá theo mùa
+                var seasonalCoupon = await GenerateSeasonalCouponAsync(occasion, 20, CouponType.Percentage, 15); // 20% discount for 15 days
+                
+                var successCount = 0;
+                var totalCount = customerEmails.Count();
+                
+                foreach (var email in customerEmails)
+                {
+                    try
+                    {
+                        var emailSent = await _emailService.SendSeasonalCouponEmailAsync(
+                            email, 
+                            GetCustomerNameFromEmail(email), 
+                            seasonalCoupon, 
+                            occasion
+                        );
+                        
+                        if (emailSent)
+                        {
+                            successCount++;
+                        }
+                        
+                        // Delay để tránh spam email
+                        await Task.Delay(100);
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogWarning(emailEx, "Failed to send seasonal coupon to {Email}", email);
+                    }
+                }
+                
+                _logger.LogInformation("Seasonal coupon campaign '{Occasion}' sent to {SuccessCount}/{TotalCount} customers", 
+                    occasion, successCount, totalCount);
+                
+                return successCount > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending seasonal coupon campaign for {Occasion}", occasion);
+                return false;
+            }
+        }
+
+        public async Task<bool> SendBirthdayCouponEmailAsync(string email, string customerName)
+        {
+            try
+            {
+                // Tạo mã giảm giá sinh nhật đặc biệt
+                var birthdayCoupon = new Coupon
+                {
+                    Code = await GenerateUniqueCouponCodeAsync("BIRTHDAY"),
+                    Name = "Mã giảm giá sinh nhật",
+                    Description = $"Chúc mừng sinh nhật {customerName} - Ưu đãi đặc biệt 25%!",
+                    Type = CouponType.Percentage,
+                    Value = 25,
+                    MinimumOrderAmount = 200000,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(7), // 7 days to use
+                    IsActive = true,
+                    UsageLimit = 1,
+                    UsageLimitPerCustomer = 1,
+                    ApplicationType = DiscountApplicationType.All,
+                    CreatedBy = "System"
+                };
+                
+                await CreateCouponAsync(birthdayCoupon);
+                
+                // Gửi email sinh nhật
+                var emailSent = await _emailService.SendBirthdayCouponEmailAsync(email, customerName, birthdayCoupon);
+                
+                if (emailSent)
+                {
+                    _logger.LogInformation("Birthday coupon email sent successfully to {Email} with coupon {CouponCode}", 
+                        email, birthdayCoupon.Code);
+                }
+                
+                return emailSent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending birthday coupon email to {Email}", email);
+                return false;
+            }
+        }
+
+        public async Task<bool> SendLoyaltyRewardCouponAsync(string email, string customerName, int orderCount, decimal totalSpent)
+        {
+            try
+            {
+                // Tính toán mức giảm giá dựa trên độ loyal
+                var discountPercentage = CalculateLoyaltyDiscount(orderCount, totalSpent);
+                
+                var loyaltyCoupon = new Coupon
+                {
+                    Code = await GenerateUniqueCouponCodeAsync("VIP"),
+                    Name = "Mã giảm giá khách hàng thân thiết",
+                    Description = $"Tri ân khách hàng VIP - Giảm {discountPercentage}% cho đơn hàng tiếp theo",
+                    Type = CouponType.Percentage,
+                    Value = discountPercentage,
+                    MinimumOrderAmount = totalSpent >= 5000000 ? 0 : 500000, // VIP customers get no minimum order
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(30),
+                    IsActive = true,
+                    UsageLimit = 1,
+                    UsageLimitPerCustomer = 1,
+                    ApplicationType = DiscountApplicationType.All,
+                    CreatedBy = "System"
+                };
+                
+                await CreateCouponAsync(loyaltyCoupon);
+                
+                // Gửi email tri ân
+                var emailSent = await _emailService.SendCustomerLoyaltyCouponEmailAsync(
+                    email, 
+                    customerName, 
+                    loyaltyCoupon, 
+                    orderCount, 
+                    totalSpent
+                );
+                
+                if (emailSent)
+                {
+                    _logger.LogInformation("Loyalty reward coupon sent to {Email} (Orders: {OrderCount}, Spent: {TotalSpent})", 
+                        email, orderCount, totalSpent);
+                }
+                
+                return emailSent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending loyalty reward coupon to {Email}", email);
+                return false;
+            }
+        }
+
+        public async Task<bool> SendAbandonedCartCouponAsync(string email, string customerName, decimal cartValue)
+        {
+            try
+            {
+                // Tạo mã giảm giá cho giỏ hàng bỏ lỡ
+                var discountValue = Math.Min(cartValue * 0.1m, 200000); // 10% of cart value, max 200k VND
+                
+                var abandonedCartCoupon = new Coupon
+                {
+                    Code = await GenerateUniqueCouponCodeAsync("COMEBACK"),
+                    Name = "Mã giảm giá hoàn tất đơn hàng",
+                    Description = "Đừng bỏ lỡ sản phẩm yêu thích - Ưu đãi đặc biệt để hoàn tất đơn hàng!",
+                    Type = CouponType.FixedAmount,
+                    Value = discountValue,
+                    MinimumOrderAmount = cartValue * 0.8m, // Must be at least 80% of original cart value
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddHours(48), // 48 hours urgency
+                    IsActive = true,
+                    UsageLimit = 1,
+                    UsageLimitPerCustomer = 1,
+                    ApplicationType = DiscountApplicationType.All,
+                    CreatedBy = "System"
+                };
+                
+                await CreateCouponAsync(abandonedCartCoupon);
+                
+                // Gửi email nhắc nhở giỏ hàng
+                var emailSent = await _emailService.SendAbandonedCartCouponEmailAsync(
+                    email, 
+                    customerName, 
+                    abandonedCartCoupon, 
+                    cartValue
+                );
+                
+                if (emailSent)
+                {
+                    _logger.LogInformation("Abandoned cart coupon sent to {Email} (Cart Value: {CartValue})", 
+                        email, cartValue);
+                }
+                
+                return emailSent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending abandoned cart coupon to {Email}", email);
+                return false;
+            }
+        }
+
+        public async Task<bool> SendCustomCouponCampaignAsync(int couponId, IEnumerable<string> customerEmails, string campaignName, string campaignDescription)
+        {
+            try
+            {
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+                if (coupon == null)
+                {
+                    _logger.LogWarning("Coupon {CouponId} not found for campaign {CampaignName}", couponId, campaignName);
+                    return false;
+                }
+                
+                var successCount = 0;
+                var totalCount = customerEmails.Count();
+                
+                foreach (var email in customerEmails)
+                {
+                    try
+                    {
+                        var customerName = GetCustomerNameFromEmail(email);
+                        var emailSent = await _emailService.SendCouponEmailAsync(email, customerName, coupon, "campaign");
+                        
+                        if (emailSent)
+                        {
+                            successCount++;
+                        }
+                        
+                        // Delay để tránh spam email
+                        await Task.Delay(200);
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogWarning(emailEx, "Failed to send custom coupon campaign to {Email}", email);
+                    }
+                }
+                
+                _logger.LogInformation("Custom coupon campaign '{CampaignName}' sent to {SuccessCount}/{TotalCount} customers", 
+                    campaignName, successCount, totalCount);
+                
+                return successCount > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending custom coupon campaign {CampaignName}", campaignName);
+                return false;
+            }
+        }
+
+        // ================== HELPER METHODS ==================
+
+        private decimal CalculateLoyaltyDiscount(int orderCount, decimal totalSpent)
+        {
+            // Tính toán mức giảm giá dựa trên số đơn hàng và tổng chi tiêu
+            if (totalSpent >= 10000000 || orderCount >= 20) // 10M VND or 20+ orders
+                return 30; // VIP tier: 30%
+            else if (totalSpent >= 5000000 || orderCount >= 10) // 5M VND or 10+ orders  
+                return 25; // Gold tier: 25%
+            else if (totalSpent >= 2000000 || orderCount >= 5) // 2M VND or 5+ orders
+                return 20; // Silver tier: 20%
+            else
+                return 15; // Bronze tier: 15%
+        }
+
+        private string GetCustomerNameFromEmail(string email)
+        {
+            // Extract name from email (simple implementation)
+            // In real implementation, you should query customer database
+            if (string.IsNullOrEmpty(email)) return "Khách hàng";
+            
+            var localPart = email.Split('@')[0];
+            var name = localPart.Replace(".", " ").Replace("_", " ");
+            
+            // Capitalize first letter of each word
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name.ToLower());
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using SunMovement.Core.Models;
+using System.Collections.Generic;
 
 namespace SunMovement.Core.Interfaces
 {
@@ -15,5 +16,14 @@ namespace SunMovement.Core.Interfaces
         Task<bool> SendWelcomeEmailAsync(string email, string firstName);
         Task<bool> SendPasswordResetEmailAsync(string email, string resetUrl, string firstName);
         Task<bool> SendOtpEmailAsync(string email, string otpCode, string purpose);
+        
+        // Các phương thức gửi mã giảm giá
+        Task<bool> SendCouponEmailAsync(string email, string customerName, Coupon coupon, string campaignType = "general");
+        Task<bool> SendCouponCampaignEmailAsync(string email, string customerName, IEnumerable<Coupon> coupons, string campaignName, string campaignDescription);
+        Task<bool> SendWelcomeCouponEmailAsync(string email, string customerName, Coupon welkomeCoupon);
+        Task<bool> SendSeasonalCouponEmailAsync(string email, string customerName, Coupon seasonalCoupon, string occasion);
+        Task<bool> SendBirthdayCouponEmailAsync(string email, string customerName, Coupon birthdayCoupon);
+        Task<bool> SendAbandonedCartCouponEmailAsync(string email, string customerName, Coupon coupon, decimal cartValue);
+        Task<bool> SendCustomerLoyaltyCouponEmailAsync(string email, string customerName, Coupon loyaltyCoupon, int orderCount, decimal totalSpent);
     }
 }

@@ -175,7 +175,7 @@ builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IProductInventoryService, ProductInventoryService>();
-builder.Services.AddScoped<IAnalyticsService, StubAnalyticsService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 // Configure Email Service based on provider and environment
 EmailServiceFactory.ConfigureEmailService(builder.Services, builder.Configuration);

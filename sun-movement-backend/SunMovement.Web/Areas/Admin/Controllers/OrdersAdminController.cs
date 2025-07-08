@@ -145,7 +145,133 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
         // POST: Admin/Orders/UpdateStatus/5
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(int id, OrderStatus status)
+        {
+            try
+            {
+                var order = await _unitOfWork.Orders.GetByIdAsync(id);
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var oldStatus = order.Status;
+                order.Status = status;
+                order.UpdatedAt = DateTime.UtcNow;
+
+                // Đồng bộ trạng thái thanh toán theo trạng thái đơn hàng (chuẩn TMĐT)
+                switch (status)
+                {
+                    case OrderStatus.Completed:
+                    case OrderStatus.Delivered:
+                    case OrderStatus.Shipped:
+                    case OrderStatus.Processing:
+                        // Các trạng thái này yêu cầu đã thanh toán
+                        order.IsPaid = true;
+                        order.PaymentStatus = PaymentStatus.Paid;
+                        if (order.PaymentDate == null)
+                        {
+                            order.PaymentDate = DateTime.UtcNow;
+                        }
+                        break;
+                        
+                    case OrderStatus.Cancelled:
+                        // Đơn hàng bị hủy - xử lý hoàn tiền
+                        if (order.IsPaid)
+                        {
+                            order.PaymentStatus = PaymentStatus.Refunded;
+                        }
+                        else
+                        {
+                            order.PaymentStatus = PaymentStatus.Cancelled;
+                        }
+                        break;
+                        
+                    case OrderStatus.Pending:
+                    case OrderStatus.AwaitingPayment:
+                        // Trạng thái chờ - giữ nguyên trạng thái thanh toán hiện tại
+                        break;
+                }
+
+                // Update status-specific dates
+                if (status == OrderStatus.Shipped && order.ShippedDate == null)
+                {
+                    order.ShippedDate = DateTime.UtcNow;
+                }
+                else if (status == OrderStatus.Delivered && order.DeliveredDate == null)
+                {
+                    order.DeliveredDate = DateTime.UtcNow;
+                    
+                    // SYNC INVENTORY: When order is delivered/completed, reduce product stock
+                    await SyncInventoryOnOrderCompletion(order);
+                }
+
+                await _unitOfWork.Orders.UpdateAsync(order);
+                await _unitOfWork.CompleteAsync();
+
+                // Professional success message with status details
+                string statusMessage = GetVietnameseStatusName(status);
+                string oldStatusMessage = GetVietnameseStatusName(oldStatus);
+                
+                TempData["SuccessMessage"] = $"✅ Đã cập nhật trạng thái đơn hàng #{order.Id} từ '{oldStatusMessage}' thành '{statusMessage}'. " +
+                                           $"Trạng thái thanh toán: {GetVietnamesePaymentStatus(order.PaymentStatus)}";
+
+                // Redirect back to order details for better UX
+                return RedirectToAction(nameof(Details), new { id = order.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order status for order {OrderId}", id);
+                TempData["ErrorMessage"] = $"❌ Có lỗi khi cập nhật trạng thái đơn hàng: {ex.Message}";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+        }
+
+        // Helper method for Vietnamese status names
+        private string GetVietnameseStatusName(OrderStatus status)
+        {
+            return status switch
+            {
+                OrderStatus.Pending => "Chờ xử lý",
+                OrderStatus.AwaitingPayment => "Chờ thanh toán",
+                OrderStatus.Paid => "Đã thanh toán",
+                OrderStatus.Processing => "Đang xử lý",
+                OrderStatus.AwaitingFulfillment => "Đang đóng gói",
+                OrderStatus.Shipped => "Đã giao vận",
+                OrderStatus.PartiallyShipped => "Giao một phần",
+                OrderStatus.Delivered => "Đã giao hàng",
+                OrderStatus.Completed => "Hoàn thành",
+                OrderStatus.Cancelled => "Đã hủy",
+                OrderStatus.Refunded => "Đã hoàn tiền",
+                OrderStatus.ReturnRequested => "Yêu cầu trả hàng",
+                OrderStatus.ReturnProcessed => "Đã xử lý trả hàng",
+                OrderStatus.Failed => "Thất bại",
+                OrderStatus.OnHold => "Tạm giữ",
+                _ => status.ToString()
+            };
+        }
+
+        // Helper method for Vietnamese payment status names
+        private string GetVietnamesePaymentStatus(PaymentStatus status)
+        {
+            return status switch
+            {
+                PaymentStatus.Pending => "Chờ thanh toán",
+                PaymentStatus.Paid => "Đã thanh toán",
+                PaymentStatus.Failed => "Thanh toán thất bại",
+                PaymentStatus.Cancelled => "Đã hủy",
+                PaymentStatus.Refunded => "Đã hoàn tiền",
+                PaymentStatus.PartiallyPaid => "Thanh toán một phần",
+                PaymentStatus.PartiallyRefunded => "Hoàn tiền một phần",
+                _ => status.ToString()
+            };
+        }
+
+        // AJAX endpoint for real-time status updates (for advanced features)
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatusAjax(int id, OrderStatus status)
         {
             try
             {
@@ -156,14 +282,13 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     order.Status = status;
                     order.UpdatedAt = DateTime.UtcNow;
 
-                    // Đồng bộ trạng thái thanh toán theo trạng thái đơn hàng (chuẩn TMĐT)
+                    // Same synchronization logic as above...
                     switch (status)
                     {
                         case OrderStatus.Completed:
                         case OrderStatus.Delivered:
                         case OrderStatus.Shipped:
                         case OrderStatus.Processing:
-                            // Các trạng thái này yêu cầu đã thanh toán
                             order.IsPaid = true;
                             order.PaymentStatus = PaymentStatus.Paid;
                             if (order.PaymentDate == null)
@@ -173,7 +298,6 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                             break;
                             
                         case OrderStatus.Cancelled:
-                            // Đơn hàng bị hủy - xử lý hoàn tiền
                             if (order.IsPaid)
                             {
                                 order.PaymentStatus = PaymentStatus.Refunded;
@@ -183,14 +307,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                                 order.PaymentStatus = PaymentStatus.Cancelled;
                             }
                             break;
-                            
-                        case OrderStatus.Pending:
-                        case OrderStatus.AwaitingPayment:
-                            // Trạng thái chờ - giữ nguyên trạng thái thanh toán hiện tại
-                            break;
                     }
 
-                    // Update status-specific dates
                     if (status == OrderStatus.Shipped && order.ShippedDate == null)
                     {
                         order.ShippedDate = DateTime.UtcNow;
@@ -198,15 +316,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     else if (status == OrderStatus.Delivered && order.DeliveredDate == null)
                     {
                         order.DeliveredDate = DateTime.UtcNow;
-                        
-                        // SYNC INVENTORY: When order is delivered/completed, reduce product stock
                         await SyncInventoryOnOrderCompletion(order);
                     }
 
                     await _unitOfWork.Orders.UpdateAsync(order);
                     await _unitOfWork.CompleteAsync();
 
-                    return Json(new { success = true, message = $"Order status updated from {oldStatus} to {status}, Payment status: {order.PaymentStatus}" });
+                    return Json(new { 
+                        success = true, 
+                        message = $"Đã cập nhật từ '{GetVietnameseStatusName(oldStatus)}' thành '{GetVietnameseStatusName(status)}'",
+                        oldStatus = GetVietnameseStatusName(oldStatus),
+                        newStatus = GetVietnameseStatusName(status),
+                        paymentStatus = GetVietnamesePaymentStatus(order.PaymentStatus),
+                        isPaid = order.IsPaid,
+                        updatedAt = order.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                    });
                 }
             }
             catch (Exception ex)
@@ -214,7 +338,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
 
-            return Json(new { success = false, message = "Order not found" });
+            return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
         }
 
         private async Task SyncInventoryOnOrderCompletion(Order order)

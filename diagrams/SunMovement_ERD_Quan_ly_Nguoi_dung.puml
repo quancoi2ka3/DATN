@@ -1,0 +1,111 @@
+@startuml SunMovement_ERD_Quan_ly_Nguoi_dung
+!define RECTANGLE class
+
+package "Quản lý Người dùng" {
+    entity "NguoiDung" as User {
+        * Id : varchar(450) <<PK>>
+        --
+        * Email : varchar(256)
+        * UserName : varchar(256)
+        * PasswordHash : varchar(max)
+        * FirstName : varchar(max)
+        * LastName : varchar(max)
+        * PhoneNumber : varchar(max)
+        * DateOfBirth : datetime2
+        * Address : varchar(max)
+        * CreatedAt : datetime2
+        * LastLogin : datetime2
+        * IsActive : bit
+        * EmailConfirmed : bit
+        * LockoutEnabled : bit
+        * LockoutEnd : datetimeoffset
+        * AccessFailedCount : int
+        * TwoFactorEnabled : bit
+        * PhoneNumberConfirmed : bit
+        * SecurityStamp : varchar(max)
+        * ConcurrencyStamp : varchar(max)
+        * NormalizedEmail : varchar(256)
+        * NormalizedUserName : varchar(256)
+    }
+
+    entity "DangKyChoXacThuc" as PendingUserRegistration {
+        * Id : int <<PK>>
+        --
+        * Email : varchar(256)
+        * FirstName : varchar(100)
+        * LastName : varchar(100)
+        * PhoneNumber : varchar(20)
+        * Password : varchar(256)
+        * VerificationCode : varchar(10)
+        * ExpiryTime : datetime2
+        * IsVerified : bit
+        * CreatedAt : datetime2
+    }
+
+    entity "XacThucOTP" as OtpVerification {
+        * Id : int <<PK>>
+        --
+        * Email : varchar(256)
+        * PhoneNumber : varchar(20)
+        * OtpCode : varchar(10)
+        * Purpose : varchar(50)
+        * ExpiryTime : datetime2
+        * IsUsed : bit
+        * CreatedAt : datetime2
+    }
+
+    entity "VaiTro" as Role {
+        * Id : varchar(450) <<PK>>
+        --
+        * Name : varchar(256)
+        * NormalizedName : varchar(256)
+        * ConcurrencyStamp : varchar(max)
+    }
+
+    entity "NguoiDung_VaiTro" as UserRole {
+        * UserId : varchar(450) <<PK,FK>>
+        * RoleId : varchar(450) <<PK,FK>>
+    }
+
+    entity "Claims_NguoiDung" as UserClaim {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * ClaimType : varchar(max)
+        * ClaimValue : varchar(max)
+    }
+
+    entity "Claims_VaiTro" as RoleClaim {
+        * Id : int <<PK>>
+        --
+        * RoleId : varchar(450) <<FK>>
+        * ClaimType : varchar(max)
+        * ClaimValue : varchar(max)
+    }
+
+    entity "DangNhap_NguoiDung" as UserLogin {
+        * LoginProvider : varchar(450) <<PK>>
+        * ProviderKey : varchar(450) <<PK>>
+        --
+        * ProviderDisplayName : varchar(max)
+        * UserId : varchar(450) <<FK>>
+    }
+
+    entity "Token_NguoiDung" as UserToken {
+        * UserId : varchar(450) <<PK,FK>>
+        * LoginProvider : varchar(450) <<PK>>
+        * Name : varchar(450) <<PK>>
+        --
+        * Value : varchar(max)
+    }
+}
+
+' Relationships
+User ||--o{ UserRole : "có nhiều"
+Role ||--o{ UserRole : "được gán cho nhiều"
+User ||--o{ UserClaim : "có nhiều"
+Role ||--o{ RoleClaim : "có nhiều"
+User ||--o{ UserLogin : "có nhiều"
+User ||--o{ UserToken : "có nhiều"
+
+@enduml

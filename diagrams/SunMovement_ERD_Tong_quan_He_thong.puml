@@ -1,0 +1,148 @@
+@startuml SunMovement_ERD_Tong_quan_He_thong
+!define RECTANGLE class
+
+' Sơ đồ tổng quan hiển thị mối quan hệ giữa các package chính
+
+package "Quản lý Người dùng" {
+    entity "NguoiDung" as User {
+        * Id : varchar(450) <<PK>>
+        --
+        * Email : varchar(256)
+        * UserName : varchar(256)
+        * FirstName : varchar(max)
+        * LastName : varchar(max)
+        * PhoneNumber : varchar(max)
+        * DateOfBirth : datetime2
+        * Address : varchar(max)
+        * CreatedAt : datetime2
+        * LastLogin : datetime2
+        * IsActive : bit
+    }
+}
+
+package "Quản lý Sản phẩm" {
+    entity "SanPham" as Product {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(200)
+        * Description : varchar(2000)
+        * Price : decimal(18,2)
+        * StockQuantity : int
+        * Category : int
+        * IsActive : bit
+        * CreatedAt : datetime2
+    }
+
+    entity "DanhGiaSanPham" as ProductReview {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * UserId : varchar(450) <<FK>>
+        * Rating : int
+        * ReviewText : varchar(2000)
+        * CreatedAt : datetime2
+    }
+}
+
+package "Quản lý Đơn hàng" {
+    entity "DonHang" as Order {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * OrderDate : datetime2
+        * TotalAmount : decimal(18,2)
+        * Status : int
+        * CreatedAt : datetime2
+    }
+
+    entity "ChiTietDonHang" as OrderItem {
+        * Id : int <<PK>>
+        --
+        * OrderId : int <<FK>>
+        * ProductId : int <<FK>>
+        * Quantity : int
+        * UnitPrice : decimal(18,2)
+    }
+
+    entity "GioHang" as ShoppingCart {
+        * Id : int <<PK>>
+        --
+        * UserId : varchar(450) <<FK>>
+        * CreatedAt : datetime2
+        * UpdatedAt : datetime2
+    }
+}
+
+package "Quản lý Kho hàng" {
+    entity "NhaCungCap" as Supplier {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(200)
+        * Email : varchar(100)
+        * IsActive : bit
+    }
+
+    entity "GiaoDichKho" as InventoryTransaction {
+        * Id : int <<PK>>
+        --
+        * ProductId : int <<FK>>
+        * SupplierId : int <<FK>>
+        * OrderId : int <<FK>>
+        * TransactionType : int
+        * Quantity : int
+        * TransactionDate : datetime2
+    }
+}
+
+package "Quản lý Mã giảm giá" {
+    entity "MaGiamGia" as Coupon {
+        * Id : int <<PK>>
+        --
+        * Code : varchar(50)
+        * Name : varchar(200)
+        * Type : int
+        * Value : decimal(18,2)
+        * IsActive : bit
+    }
+
+    entity "LichSuSuDungMaGiamGia" as CouponUsageHistory {
+        * Id : int <<PK>>
+        --
+        * CouponId : int <<FK>>
+        * OrderId : int <<FK>>
+        * UserId : varchar(450) <<FK>>
+        * DiscountAmount : decimal(18,2)
+    }
+}
+
+package "Quản lý Dịch vụ" {
+    entity "DichVu" as Service {
+        * Id : int <<PK>>
+        --
+        * Name : varchar(max)
+        * Description : varchar(max)
+        * Price : decimal(18,2)
+        * Type : int
+        * IsActive : bit
+    }
+}
+
+' Mối quan hệ chính giữa các package
+User ||--o{ Order : "tạo đơn hàng"
+User ||--o{ ShoppingCart : "có giỏ hàng"
+User ||--o{ ProductReview : "đánh giá sản phẩm"
+User ||--o{ CouponUsageHistory : "sử dụng mã giảm giá"
+
+Product ||--o{ OrderItem : "được đặt mua"
+Product ||--o{ ProductReview : "được đánh giá"
+Product ||--o{ InventoryTransaction : "có giao dịch kho"
+
+Order ||--o{ OrderItem : "chứa chi tiết"
+Order ||--o{ CouponUsageHistory : "sử dụng coupon"
+Order ||--o{ InventoryTransaction : "tạo giao dịch kho"
+
+Supplier ||--o{ InventoryTransaction : "cung cấp hàng"
+
+Coupon ||--o{ CouponUsageHistory : "được sử dụng"
+
+@enduml

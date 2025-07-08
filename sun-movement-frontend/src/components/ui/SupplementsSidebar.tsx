@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
@@ -76,7 +76,8 @@ export function SupplementsSidebar({
   const categories = generateCategoryOptions();
   const brands = generateBrandOptions();
 
-  const handleCategoryToggle = (categoryValue: string) => {
+  // Stable callbacks to prevent re-renders
+  const handleCategoryToggle = useCallback((categoryValue: string) => {
     if (categoryValue === "all") {
       onCategoryChange([]);
     } else {
@@ -85,31 +86,31 @@ export function SupplementsSidebar({
         : [...selectedCategories.filter(cat => cat !== "all"), categoryValue];
       onCategoryChange(newCategories);
     }
-  };
+  }, [selectedCategories, onCategoryChange]);
 
-  const handleRatingToggle = (rating: number) => {
+  const handleRatingToggle = useCallback((rating: number) => {
     const newRatings = selectedRatings.includes(rating)
       ? selectedRatings.filter(r => r !== rating)
       : [...selectedRatings, rating];
     onRatingChange(newRatings);
-  };
+  }, [selectedRatings, onRatingChange]);
 
-  const handlePriceChange = (min: number, max: number) => {
+  const handlePriceChange = useCallback((min: number, max: number) => {
     onPriceRangeChange([min, max]);
-  };
+  }, [onPriceRangeChange]);
 
-  const clearAllFilters = () => {
-    onCategoryChange([]);
-    onRatingChange([]);
-    onPriceRangeChange([0, 1500000]);
-  };
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
+  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    onCategoryChange([]);
+    onRatingChange([]);
+    onPriceRangeChange([0, 1500000]);
+  }, [onCategoryChange, onRatingChange, onPriceRangeChange]);
 
   return (
     <div className={`bg-slate-900 border border-slate-800 rounded-xl p-6 sticky top-24 ${className}`}>
@@ -315,7 +316,7 @@ export function SupplementsSidebar({
       {/* Action Buttons */}
       <div className="space-y-3">
         <Button 
-          onClick={clearAllFilters}
+          onClick={handleClearFilters}
           variant="outline" 
           className="w-full border-slate-700 text-slate-300 hover:bg-slate-800"
         >

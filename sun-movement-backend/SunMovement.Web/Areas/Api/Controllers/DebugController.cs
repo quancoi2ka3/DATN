@@ -173,7 +173,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogInformation("Test email sent successfully to: {Email}", request.Email);
                     return Ok(new { 
                         success = true, 
-                        message = "Test email sent successfully",
+                        message = "Email thử nghiệm đã được gửi thành công",
                         email = request.Email 
                     });
                 }
@@ -182,7 +182,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     _logger.LogWarning("Failed to send test email to: {Email}", request.Email);
                     return BadRequest(new { 
                         success = false, 
-                        message = "Failed to send test email. Check SMTP configuration." 
+                        message = "Không thể gửi email thử nghiệm. Vui lòng kiểm tra cấu hình SMTP." 
                     });
                 }
             }
@@ -191,7 +191,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 _logger.LogError(ex, "Exception sending test email to: {Email}", request.Email);
                 return StatusCode(500, new { 
                     success = false, 
-                    message = "Exception occurred while sending test email",
+                    message = "Đã xảy ra lỗi khi gửi email thử nghiệm",
                     error = ex.Message 
                 });
             }
@@ -210,7 +210,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
                 return Ok(new
                 {
-                    message = emailSent ? "Email sent successfully!" : "Email failed to send",
+                    message = emailSent ? "Email đã được gửi thành công!" : "Gửi email thất bại",
                     success = emailSent,
                     testEmail = model.Email,
                     timestamp = DateTime.UtcNow
@@ -221,7 +221,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 _logger.LogError(ex, "Error testing email send to {Email}", model.Email);
                 return StatusCode(500, new
                 {
-                    message = "Error testing email send",
+                    message = "Lỗi khi thử nghiệm gửi email",
                     error = ex.Message,
                     stackTrace = ex.StackTrace
                 });

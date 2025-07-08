@@ -18,7 +18,17 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <div class="small text-white-50">Lượt Xem (Hôm Nay)</div>
-                            <div class="h4">@ViewBag.PageViews.Today</div>
+                            @if (ViewBag.PageViews?.Today > 0)
+                            {
+                                <div class="h4">@ViewBag.PageViews.Today</div>
+                            }
+                            else
+                            {
+                                <div class="h6">
+                                    <i class="fas fa-info-circle"></i>
+                                    <small>Chưa có dữ liệu</small>
+                                </div>
+                            }
                         </div>
                         <div>
                             <i class="fas fa-eye fa-2x"></i>
@@ -34,7 +44,17 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <div class="small text-white-50">Lượt Xem (Tuần)</div>
-                            <div class="h4">@ViewBag.PageViews.Week</div>
+                            @if (ViewBag.PageViews?.Week > 0)
+                            {
+                                <div class="h4">@ViewBag.PageViews.Week</div>
+                            }
+                            else
+                            {
+                                <div class="h6">
+                                    <i class="fas fa-info-circle"></i>
+                                    <small>Chưa có dữ liệu</small>
+                                </div>
+                            }
                         </div>
                         <div>
                             <i class="fas fa-chart-line fa-2x"></i>
@@ -50,7 +70,17 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <div class="small text-white-50">Lượt Xem (Tháng)</div>
-                            <div class="h4">@ViewBag.PageViews.Month</div>
+                            @if (ViewBag.PageViews?.Month > 0)
+                            {
+                                <div class="h4">@ViewBag.PageViews.Month</div>
+                            }
+                            else
+                            {
+                                <div class="h6">
+                                    <i class="fas fa-info-circle"></i>
+                                    <small>Chưa có dữ liệu</small>
+                                </div>
+                            }
                         </div>
                         <div>
                             <i class="fas fa-chart-area fa-2x"></i>

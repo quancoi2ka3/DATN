@@ -25,6 +25,14 @@ namespace SunMovement.Core.Interfaces
         Task<Coupon> GenerateWelcomeCouponAsync(string newUserId, decimal discountPercentage = 10);
         Task<Coupon> GenerateSeasonalCouponAsync(string occasion, decimal discountValue, CouponType type, int validityDays = 30);
         
+        // Email campaign methods
+        Task<bool> SendWelcomeCouponEmailAsync(string email, string customerName);
+        Task<bool> SendSeasonalCouponCampaignAsync(string occasion, IEnumerable<string> customerEmails);
+        Task<bool> SendBirthdayCouponEmailAsync(string email, string customerName);
+        Task<bool> SendLoyaltyRewardCouponAsync(string email, string customerName, int orderCount, decimal totalSpent);
+        Task<bool> SendAbandonedCartCouponAsync(string email, string customerName, decimal cartValue);
+        Task<bool> SendCustomCouponCampaignAsync(int couponId, IEnumerable<string> customerEmails, string campaignName, string campaignDescription);
+        
         // Thống kê và báo cáo
         Task<CouponStatistics> GetCouponStatisticsAsync(int couponId);
         Task<IEnumerable<CouponUsageHistory>> GetCouponUsageHistoryAsync(int couponId);

@@ -39,8 +39,23 @@ namespace SunMovement.Web.Areas.Api.Controllers
         }        private string GetUserId()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // For testing purposes, use consistent session ID for anonymous users
-            return userId ?? "guest-session";
+            
+            // If user is authenticated, use their ID
+            if (!string.IsNullOrEmpty(userId))
+            {
+                return userId;
+            }
+            
+            // For anonymous users, create a unique session ID
+            // This prevents sharing cart between different anonymous sessions
+            var sessionId = HttpContext.Session.GetString("AnonymousUserId");
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                sessionId = $"anonymous-{Guid.NewGuid()}";
+                HttpContext.Session.SetString("AnonymousUserId", sessionId);
+            }
+            
+            return sessionId;
         }[HttpGet("items")]
         public async Task<ActionResult<ShoppingCartDto>> GetCart()
         {

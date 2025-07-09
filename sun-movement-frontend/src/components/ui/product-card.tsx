@@ -9,6 +9,7 @@ import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
+import { trackProductView, trackAddToCart } from "@/services/analytics";
 
 interface ProductCardProps {
   product: Product;
@@ -41,6 +42,8 @@ export function ProductCard({ product }: ProductCardProps) {
     try {
       const success = await addToCart(product, quantity, selectedSize, selectedColor);
       if (success) {
+        // Track add to cart event
+        trackAddToCart('anonymous', product, quantity);
         setIsOpen(false);
         setQuantity(1);
       }
@@ -51,11 +54,17 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const handleProductClick = () => {
+    // Track product view
+    trackProductView('anonymous', product);
+    setIsOpen(true);
+  };
+
   return (
     <>
       <div 
         className="bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-lg shadow-xl overflow-hidden hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 cursor-pointer group hover:scale-[1.02] hover:border-red-500/30"
-        onClick={() => setIsOpen(true)}
+        onClick={handleProductClick}
       >
         <div className="relative h-64 w-full overflow-hidden">
           <Image

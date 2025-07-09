@@ -1,0 +1,416 @@
+@{
+    ViewData["Title"] = "Phân Tích Tìm Kiếm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-search me-2"></i>Phân Tích Tìm Kiếm
+            </h1>
+            <p class="mb-0 text-muted">Theo dõi và phân tích hành vi tìm kiếm của người dùng từ Mixpanel</p>
+        </div>
+        <div class="d-none d-sm-inline-block">
+            <button class="btn btn-primary me-2" onclick="refreshSearchData()">
+                <i class="fas fa-sync-alt me-1"></i>Làm Mới Dữ Liệu
+            </button>
+            <button class="btn btn-secondary" onclick="toggleDebugPanel()">
+                <i class="fas fa-bug me-1"></i>Debug
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Analytics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Số Tìm Kiếm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @((ViewBag.SearchData as Array)?.Length ?? 0)
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-search fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Từ Khóa Phổ Biến</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var searchData = ViewBag.SearchData as dynamic[];
+                                    var topSearch = searchData?.FirstOrDefault();
+                                }
+                                @(topSearch?.Term ?? "N/A")
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tổng Lượt Tìm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @{
+                                    var totalSearches = 0;
+                                    if (searchData != null)
+                                    {
+                                        foreach (var item in searchData)
+                                        {
+                                            totalSearches += (int)(item.Count ?? 0);
+                                        }
+                                    }
+                                }
+                                @totalSearches
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Nguồn Dữ Liệu</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800">
+                                <i class="fas fa-chart-line me-1"></i>Mixpanel Analytics
+                            </div>
+                            <div class="small text-muted">30 ngày qua</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-database fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Data Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-table me-2"></i>Chi Tiết Phân Tích Tìm Kiếm
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="searchTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Từ Khóa Tìm Kiếm</th>
+                            <th>Số Lượt Tìm</th>
+                            <th>Kết Quả Tìm Thấy</th>
+                            <th>Tỷ Lệ Click Through</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.SearchData != null)
+                        {
+                            foreach (var item in ViewBag.SearchData)
+                            {
+                                <tr>
+                                    <td>@item.Term</td>
+                                    <td>
+                                        <span class="badge badge-primary">@item.Count</span>
+                                    </td>
+                                    <td>@item.ResultsFound</td>
+                                    <td>
+                                        @{
+                                            var clickThrough = (double)(item.ClickThrough ?? 0.0);
+                                            var percentageClass = clickThrough > 0.5 ? "text-success" : clickThrough > 0.2 ? "text-warning" : "text-danger";
+                                        }
+                                        <span class="@percentageClass">
+                                            @clickThrough.ToString("P1")
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>Không có dữ liệu tìm kiếm
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="card border-secondary mb-4" id="debugPanel" style="display: none;">
+        <div class="card-header bg-secondary text-white">
+            <h6 class="m-0">
+                <i class="fas fa-bug me-2"></i>Debug Information
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>🔧 Test Actions</h6>
+                    <button class="btn btn-sm btn-info me-2" onclick="testMixpanelConnection()">
+                        <i class="fas fa-plug"></i> Test Mixpanel
+                    </button>
+                    <button class="btn btn-sm btn-success me-2" onclick="sendTestSearchEvent()">
+                        <i class="fas fa-paper-plane"></i> Send Test Search
+                    </button>
+                    <button class="btn btn-sm btn-warning" onclick="loadSearchAnalytics()">
+                        <i class="fas fa-sync"></i> Reload Data
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h6>📊 Debug Info</h6>
+                    <div id="debugInfo" style="font-family: monospace; font-size: 12px; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                        Ready to debug...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mixpanel Integration Status -->
+    <div class="card border-info mb-4">
+        <div class="card-header bg-info text-white">
+            <h6 class="m-0">
+                <i class="fas fa-chart-line me-2"></i>Tình Trạng Tích Hợp Mixpanel
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-check-circle text-success"></i> Kết Nối</h6>
+                    <p class="mb-2">Đã kết nối với Mixpanel Analytics</p>
+                    <small class="text-muted">Project Token: 8e22b9a79446802234818ec75fbf40f0</small>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-clock text-warning"></i> Dữ Liệu</h6>
+                    <p class="mb-2">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy")</p>
+                    <small class="text-muted">Export API có thể có độ trễ 15-30 phút</small>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Lưu ý:</strong> Dữ liệu tìm kiếm được thu thập từ events "Search" trên Mixpanel. 
+                    Nếu không thấy dữ liệu mới, hãy kiểm tra 
+                    <a href="https://mixpanel.com/project/8e22b9a79446802234818ec75fbf40f0/view/live" target="_blank" class="alert-link">
+                        Mixpanel Live View
+                    </a>
+                    để xác nhận events đang được gửi.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let dataTable;
+
+// Initialize DataTable and load data
+$(document).ready(function() {
+    initializeDataTable();
+    loadSearchAnalytics();
+});
+
+function initializeDataTable() {
+    dataTable = $('#searchTable').DataTable({
+        "order": [[ 1, "desc" ]], // Sort by search count descending
+        "pageLength": 25,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+        },
+        "columnDefs": [
+            { "targets": [1, 2], "className": "text-center" },
+            { "targets": [3], "className": "text-center" }
+        ]
+    });
+}
+
+// Load search analytics via API
+async function loadSearchAnalytics() {
+    try {
+        console.log('🔄 Loading search analytics data...');
+        
+        const response = await fetch('/Admin/AnalyticsAdmin/api/search-analytics');
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Search analytics loaded:', result.stats);
+            updateTable(result.data);
+            updateStats(result.stats);
+            showLastUpdate();
+        } else {
+            console.error('❌ Failed to load search analytics:', result.error);
+            showError(result.error || 'Không thể tải dữ liệu');
+        }
+    } catch (error) {
+        console.error('❌ Error loading search analytics:', error);
+        showError('Lỗi kết nối API: ' + error.message);
+    }
+}
+
+function updateTable(searchData) {
+    // Clear existing data
+    dataTable.clear();
+    
+    // Add new data
+    searchData.forEach(item => {
+        const clickThroughClass = item.ClickThrough > 0.5 ? 'text-success' : 
+                                 item.ClickThrough > 0.2 ? 'text-warning' : 'text-danger';
+        
+        dataTable.row.add([
+            item.Term,
+            `<span class="badge badge-primary">${item.Count}</span>`,
+            item.ResultsFound,
+            `<span class="${clickThroughClass}">${(item.ClickThrough * 100).toFixed(1)}%</span>`
+        ]);
+    });
+    
+    // Redraw table
+    dataTable.draw();
+}
+
+function updateStats(stats) {
+    // Update the stats cards if they exist
+    const totalSearchesElement = document.querySelector('.h5.mb-0.font-weight-bold.text-gray-800');
+    if (totalSearchesElement && stats.unique_terms) {
+        // This is a simple update, you might want to be more specific with selectors
+        console.log('📊 Stats updated:', stats);
+    }
+}
+
+function showLastUpdate() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('vi-VN');
+    console.log(`⏰ Data updated at: ${timeString}`);
+    
+    // You can add a visual indicator here
+    const statusElement = document.querySelector('.card-header');
+    if (statusElement) {
+        statusElement.style.borderLeft = '4px solid #28a745';
+        setTimeout(() => {
+            statusElement.style.borderLeft = '';
+        }, 2000);
+    }
+}
+
+function showError(message) {
+    console.error('❌ Search Analytics Error:', message);
+    
+    // Clear table and show error
+    dataTable.clear();
+    dataTable.row.add([
+        `⚠️ ${message}`,
+        '<span class="badge badge-warning">0</span>',
+        '0',
+        '<span class="text-muted">0%</span>'
+    ]);
+    dataTable.draw();
+}
+
+// Refresh search data
+function refreshSearchData() {
+    loadSearchAnalytics();
+}
+
+// Auto-refresh every 2 minutes
+setInterval(function() {
+    console.log('🔄 Auto-refreshing search analytics...');
+    loadSearchAnalytics();
+}, 2 * 60 * 1000);
+
+// Debug functions
+function toggleDebugPanel() {
+    const panel = document.getElementById('debugPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateDebugInfo(message) {
+    const debugInfo = document.getElementById('debugInfo');
+    const timestamp = new Date().toLocaleTimeString();
+    debugInfo.innerHTML += `[${timestamp}] ${message}<br>`;
+    debugInfo.scrollTop = debugInfo.scrollHeight;
+}
+
+async function testMixpanelConnection() {
+    updateDebugInfo('🔌 Testing Mixpanel connection...');
+    try {
+        const response = await fetch('/api/mixpaneldebug/test-search-data');
+        const result = await response.json();
+        
+        if (result.success) {
+            updateDebugInfo(`✅ Mixpanel OK - ${result.total_events} events, ${result.unique_terms} terms`);
+        } else {
+            updateDebugInfo(`❌ Mixpanel Error: ${result.error}`);
+        }
+    } catch (error) {
+        updateDebugInfo(`❌ Connection Error: ${error.message}`);
+    }
+}
+
+async function sendTestSearchEvent() {
+    updateDebugInfo('📤 Sending test search event...');
+    const testSearchTerm = `test-search-${Date.now()}`;
+    
+    try {
+        const response = await fetch('/api/mixpanel/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event: 'Search',
+                properties: {
+                    distinct_id: `test-user-${Date.now()}`,
+                    search_term: testSearchTerm,
+                    results_count: Math.floor(Math.random() * 10) + 1,
+                    timestamp: Math.floor(Date.now() / 1000),
+                    user_agent: 'SearchAnalytics-Debug/1.0'
+                }
+            })
+        });
+        
+        if (response.ok) {
+            updateDebugInfo(`✅ Test search event sent: "${testSearchTerm}"`);
+            // Reload data after a short delay
+            setTimeout(() => {
+                updateDebugInfo('🔄 Reloading data to check for new event...');
+                loadSearchAnalytics();
+            }, 2000);
+        } else {
+            updateDebugInfo(`❌ Failed to send test event: ${response.status}`);
+        }
+    } catch (error) {
+        updateDebugInfo(`❌ Send Error: ${error.message}`);
+    }
+}
+</script>
+}

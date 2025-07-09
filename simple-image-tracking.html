@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Pixel Tracking Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Image Pixel Tracking Test</h1>
+    <p>Test tracking với Image Pixel - không có lỗi CORS</p>
+    
+    <div>
+        <button class="btn" onclick="trackPageView()">📄 Track Page View</button>
+        <button class="btn" onclick="trackSearch()">🔍 Track Search</button>
+        <button class="btn" onclick="trackProductView()">👕 Track Product View</button>
+        <button class="btn" onclick="trackAnonymousActivity()">👤 Track Anonymous</button>
+    </div>
+    
+    <div id="status"></div>
+    <div class="log" id="log"></div>
+    
+    <script>
+        const MIXPANEL_TOKEN = '8e22b9a79446802234818ec75fbf40f0';
+        
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `[${timestamp}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateStatus(message, isSuccess = true) {
+            document.getElementById('status').innerHTML = `<p class="${isSuccess ? 'success' : 'error'}">${message}</p>`;
+        }
+        
+        // Image pixel tracking - KHÔNG BAO GIỜ có lỗi CORS
+        function imagePixelTrack(eventName, properties) {
+            return new Promise((resolve) => {
+                const eventData = {
+                    event: eventName,
+                    properties: {
+                        ...properties,
+                        token: MIXPANEL_TOKEN,
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: `anonymous-${Date.now()}`,
+                        $browser: navigator.userAgent,
+                        $current_url: window.location.href,
+                        $referrer: document.referrer || 'direct'
+                    }
+                };
+                
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                const img = new Image();
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}&img=1`;
+                
+                log(`🖼️ Tracking: ${eventName}`);
+                
+                img.onload = () => {
+                    log(`✅ SUCCESS: ${eventName}`);
+                    updateStatus(`✅ Event "${eventName}" tracked successfully!`, true);
+                    resolve(true);
+                };
+                
+                img.onerror = () => {
+                    log(`❌ FAILED: ${eventName}`);
+                    updateStatus(`❌ Event "${eventName}" failed!`, false);
+                    resolve(false);
+                };
+                
+                img.src = url;
+            });
+        }
+        
+        async function trackPageView() {
+            await imagePixelTrack('Page View', {
+                page_name: 'Test Page',
+                page_title: document.title,
+                test: true
+            });
+        }
+        
+        async function trackSearch() {
+            await imagePixelTrack('Search', {
+                search_term: 'test search query',
+                results_count: 10,
+                test: true
+            });
+        }
+        
+        async function trackProductView() {
+            await imagePixelTrack('Product View', {
+                product_id: 'TEST_PRODUCT_001',
+                product_name: 'Test Product',
+                price: 99.99,
+                test: true
+            });
+        }
+        
+        async function trackAnonymousActivity() {
+            await imagePixelTrack('Anonymous Activity', {
+                activity_type: 'page_load',
+                anonymous_user: true,
+                test: true
+            });
+        }
+        
+        // Auto track page load
+        log('🌐 Page loaded!');
+        imagePixelTrack('Page Load Test', {
+            auto_track: true,
+            load_time: Date.now()
+        });
+    </script>
+</body>
+</html>

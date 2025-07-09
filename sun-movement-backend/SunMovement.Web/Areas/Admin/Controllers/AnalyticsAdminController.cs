@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SunMovement.Core.Interfaces;
 using SunMovement.Infrastructure.Services;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -13,12 +15,18 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAnalyticsService _analyticsService;
         private readonly MixpanelService _mixpanelService;
+        private readonly ILogger<AnalyticsAdminController> _logger;
 
-        public AnalyticsAdminController(IUnitOfWork unitOfWork, IAnalyticsService analyticsService, MixpanelService mixpanelService)
+        public AnalyticsAdminController(
+            IUnitOfWork unitOfWork, 
+            IAnalyticsService analyticsService, 
+            MixpanelService mixpanelService,
+            ILogger<AnalyticsAdminController> logger)
         {
             _unitOfWork = unitOfWork;
             _analyticsService = analyticsService;
             _mixpanelService = mixpanelService;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -75,30 +83,38 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             var from = DateTime.Now.AddDays(-30);
             var to = DateTime.Now;
             
+            _logger.LogInformation("🔍 Loading Search Analytics page - Date range: {From} to {To}", from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
+            
             try
             {
-                // Get detailed search analytics from Mixpanel
-                var searchEvents = await _mixpanelService.GetEventDataAsync("search", from, to);
+                // Get detailed search analytics from Mixpanel - use correct event name
+                _logger.LogInformation("📊 Calling Mixpanel GetEventDataAsync for 'Search' events...");
+                var searchEvents = await _mixpanelService.GetEventDataAsync("Search", from, to);
+                _logger.LogInformation("✅ Retrieved {Count} search events from Mixpanel", searchEvents.Count);
                 
                 if (!searchEvents.Any())
                 {
+                    _logger.LogWarning("⚠️ No search events found in Mixpanel for the last 30 days");
                     ViewBag.SearchData = new[]
                     {
-                        new { Term = "Chưa có dữ liệu tìm kiếm từ Mixpanel", Count = 0, ResultsFound = 0, ClickThrough = 0.0 }
+                        new { Term = "Chưa có dữ liệu tìm kiếm từ Mixpanel (30 ngày qua)", Count = 0, ResultsFound = 0, ClickThrough = 0.0 }
                     };
                 }
                 else
                 {
                     // Process search data to get analytics
+                    _logger.LogInformation("📈 Processing {Count} search events...", searchEvents.Count);
                     var searchAnalytics = ProcessSearchAnalytics(searchEvents);
                     ViewBag.SearchData = searchAnalytics;
+                    _logger.LogInformation("✅ Processed search analytics: {AnalyticsCount} unique terms", searchAnalytics.Length);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "❌ Error getting search data from Mixpanel");
                 ViewBag.SearchData = new[]
                 {
-                    new { Term = "Lỗi khi lấy dữ liệu tìm kiếm từ Mixpanel", Count = 0, ResultsFound = 0, ClickThrough = 0.0 }
+                    new { Term = $"Lỗi khi lấy dữ liệu tìm kiếm từ Mixpanel: {ex.Message}", Count = 0, ResultsFound = 0, ClickThrough = 0.0 }
                 };
             }
 
@@ -110,8 +126,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                // Get page view events from Mixpanel for the specific period
-                var pageViewEvents = await _mixpanelService.GetEventCountByDayAsync("page_view", from, to);
+                // Get page view events from Mixpanel for the specific period - use correct event name
+                var pageViewEvents = await _mixpanelService.GetEventCountByDayAsync("Page View", from, to);
                 return pageViewEvents.Values.Sum();
             }
             catch (Exception)
@@ -125,8 +141,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                // Get search events from Mixpanel
-                var searchEvents = await _mixpanelService.GetEventDataAsync("search", from, to);
+                // Get search events from Mixpanel - use correct event name
+                var searchEvents = await _mixpanelService.GetEventDataAsync("Search", from, to);
                 
                 if (!searchEvents.Any())
                 {
@@ -172,8 +188,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                // Get product view events from Mixpanel
-                var productViewEvents = await _mixpanelService.GetEventDataAsync("view_product", from, to);
+                // Get product view events from Mixpanel - use correct event name
+                var productViewEvents = await _mixpanelService.GetEventDataAsync("Product View", from, to);
                 
                 if (!productViewEvents.Any())
                 {
@@ -319,6 +335,60 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             public int Count { get; set; }
             public int ResultsFound { get; set; }
             public int ClickThroughs { get; set; }
+        }
+
+        // API endpoint to get search analytics data for AJAX calls
+        [HttpGet("api/search-analytics")]
+        public async Task<IActionResult> GetSearchAnalyticsApi()
+        {
+            try
+            {
+                var from = DateTime.Now.AddDays(-30);
+                var to = DateTime.Now;
+                
+                _logger.LogInformation("🔍 API call for Search Analytics - Date range: {From} to {To}", 
+                    from.ToString("yyyy-MM-dd"), to.ToString("yyyy-MM-dd"));
+                
+                // Get search events from Mixpanel
+                var searchEvents = await _mixpanelService.GetEventDataAsync("Search", from, to);
+                _logger.LogInformation("📊 Retrieved {Count} search events from Mixpanel", searchEvents.Count);
+                
+                if (!searchEvents.Any())
+                {
+                    return Ok(new { 
+                        success = true, 
+                        message = "No search data found",
+                        data = new[] { 
+                            new { Term = "Chưa có dữ liệu tìm kiếm từ Mixpanel (30 ngày qua)", Count = 0, ResultsFound = 0, ClickThrough = 0.0 } 
+                        },
+                        stats = new { total_events = 0, unique_terms = 0 }
+                    });
+                }
+                
+                // Process search analytics
+                var searchAnalytics = ProcessSearchAnalytics(searchEvents);
+                
+                return Ok(new { 
+                    success = true, 
+                    message = "Search analytics retrieved successfully",
+                    data = searchAnalytics,
+                    stats = new { 
+                        total_events = searchEvents.Count, 
+                        unique_terms = searchAnalytics.Length 
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Error in GetSearchAnalyticsApi");
+                return StatusCode(500, new { 
+                    success = false, 
+                    error = ex.Message,
+                    data = new[] { 
+                        new { Term = $"Lỗi API: {ex.Message}", Count = 0, ResultsFound = 0, ClickThrough = 0.0 } 
+                    }
+                });
+            }
         }
     }
 }

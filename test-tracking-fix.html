@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tracking Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Tracking Fix</h1>
+    <p>This page tests that all tracking events go through backend proxy without ad blocker issues.</p>
+
+    <div class="test-section">
+        <h3>📊 Basic Tracking Tests</h3>
+        <button onclick="testPageView()">Test Page View</button>
+        <button onclick="testSearch()">Test Search</button>
+        <button onclick="testProductView()">Test Product View</button>
+        <button onclick="testRecommendationShown()">Test Recommendation Shown</button>
+        <div id="basicResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Backend Proxy Tests</h3>
+        <button onclick="testBackendProxy()">Test Backend Proxy Health</button>
+        <button onclick="testDirectBackendTracking()">Test Direct Backend Tracking</button>
+        <div id="proxyResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📝 Console Monitor</h3>
+        <p>Check the browser console for tracking events. You should see:</p>
+        <ul>
+            <li>✅ Backend proxy tracking successful messages</li>
+            <li>❌ NO "Bad HTTP status: 0" errors</li>
+            <li>❌ NO "ERR_BLOCKED_BY_CLIENT" errors</li>
+        </ul>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script>
+        // Backend tracking function (same as in analytics.js)
+        const trackViaBackendProxy = async (eventName, properties) => {
+            try {
+                const backendUrl = 'http://localhost:5000';
+                
+                const requestData = {
+                    eventName: eventName,
+                    distinctId: properties.user_id || properties.distinct_id || `anonymous-${Date.now()}`,
+                    properties: properties
+                };
+                
+                console.log('🔄 Sending event via backend proxy:', eventName);
+                
+                const response = await fetch(`${backendUrl}/api/MixpanelProxy/track`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Backend proxy tracking successful:', eventName, result);
+                    return true;
+                } else {
+                    const errorText = await response.text();
+                    console.error('❌ Backend proxy tracking failed:', response.status, errorText);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Backend proxy tracking error:', error);
+                return false;
+            }
+        };
+
+        async function testPageView() {
+            const result = await trackViaBackendProxy('Page View', {
+                page_url: window.location.href,
+                page_title: document.title,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                test: true
+            });
+            showResult('basicResults', 'Page View', result);
+        }
+
+        async function testSearch() {
+            const result = await trackViaBackendProxy('Search', {
+                search_term: 'test search',
+                results_count: 10,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                test: true
+            });
+            showResult('basicResults', 'Search', result);
+        }
+
+        async function testProductView() {
+            const result = await trackViaBackendProxy('Product View', {
+                product_id: 'test-product-123',
+                product_name: 'Test Product',
+                product_price: 99.99,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                test: true
+            });
+            showResult('basicResults', 'Product View', result);
+        }
+
+        async function testRecommendationShown() {
+            const result = await trackViaBackendProxy('Recommendation Impression', {
+                user_id: 'test-user-123',
+                product_id: 'rec-product-456',
+                recommendation_type: 'personal',
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString(),
+                test: true
+            });
+            showResult('basicResults', 'Recommendation Impression', result);
+        }
+
+        async function testBackendProxy() {
+            try {
+                const response = await fetch('http://localhost:5000/api/MixpanelProxy/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('proxyResults', 'Backend Proxy Health', true, JSON.stringify(result));
+                } else {
+                    showResult('proxyResults', 'Backend Proxy Health', false, `HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showResult('proxyResults', 'Backend Proxy Health', false, error.message);
+            }
+        }
+
+        async function testDirectBackendTracking() {
+            try {
+                const response = await fetch('http://localhost:5000/api/MixpanelProxy/track', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        eventName: 'Direct Test Event',
+                        distinctId: 'test-user-direct',
+                        properties: {
+                            test: true,
+                            timestamp: new Date().toISOString(),
+                            source: 'direct-test'
+                        }
+                    }),
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showResult('proxyResults', 'Direct Backend Tracking', true, JSON.stringify(result));
+                } else {
+                    const errorText = await response.text();
+                    showResult('proxyResults', 'Direct Backend Tracking', false, `HTTP ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                showResult('proxyResults', 'Direct Backend Tracking', false, error.message);
+            }
+        }
+
+        function showResult(containerId, testName, success, details = '') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `
+                <strong>${testName}:</strong> ${success ? '✅ Success' : '❌ Failed'}
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            container.appendChild(resultDiv);
+        }
+
+        function clearConsole() {
+            console.clear();
+            console.log('🧹 Console cleared - ready for new tracking tests');
+        }
+
+        // Auto-test when page loads
+        window.onload = function() {
+            console.log('🔧 Tracking Fix Test Page Loaded');
+            console.log('📊 Monitor this console for tracking events');
+            console.log('✅ Look for backend proxy success messages');
+            console.log('❌ Should NOT see any Mixpanel direct API errors');
+        };
+    </script>
+</body>
+</html>

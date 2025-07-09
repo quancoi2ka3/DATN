@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Frontend Test</title>
+    <script src="https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Quick Frontend Tracking Test</h1>
+    <p>Test tracking từ frontend như user thực tế (không đăng nhập)</p>
+    
+    <div>
+        <button class="btn" onclick="testNormalTracking()">✅ Test Normal Tracking</button>
+        <button class="btn" onclick="testFallbackOnly()">🔄 Test Fallback Only</button>
+        <button class="btn" onclick="clearLog()">🗑️ Clear</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        const MIXPANEL_TOKEN = '8e22b9a79446802234818ec75fbf40f0';
+        let mixpanelReady = false;
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logEl.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Initialize Mixpanel
+        try {
+            mixpanel.init(MIXPANEL_TOKEN, {
+                debug: true,
+                track_pageview: false,
+                loaded: function() {
+                    mixpanelReady = true;
+                    log('✅ Mixpanel library loaded successfully', 'success');
+                }
+            });
+        } catch (error) {
+            log('❌ Mixpanel init error: ' + error.message, 'error');
+        }
+        
+        // Fallback tracking (same logic as analytics.js)
+        async function fallbackTrack(eventName, properties) {
+            try {
+                log(`🔄 Using fallback tracking for: ${eventName}`);
+                
+                const eventData = {
+                    event: eventName,
+                    properties: {
+                        ...properties,
+                        token: MIXPANEL_TOKEN,
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: properties.user_id || `anonymous-${Date.now()}`
+                    }
+                };
+                
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                log(`✅ Fallback tracking sent: ${eventName}`, 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Fallback tracking error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Safe tracking method
+        async function safeMixpanelTrack(eventName, properties = {}) {
+            const enhancedProperties = {
+                ...properties,
+                page_url: window.location.href,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
+            
+            log(`📤 Tracking event: ${eventName}`);
+            
+            if (mixpanelReady && mixpanel) {
+                try {
+                    mixpanel.track(eventName, enhancedProperties);
+                    log(`✅ Mixpanel track successful: ${eventName}`, 'success');
+                    return true;
+                } catch (error) {
+                    log(`❌ Mixpanel track error: ${error.message}`, 'error');
+                }
+            }
+            
+            // Fallback
+            return await fallbackTrack(eventName, enhancedProperties);
+        }
+        
+        async function testNormalTracking() {
+            log('🚀 Testing normal tracking flow...');
+            await safeMixpanelTrack('Page View', {
+                page_name: 'Test Page',
+                test: true
+            });
+        }
+        
+        async function testFallbackOnly() {
+            log('🔄 Testing fallback tracking only...');
+            await fallbackTrack('Fallback Test', {
+                test: true,
+                method: 'fallback_only'
+            });
+        }
+        
+        // Auto log page load
+        log('🌐 Page loaded, ready for testing!');
+    </script>
+</body>
+</html>

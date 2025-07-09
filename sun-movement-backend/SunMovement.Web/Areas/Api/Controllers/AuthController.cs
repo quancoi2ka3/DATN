@@ -220,8 +220,31 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     
                     // Clean up verification data
                     await _emailVerificationService.CleanupExpiredVerificationsAsync();
-                      _logger.LogInformation("🎉 Email verification completed successfully for {Email}", model.Email);
-                    return Ok(new { message = "Xác thực email thành công! Chào mừng bạn đến với Sun Movement!" });
+                    
+                    // 🎉 AUTO-LOGIN AFTER VERIFICATION
+                    _logger.LogInformation("🎉 Email verification completed successfully for {Email}, auto-logging in...", model.Email);
+                    
+                    // Update last login
+                    user.LastLogin = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                    
+                    // Generate JWT token for auto-login
+                    var userRoles = await _userManager.GetRolesAsync(user);
+                    var token = GenerateJwtToken(user, userRoles);
+                    
+                    return Ok(new { 
+                        message = "Xác thực email thành công! Chào mừng bạn đến với Sun Movement!",
+                        autoLogin = true,
+                        token = token,
+                        expiration = DateTime.UtcNow.AddMinutes(GetJwtDurationInMinutes()),
+                        user = new {
+                            id = user.Id,
+                            email = user.Email,
+                            firstName = user.FirstName,
+                            lastName = user.LastName,
+                            roles = userRoles
+                        }
+                    });
                 }
 
                 var errorMessages = result.Errors?.Select(e => $"{e.Code}: {e.Description}").ToArray() ?? new string[0];

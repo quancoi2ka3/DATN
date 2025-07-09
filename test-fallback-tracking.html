@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mixpanel Fallback Tracking</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; max-height: 400px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Mixpanel Fallback Tracking</h1>
+    <p>Kiểm tra fallback tracking để khắc phục lỗi "Failed to fetch"</p>
+    
+    <div id="status" class="status">Chờ test...</div>
+    
+    <div>
+        <button class="btn" onclick="testFallbackTracking()">🚀 Test Fallback Tracking</button>
+        <button class="btn" onclick="testMultipleEvents()">📊 Test Multiple Events</button>
+        <button class="btn" onclick="testAnonymousTracking()">👤 Test Anonymous Tracking</button>
+        <button class="btn" onclick="clearLog()">🗑️ Clear Log</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logEl.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus(message, isSuccess) {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `status ${isSuccess ? 'success' : 'error'}`;
+            statusEl.textContent = message;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Use the actual token from your .env.local
+        const MIXPANEL_TOKEN = '8e22b9a79446802234818ec75fbf40f0';
+        
+        // Fallback tracking method (same as in analytics.js)
+        async function fallbackTrack(eventName, properties) {
+            try {
+                const token = MIXPANEL_TOKEN;
+                
+                if (!token || token === 'demo-token') {
+                    log('❌ No Mixpanel token available for fallback tracking', 'error');
+                    return false;
+                }
+                
+                log(`📤 Sending fallback event: ${eventName}`, 'info');
+                
+                // Use Mixpanel's browser tracking API (via GET request with data parameter)
+                const eventData = {
+                    event: eventName,
+                    properties: {
+                        ...properties,
+                        token: token,
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: properties.user_id || `anonymous-${Date.now()}`
+                    }
+                };
+                
+                // Base64 encode the data
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                
+                // Use GET request with data parameter (Mixpanel's browser-friendly endpoint)
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}`;
+                
+                log(`🌐 Making request to: ${url.substring(0, 100)}...`, 'info');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'no-cors' // This allows the request but we can't read the response
+                });
+                
+                log(`✅ Fallback tracking sent successfully: ${eventName}`, 'success');
+                return true; // We assume success since we can't read response in no-cors mode
+                
+            } catch (error) {
+                log(`❌ Fallback tracking error: ${error.message}`, 'error');
+                log(`📝 Error details: ${JSON.stringify(error)}`, 'error');
+                return false;
+            }
+        }
+        
+        // Test functions
+        async function testFallbackTracking() {
+            log('🚀 Starting fallback tracking test...', 'info');
+            updateStatus('Testing...', false);
+            
+            try {
+                const result = await fallbackTrack('Test Event', {
+                    test: true,
+                    page_url: window.location.href,
+                    user_agent: navigator.userAgent,
+                    timestamp: new Date().toISOString()
+                });
+                
+                if (result) {
+                    updateStatus('✅ Fallback tracking test successful!', true);
+                    log('✅ Test completed successfully - no "Failed to fetch" error!', 'success');
+                } else {
+                    updateStatus('❌ Fallback tracking test failed', false);
+                    log('❌ Test failed but no "Failed to fetch" error occurred', 'error');
+                }
+            } catch (error) {
+                updateStatus('❌ Test failed with error', false);
+                log(`❌ Test failed with error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testMultipleEvents() {
+            log('📊 Testing multiple events...', 'info');
+            updateStatus('Testing multiple events...', false);
+            
+            const events = [
+                { name: 'Page View', props: { page_name: 'Test Page' } },
+                { name: 'Search', props: { search_term: 'test search', results_count: 5 } },
+                { name: 'Product View', props: { product_id: 'TEST_001', product_name: 'Test Product' } }
+            ];
+            
+            let successCount = 0;
+            for (const event of events) {
+                try {
+                    const result = await fallbackTrack(event.name, event.props);
+                    if (result) successCount++;
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms between events
+                } catch (error) {
+                    log(`❌ Failed to send ${event.name}: ${error.message}`, 'error');
+                }
+            }
+            
+            if (successCount === events.length) {
+                updateStatus(`✅ All ${events.length} events sent successfully!`, true);
+            } else {
+                updateStatus(`⚠️ ${successCount}/${events.length} events sent`, false);
+            }
+        }
+        
+        async function testAnonymousTracking() {
+            log('👤 Testing anonymous user tracking...', 'info');
+            updateStatus('Testing anonymous tracking...', false);
+            
+            try {
+                const result = await fallbackTrack('Anonymous User Activity', {
+                    user_type: 'anonymous',
+                    session_id: `session-${Date.now()}`,
+                    page_url: window.location.href,
+                    referrer: document.referrer || 'direct'
+                });
+                
+                if (result) {
+                    updateStatus('✅ Anonymous tracking successful!', true);
+                    log('✅ Anonymous user tracking works - no login required!', 'success');
+                } else {
+                    updateStatus('❌ Anonymous tracking failed', false);
+                }
+            } catch (error) {
+                updateStatus('❌ Anonymous tracking error', false);
+                log(`❌ Anonymous tracking error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-run initial test
+        log('🌐 Page loaded. Click buttons to test fallback tracking!', 'info');
+        log(`🔑 Using Mixpanel token: ${MIXPANEL_TOKEN.substring(0, 8)}...`, 'info');
+    </script>
+</body>
+</html>

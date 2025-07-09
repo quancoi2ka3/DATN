@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero-Error Mixpanel Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .btn.success { background: #28a745; }
+        .btn.warning { background: #ffc107; color: #212529; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .warning { color: orange; }
+        .status { padding: 15px; margin: 15px 0; border-radius: 5px; text-align: center; font-weight: bold; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .status.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Zero-Error Mixpanel Test</h1>
+    <p>Test Mixpanel tracking không có lỗi "Failed to fetch"</p>
+    
+    <div id="status" class="status warning">Chờ kiểm tra...</div>
+    
+    <div>
+        <button class="btn" onclick="testImagePixelTracking()">🖼️ Test Image Pixel</button>
+        <button class="btn" onclick="testBeaconTracking()">📡 Test Beacon</button>
+        <button class="btn" onclick="testMultipleMethods()">🔀 Test All Methods</button>
+        <button class="btn warning" onclick="testErrorScenarios()">⚠️ Test Error Scenarios</button>
+        <button class="btn" onclick="clearLog()">🗑️ Clear Log</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        const MIXPANEL_TOKEN = '8e22b9a79446802234818ec75fbf40f0';
+        let successCount = 0;
+        let errorCount = 0;
+        
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            if (errorCount === 0 && successCount > 0) {
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ ALL TESTS PASSED! ${successCount} successful, 0 errors`;
+            } else if (errorCount > 0) {
+                statusEl.className = 'status error';
+                statusEl.textContent = `❌ ${errorCount} errors found, ${successCount} successful`;
+            } else {
+                statusEl.className = 'status warning';
+                statusEl.textContent = 'Chờ kiểm tra...';
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            successCount = 0;
+            errorCount = 0;
+            updateStatus();
+        }
+        
+        // Image pixel tracking (NO CORS issues)
+        function imagePixelTrack(eventName, properties) {
+            return new Promise((resolve) => {
+                try {
+                    const eventData = {
+                        event: eventName,
+                        properties: {
+                            ...properties,
+                            token: MIXPANEL_TOKEN,
+                            time: Math.floor(Date.now() / 1000),
+                            distinct_id: `anonymous-${Date.now()}`,
+                            $browser: navigator.userAgent,
+                            $current_url: window.location.href,
+                            mp_lib: 'web-image-pixel'
+                        }
+                    };
+                    
+                    const jsonData = JSON.stringify(eventData);
+                    const encodedData = btoa(jsonData);
+                    const img = new Image();
+                    const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}&img=1`;
+                    
+                    log(`🖼️ Sending via image pixel: ${eventName}`, 'info');
+                    
+                    img.onload = () => {
+                        log(`✅ Image pixel success: ${eventName}`, 'success');
+                        successCount++;
+                        updateStatus();
+                        resolve(true);
+                    };
+                    
+                    img.onerror = () => {
+                        log(`❌ Image pixel failed: ${eventName}`, 'error');
+                        errorCount++;
+                        updateStatus();
+                        resolve(false);
+                    };
+                    
+                    img.src = url;
+                    
+                    setTimeout(() => {
+                        log(`⏰ Image pixel timeout: ${eventName}`, 'warning');
+                        resolve(false);
+                    }, 5000);
+                    
+                } catch (error) {
+                    log(`❌ Image pixel error: ${error.message}`, 'error');
+                    errorCount++;
+                    updateStatus();
+                    resolve(false);
+                }
+            });
+        }
+        
+        // Beacon tracking (NO CORS issues)
+        function beaconTrack(eventName, properties) {
+            try {
+                if (!navigator.sendBeacon) {
+                    log(`❌ Beacon not supported in this browser`, 'error');
+                    return false;
+                }
+                
+                const eventData = {
+                    event: eventName,
+                    properties: {
+                        ...properties,
+                        token: MIXPANEL_TOKEN,
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: `anonymous-${Date.now()}`,
+                        mp_lib: 'web-beacon'
+                    }
+                };
+                
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}`;
+                
+                log(`📡 Sending via beacon: ${eventName}`, 'info');
+                
+                const sent = navigator.sendBeacon(url);
+                if (sent) {
+                    log(`✅ Beacon success: ${eventName}`, 'success');
+                    successCount++;
+                    updateStatus();
+                    return true;
+                } else {
+                    log(`❌ Beacon failed: ${eventName}`, 'error');
+                    errorCount++;
+                    updateStatus();
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Beacon error: ${error.message}`, 'error');
+                errorCount++;
+                updateStatus();
+                return false;
+            }
+        }
+        
+        // Test functions
+        async function testImagePixelTracking() {
+            log('🖼️ Testing Image Pixel Tracking...', 'info');
+            await imagePixelTrack('Image Pixel Test', {
+                test_type: 'image_pixel',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        function testBeaconTracking() {
+            log('📡 Testing Beacon Tracking...', 'info');
+            beaconTrack('Beacon Test', {
+                test_type: 'beacon',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        async function testMultipleMethods() {
+            log('🔀 Testing All Methods...', 'info');
+            
+            // Test image pixel
+            await imagePixelTrack('Multi Test - Image', { method: 'image_pixel' });
+            
+            // Wait a bit
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test beacon
+            beaconTrack('Multi Test - Beacon', { method: 'beacon' });
+            
+            // Test multiple events rapidly
+            await imagePixelTrack('Rapid Test 1', { rapid: true });
+            await imagePixelTrack('Rapid Test 2', { rapid: true });
+            await imagePixelTrack('Rapid Test 3', { rapid: true });
+        }
+        
+        async function testErrorScenarios() {
+            log('⚠️ Testing Error Scenarios...', 'warning');
+            
+            // Test with invalid token (should fail gracefully)
+            try {
+                const eventData = {
+                    event: 'Invalid Token Test',
+                    properties: {
+                        token: 'invalid-token',
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: 'test-user'
+                    }
+                };
+                
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                const img = new Image();
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}&img=1`;
+                
+                img.onload = () => log('⚠️ Invalid token test - unexpected success', 'warning');
+                img.onerror = () => log('✅ Invalid token test - correctly failed', 'success');
+                img.src = url;
+                
+            } catch (error) {
+                log(`✅ Error scenario handled: ${error.message}`, 'success');
+            }
+        }
+        
+        // Auto-start
+        log('🌐 Page loaded, ready for testing!', 'info');
+        log(`🔑 Using token: ${MIXPANEL_TOKEN.substring(0, 8)}...`, 'info');
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import SupplementsTopControls from "@/components/ui/SupplementsTopControls";
 import { SupplementsSidebar } from "@/components/ui/SupplementsSidebar";
 import { ProductList } from "@/components/ui/ProductList";
 import { Pagination } from "@/components/ui/Pagination";
+import { trackPageView } from "@/services/analytics";
 
 import { Product } from "@/lib/types";
 import { ProductDto } from "@/lib/adapters";
@@ -212,6 +213,9 @@ export default function SupplementsPage() {
     }
 
     fetchProducts();
+    
+    // Track page view
+    trackPageView('/store/supplements');
   }, []);
 
   // Create stable callback functions to prevent infinite re-renders

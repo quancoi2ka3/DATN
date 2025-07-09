@@ -25,9 +25,9 @@ const PersonalRecommendations = ({ count = 4, title = "Đề xuất dành cho b�
           setRecommendations(data);
           
           // Track impressions for trending products
-          data.forEach(product => {
-            trackRecommendationShown('guest', product.id, 'trending');
-          });
+          for (const product of data) {
+            await trackRecommendationShown('guest', product.id, 'trending');
+          }
           
           return;
         }
@@ -40,9 +40,9 @@ const PersonalRecommendations = ({ count = 4, title = "Đề xuất dành cho b�
         setRecommendations(data);
         
         // Track impressions
-        data.forEach(product => {
-          trackRecommendationShown(user.id, product.id, 'personal');
-        });
+        for (const product of data) {
+          await trackRecommendationShown(user.id, product.id, 'personal');
+        }
         
       } catch (err) {
         console.error('Error fetching recommendations:', err);
@@ -55,11 +55,11 @@ const PersonalRecommendations = ({ count = 4, title = "Đề xuất dành cho b�
     fetchRecommendations();
   }, [user, count]);
 
-  const handleRecommendationClick = (productId) => {
+  const handleRecommendationClick = async (productId) => {
     if (user && user.id) {
-      trackRecommendationClick(user.id, productId, 'personal');
+      await trackRecommendationClick(user.id, productId, 'personal');
     } else {
-      trackRecommendationClick('guest', productId, 'trending');
+      await trackRecommendationClick('guest', productId, 'trending');
     }
   };
 

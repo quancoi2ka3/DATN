@@ -160,9 +160,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Register repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Register memory cache
+// Add memory cache
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheService, CacheService>();
+
+// Add session support for anonymous user carts
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
 
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -362,6 +372,9 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Add session middleware
+app.UseSession();
 
 // Use more permissive CORS in development for testing
 if (app.Environment.IsDevelopment())

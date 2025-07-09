@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Mail, Clock, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 interface EmailVerificationModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
   email,
   onVerificationSuccess,
 }) => {
+  const { loginWithTokenData } = useAuth();
   const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -80,6 +82,13 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
         const data = await response.json();
         console.log('Verification success data:', data);
         setSuccess('Email đã được xác thực thành công!');
+        
+        // Check if backend returned auto-login data
+        if (data.autoLogin && data.token && data.user) {
+          console.log('Auto-login data received, logging in user...');
+          loginWithTokenData(data);
+        }
+        
         setTimeout(() => {
           onVerificationSuccess();
           onClose();

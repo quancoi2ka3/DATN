@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Báo cáo khắc phục lỗi đăng ký & giỏ hàng</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            line-height: 1.6;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            color: #00ff88;
+        }
+        .problem {
+            background: rgba(255, 100, 100, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+        }
+        .solution {
+            background: rgba(100, 255, 100, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #00ff88;
+        }
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .highlight {
+            background: rgba(255, 255, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .checklist {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .checklist ul {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            margin: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .checklist li::before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .test-steps {
+            background: rgba(100, 200, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #4fc3f7;
+        }
+        .test-steps ol {
+            padding-left: 20px;
+        }
+        .test-steps li {
+            margin: 8px 0;
+        }
+        .file-list {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .file-list ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .file-list li {
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Báo cáo khắc phục lỗi đăng ký & giỏ hàng</h1>
+        
+        <div class="problem">
+            <h2>🚨 Vấn đề được báo cáo:</h2>
+            <ol>
+                <li><strong>Đăng ký không tự động đăng nhập:</strong> Sau khi đăng ký thành công và xác thực email, hệ thống yêu cầu người dùng đăng nhập lại thủ công</li>
+                <li><strong>Giỏ hàng có sẵn 3 sản phẩm:</strong> Khi đăng ký tài khoản mới, giỏ hàng mặc định có sẵn 3 sản phẩm mặc dù chưa thêm gì</li>
+            </ol>
+        </div>
+
+        <div class="solution">
+            <h2>🛠️ Giải pháp đã triển khai:</h2>
+            
+            <h3>1. Khắc phục auto-login sau đăng ký</h3>
+            <p>Đã cập nhật backend để tự động đăng nhập người dùng sau khi xác thực email thành công:</p>
+            
+            <div class="code">
+                <strong>File:</strong> AuthController.cs - VerifyEmail method
+                <pre>
+// Thêm auto-login sau khi verify email thành công
+user.LastLogin = DateTime.UtcNow;
+await _userManager.UpdateAsync(user);
+
+// Generate JWT token for auto-login
+var userRoles = await _userManager.GetRolesAsync(user);
+var token = GenerateJwtToken(user, userRoles);
+
+return Ok(new { 
+    message = "Xác thực email thành công! Chào mừng bạn đến với Sun Movement!",
+    <span class="highlight">autoLogin = true,</span>
+    <span class="highlight">token = token,</span>
+    <span class="highlight">expiration = DateTime.UtcNow.AddMinutes(GetJwtDurationInMinutes()),</span>
+    user = new {
+        id = user.Id,
+        email = user.Email,
+        firstName = user.FirstName,
+        lastName = user.LastName,
+        roles = userRoles
+    }
+});
+                </pre>
+            </div>
+            
+            <p>Đã cập nhật frontend để xử lý auto-login:</p>
+            
+            <div class="code">
+                <strong>File:</strong> auth-context.tsx - thêm method loginWithTokenData
+                <pre>
+// Method to handle auto-login with token data (used after email verification)
+const loginWithTokenData = (tokenData: any) => {
+    try {
+        const { token, user } = tokenData;
+        
+        if (!token || !user) {
+            console.error('Invalid token data for auto-login:', tokenData);
+            return;
+        }
+        
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Also set cookie for API routes
+        setCookie("auth-token", token, 7);
+        
+        setAuthState({
+            isAuthenticated: true,
+            user: { /* user data mapping */ },
+            token,
+        });
+        
+        console.log('[AUTH] Auto-login successful for user:', user.email);
+    } catch (error) {
+        console.error("Auto-login failed:", error);
+    }
+};
+                </pre>
+            </div>
+            
+            <div class="code">
+                <strong>File:</strong> EmailVerificationModal.tsx - xử lý auto-login
+                <pre>
+if (response.ok) {
+    const data = await response.json();
+    console.log('Verification success data:', data);
+    setSuccess('Email đã được xác thực thành công!');
+    
+    // <span class="highlight">Check if backend returned auto-login data</span>
+    if (data.autoLogin && data.token && data.user) {
+        console.log('Auto-login data received, logging in user...');
+        <span class="highlight">loginWithTokenData(data);</span>
+    }
+    
+    setTimeout(() => {
+        onVerificationSuccess();
+        onClose();
+    }, 1000);
+}
+                </pre>
+            </div>
+            
+            <h3>2. Khắc phục vấn đề giỏ hàng có sẵn sản phẩm</h3>
+            <p>Nguyên nhân: Hệ thống sử dụng cùng một ID "guest-session" cho tất cả người dùng ẩn danh, dẫn đến chia sẻ giỏ hàng.</p>
+            
+            <p><strong>Giải pháp:</strong> Tạo session ID riêng biệt cho mỗi người dùng ẩn danh:</p>
+            
+            <div class="code">
+                <strong>File:</strong> ShoppingCartController.cs - GetUserId method
+                <pre>
+private string GetUserId()
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+    // If user is authenticated, use their ID
+    if (!string.IsNullOrEmpty(userId))
+    {
+        return userId;
+    }
+    
+    // <span class="highlight">For anonymous users, create a unique session ID</span>
+    // This prevents sharing cart between different anonymous sessions
+    var sessionId = HttpContext.Session.GetString("AnonymousUserId");
+    if (string.IsNullOrEmpty(sessionId))
+    {
+        sessionId = $"anonymous-{Guid.NewGuid()}";
+        HttpContext.Session.SetString("AnonymousUserId", sessionId);
+    }
+    
+    return sessionId;
+}
+                </pre>
+            </div>
+            
+            <div class="code">
+                <strong>File:</strong> Program.cs - thêm session support
+                <pre>
+// Add session support for anonymous user carts
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+// Trong middleware pipeline
+app.UseSession();
+                </pre>
+            </div>
+        </div>
+
+        <div class="checklist">
+            <h2>📋 Files đã được cập nhật:</h2>
+            <div class="file-list">
+                <h3>Backend:</h3>
+                <ul>
+                    <li>SunMovement.Web/Areas/Api/Controllers/AuthController.cs</li>
+                    <li>SunMovement.Web/Areas/Api/Controllers/ShoppingCartController.cs</li>
+                    <li>SunMovement.Web/Areas/Api/Controllers/OrdersController.cs</li>
+                    <li>SunMovement.Web/Program.cs</li>
+                </ul>
+                
+                <h3>Frontend:</h3>
+                <ul>
+                    <li>src/lib/auth-context.tsx</li>
+                    <li>src/components/auth/EmailVerificationModal.tsx</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-steps">
+            <h2>🧪 Hướng dẫn test:</h2>
+            <ol>
+                <li><strong>Khởi động backend:</strong>
+                    <div class="code">cd sun-movement-backend/SunMovement.Web && dotnet run</div>
+                </li>
+                <li><strong>Khởi động frontend:</strong>
+                    <div class="code">cd sun-movement-frontend && npm run dev</div>
+                </li>
+                <li><strong>Test auto-login sau đăng ký:</strong>
+                    <ul>
+                        <li>Truy cập trang đăng ký</li>
+                        <li>Điền thông tin và gửi form</li>
+                        <li>Nhập mã xác thực từ email hoặc console</li>
+                        <li>Xác minh rằng sau khi xác thực thành công, người dùng được tự động đăng nhập</li>
+                        <li>Kiểm tra header để xác nhận hiển thị thông tin người dùng</li>
+                    </ul>
+                </li>
+                <li><strong>Test giỏ hàng trống cho người dùng mới:</strong>
+                    <ul>
+                        <li>Mở trình duyệt mới (hoặc incognito)</li>
+                        <li>Truy cập trang chủ</li>
+                        <li>Kiểm tra giỏ hàng - phải trống</li>
+                        <li>Đăng ký tài khoản mới</li>
+                        <li>Sau khi đăng ký, kiểm tra giỏ hàng vẫn phải trống</li>
+                    </ul>
+                </li>
+                <li><strong>Test giỏ hàng độc lập giữa các session:</strong>
+                    <ul>
+                        <li>Mở 2 tab incognito khác nhau</li>
+                        <li>Thêm sản phẩm vào giỏ hàng ở tab 1</li>
+                        <li>Kiểm tra tab 2 - giỏ hàng phải trống</li>
+                        <li>Đăng ký tài khoản ở tab 2</li>
+                        <li>Giỏ hàng ở tab 2 vẫn phải trống</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="checklist">
+            <h2>✅ Kết quả mong đợi:</h2>
+            <ul>
+                <li>Sau khi đăng ký và xác thực email thành công, người dùng được tự động đăng nhập</li>
+                <li>Giỏ hàng của người dùng mới luôn trống</li>
+                <li>Mỗi session ẩn danh có giỏ hàng riêng biệt</li>
+                <li>Không còn chia sẻ giỏ hàng giữa các người dùng khác nhau</li>
+                <li>Trải nghiệm người dùng mượt mà hơn khi không cần đăng nhập lại sau đăng ký</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; padding: 20px; background: rgba(34, 197, 94, 0.1); border-radius: 10px;">
+            <h2>🎉 Trạng thái: <span style="color: #22c55e;">HOÀN THÀNH</span></h2>
+            <p>Cả hai vấn đề đã được khắc phục thành công. Hệ thống sẵn sàng cho việc testing và sử dụng.</p>
+        </div>
+    </div>
+</body>
+</html>

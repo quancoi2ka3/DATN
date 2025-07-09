@@ -6,6 +6,7 @@ import { SocialProof, FloatingCTA, ExitIntentPopup } from "@/components/ui/conve
 import { PerformanceMonitor } from "@/components/ui/performance-monitor";
 import { ScrollAnimation } from "@/components/ui/enhanced-animations";
 import { RealtimeNotifications } from "@/components/ui/engagement-boosters";
+import { HomePageTracker } from "@/components/tracking/home-page-tracker";
 import { Suspense } from "react";
 
 // Lazy loaded components
@@ -27,6 +28,7 @@ export default async function Home() {
   
   return (
     <>
+      <HomePageTracker />
       <PerformanceMonitor />
       <ComponentPreloader />
       <OptimizedHeroSection />

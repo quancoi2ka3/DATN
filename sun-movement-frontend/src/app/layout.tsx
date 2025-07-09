@@ -135,17 +135,20 @@ export default function RootLayout({
               <ToastProvider>
                 <NotificationProvider>
                   <AuthProvider>
-                    <CartProvider>
-                  <Header />
-                  <main className="flex-grow">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {children}
-                    </Suspense>
-                  </main>
-                  <Footer />
-                  <RasaChatbot />                    <FloatingCart />
-                      <ScrollButtons />
-                    </CartProvider>
+                    <MixpanelProvider>
+                      <CartProvider>
+                        <Header />
+                        <main className="flex-grow">
+                          <Suspense fallback={<LoadingSpinner />}>
+                            {children}
+                          </Suspense>
+                        </main>
+                        <Footer />
+                        <RasaChatbot />
+                        <FloatingCart />
+                        <ScrollButtons />
+                      </CartProvider>
+                    </MixpanelProvider>
                   </AuthProvider>
                 </NotificationProvider>
               </ToastProvider>

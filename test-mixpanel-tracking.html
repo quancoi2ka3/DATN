@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mixpanel Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .test-results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            min-height: 200px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Test Mixpanel Tracking</h1>
+        <p>Trang này dùng để test việc tracking events tới Mixpanel cho dự án Sun Movement.</p>
+        
+        <div class="actions">
+            <h3>Test các sự kiện:</h3>
+            <button class="button" onclick="testPageView()">📄 Test Page View</button>
+            <button class="button" onclick="testSearch()">🔍 Test Search</button>
+            <button class="button" onclick="testProductView()">👕 Test Product View</button>
+            <button class="button" onclick="testAddToCart()">🛒 Test Add to Cart</button>
+            <button class="button" onclick="testPurchase()">💳 Test Purchase</button>
+            <button class="button" onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div class="test-results" id="results">
+            <h4>📊 Kết quả test:</h4>
+            <p class="info">Nhấn các nút bên trên để test tracking events. Results sẽ hiển thị ở đây...</p>
+        </div>
+    </div>
+
+    <!-- Mixpanel Script -->
+    <script>
+        (function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};i="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");for(h=0;h<i.length;h++)c(e,i[h]);a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+        
+        // Initialize Mixpanel with your project token
+        mixpanel.init('8e22b9a79446802234818ec75fbf40f0', {debug: true});
+        
+        // Helper function to log results
+        function logResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            results.innerHTML += `<p class="${color}">[${timestamp}] ${message}</p>`;
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        // Test Page View
+        function testPageView() {
+            try {
+                mixpanel.track('Page View', {
+                    page_url: window.location.href,
+                    page_title: document.title,
+                    timestamp: new Date().toISOString(),
+                    test_event: true
+                });
+                logResult('✅ Page View event tracked successfully!', 'success');
+            } catch (error) {
+                logResult('❌ Page View tracking failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test Search
+        function testSearch() {
+            try {
+                mixpanel.track('Search', {
+                    search_term: 'áo thể thao nam test',
+                    results_count: 15,
+                    timestamp: new Date().toISOString(),
+                    test_event: true
+                });
+                logResult('✅ Search event tracked successfully!', 'success');
+            } catch (error) {
+                logResult('❌ Search tracking failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test Product View
+        function testProductView() {
+            try {
+                mixpanel.track('Product View', {
+                    product_id: 'test-product-123',
+                    product_name: 'Áo Thể Thao Nam Nike Test',
+                    product_price: 500000,
+                    category: 'Áo thể thao',
+                    timestamp: new Date().toISOString(),
+                    test_event: true
+                });
+                logResult('✅ Product View event tracked successfully!', 'success');
+            } catch (error) {
+                logResult('❌ Product View tracking failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test Add to Cart
+        function testAddToCart() {
+            try {
+                mixpanel.track('Add to Cart', {
+                    product_id: 'test-product-123',
+                    product_name: 'Áo Thể Thao Nam Nike Test',
+                    product_price: 500000,
+                    quantity: 2,
+                    timestamp: new Date().toISOString(),
+                    test_event: true
+                });
+                logResult('✅ Add to Cart event tracked successfully!', 'success');
+            } catch (error) {
+                logResult('❌ Add to Cart tracking failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Test Purchase
+        function testPurchase() {
+            try {
+                mixpanel.track('Purchase', {
+                    order_id: 'test-order-' + Date.now(),
+                    total_amount: 1000000,
+                    products: [
+                        {
+                            id: 'test-product-123',
+                            name: 'Áo Thể Thao Nam Nike Test',
+                            price: 500000,
+                            quantity: 2
+                        }
+                    ],
+                    payment_method: 'VNPay',
+                    timestamp: new Date().toISOString(),
+                    test_event: true
+                });
+                logResult('✅ Purchase event tracked successfully!', 'success');
+            } catch (error) {
+                logResult('❌ Purchase tracking failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Clear results
+        function clearResults() {
+            document.getElementById('results').innerHTML = '<h4>📊 Kết quả test:</h4><p class="info">Results cleared. Nhấn các nút bên trên để test tracking events...</p>';
+        }
+        
+        // Auto-track page view when page loads
+        window.addEventListener('load', function() {
+            logResult('🎯 Mixpanel tracking test page loaded', 'info');
+            setTimeout(() => {
+                testPageView();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

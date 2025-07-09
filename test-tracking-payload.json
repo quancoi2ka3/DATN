@@ -1,0 +1,10 @@
+{
+  "eventName": "Test Page View",
+  "distinctId": "test-user-123",
+  "properties": {
+    "page_url": "http://localhost:3000/test",
+    "page_title": "Test Page",
+    "timestamp": "2025-07-09T06:30:00.000Z",
+    "source": "frontend_test"
+  }
+}

@@ -26,6 +26,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithTokenData: (tokenData: any) => void; // For auto-login after verification
   logout: () => void;
   isAdmin: () => boolean;
   isLoading: boolean;
@@ -86,7 +87,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     setIsLoading(false);
-  }, []);  const login = async (email: string, password: string): Promise<boolean> => {
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       // Preserve shopping session before login
       preserveShoppingSession();
@@ -166,6 +169,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Login failed:", error);
       return false;
+    }
+  };
+
+  // Method to handle auto-login with token data (used after email verification)
+  const loginWithTokenData = (tokenData: any) => {
+    try {
+      const { token, user } = tokenData;
+      
+      if (!token || !user) {
+        console.error('Invalid token data for auto-login:', tokenData);
+        return;
+      }
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      
+      // Also set cookie for API routes
+      setCookie("auth-token", token, 7);
+      console.log('[AUTH] Auto-login cookie set for token:', token.substring(0, 20) + '...');
+      
+      setAuthState({
+        isAuthenticated: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          roles: user.roles,
+          phoneNumber: user.phoneNumber,
+          address: user.address,
+          dateOfBirth: user.dateOfBirth,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin,
+          emailConfirmed: user.emailConfirmed
+        },
+        token,
+      });
+      
+      console.log('[AUTH] Auto-login successful for user:', user.email);
+    } catch (error) {
+      console.error("Auto-login failed:", error);
     }
   };
 
@@ -282,6 +326,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ 
       ...authState,
       login,
+      loginWithTokenData,
       logout,
       isAdmin,
       isLoading,

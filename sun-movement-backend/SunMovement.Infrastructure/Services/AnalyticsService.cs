@@ -116,13 +116,13 @@ namespace SunMovement.Infrastructure.Services
             {
                 var metrics = new DashboardMetrics();
                 
-                // Lấy dữ liệu từ Mixpanel
-                var purchaseEvents = await _mixpanelService.GetEventCountByDayAsync("purchase", from, to);
-                var pageViewEvents = await _mixpanelService.GetEventCountByDayAsync("page_view", from, to);
-                var productViewEvents = await _mixpanelService.GetEventCountByDayAsync("view_product", from, to);
-                var newUserEvents = await _mixpanelService.GetEventCountByDayAsync("new_user_registered", from, to);
-                var cartAddEvents = await _mixpanelService.GetEventCountByDayAsync("add_to_cart", from, to);
-                var checkoutEvents = await _mixpanelService.GetEventCountByDayAsync("start_checkout", from, to);
+                // Lấy dữ liệu từ Mixpanel - sử dụng event names đúng từ frontend
+                var purchaseEvents = await _mixpanelService.GetEventCountByDayAsync("Purchase", from, to);
+                var pageViewEvents = await _mixpanelService.GetEventCountByDayAsync("Page View", from, to);
+                var productViewEvents = await _mixpanelService.GetEventCountByDayAsync("Product View", from, to);
+                var newUserEvents = await _mixpanelService.GetEventCountByDayAsync("Sign Up", from, to);
+                var cartAddEvents = await _mixpanelService.GetEventCountByDayAsync("Add to Cart", from, to);
+                var checkoutEvents = await _mixpanelService.GetEventCountByDayAsync("Checkout Started", from, to);
                 
                 // Lấy dữ liệu từ cơ sở dữ liệu
                 var orders = await _unitOfWork.Orders.FindAsync(o => 
@@ -867,7 +867,7 @@ namespace SunMovement.Infrastructure.Services
                 var result = new List<Core.ViewModels.SearchQueryAnalytics>();
                 
                 // Try to get search data from Mixpanel
-                var searchData = await _mixpanelService.GetEventDataAsync("search", DateTime.UtcNow.AddDays(-30), DateTime.UtcNow);
+                var searchData = await _mixpanelService.GetEventDataAsync("Search", DateTime.UtcNow.AddDays(-30), DateTime.UtcNow);
                 
                 if (searchData != null && searchData.Count > 0)
                 {
@@ -895,7 +895,7 @@ namespace SunMovement.Infrastructure.Services
                 {
                     if (item.TryGetValue("properties", out var properties) && properties is Dictionary<string, object> propDict)
                     {
-                        if (propDict.TryGetValue("search_query", out var queryObj))
+                        if (propDict.TryGetValue("search_term", out var queryObj))
                         {
                             var query = queryObj?.ToString()?.ToLower()?.Trim();
                             if (!string.IsNullOrEmpty(query))

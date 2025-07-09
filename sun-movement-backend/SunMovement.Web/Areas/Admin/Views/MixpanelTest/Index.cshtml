@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Mixpanel Test";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-flask me-2"></i>Mixpanel Test Console
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Test Connection</h6>
+                </div>
+                <div class="card-body">
+                    <button id="testConnection" class="btn btn-primary mb-3">
+                        <i class="fas fa-link me-2"></i>Test Mixpanel Connection
+                    </button>
+                    <button id="testEventData" class="btn btn-info mb-3">
+                        <i class="fas fa-data me-2"></i>Test Event Data
+                    </button>
+                    <div id="connectionResults" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Event Logs</h6>
+                </div>
+                <div class="card-body">
+                    <div id="eventLogs" style="max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                        <div class="text-muted">Click test buttons to see results...</div>
+                    </div>
+                    <button id="clearLogs" class="btn btn-sm btn-secondary mt-2">
+                        <i class="fas fa-trash me-1"></i>Clear Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">Current ViewBag Values</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Today Page Views</h5>
+                                    <h3 class="text-primary">@(ViewBag.TodayPageViews ?? "null")</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Today Searches</h5>
+                                    <h3 class="text-success">@(ViewBag.TodaySearches ?? "null")</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h5>Current Time</h5>
+                                    <h6 class="text-info">@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <a href="/admin" class="btn btn-primary">
+                                        <i class="fas fa-tachometer-alt me-1"></i>Back to Dashboard
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testConnectionBtn = document.getElementById('testConnection');
+    const testEventDataBtn = document.getElementById('testEventData');
+    const clearLogsBtn = document.getElementById('clearLogs');
+    const resultsDiv = document.getElementById('connectionResults');
+    const logsDiv = document.getElementById('eventLogs');
+
+    function addLog(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logClass = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = logClass;
+        logEntry.innerHTML = `[${timestamp}] ${message}`;
+        
+        logsDiv.appendChild(logEntry);
+        logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    function showResults(data, title) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-${data.Success ? 'success' : 'danger'}">
+                <h6>${title}</h6>
+                <p><strong>Status:</strong> ${data.Success ? 'Success' : 'Failed'}</p>
+                <p><strong>Message:</strong> ${data.Message}</p>
+                ${data.Data ? `<pre style="font-size: 11px; max-height: 200px; overflow-y: auto;">${JSON.stringify(data.Data, null, 2)}</pre>` : ''}
+                ${data.StackTrace ? `<details><summary>Stack Trace</summary><pre style="font-size: 10px;">${data.StackTrace}</pre></details>` : ''}
+            </div>
+        `;
+    }
+
+    testConnectionBtn.addEventListener('click', async function() {
+        addLog('Testing Mixpanel connection...', 'info');
+        testConnectionBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/Admin/MixpanelTest/TestConnection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            showResults(data, 'Connection Test Results');
+            addLog(`Connection test completed: ${data.Success ? 'SUCCESS' : 'FAILED'}`, data.Success ? 'success' : 'error');
+            
+            if (data.Data) {
+                addLog(`Today Page Views: ${Object.values(data.Data.TodayPageViews || {}).reduce((a, b) => a + b, 0)}`, 'info');
+                addLog(`Today Searches: ${Object.values(data.Data.TodaySearches || {}).reduce((a, b) => a + b, 0)}`, 'info');
+            }
+        } catch (error) {
+            addLog(`Connection test failed: ${error.message}`, 'error');
+            resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        } finally {
+            testConnectionBtn.disabled = false;
+        }
+    });
+
+    testEventDataBtn.addEventListener('click', async function() {
+        addLog('Testing event data retrieval...', 'info');
+        testEventDataBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/Admin/MixpanelTest/TestEventData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            showResults(data, 'Event Data Test Results');
+            addLog(`Event data test completed: ${data.Success ? 'SUCCESS' : 'FAILED'}`, data.Success ? 'success' : 'error');
+            
+            if (data.Data) {
+                addLog(`Search Events: ${data.Data.SearchEvents}`, 'info');
+                addLog(`Page View Events: ${data.Data.PageViewEvents}`, 'info');
+            }
+        } catch (error) {
+            addLog(`Event data test failed: ${error.message}`, 'error');
+            resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+        } finally {
+            testEventDataBtn.disabled = false;
+        }
+    });
+
+    clearLogsBtn.addEventListener('click', function() {
+        logsDiv.innerHTML = '<div class="text-muted">Logs cleared...</div>';
+    });
+
+    // Initial log
+    addLog('Mixpanel Test Console ready', 'success');
+});
+</script>

@@ -1,0 +1,109 @@
+// Test file to debug Mixpanel integration
+// Save this as test-mixpanel.html and open in browser
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mixpanel Test</title>
+</head>
+<body>
+    <h1>Mixpanel Integration Test</h1>
+    <div id="results"></div>
+    
+    <button onclick="testMixpanel()">Test Mixpanel</button>
+    <button onclick="testFallback()">Test Fallback</button>
+    
+    <script>
+        // Your actual Mixpanel token
+        const MIXPANEL_TOKEN = '6a87b4d11fab9c9b8ece4b3d31978893'; // Replace with your actual token
+        
+        function log(message) {
+            const div = document.getElementById('results');
+            div.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + message + '</p>';
+            console.log(message);
+        }
+        
+        // Test direct Mixpanel integration
+        function testMixpanel() {
+            log('Testing Mixpanel...');
+            
+            try {
+                // Load Mixpanel script
+                const script = document.createElement('script');
+                script.src = 'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js';
+                script.onload = function() {
+                    try {
+                        mixpanel.init(MIXPANEL_TOKEN, {
+                            debug: true,
+                            track_pageview: false,
+                            loaded: function() {
+                                log('✅ Mixpanel loaded successfully');
+                                
+                                // Test tracking
+                                mixpanel.track('Test Event', {
+                                    test: true,
+                                    timestamp: new Date(),
+                                    source: 'debug_test'
+                                });
+                                log('✅ Test event sent');
+                            }
+                        });
+                    } catch (error) {
+                        log('❌ Mixpanel error: ' + error.message);
+                    }
+                };
+                script.onerror = function() {
+                    log('❌ Failed to load Mixpanel script');
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                log('❌ Script loading error: ' + error.message);
+            }
+        }
+        
+        // Test fallback API method
+        async function testFallback() {
+            log('Testing fallback API...');
+            
+            try {
+                const data = {
+                    event: 'Test Fallback Event',
+                    properties: {
+                        token: MIXPANEL_TOKEN,
+                        test: true,
+                        timestamp: new Date(),
+                        source: 'fallback_test',
+                        time: Math.floor(Date.now() / 1000)
+                    }
+                };
+                
+                log('Sending to: https://api.mixpanel.com/track');
+                log('Data: ' + JSON.stringify(data, null, 2));
+                
+                const response = await fetch('https://api.mixpanel.com/track', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                log('Response status: ' + response.status);
+                log('Response ok: ' + response.ok);
+                
+                if (response.ok) {
+                    const result = await response.text();
+                    log('✅ Fallback successful: ' + result);
+                } else {
+                    log('❌ Fallback failed: ' + response.statusText);
+                }
+            } catch (error) {
+                log('❌ Fallback error: ' + error.message);
+            }
+        }
+        
+        // Auto start test
+        log('Page loaded, ready to test');
+    </script>
+</body>
+</html>

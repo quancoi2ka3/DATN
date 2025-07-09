@@ -47,7 +47,25 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 }
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                string cartUserId = userId ?? "guest-session"; // Use guest session for cart
+                
+                // Get cart user ID - use session-based ID for anonymous users
+                string cartUserId;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    cartUserId = userId;
+                }
+                else
+                {
+                    // For anonymous users, get session ID
+                    var sessionId = HttpContext.Session.GetString("AnonymousUserId");
+                    if (string.IsNullOrEmpty(sessionId))
+                    {
+                        sessionId = $"anonymous-{Guid.NewGuid()}";
+                        HttpContext.Session.SetString("AnonymousUserId", sessionId);
+                    }
+                    cartUserId = sessionId;
+                }
+                
                 string? orderUserId = userId; // Keep null for order if anonymous
                 
                 // Debug logging

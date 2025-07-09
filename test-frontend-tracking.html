@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend Tracking</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .btn { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 15px 0; border-radius: 5px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Frontend Tracking</h1>
+    <p>Kiểm tra tracking Mixpanel từ frontend mà không cần đăng nhập</p>
+    
+    <div>
+        <button class="btn" onclick="initAndTest()">🚀 Init Mixpanel & Test</button>
+        <button class="btn" onclick="trackPageView()">📄 Track Page View</button>
+        <button class="btn" onclick="trackSearch()">🔍 Track Search</button>
+        <button class="btn" onclick="trackProductView()">👕 Track Product View</button>
+        <button class="btn" onclick="clearLog()">🗑️ Clear Log</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logEl.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Mixpanel token - thay thế bằng token thực của bạn
+        const MIXPANEL_TOKEN = 'f47ac10b58cc4372a5670e02b2c3d479dcd93d'; // Test token
+        
+        // Initialize Mixpanel (simplified version)
+        let mixpanel = null;
+        let mixpanelInitialized = false;
+        
+        function initMixpanel() {
+            try {
+                // Load Mixpanel library if not already loaded
+                if (typeof window.mixpanel === 'undefined') {
+                    log('❌ Mixpanel library not loaded. Using fallback method...', 'error');
+                    mixpanelInitialized = false;
+                    return false;
+                }
+                
+                mixpanel = window.mixpanel;
+                mixpanel.init(MIXPANEL_TOKEN, {
+                    debug: true,
+                    track_pageview: false,
+                    persistence: 'localStorage'
+                });
+                
+                mixpanelInitialized = true;
+                log('✅ Mixpanel initialized successfully', 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Mixpanel init error: ${error.message}`, 'error');
+                mixpanelInitialized = false;
+                return false;
+            }
+        }
+        
+        // Fallback tracking method using GET + base64
+        async function fallbackTrack(eventName, properties) {
+            try {
+                const eventData = {
+                    event: eventName,
+                    properties: {
+                        ...properties,
+                        token: MIXPANEL_TOKEN,
+                        time: Math.floor(Date.now() / 1000),
+                        distinct_id: properties.user_id || `anonymous-${Date.now()}`
+                    }
+                };
+                
+                const jsonData = JSON.stringify(eventData);
+                const encodedData = btoa(jsonData);
+                const url = `https://api.mixpanel.com/track?data=${encodeURIComponent(encodedData)}`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'no-cors'
+                });
+                
+                log(`✅ Fallback tracking sent: ${eventName}`, 'success');
+                return true;
+            } catch (error) {
+                log(`❌ Fallback tracking error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Safe tracking method
+        async function safeMixpanelTrack(eventName, properties = {}) {
+            const enhancedProperties = {
+                ...properties,
+                page_url: window.location.href,
+                user_agent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
+            
+            log(`📤 Tracking event: ${eventName}`, 'info');
+            
+            if (mixpanelInitialized && mixpanel) {
+                try {
+                    mixpanel.track(eventName, enhancedProperties);
+                    log(`✅ Mixpanel track successful: ${eventName}`, 'success');
+                    return true;
+                } catch (error) {
+                    log(`❌ Mixpanel track error: ${error.message}`, 'error');
+                }
+            }
+            
+            // Fallback
+            log(`🔄 Using fallback tracking for: ${eventName}`, 'info');
+            return await fallbackTrack(eventName, enhancedProperties);
+        }
+        
+        // Test functions
+        async function initAndTest() {
+            log('🚀 Initializing Mixpanel...', 'info');
+            
+            // Try to load Mixpanel if not loaded
+            if (typeof window.mixpanel === 'undefined') {
+                log('📦 Loading Mixpanel library...', 'info');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js';
+                script.onload = () => {
+                    log('✅ Mixpanel library loaded', 'success');
+                    initMixpanel();
+                };
+                script.onerror = () => {
+                    log('❌ Failed to load Mixpanel library', 'error');
+                };
+                document.head.appendChild(script);
+            } else {
+                initMixpanel();
+            }
+            
+            // Test connection
+            setTimeout(async () => {
+                await safeMixpanelTrack('Connection Test', {
+                    test: true,
+                    source: 'test_page'
+                });
+            }, 1000);
+        }
+        
+        async function trackPageView() {
+            await safeMixpanelTrack('Page View', {
+                page_name: 'Test Page',
+                url: window.location.href,
+                referrer: document.referrer || 'direct'
+            });
+        }
+        
+        async function trackSearch() {
+            await safeMixpanelTrack('Search', {
+                search_term: 'test search',
+                results_count: 10,
+                user_id: 'test_user'
+            });
+        }
+        
+        async function trackProductView() {
+            await safeMixpanelTrack('Product View', {
+                product_id: 'TEST_001',
+                product_name: 'Test Product',
+                price: 99.99,
+                category: 'Test Category'
+            });
+        }
+        
+        // Auto-init on page load
+        log('🌐 Page loaded. Ready for testing!', 'info');
+    </script>
+</body>
+</html>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, CreditCard, Calendar, Hash, ShoppingBag } from 'lucide-react';
+import { trackPurchase, trackPageView } from '@/services/analytics';
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
@@ -21,12 +22,26 @@ export default function CheckoutSuccessPage() {
     const transactionId = searchParams.get('transactionId') || searchParams.get('vnp_TransactionNo');
     
     if (orderId) {
-      setOrderInfo({
+      const orderData = {
         orderId,
         paymentMethod: paymentMethod || 'unknown',
         transactionId: transactionId || undefined,
         message: getSuccessMessage(paymentMethod)
-      });
+      };
+      
+      setOrderInfo(orderData);
+      
+      // Track page view
+      trackPageView('/checkout/success');
+      
+      // Track purchase completion
+      const order = {
+        id: orderId,
+        items: [], // Would need to be passed from previous page or fetched
+        totalAmount: 0, // Would need to be passed from previous page or fetched
+      };
+      
+      trackPurchase('anonymous', order);
     }
   }, [searchParams]);
 

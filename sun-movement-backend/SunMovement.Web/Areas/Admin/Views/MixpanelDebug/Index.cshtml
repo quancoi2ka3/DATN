@@ -1,0 +1,147 @@
+@{
+    ViewData["Title"] = "Mixpanel Debug";
+    var testResults = ViewBag.TestResults as Dictionary<string, object>;
+    bool success = testResults != null && (bool)(testResults.GetValueOrDefault("Success", false));
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">🧪 Mixpanel Debug</h1>
+    </div>
+
+    @if (success)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> Mixpanel API connection successful!
+        </div>
+
+        <div class="row">
+            <!-- Today's Data -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Today (@testResults["TestDate"])</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Page Views:</strong></td>
+                                <td>@testResults["TodayPageViewsCount"]</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Searches:</strong></td>
+                                <td>@testResults["TodaySearchesCount"]</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Test Events:</strong></td>
+                                <td>@testResults["TodayTestEventsCount"]</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Connection Tests:</strong></td>
+                                <td>@testResults["TodayConnectionTestsCount"]</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yesterday's Data -->
+            <div class="col-md-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-info">Yesterday (@testResults["YesterdayDate"])</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Page Views:</strong></td>
+                                <td>@testResults["YesterdayPageViewsCount"]</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Searches:</strong></td>
+                                <td>@testResults["YesterdaySearchesCount"]</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw Data -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-secondary">Raw Mixpanel Data</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Today's Page Views Data:</h6>
+                        <pre class="bg-light p-2 small">@System.Text.Json.JsonSerializer.Serialize(testResults["TodayPageViews"], new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre>
+                        
+                        <h6>Today's Searches Data:</h6>
+                        <pre class="bg-light p-2 small">@System.Text.Json.JsonSerializer.Serialize(testResults["TodaySearches"], new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Today's Test Events Data:</h6>
+                        <pre class="bg-light p-2 small">@System.Text.Json.JsonSerializer.Serialize(testResults["TodayTestEvents"], new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre>
+                        
+                        <h6>Today's Connection Tests Data:</h6>
+                        <pre class="bg-light p-2 small">@System.Text.Json.JsonSerializer.Serialize(testResults["TodayConnectionTests"], new System.Text.Json.JsonSerializerOptions { WriteIndented = true })</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> Mixpanel API connection failed!
+            @if (testResults != null && testResults.ContainsKey("Error"))
+            {
+                <br><strong>Error:</strong> @testResults["Error"]
+                
+                @if (testResults.ContainsKey("ErrorDetails"))
+                {
+                    <details class="mt-2">
+                        <summary>Show Error Details</summary>
+                        <pre class="bg-light p-2 mt-2 small">@testResults["ErrorDetails"]</pre>
+                    </details>
+                }
+            }
+        </div>
+    }
+
+    <!-- Action Buttons -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-warning">Actions</h6>
+        </div>
+        <div class="card-body">
+            <a href="/admin/mixpaneldebug" class="btn btn-primary">
+                <i class="fas fa-sync"></i> Refresh Test
+            </a>
+            <a href="/admin" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="/debug-analytics" target="_blank" class="btn btn-info">
+                <i class="fas fa-external-link-alt"></i> Open Frontend Debug
+            </a>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-success">Debug Instructions</h6>
+        </div>
+        <div class="card-body">
+            <ol>
+                <li><strong>Send Test Events:</strong> Go to <a href="http://localhost:3000/debug-analytics" target="_blank">Frontend Debug Page</a> and click "Test Connection", "Test Page View", "Test Search"</li>
+                <li><strong>Check Mixpanel Live View:</strong> Visit <a href="https://eu.mixpanel.com/project/3781876/view/4278692/app/events" target="_blank">Mixpanel Dashboard</a></li>
+                <li><strong>Wait for Processing:</strong> Events may take 1-2 minutes to appear in Mixpanel API</li>
+                <li><strong>Refresh This Page:</strong> Click "Refresh Test" to see updated data</li>
+                <li><strong>Check Admin Dashboard:</strong> Go to <a href="/admin">Admin Dashboard</a> to see if data appears</li>
+            </ol>
+        </div>
+    </div>
+</div>

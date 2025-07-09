@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Mixpanel Events</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>🧪 Mixpanel Events Test</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Send Test Events to Mixpanel</h5>
+                    </div>
+                    <div class="card-body">
+                        <button id="sendPageView" class="btn btn-primary mb-2">Send Page View Event</button>
+                        <button id="sendSearch" class="btn btn-success mb-2">Send Search Event</button>
+                        <button id="checkData" class="btn btn-info mb-2">Check Current Data</button>
+                        <button id="openAdmin" class="btn btn-warning mb-2">Open Admin Dashboard</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="results" style="max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                            <div class="text-muted">Click buttons to test...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info mt-3">
+            <h6>Instructions:</h6>
+            <ol>
+                <li>Click "Send Page View Event" or "Send Search Event" to send events to Mixpanel</li>
+                <li>Wait 1-2 minutes for Mixpanel to process the events</li>
+                <li>Click "Check Current Data" to see if events are retrieved from Mixpanel</li>
+                <li>Click "Open Admin Dashboard" to see if data appears on dashboard</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'text-danger' : type === 'success' ? 'text-success' : 'text-info';
+            
+            const resultsDiv = document.getElementById('results');
+            const logEntry = document.createElement('div');
+            logEntry.className = color;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            resultsDiv.appendChild(logEntry);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        document.getElementById('sendPageView').addEventListener('click', async function() {
+            try {
+                addLog('Sending Page View event...', 'info');
+                const response = await fetch('/Admin/TestEvents/SendPageView', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                addLog(`Page View: ${result.success ? 'SUCCESS' : 'FAILED'} - ${result.message}`, result.success ? 'success' : 'error');
+            } catch (error) {
+                addLog(`Page View failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('sendSearch').addEventListener('click', async function() {
+            try {
+                addLog('Sending Search event...', 'info');
+                const response = await fetch('/Admin/TestEvents/SendSearch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await response.json();
+                addLog(`Search: ${result.success ? 'SUCCESS' : 'FAILED'} - ${result.message}`, result.success ? 'success' : 'error');
+            } catch (error) {
+                addLog(`Search failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('checkData').addEventListener('click', async function() {
+            try {
+                addLog('Checking current data...', 'info');
+                const response = await fetch('/Admin/TestEvents/CheckData');
+                const result = await response.json();
+                
+                if (result.success) {
+                    addLog(`Data Check SUCCESS:`, 'success');
+                    addLog(`  Date: ${result.date}`, 'info');
+                    addLog(`  Page Views: ${result.pageViewsCount}`, 'info');
+                    addLog(`  Searches: ${result.searchesCount}`, 'info');
+                    addLog(`  Total Events: ${result.totalEvents}`, 'info');
+                    
+                    if (result.totalEvents > 0) {
+                        addLog(`✅ Found ${result.totalEvents} events in Mixpanel!`, 'success');
+                    } else {
+                        addLog(`⚠️ No events found for today`, 'error');
+                    }
+                } else {
+                    addLog(`Data Check FAILED: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Data check failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('openAdmin').addEventListener('click', function() {
+            window.open('/admin', '_blank');
+        });
+
+        // Initial message
+        addLog('Test page loaded. Ready to test Mixpanel integration.', 'success');
+    </script>
+</body>
+</html>

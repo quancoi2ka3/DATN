@@ -51,12 +51,20 @@ Lưu ý: Hành động này không thể hoàn tác!
     setIsLoading(true);
     try {
       console.log('[ORDER ACTIONS] Confirming order received:', orderId);
-      
+      // Lấy JWT từ localStorage
+      let token: string | null = null;
+      if (typeof window !== 'undefined') {
+        token = localStorage.getItem('token');
+      }
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const response = await fetch(`/api/orders/${orderId}/confirm-received`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       console.log('[ORDER ACTIONS] Confirm received response status:', response.status);
@@ -64,24 +72,24 @@ Lưu ý: Hành động này không thể hoàn tác!
       if (response.ok) {
         const result = await response.json();
         console.log('[ORDER ACTIONS] Confirm received result:', result);
-        
         showSuccess('🎉 Cảm ơn bạn đã xác nhận nhận hàng! Đơn hàng đã hoàn thành và thanh toán đã được xác nhận.');
-        
         // Log before calling onOrderUpdated
         console.log('[ORDER ACTIONS] Calling onOrderUpdated to refresh order details');
-        
         // Wait a bit for backend to complete transaction
         setTimeout(async () => {
           console.log('[ORDER ACTIONS] Refreshing order details after confirm');
           onOrderUpdated?.();
-          
           // Check if order still exists after a delay
           setTimeout(async () => {
             try {
+              const checkHeaders: Record<string, string> = {};
+              if (token) {
+                checkHeaders['Authorization'] = `Bearer ${token}`;
+              }
               const checkResponse = await fetch(`/api/order?id=${orderId}&_t=${Date.now()}`, {
-                cache: 'no-store'
+                cache: 'no-store',
+                headers: checkHeaders,
               });
-              
               if (!checkResponse.ok) {
                 console.warn('[ORDER ACTIONS] Order not accessible after confirm - forcing page reload');
                 window.location.reload();
@@ -110,11 +118,20 @@ Lưu ý: Hành động này không thể hoàn tác!
 
     setIsLoading(true);
     try {
+      // Lấy JWT từ localStorage
+      let token: string | null = null;
+      if (typeof window !== 'undefined') {
+        token = localStorage.getItem('token');
+      }
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const response = await fetch(`/api/orders/${orderId}/cancel`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (response.ok) {

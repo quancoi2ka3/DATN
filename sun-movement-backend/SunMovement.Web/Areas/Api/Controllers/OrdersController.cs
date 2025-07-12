@@ -33,13 +33,21 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
         // POST: api/orders/checkout
         [HttpPost("checkout")]
-        [AllowAnonymous] // Allow anonymous access for testing
+        [Authorize(AuthenticationSchemes = "MultiScheme")] // Require authentication via JWT or Cookie, ưu tiên JWT
         public async Task<ActionResult<object>> ProcessCheckout(CheckoutCreateModel checkoutModel)
         {
+            Console.WriteLine("[CHECKOUT DEBUG] --- BEGIN ---");
+            Console.WriteLine($"[CHECKOUT DEBUG] Authorization header: {Request.Headers["Authorization"]}");
+            Console.WriteLine($"[CHECKOUT DEBUG] User.Identity.IsAuthenticated: {User.Identity?.IsAuthenticated}");
+            Console.WriteLine($"[CHECKOUT DEBUG] User.Claims count: {User.Claims.Count()}");
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"[CHECKOUT DEBUG] CLAIM {claim.Type}: {claim.Value}");
+            }
             try
             {
                 Console.WriteLine("[CHECKOUT DEBUG] ProcessCheckout started");
-                
+
                 if (!ModelState.IsValid)
                 {
                     Console.WriteLine("[CHECKOUT DEBUG] ModelState invalid");
@@ -47,27 +55,16 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 }
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
-                // Get cart user ID - use session-based ID for anonymous users
-                string cartUserId;
-                if (!string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(userId))
                 {
-                    cartUserId = userId;
+                    // Should never happen due to [Authorize], but double check
+                    return Unauthorized("Bạn cần đăng nhập để đặt hàng.");
                 }
-                else
-                {
-                    // For anonymous users, get session ID
-                    var sessionId = HttpContext.Session.GetString("AnonymousUserId");
-                    if (string.IsNullOrEmpty(sessionId))
-                    {
-                        sessionId = $"anonymous-{Guid.NewGuid()}";
-                        HttpContext.Session.SetString("AnonymousUserId", sessionId);
-                    }
-                    cartUserId = sessionId;
-                }
-                
-                string? orderUserId = userId; // Keep null for order if anonymous
-                
+
+                // CartUserId và OrderUserId đều là userId đã đăng nhập
+                var cartUserId = userId;
+                var orderUserId = userId;
+
                 // Debug logging
                 Console.WriteLine($"[CHECKOUT DEBUG] UserId: {userId}");
                 Console.WriteLine($"[CHECKOUT DEBUG] CartUserId: {cartUserId}");
@@ -76,7 +73,6 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 // Get user's cart
                 var cartService = HttpContext.RequestServices.GetRequiredService<IShoppingCartService>();
                 var cart = await cartService.GetCartWithItemsAsync(cartUserId);
-                
                 if (cart == null || !cart.Items.Any())
                 {
                     Console.WriteLine("[CHECKOUT DEBUG] Cart is empty");
@@ -92,7 +88,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     if (cartItem.ProductId.HasValue)
                     {
                         var product = await _unitOfWork.Products.GetByIdAsync(cartItem.ProductId.Value);
-                        
+
                         if (product == null)
                         {
                             Console.WriteLine($"[CHECKOUT DEBUG] Product not found: {cartItem.ProductId}");
@@ -101,7 +97,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
                         var unitPrice = product.DiscountPrice ?? product.Price;
                         var subtotal = unitPrice * cartItem.Quantity;
-                        totalAmount += subtotal;                        orderItems.Add(new OrderItem
+                        totalAmount += subtotal; orderItems.Add(new OrderItem
                         {
                             ProductId = cartItem.ProductId.Value,
                             ProductName = product.Name,
@@ -130,7 +126,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 var dbContext = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
                 dbContext.Orders.Add(order);
                 await dbContext.SaveChangesAsync();
-                
+
                 Console.WriteLine($"[CHECKOUT DEBUG] Order saved with ID: {order.Id}");
 
                 // Now add OrderItems with the correct OrderId
@@ -138,10 +134,10 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 {
                     item.OrderId = order.Id;
                 }
-                
+
                 dbContext.OrderItems.AddRange(orderItems);
                 await dbContext.SaveChangesAsync();
-                
+
                 Console.WriteLine($"[CHECKOUT DEBUG] Order and items saved successfully");
 
                 // Clear the cart after successful order
@@ -150,7 +146,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 Console.WriteLine($"[CHECKOUT DEBUG] Payment method: {checkoutModel.PaymentMethod}");
 
                 // Handle VNPay payment
-                if (checkoutModel.PaymentMethod.Equals("vnpay", StringComparison.OrdinalIgnoreCase) || 
+                if (checkoutModel.PaymentMethod.Equals("vnpay", StringComparison.OrdinalIgnoreCase) ||
                     checkoutModel.PaymentMethod.Equals("vnpay_qr", StringComparison.OrdinalIgnoreCase))
                 {
                     try
@@ -158,7 +154,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
                         Console.WriteLine("[CHECKOUT DEBUG] Creating VNPay payment URL");
                         var paymentUrl = await _vnPayService.CreatePaymentUrl(order, HttpContext);
                         Console.WriteLine($"[CHECKOUT DEBUG] VNPay payment URL created: {paymentUrl}");
-                        
+
                         // Send confirmation email (optional)
                         try
                         {
@@ -170,8 +166,9 @@ namespace SunMovement.Web.Areas.Api.Controllers
                             Console.WriteLine($"[EMAIL ERROR] {ex.Message}");
                         }
 
-                        return Ok(new { 
-                            success = true, 
+                        return Ok(new
+                        {
+                            success = true,
                             order = order,
                             paymentUrl = paymentUrl
                         });
@@ -179,10 +176,11 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[VNPAY ERROR] {ex.Message}");
-                        return StatusCode(500, new { 
-                            success = false, 
-                            error = "Failed to create VNPay payment URL", 
-                            message = ex.Message 
+                        return StatusCode(500, new
+                        {
+                            success = false,
+                            error = "Failed to create VNPay payment URL",
+                            message = ex.Message
                         });
                     }
                 }
@@ -205,10 +203,11 @@ namespace SunMovement.Web.Areas.Api.Controllers
             {
                 Console.WriteLine($"[CHECKOUT ERROR] {ex.Message}");
                 Console.WriteLine($"[CHECKOUT ERROR] StackTrace: {ex.StackTrace}");
-                return StatusCode(500, new { 
-                    success = false, 
-                    error = "Internal server error", 
-                    message = ex.Message 
+                return StatusCode(500, new
+                {
+                    success = false,
+                    error = "Internal server error",
+                    message = ex.Message
                 });
             }
         }        // POST: api/orders/test-checkout
@@ -594,15 +593,15 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     }
                 }
                 
+                Console.WriteLine("[ORDER DETAIL API] --- BEGIN ---");
+                Console.WriteLine($"[ORDER DETAIL API] Authorization header: {Request.Headers["Authorization"]}");
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 Console.WriteLine($"[ORDER DETAIL API] User authenticated: {User.Identity?.IsAuthenticated}");
                 Console.WriteLine($"[ORDER DETAIL API] User ID: {userId ?? "null"}");
                 Console.WriteLine($"[ORDER DETAIL API] User claims count: {User.Claims.Count()}");
-                
-                // Debug user claims
-                foreach (var claim in User.Claims.Take(5))
+                foreach (var claim in User.Claims)
                 {
-                    Console.WriteLine($"  Claim: {claim.Type} = {claim.Value}");
+                    Console.WriteLine($"[ORDER DETAIL API] CLAIM {claim.Type}: {claim.Value}");
                 }
 
                 if (!int.TryParse(id, out int orderId))

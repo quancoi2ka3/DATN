@@ -10,7 +10,12 @@ export async function GET(request: NextRequest) {
     // Get auth token from cookies
     const cookieStore = await cookies();
     const authCookie = cookieStore.get('auth-token');
-    
+    const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  };
     console.log('[ORDERS API] Auth token:', authCookie?.value ? 'found' : 'not found');
 
     // Try multiple API URLs

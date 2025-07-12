@@ -102,7 +102,7 @@ export default function EventsPage() {
     <div className="min-h-screen bg-slate-950">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-slate-900 via-slate-950 to-black py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-10"></div>
+        <div className="absolute inset-0 bg-[url('/images/dichvu/Strength-Thumb.webp')] bg-repeat opacity-10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
         
@@ -305,7 +305,7 @@ export default function EventsPage() {
                   <div className="mt-auto">
                     <Button 
                       variant="outline" 
-                      className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-red-500"
+                      className="w-full bg-red-500 hover:bg-red-600 text-white"
                       asChild
                     >
                       <Link 

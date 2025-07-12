@@ -9,20 +9,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Checkout API - Request body:', body);
     
-    // Extract cookies from incoming request to forward to API
+    // Extract cookies and Authorization header from incoming request to forward to API
     const cookies = request.headers.get('cookie') || '';
+    const authHeader = request.headers.get('authorization') || '';
     console.log('Checkout API - Cookies:', cookies);
-    
+    console.log('Checkout API - Authorization:', authHeader);
+
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
       console.log('Checkout API - Trying:', `${apiUrl}/api/orders/checkout`);
-      
+
+      // Forward both Cookie and Authorization header if present
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cookie': cookies,
+      };
+      if (authHeader) {
+        headers['Authorization'] = authHeader;
+      }
+
       const response = await fetch(`${apiUrl}/api/orders/checkout`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': cookies,
-        },
+        headers,
         body: JSON.stringify(body),
         credentials: 'include',
       });

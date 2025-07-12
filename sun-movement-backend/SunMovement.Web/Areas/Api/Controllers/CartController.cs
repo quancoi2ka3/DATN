@@ -4,6 +4,7 @@ using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Infrastructure.Services;
 using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace SunMovement.Web.Areas.Api.Controllers
 {
@@ -25,13 +26,17 @@ namespace SunMovement.Web.Areas.Api.Controllers
             _couponService = couponService;
             _logger = logger;
         }
-
+        private string? GetUserId()
+        {
+            return User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
         [HttpPost("validate-coupon")]
         public async Task<IActionResult> ValidateCoupon([FromBody] ValidateCouponRequest request)
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { error = "User not authenticated" });
@@ -81,7 +86,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { error = "User not authenticated" });
@@ -166,7 +171,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
         {
             try
             {
-                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
                     return Unauthorized(new { error = "User not authenticated" });
@@ -215,6 +220,7 @@ namespace SunMovement.Web.Areas.Api.Controllers
             }
         }
     }
+    
 
     // Request models
     public class ValidateCouponRequest

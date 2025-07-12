@@ -13,7 +13,7 @@ namespace SunMovement.Core.DTOs
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
         public decimal Subtotal => UnitPrice * Quantity;
-        public ProductDto Product { get; set; }
-        public ServiceDto Service { get; set; }
+        public ProductDto? Product { get; set; }
+        public ServiceDto? Service { get; set; }
     }
 }

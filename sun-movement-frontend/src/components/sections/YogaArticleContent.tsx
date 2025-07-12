@@ -62,7 +62,7 @@ export default function YogaArticleContent() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-500/10 z-0"></div>
-        <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5 z-0"></div>
+        <div className="absolute inset-0 bg-[url('/images/dichvu/Yoga-Thumb.webp')] bg-repeat opacity-5 z-0"></div>
         
         <div className="container relative z-10 py-16 md:py-24">
           <div className="max-w-4xl mx-auto text-center mb-16">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import { ErrorBoundary } from "./error-boundary";
 import { OptimizedImage } from "./optimized-image";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
@@ -47,7 +48,8 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
   };
 
   return (
-    <>
+    <ErrorBoundary>
+      <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
         <div className="relative aspect-square overflow-hidden rounded-lg">
           <OptimizedImage
@@ -249,6 +251,7 @@ export default function ProductDetailModal({ product, onAddToCart }: ProductDeta
           </Suspense>
         </div>
       </div>
-    </>
+      </>
+    </ErrorBoundary>
   );
 }

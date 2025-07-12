@@ -6,20 +6,34 @@ export async function GET(request: Request) {
   const httpUrl = 'http://localhost:5000';
   
   try {
+    console.log('Headers nhận được (GET):', Object.fromEntries(request.headers.entries()));
     // Extract cookies from incoming request to forward to API
     const cookies = request.headers.get('cookie') || '';
+    let authHeader = request.headers.get('authorization') || '';
+    // Nếu không có Authorization header, lấy từ cookie auth-token
+    if (!authHeader && cookies) {
+      const match = cookies.match(/auth-token=([^;]+)/);
+      if (match) {
+        authHeader = `Bearer ${match[1]}`;
+        console.log('Cart GET API - Lấy Authorization từ cookie:', authHeader);
+      }
+    }
     console.log('Cart GET API - Cookies:', cookies);
+    console.log('Cart GET API - Auth Header:', authHeader ? 'Present' : 'Not present');
     
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
-      console.log('Cart GET API - Trying:', `${apiUrl}/api/ShoppingCart/items`);
+      console.log('Cart GET API - Trying:', `${apiUrl}/api/cart/items`);
       
-      const response = await fetch(`${apiUrl}/api/ShoppingCart/items`, {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cookie': cookies,
+        ...(authHeader ? { 'Authorization': authHeader } : {})
+      };
+      
+      const response = await fetch(`${apiUrl}/api/cart/items`, {
         cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': cookies,
-        },
+        headers,
         credentials: 'include',
       });
 
@@ -84,28 +98,38 @@ export async function POST(request: Request) {
   const httpUrl = 'http://localhost:5000';
   
   try {
+    console.log('Headers nhận được (POST):', Object.fromEntries(request.headers.entries()));
     const body = await request.json();
-    console.log('Cart API - Request body:', body);
-    
-    // Extract cookies from incoming request to forward to API
+    // Extract cookies and Authorization header from incoming request to forward to API
     const cookies = request.headers.get('cookie') || '';
-    console.log('Cart API - Cookies:', cookies);
-    
+    let authHeader = request.headers.get('authorization') || '';
+    // Nếu không có Authorization header, lấy từ cookie auth-token
+    if (!authHeader && cookies) {
+      const match = cookies.match(/auth-token=([^;]+)/);
+      if (match) {
+        authHeader = `Bearer ${match[1]}`;
+        console.log('Cart POST API - Lấy Authorization từ cookie:', authHeader);
+      }
+    }
+    console.log('Cart POST API - Request body:', body);
+    console.log('Cart POST API - Cookies nhận được từ client:', cookies);
+    console.log('Cart POST API - Authorization header nhận được từ client:', authHeader);
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
-      console.log('Cart API - Trying:', `${apiUrl}/api/ShoppingCart/items`);
-      
-      const response = await fetch(`${apiUrl}/api/ShoppingCart/items`, {
+      console.log('Cart POST API - Forwarding tới backend:', `${apiUrl}/api/cart/items`);
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cookie': cookies,
+        ...(authHeader ? { 'Authorization': authHeader } : {})
+      };
+      console.log('Cart POST API - Headers forward sang backend:', headers);
+      const response = await fetch(`${apiUrl}/api/cart/items`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': cookies,
-        },
+        headers,
         body: JSON.stringify(body),
         credentials: 'include',
       });
-
-      console.log(`Cart API - Response from ${apiUrl}:`, response.status);
+      console.log(`Cart POST API - Response from ${apiUrl}:`, response.status);
       return response;
     };
     
@@ -207,23 +231,35 @@ export async function DELETE(request: Request) {
   }
   
   try {
-    // Extract cookies from incoming request to forward to API
+    console.log('Headers nhận được (DELETE):', Object.fromEntries(request.headers.entries()));
+    // Extract cookies and Authorization header from incoming request to forward to API
     const cookies = request.headers.get('cookie') || '';
-    console.log('Cart DELETE API - ItemId:', itemId, 'Cookies:', cookies);
-    
+    let authHeader = request.headers.get('authorization') || '';
+    // Nếu không có Authorization header, lấy từ cookie auth-token
+    if (!authHeader && cookies) {
+      const match = cookies.match(/auth-token=([^;]+)/);
+      if (match) {
+        authHeader = `Bearer ${match[1]}`;
+        console.log('Cart DELETE API - Lấy Authorization từ cookie:', authHeader);
+      }
+    }
+    console.log('Cart DELETE API - ItemId:', itemId);
+    console.log('Cart DELETE API - Cookies nhận được từ client:', cookies);
+    console.log('Cart DELETE API - Authorization header nhận được từ client:', authHeader);
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
-      console.log('Cart DELETE API - Trying:', `${apiUrl}/api/ShoppingCart/items/${itemId}`);
-      
-      const response = await fetch(`${apiUrl}/api/ShoppingCart/items/${itemId}`, {
+      console.log('Cart DELETE API - Forwarding tới backend:', `${apiUrl}/api/cart/items/${itemId}`);
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cookie': cookies,
+        ...(authHeader ? { 'Authorization': authHeader } : {})
+      };
+      console.log('Cart DELETE API - Headers forward sang backend:', headers);
+      const response = await fetch(`${apiUrl}/api/cart/items/${itemId}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': cookies,
-        },
+        headers,
         credentials: 'include',
       });
-
       console.log(`Cart DELETE API - Response from ${apiUrl}:`, response.status);
       return response;
     };
@@ -283,6 +319,7 @@ export async function PUT(request: Request) {
   const httpUrl = 'http://localhost:5000';
   
   try {
+    console.log('Headers nhận được (PUT):', Object.fromEntries(request.headers.entries()));
     const body = await request.json();
     console.log('Cart PUT API - Request body:', body);
     
@@ -292,18 +329,28 @@ export async function PUT(request: Request) {
     
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
-      console.log('Cart PUT API - Trying:', `${apiUrl}/api/ShoppingCart/items`);
+      console.log('Cart PUT API - Trying:', `${apiUrl}/api/cart/items`);
       
-      const response = await fetch(`${apiUrl}/api/ShoppingCart/items`, {
+      let authHeader = request.headers.get('authorization') || '';
+      // Nếu không có Authorization header, lấy từ cookie auth-token
+      if (!authHeader && cookies) {
+        const match = cookies.match(/auth-token=([^;]+)/);
+        if (match) {
+          authHeader = `Bearer ${match[1]}`;
+          console.log('Cart PUT API - Lấy Authorization từ cookie:', authHeader);
+        }
+      }
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cookie': cookies,
+        ...(authHeader ? { 'Authorization': authHeader } : {})
+      };
+      const response = await fetch(`${apiUrl}/api/cart/items`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': cookies,
-        },
+        headers,
         body: JSON.stringify(body),
         credentials: 'include',
       });
-
       console.log(`Cart PUT API - Response from ${apiUrl}:`, response.status);
       return response;
     };

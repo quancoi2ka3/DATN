@@ -8,7 +8,26 @@ export async function GET(
     // Extract orderId from URL pathname
     const pathname = request.nextUrl.pathname;
     const orderId = pathname.split('/').pop();
-    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    };
+
+    // Forward cookies for authentication
+    const clientCookies = request.headers.get('cookie');
+    if (clientCookies) {
+      headers['Cookie'] = clientCookies;
+      console.log('[ORDER DETAIL API] Forwarding cookies to backend');
+    }
+
+    // Forward Authorization header if present
+    const authHeader = request.headers.get('authorization');
+    if (authHeader) {
+      headers['Authorization'] = authHeader;
+      console.log('[ORDER DETAIL API] Forwarding Authorization header to backend');
+    }
     console.log('[ORDER DETAIL API] GET request for orderId:', orderId);
 
     if (!orderId || orderId === 'undefined') {
@@ -26,9 +45,7 @@ export async function GET(
     
     const response = await fetch(`${backendUrl}/api/orders/${orderId}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers
     });
 
     console.log('[ORDER DETAIL API] Backend response status:', response.status);

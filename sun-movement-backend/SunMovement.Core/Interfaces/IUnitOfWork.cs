@@ -39,5 +39,6 @@ namespace SunMovement.Core.Interfaces
         /// Clears all repository caches
         /// </summary>
         void ClearCache();
+        object GetDbContext();
     }
 }

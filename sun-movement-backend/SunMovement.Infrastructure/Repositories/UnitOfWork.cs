@@ -143,5 +143,10 @@ namespace SunMovement.Infrastructure.Repositories
         {
             return await CompleteAsync();
         }
+
+        public object GetDbContext()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

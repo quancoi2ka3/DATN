@@ -62,11 +62,14 @@ const EnhancedCartContext = createContext<EnhancedCartContextType | undefined>(u
 // Enhanced coupon service functions
 const validateCouponAPI = async (couponCode: string, orderTotal: number, items: CartItem[]): Promise<CouponValidationResult> => {
   try {
+    let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch('/api/cart/validate-coupon', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         couponCode,
         orderTotal,
@@ -96,11 +99,14 @@ const validateCouponAPI = async (couponCode: string, orderTotal: number, items: 
 
 const applyCouponAPI = async (couponCode: string, cartItems: CartItem[]): Promise<{ success: boolean; items?: EnhancedCartItem[]; error?: string }> => {
   try {
+    let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch('/api/cart/apply-coupon', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         couponCode,
         items: cartItems
@@ -124,11 +130,14 @@ const applyCouponAPI = async (couponCode: string, cartItems: CartItem[]): Promis
 
 const removeCouponAPI = async (couponCode: string): Promise<{ success: boolean; items?: EnhancedCartItem[]; error?: string }> => {
   try {
+    let headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch('/api/cart/remove-coupon', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({ couponCode }),
     });
 

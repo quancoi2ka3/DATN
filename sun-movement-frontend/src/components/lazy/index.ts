@@ -39,8 +39,10 @@ export const LazyEventsSection = lazy(() =>
   }))
 );
 
+// Update the import path below to the correct file if it is different, for example:
+// import('@/components/sections/sportswear') or the actual file name that exists.
 export const LazySportswearSection = lazy(() => 
-  import('@/components/sections/sportswear-preview').then(module => ({ 
+  import('@/components/sections/sportswear').then(module => ({ 
     default: module.SportswearSection 
   }))
 );

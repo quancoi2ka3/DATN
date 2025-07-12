@@ -18,19 +18,25 @@ export async function POST(
       );
     }
 
-    // Get auth token from cookies
-    const cookieStore = await cookies();
-    const authCookie = cookieStore.get('auth-token');
-    
-    if (!authCookie?.value) {
+    // Forward cookies and Authorization header
+    const clientCookies = request.headers.get('cookie');
+    let authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      // Try to get token from cookie (for SSR)
+      const cookieHeader = clientCookies || '';
+      const match = cookieHeader.match(/auth-token=([^;]+)/);
+      if (match) {
+        authHeader = `Bearer ${decodeURIComponent(match[1])}`;
+        console.log('[ORDER CANCEL API] Using auth-token from cookie as Bearer token');
+      }
+    }
+    if (!authHeader) {
       console.log('[ORDER CANCEL API] No auth token found');
       return NextResponse.json(
         { success: false, error: 'Unauthorized - Please login to cancel order' },
         { status: 401 }
       );
     }
-
-    console.log('[ORDER CANCEL API] Auth token found');
 
     // Try multiple API URLs
     const apiUrls = [
@@ -55,7 +61,8 @@ export async function POST(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authCookie.value}`,
+            'Authorization': authHeader,
+            ...(clientCookies ? { 'Cookie': clientCookies } : {})
           },
           signal: controller.signal,
         });

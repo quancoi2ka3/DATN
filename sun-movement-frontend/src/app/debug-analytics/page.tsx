@@ -19,9 +19,9 @@ export default function DebugAnalytics() {
     addLog('🎯 Mixpanel initialization attempted')
   }, [])
 
-  const testConnection = () => {
+  const testConnection = async () => {
     addLog('🔍 Testing Mixpanel connection...')
-    const result = testMixpanelConnection()
+    const result = await testMixpanelConnection()
     setMixpanelStatus(result ? 'Connected' : 'Failed')
     addLog(result ? '✅ Connection test passed' : '❌ Connection test failed')
   }

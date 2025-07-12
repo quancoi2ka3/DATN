@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { trackSearch } from "@/services/analytics";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 interface SearchBarProps {
   value?: string;
@@ -21,17 +22,18 @@ export function SearchBar({
   onSearch = () => {}
 }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState(value);
+  const { user } = useAuth();
 
   // Enhanced search tracking with immediate and debounced events
   useEffect(() => {
-    if (searchTerm.length > 0) {
+    if (searchTerm.length > 0 && user?.id) {
       // Track immediately when user starts typing (for engagement)
-      trackSearch('anonymous', searchTerm, 0);
+      trackSearch(user.id, searchTerm, 0);
       
       // Also track with debounce for completed searches
       const timeoutId = setTimeout(() => {
         if (searchTerm.length > 2) {
-          trackSearch('anonymous', searchTerm, 0);
+          trackSearch(user.id, searchTerm, 0);
           console.log('🔍 Search tracked:', searchTerm);
         }
       }, 500);

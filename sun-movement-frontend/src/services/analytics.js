@@ -301,41 +301,22 @@ export const trackProductView = async (userId, product) => {
 
 // Track add to cart
 export const trackAddToCart = async (userId, product, quantity) => {
-  await safeMixpanelTrack('Add to Cart', {
-    user_id: userId,
-    product_id: product.id,
-    product_name: product.name,
-    product_price: product.price,
-    quantity: quantity,
-    timestamp: new Date()
-  });
-  
-  // Also send to backend for recommendation system
-  fetch('/api/interactions/cart', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      userId: userId,
-      productId: product.id
-    }),
-  }).catch(error => console.error('Error tracking add to cart:', error));
-};
-
-// Track add to wishlist
-export const trackAddToWishlist = async (userId, product) => {
-  await safeMixpanelTrack('Add to Wishlist', {
-    user_id: userId,
-    product_id: product.id,
-    product_name: product.name,
-    product_price: product.price,
-    timestamp: new Date()
-  });
-  
-  // Also send to backend for recommendation system
   try {
-    await fetch('/api/interactions/wishlist', {
+    await safeMixpanelTrack('Add to Cart', {
+      user_id: userId,
+      product_id: product.id,
+      product_name: product.name,
+      product_price: product.price,
+      quantity: quantity,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    console.warn('Mixpanel tracking failed:', error);
+  }
+  
+  // Also send to backend for recommendation system - make it non-blocking
+  try {
+    fetch('/api/interactions/cart', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -344,9 +325,40 @@ export const trackAddToWishlist = async (userId, product) => {
         userId: userId,
         productId: product.id
       }),
+    }).catch(error => console.warn('Backend interaction tracking failed:', error));
+  } catch (error) {
+    console.warn('Error setting up backend cart tracking:', error);
+  }
+};
+
+// Track add to wishlist
+export const trackAddToWishlist = async (userId, product) => {
+  try {
+    await safeMixpanelTrack('Add to Wishlist', {
+      user_id: userId,
+      product_id: product.id,
+      product_name: product.name,
+      product_price: product.price,
+      timestamp: new Date()
     });
   } catch (error) {
-    console.error('Error tracking add to wishlist:', error);
+    console.warn('Mixpanel wishlist tracking failed:', error);
+  }
+  
+  // Also send to backend for recommendation system - make it non-blocking
+  try {
+    fetch('/api/interactions/wishlist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: userId,
+        productId: product.id
+      }),
+    }).catch(error => console.warn('Backend wishlist interaction tracking failed:', error));
+  } catch (error) {
+    console.warn('Error setting up backend wishlist tracking:', error);
   }
 };
 

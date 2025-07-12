@@ -115,7 +115,7 @@ namespace SunMovement.Infrastructure.Services
             try
             {
                 var metrics = new DashboardMetrics();
-                
+
                 // Lấy dữ liệu từ Mixpanel - sử dụng event names đúng từ frontend
                 var purchaseEvents = await _mixpanelService.GetEventCountByDayAsync("Purchase", from, to);
                 var pageViewEvents = await _mixpanelService.GetEventCountByDayAsync("Page View", from, to);
@@ -123,27 +123,49 @@ namespace SunMovement.Infrastructure.Services
                 var newUserEvents = await _mixpanelService.GetEventCountByDayAsync("Sign Up", from, to);
                 var cartAddEvents = await _mixpanelService.GetEventCountByDayAsync("Add to Cart", from, to);
                 var checkoutEvents = await _mixpanelService.GetEventCountByDayAsync("Checkout Started", from, to);
-                
+
                 // Lấy dữ liệu từ cơ sở dữ liệu
-                var orders = await _unitOfWork.Orders.FindAsync(o => 
+                var orders = await _unitOfWork.Orders.FindAsync(o =>
                     o.CreatedAt >= from && o.CreatedAt <= to);
-                
+                var allorders = await _unitOfWork.Orders.GetAllAsync();
                 var products = await _unitOfWork.Products.GetAllAsync();
-                
+
                 // Tổng hợp dữ liệu
-                metrics.TotalOrders = orders.Count();
+                metrics.TotalOrders = allorders.Count();
+
+                // --- Tính phần trăm tăng trưởng tổng số đơn hàng so với tháng trước ---
+                // Xác định tháng hiện tại và tháng trước
+                var now = DateTime.UtcNow;
+                var currentMonthStart = new DateTime(now.Year, now.Month, 1);
+                var previousMonthStart = currentMonthStart.AddMonths(-1);
+                var previousMonthEnd = currentMonthStart.AddDays(-1).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+                // Lấy số lượng đơn hàng của tháng hiện tại và tháng trước
+                var currentMonthOrders = allorders.Count(o => o.CreatedAt >= currentMonthStart && o.CreatedAt <= now);
+                var previousMonthOrders = allorders.Count(o => o.CreatedAt >= previousMonthStart && o.CreatedAt <= previousMonthEnd);
+
+                decimal orderGrowthPercent = 0;
+                if (previousMonthOrders > 0)
+                {
+                    orderGrowthPercent = ((decimal)(currentMonthOrders - previousMonthOrders) / previousMonthOrders) * 100;
+                }
+                else if (currentMonthOrders > 0)
+                {
+                    orderGrowthPercent = 100;
+                }
+                metrics.OrderGrowthPercent = orderGrowthPercent;
                 metrics.TotalSales = orders.Sum(o => o.SubtotalAmount + o.ShippingAmount + o.TaxAmount - o.DiscountAmount);
-                metrics.AverageOrderValue = orders.Any() 
-                    ? orders.Average(o => o.SubtotalAmount + o.ShippingAmount + o.TaxAmount - o.DiscountAmount) 
+                metrics.AverageOrderValue = orders.Any()
+                    ? orders.Average(o => o.SubtotalAmount + o.ShippingAmount + o.TaxAmount - o.DiscountAmount)
                     : 0;
-                
+
                 metrics.TotalVisits = pageViewEvents.Values.Sum();
                 metrics.ConversionRate = pageViewEvents.Values.Sum() > 0
                     ? (decimal)purchaseEvents.Values.Sum() / pageViewEvents.Values.Sum() * 100
                     : 0;
-                
+
                 metrics.NewCustomers = newUserEvents.Values.Sum();
-                
+
                 // Lấy thông tin đơn hàng theo trạng thái
                 metrics.OrdersByStatus = orders
                     .GroupBy(o => o.Status)
@@ -151,7 +173,7 @@ namespace SunMovement.Infrastructure.Services
                         g => g.Key.ToString(),
                         g => g.Count()
                     );
-                
+
                 // Lấy thông tin doanh thu theo danh mục
                 metrics.SalesByCategory = orders
                     .SelectMany(o => o.OrderItems)
@@ -160,12 +182,12 @@ namespace SunMovement.Infrastructure.Services
                         g => g.Key,
                         g => g.Sum(i => i.UnitPrice * i.Quantity)
                     );
-                
+
                 // Lấy thông tin tồn kho
                 metrics.ProductsOutOfStock = products.Count(p => p.StockQuantity <= 0);
-                metrics.ProductsLowStock = products.Count(p => 
+                metrics.ProductsLowStock = products.Count(p =>
                     p.StockQuantity > 0 && p.StockQuantity <= p.MinimumStockLevel);
-                
+
                 // Thông tin về nguồn truy cập (giả định từ Mixpanel)
                 metrics.VisitsBySource = new Dictionary<string, int>
                 {
@@ -174,7 +196,7 @@ namespace SunMovement.Infrastructure.Services
                     { "Social Media", (int)(pageViewEvents.Values.Sum() * 0.2) },
                     { "Referral", (int)(pageViewEvents.Values.Sum() * 0.1) }
                 };
-                
+
                 return metrics;
             }
             catch (Exception ex)

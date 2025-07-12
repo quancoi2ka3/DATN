@@ -340,3 +340,20 @@ nlu:
     - đánh giá về [dịch vụ PT](service)
     - thông tin về [lớp aerobic](service)
     - tôi muốn đăng ký [dịch vụ boxing](service)
+- intent: câu hỏi chuyên sâu
+  examples : |
+    - Tôi cần tư vấn thêm về dinh dưỡng cho người gầy
+    - Tôi cần tư vấn thêm về dinh dưỡng cho người béo
+    - Dinh dưỡng cho người gầy
+    - Dinh dưỡng cho người béo
+    - Ăn thế nào để tăng cơ
+    - Ăn thế nào để giảm mỡ
+    - Chế độ ăn cho người tập luyện
+    - Một tuần tập mấy buổi là đủ
+    - Một buổi tập bao lâu là đủ
+    - Tập luyện bao lâu thì có kết quả
+    - Tập luyện bao lâu thì có cơ bắp
+    - Tập luyện bao lâu thì giảm mỡ
+    - Tập luyện bao lâu thì giảm cân
+    - Các cách tránh chấn thương khi tập
+    - Sử dụng thực phẩm bổ sung như thế nào

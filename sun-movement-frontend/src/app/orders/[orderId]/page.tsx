@@ -107,23 +107,34 @@ export default function OrderDetailPage() {
 
     try {
       console.log('[ORDER DETAIL PAGE] Fetching order:', orderId);
-      
+
+      // Lấy JWT từ localStorage (key: 'token')
+      let token: string | null = null;
+      if (typeof window !== 'undefined') {
+        token = localStorage.getItem('token');
+      }
+
       // Always try frontend API proxy first
       console.log('[ORDER DETAIL PAGE] Calling frontend API proxy:', `/api/order?id=${orderId}`);
-      
+
       // Add timestamp to prevent any caching
       const timestamp = Date.now();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/order?id=${orderId}&_t=${timestamp}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
+        headers,
         cache: 'no-store', // Prevent caching
       });
-      
+
       console.log('[ORDER DETAIL PAGE] Response status:', response.status);
       console.log('[ORDER DETAIL PAGE] Response headers:', Object.fromEntries(response.headers.entries()));
 
@@ -132,12 +143,12 @@ export default function OrderDetailPage() {
         console.error('[ORDER DETAIL PAGE] API error response:', errorText);
         console.error('[ORDER DETAIL PAGE] Response status:', response.status);
         console.error('[ORDER DETAIL PAGE] Order ID being requested:', orderId);
-        
+
         // Try to parse error for better debugging
         try {
           const errorData = JSON.parse(errorText);
           console.error('[ORDER DETAIL PAGE] Parsed error:', errorData);
-          
+
           if (response.status === 404) {
             throw new Error(`Đơn hàng #${orderId} không tồn tại hoặc bạn không có quyền xem. Vui lòng kiểm tra lại mã đơn hàng.`);
           } else {
@@ -160,9 +171,9 @@ export default function OrderDetailPage() {
         console.error('[ORDER DETAIL PAGE] Raw text that failed to parse:', responseText);
         throw new Error('Phản hồi từ server không đúng định dạng JSON');
       }
-      
+
       console.log('[ORDER DETAIL PAGE] Parsed data:', data);
-      
+
       if (data.success && data.order) {
         setOrder(data.order);
         console.log('[ORDER DETAIL PAGE] Order loaded successfully:', data.order);
@@ -172,24 +183,33 @@ export default function OrderDetailPage() {
 
     } catch (error) {
       console.error('[ORDER DETAIL PAGE] Error fetching order detail:', error);
-      
+
       // Try direct backend call as fallback
       console.log('[ORDER DETAIL PAGE] Trying direct backend call as fallback...');
       try {
+        // Lấy lại token nếu cần
+        let token: string | null = null;
+        if (typeof window !== 'undefined') {
+          token = localStorage.getItem('token');
+        }
+        const backendHeaders: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        if (token) {
+          backendHeaders['Authorization'] = `Bearer ${token}`;
+        }
         const backendResponse = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: backendHeaders,
           cache: 'no-store',
         });
-        
+
         console.log('[ORDER DETAIL PAGE] Fallback backend response status:', backendResponse.status);
-        
+
         if (backendResponse.ok) {
           const backendData = await backendResponse.json();
           console.log('[ORDER DETAIL PAGE] Fallback backend call successful:', backendData);
-          
+
           if (backendData.success && backendData.order) {
             setOrder(backendData.order);
             console.log('[ORDER DETAIL PAGE] Order loaded via fallback:', backendData.order);
@@ -202,7 +222,7 @@ export default function OrderDetailPage() {
       } catch (fallbackError) {
         console.error('[ORDER DETAIL PAGE] Fallback backend call also failed:', fallbackError);
       }
-      
+
       // If both fail, show a more informative error
       const errorMessage = `Đơn hàng #${orderId} không tồn tại trong hệ thống. ` +
                           `Có thể đơn hàng đã bị hủy hoặc chưa được tạo thành công. ` +

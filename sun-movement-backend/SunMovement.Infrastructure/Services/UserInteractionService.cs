@@ -28,6 +28,21 @@ namespace SunMovement.Infrastructure.Services
         {
             try
             {
+                // Skip tracking for anonymous users or invalid user IDs
+                if (string.IsNullOrEmpty(userId) || userId == "anonymous")
+                {
+                    _logger.LogInformation("Skipping view tracking for anonymous user");
+                    return;
+                }
+
+                // Check if user exists in database before tracking
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    _logger.LogWarning("User {UserId} not found in database, skipping view tracking", userId);
+                    return;
+                }
+
                 var interaction = await GetOrCreateInteractionAsync(userId, productId);
                 interaction.Viewed = true;
                 interaction.UpdatedAt = DateTime.UtcNow;
@@ -45,6 +60,21 @@ namespace SunMovement.Infrastructure.Services
         {
             try
             {
+                // Skip tracking for anonymous users or invalid user IDs
+                if (string.IsNullOrEmpty(userId) || userId == "anonymous")
+                {
+                    _logger.LogInformation("Skipping interaction tracking for anonymous user");
+                    return;
+                }
+
+                // Check if user exists in database before tracking
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+                if (!userExists)
+                {
+                    _logger.LogWarning("User {UserId} not found in database, skipping interaction tracking", userId);
+                    return;
+                }
+
                 var interaction = await GetOrCreateInteractionAsync(userId, productId);
                 interaction.AddedToCart = true;
                 interaction.UpdatedAt = DateTime.UtcNow;

@@ -108,7 +108,7 @@ export function WhyChooseSection() {
 
       <div className="absolute top-0 left-0 w-full h-full opacity-10 streak-container">
         <Image 
-          src="/images/pattern-grid.png" 
+          src="/images/dichvu/Strength-Thumb.webp" 
           alt="Background pattern" 
           fill 
           sizes="100vw"

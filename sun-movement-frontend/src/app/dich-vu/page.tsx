@@ -379,7 +379,7 @@ export default function ServicesPage() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-slate-800/80 to-slate-900/80 z-0"></div>
-        <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5 z-0"></div>
+        <div className="absolute inset-0 bg-[url('/images/dichvu/Strength-Thumb.webp')] bg-repeat opacity-5 z-0"></div>
         
         <div className="container relative z-10 py-20 md:py-28">
           <div className="max-w-3xl mx-auto text-center mb-16">

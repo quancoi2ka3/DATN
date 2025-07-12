@@ -5,10 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, CreditCard, Calendar, Hash, ShoppingBag } from 'lucide-react';
 import { trackPurchase, trackPageView } from '@/services/analytics';
+import { useAuth } from '@/lib/auth-context';
 
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [orderInfo, setOrderInfo] = useState<{
     orderId: string;
     paymentMethod: string;
@@ -41,7 +43,10 @@ export default function CheckoutSuccessPage() {
         totalAmount: 0, // Would need to be passed from previous page or fetched
       };
       
-      trackPurchase('anonymous', order);
+      // Only track for authenticated users
+      if (user?.id) {
+        trackPurchase(user.id, order);
+      }
     }
   }, [searchParams]);
 

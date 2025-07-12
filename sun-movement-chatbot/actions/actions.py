@@ -799,3 +799,39 @@ class ActionGetWorkoutPlan(Action):
             dispatcher.utter_message(text="Đã xảy ra lỗi khi tìm kiếm thông tin tập luyện. Vui lòng thử lại sau.")
         
         return []
+class ActionAnswerSpecializedQuestion(Action):
+    def name(self) -> Text:
+        return "action_answer_specialized_question"
+        
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+            
+        # Lấy nội dung câu hỏi
+        message = tracker.latest_message.get('text', '')
+        
+        # Xử lý câu hỏi dựa trên từ khóa
+        if "người gầy" in message or "tăng cân" in message:
+            dispatcher.utter_message(response="utter_dinh_dưỡng_người_gầy")
+        elif "người béo" in message or "giảm cân" in message:
+            dispatcher.utter_message(response="utter_dinh_dưỡng_người_béo")
+        elif "tăng cơ" in message:
+            dispatcher.utter_message(response="utter_tăng_cơ")
+        elif "giảm mỡ" in message:
+            dispatcher.utter_message(response="utter_giảm_mỡ")
+        elif "chế độ ăn" in message:
+            dispatcher.utter_message(response="utter_chế_độ_ăn_tập_luyện")
+        elif "mấy buổi" in message or "bao nhiêu buổi" in message:
+            dispatcher.utter_message(response="utter_tần_suất_tập")
+        elif "bao lâu" in message and ("buổi" in message or "tập" in message):
+            dispatcher.utter_message(response="utter_thời_lượng_tập")
+        elif "kết quả" in message or "hiệu quả" in message:
+            dispatcher.utter_message(response="utter_thời_gian_có_kết_quả")
+        elif "chấn thương" in message:
+            dispatcher.utter_message(response="utter_phòng_chấn_thương")
+        elif "thực phẩm bổ sung" in message or "tpbs" in message:
+            dispatcher.utter_message(response="utter_sử_dụng_thực_phẩm_bổ_sung")
+        else:
+            dispatcher.utter_message(response="utter_câu_hỏi_chuyên_sâu")
+            
+        return []

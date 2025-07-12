@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest, { params }: { params: { orderId: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
   try {
-    const { orderId } = params;
+    const { orderId } = await params;
     console.log('[CONFIRM RECEIVED API] Request for orderId:', orderId);
 
     if (!orderId) {
@@ -32,7 +35,16 @@ export async function POST(request: NextRequest, { params }: { params: { orderId
     }
 
     // Forward Authorization header if present
-    const authHeader = request.headers.get('authorization');
+    let authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      // Try to get token from cookie (for SSR)
+      const cookieHeader = clientCookies || '';
+      const match = cookieHeader.match(/auth-token=([^;]+)/);
+      if (match) {
+        authHeader = `Bearer ${decodeURIComponent(match[1])}`;
+        console.log('[CONFIRM RECEIVED API] Using auth-token from cookie as Bearer token');
+      }
+    }
     if (authHeader) {
       authHeaders['Authorization'] = authHeader;
       console.log('[CONFIRM RECEIVED API] Forwarding Authorization header to backend');

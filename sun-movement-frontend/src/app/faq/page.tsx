@@ -282,7 +282,7 @@ export default function FAQPage() {
       {/* Hero Section */}
       <div className="relative py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-blue-500/10 z-0"></div>
-        <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5 z-0"></div>
+        <div className="absolute inset-0 bg-[url('/images/dichvu/Strength-Thumb.webp')] bg-repeat opacity-5 z-0"></div>
         
         {/* Background particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -440,7 +440,7 @@ export default function FAQPage() {
             
             {/* Still have questions */}
             <div className="mt-16 bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-8 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5 z-0"></div>
+              <div className="absolute inset-0 bg-[url('/images/dichvu/Strength-Thumb.webp')] bg-repeat opacity-5 z-0"></div>
               
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="text-center md:text-left">

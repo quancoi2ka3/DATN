@@ -42,16 +42,27 @@ export async function processCheckout(checkoutDetails: CheckoutRequest):
   try {
     console.log('[CHECKOUT DEBUG] Starting checkout with data:', checkoutDetails);
     console.log('[CHECKOUT DEBUG] Using API proxy: /api/checkout');
-    
+
+    // Lấy JWT từ localStorage giống cart-service
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+      token = localStorage.getItem('token');
+    }
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CHECKOUT DEBUG] Thêm Authorization header cho checkout');
+    }
+
     const response = await fetch('/api/checkout', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(checkoutDetails),
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include',
     });
-    
+
     console.log('[CHECKOUT DEBUG] Response status:', response.status);
     console.log('[CHECKOUT DEBUG] Response ok:', response.ok);
     
@@ -116,8 +127,14 @@ export async function processCheckout(checkoutDetails: CheckoutRequest):
 export async function getOrderById(orderId: string): 
   Promise<{ success: boolean; order?: CheckoutResponse; error?: string }> {
   try {
+    let headers: Record<string, string> = {};
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders/${orderId}`, {
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include',
+      headers,
     });
 
     if (!response.ok) {
@@ -147,8 +164,14 @@ export async function getOrderById(orderId: string):
 export async function getOrderHistory(): 
   Promise<{ success: boolean; orders?: CheckoutResponse[]; error?: string }> {
   try {
+    let headers: Record<string, string> = {};
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+    }
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders/history`, {
-      credentials: 'include', // Include cookies for authentication
+      credentials: 'include',
+      headers,
     });
 
     if (!response.ok) {

@@ -288,9 +288,14 @@ class EnhancedCheckoutService {
           
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/checkout`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: (() => {
+              const h: Record<string, string> = { 'Content-Type': 'application/json' };
+              if (typeof window !== 'undefined') {
+                const token = localStorage.getItem('token');
+                if (token) h['Authorization'] = `Bearer ${token}`;
+              }
+              return h;
+            })(),
             body: JSON.stringify(checkoutDetails),
             credentials: 'include',
           });
@@ -391,6 +396,14 @@ class EnhancedCheckoutService {
       const result = await withCheckoutRetry(
         async () => {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders/${orderId}`, {
+            headers: (() => {
+              const h: Record<string, string> = {};
+              if (typeof window !== 'undefined') {
+                const token = localStorage.getItem('token');
+                if (token) h['Authorization'] = `Bearer ${token}`;
+              }
+              return h;
+            })(),
             credentials: 'include',
           });
 
@@ -436,6 +449,14 @@ class EnhancedCheckoutService {
       const result = await withCheckoutRetry(
         async () => {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders/history`, {
+            headers: (() => {
+              const h: Record<string, string> = {};
+              if (typeof window !== 'undefined') {
+                const token = localStorage.getItem('token');
+                if (token) h['Authorization'] = `Bearer ${token}`;
+              }
+              return h;
+            })(),
             credentials: 'include',
           });
 

@@ -13,7 +13,6 @@ import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/components/ui/simple-toast";
 import { ReduxProvider } from "@/store/ReduxProvider";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import FloatingCart from "@/components/ui/floating-cart";
 import ScrollButtons from "@/components/ui/scroll-buttons";
@@ -129,7 +128,6 @@ export default function RootLayout({
         <ResourcePreloader />
         <PerformanceMonitor />
         <ScrollToTop />
-        <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner />}>
             <ReduxProvider>
               <ToastProvider>
@@ -154,7 +152,6 @@ export default function RootLayout({
               </ToastProvider>
             </ReduxProvider>
           </Suspense>
-        </ErrorBoundary>
       </body>
     </html>
   );

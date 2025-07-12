@@ -200,13 +200,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 {
                     order.ShippedDate = DateTime.UtcNow;
                 }
-                else if (status == OrderStatus.Delivered && order.DeliveredDate == null)
-                {
-                    order.DeliveredDate = DateTime.UtcNow;
-                    
-                    // SYNC INVENTORY: When order is delivered/completed, reduce product stock
-                    await SyncInventoryOnOrderCompletion(order);
-                }
+                
 
                 await _unitOfWork.Orders.UpdateAsync(order);
                 await _unitOfWork.CompleteAsync();
@@ -313,11 +307,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     {
                         order.ShippedDate = DateTime.UtcNow;
                     }
-                    else if (status == OrderStatus.Delivered && order.DeliveredDate == null)
-                    {
-                        order.DeliveredDate = DateTime.UtcNow;
-                        await SyncInventoryOnOrderCompletion(order);
-                    }
+                  
 
                     await _unitOfWork.Orders.UpdateAsync(order);
                     await _unitOfWork.CompleteAsync();

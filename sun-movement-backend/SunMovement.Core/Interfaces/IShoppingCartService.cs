@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SunMovement.Core.DTOs;
 using SunMovement.Core.Models;
 
 namespace SunMovement.Core.Interfaces
@@ -12,5 +13,7 @@ namespace SunMovement.Core.Interfaces
         Task RemoveItemFromCartAsync(string userId, int cartItemId);
         Task ClearCartAsync(string userId);
         Task<int> GetCartItemCountAsync(string userId);
+        Task AddToCartAsync(string userId, AddToCartDto dto);
+        Task<CartDto> GetCartByUserIdAsync(string userId);
     }
 }

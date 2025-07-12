@@ -66,21 +66,24 @@ namespace SunMovement.Core.Interfaces
         Task<List<Core.ViewModels.SearchQueryAnalytics>> GetTopSearchQueriesAsync(int limit = 10);
     }
 
-    public class DashboardMetrics
-    {
-        public decimal TotalSales { get; set; }
-        public int TotalOrders { get; set; }
-        public int TotalVisits { get; set; }
-        public decimal AverageOrderValue { get; set; }
-        public decimal ConversionRate { get; set; }
-        public int NewCustomers { get; set; }
-        public int ReturningCustomers { get; set; }
-        public Dictionary<string, int> OrdersByStatus { get; set; } = new();
-        public Dictionary<string, decimal> SalesByCategory { get; set; } = new();
-        public int ProductsOutOfStock { get; set; }
-        public int ProductsLowStock { get; set; }
-        public Dictionary<string, int> VisitsBySource { get; set; } = new();
-    }
+public class DashboardMetrics
+{
+    public decimal TotalSales { get; set; }
+    public int TotalOrders { get; set; }
+    public int TotalVisits { get; set; }
+    public decimal AverageOrderValue { get; set; }
+    public decimal ConversionRate { get; set; }
+    public int NewCustomers { get; set; }
+    public int ReturningCustomers { get; set; }
+    public Dictionary<string, int> OrdersByStatus { get; set; } = new();
+    public Dictionary<string, decimal> SalesByCategory { get; set; } = new();
+    public int ProductsOutOfStock { get; set; }
+    public int ProductsLowStock { get; set; }
+    public Dictionary<string, int> VisitsBySource { get; set; } = new();
+    public decimal OrderGrowthPercent { get; set; }
+    // Thêm thuộc tính phần trăm tăng trưởng đơn hàng so với tháng trước
+    
+}
 
     public class ProductMetrics
     {

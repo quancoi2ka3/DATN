@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SunMovement.Core.DTOs;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Infrastructure.Data;
@@ -57,7 +58,7 @@ namespace SunMovement.Infrastructure.Services
             var cart = await GetOrCreateCartAsync(userId);
 
             // Check if item already exists in cart
-            var existingItem = cart.Items.FirstOrDefault(i => 
+            var existingItem = cart.Items.FirstOrDefault(i =>
                 i.ProductId == productId && i.ServiceId == serviceId);
 
             if (existingItem != null)
@@ -157,5 +158,71 @@ namespace SunMovement.Infrastructure.Services
             var cart = await GetCartWithItemsAsync(userId);
             return cart?.Items.Sum(i => i.Quantity) ?? 0;
         }
+
+        // Implementation for IShoppingCartService.AddToCartAsync
+
+        public async Task AddToCartAsync(string userId, AddToCartDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+            await AddItemToCartAsync(
+                userId,
+                dto.ProductId,
+                dto.ServiceId,
+                dto.ItemName,
+                dto.ImageUrl,
+                dto.UnitPrice,
+                dto.Quantity
+            );
+        }
+
+        public async Task<SunMovement.Core.DTOs.CartDto> GetCartByUserIdAsync(string userId)
+        {
+            var cart = await GetCartWithItemsAsync(userId);
+            if (cart == null)
+            {
+                return new SunMovement.Core.DTOs.CartDto();
+            }
+
+            var items = cart.Items.Select(i => {
+                SunMovement.Core.DTOs.ProductDto? productDto = null;
+                if (i.Product != null)
+                {
+                    productDto = new SunMovement.Core.DTOs.ProductDto
+                    {
+                        Id = i.Product.Id,
+                        Name = i.Product.Name,
+                        ImageUrl = i.Product.ImageUrl ?? string.Empty,
+                        Price = i.Product.Price,
+                        SubCategory = i.Product.SubCategory ?? string.Empty,
+                        Specifications = i.Product.Specifications ?? string.Empty,
+                        Description = i.Product.Description ?? string.Empty
+                    };
+                }
+                return new SunMovement.Core.DTOs.CartItemDto
+                {
+                    Id = i.Id,
+                    CartId = i.ShoppingCartId,
+                    ProductId = i.ProductId,
+                    ServiceId = i.ServiceId,
+                    ItemName = i.ItemName,
+                    ItemImageUrl = i.ItemImageUrl,
+                    UnitPrice = i.UnitPrice,
+                    Quantity = i.Quantity,
+                    Product = productDto,
+                    Service = null // Nếu cần, map Service tương tự
+                };
+            }).ToList();
+
+            return new SunMovement.Core.DTOs.CartDto
+            {
+                Items = items,
+                TotalQuantity = items.Sum(x => x.Quantity),
+                TotalPrice = items.Sum(x => x.UnitPrice * x.Quantity)
+            };
+        }
+
+        // Đảm bảo interface IShoppingCartService cũng trả về Task<CartDto>
     }
 }
+
+        

@@ -2,6 +2,13 @@
 
 import { CartItem, Product } from "./types";
 
+// Get auth token for authenticated requests
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  // Lấy token trực tiếp từ localStorage key 'token'
+  return localStorage.getItem('token');
+}
+
 // Base types for cart API requests and responses
 interface AddToCartRequest {
   productId: number;
@@ -184,12 +191,29 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
     console.log('[CART DEBUG] Adding item to cart through proxy API...');
     console.log('[CART DEBUG] Request:', request);
     
+    // Prepare headers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authorization header if user is authenticated
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CART DEBUG] Adding auth header for authenticated user');
+    }
+    
     // Use local API proxy to avoid CORS issues
-    const response = await fetch('/api/cart', {
+    console.log('[CART DEBUG] Fetch addToCart:', {
+      url: '/api/cart/items',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      body: request,
+      credentials: 'include'
+    });
+    const response = await fetch('/api/cart/items', {
+      method: 'POST',
+      headers,
       body: JSON.stringify(request),
       credentials: 'include' // Add credentials for session consistency
     });
@@ -255,22 +279,41 @@ export async function addToCart(product: Product, quantity: number = 1, size?: s
 export async function getCart(): Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
   try {
     console.log('[CART DEBUG] Getting cart through proxy API...');
+    
+    // Prepare headers
+    const headers: Record<string, string> = {};
+    
+    // Add authorization header if user is authenticated
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CART DEBUG] Adding auth header for get cart');
+    }
+    
     // Use local API proxy to avoid CORS issues
-    const response = await fetch('/api/cart', {
+    console.log('[CART DEBUG] Fetch getCart:', {
+      url: '/api/cart/items',
+      method: 'GET',
+      headers,
+      credentials: 'include'
+    });
+    const response = await fetch('/api/cart/items', {
       cache: 'no-store',
+      headers,
       credentials: 'include' // Add credentials for session consistency
     });
 
     console.log('[CART DEBUG] Get cart response status:', response.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[CART DEBUG] Get cart error:', errorText);
-      throw new Error(`Failed to get cart: ${errorText}`);
-    }
-
-    const backendData: BackendCartResponse = await response.json();
-    console.log('[CART DEBUG] Cart data:', backendData);
+    let backendData: BackendCartResponse;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[CART DEBUG] Get cart error:', errorText);
+        throw new Error(`Failed to get cart: ${errorText}`);
+      } else {
+        backendData = await response.json();
+        console.log('[CART DEBUG] Cart data:', backendData);
+      }
     const data = mapBackendCartResponse(backendData);
 
     return {
@@ -306,12 +349,25 @@ export async function updateCartItem(cartItemId: string, quantity: number):
     };
     
     console.log('[CART DEBUG] Updating cart item:', request);
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CART DEBUG] Adding auth header for update cart item');
+    }
     // Use local API proxy to avoid CORS issues
-    const response = await fetch('/api/cart', {
+    console.log('[CART DEBUG] Fetch updateCartItem:', {
+      url: '/api/cart/items',
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      body: request,
+      credentials: 'include'
+    });
+    const response = await fetch('/api/cart/items', {
+      method: 'PUT',
+      headers,
       body: JSON.stringify(request),
       credentials: 'include' // Add credentials for session consistency
     });
@@ -347,9 +403,22 @@ export async function removeCartItem(cartItemId: string):
   Promise<{ success: boolean; items: CartItem[]; error?: string; totalQuantity: number; totalPrice: number }> {
   try {
     console.log('[CART DEBUG] Removing cart item:', cartItemId);
+    const headers: Record<string, string> = {};
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CART DEBUG] Adding auth header for remove cart item');
+    }
     // Use local API proxy to avoid CORS issues
+    console.log('[CART DEBUG] Fetch removeCartItem:', {
+      url: `/api/cart?itemId=${cartItemId}`,
+      method: 'DELETE',
+      headers,
+      credentials: 'include'
+    });
     const response = await fetch(`/api/cart?itemId=${cartItemId}`, {
       method: 'DELETE',
+      headers,
       credentials: 'include' // Add credentials for session consistency
     });
 
@@ -382,9 +451,22 @@ export async function removeCartItem(cartItemId: string):
 export async function clearCart(): Promise<{ success: boolean; error?: string }> {
   try {
     console.log('[CART DEBUG] Clearing cart...');
+    const headers: Record<string, string> = {};
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      console.log('[CART DEBUG] Adding auth header for clear cart');
+    }
     // Use local API proxy to avoid CORS issues
+    console.log('[CART DEBUG] Fetch clearCart:', {
+      url: '/api/cart/clear',
+      method: 'DELETE',
+      headers,
+      credentials: 'include'
+    });
     const response = await fetch('/api/cart/clear', {
       method: 'DELETE',
+      headers,
       credentials: 'include' // Add credentials for session consistency
     });
 
@@ -406,45 +488,5 @@ export async function clearCart(): Promise<{ success: boolean; error?: string }>
   }
 }
 
-/**
- * Merge guest cart with user cart after login
- */
-export async function apiMergeGuestCart(guestCartItems: CartItem[]): Promise<{ success: boolean; items: CartItem[]; error?: string }> {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return { success: false, error: 'User not authenticated', items: [] };
-    }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-    const response = await fetch(`${apiUrl}/api/cart/merge-guest-cart`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ guestCartItems }),
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return { 
-        success: false, 
-        error: errorData.message || `HTTP error! status: ${response.status}`,
-        items: []
-      };
-    }
-
-    const data: CartResponse = await response.json();
-    const items = data.items.map(mapCartItemDtoToCartItem);
-    
-    return { success: true, items };
-  } catch (error) {
-    console.error('Error merging guest cart:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Network error',
-      items: []
-    };
-  }
-}

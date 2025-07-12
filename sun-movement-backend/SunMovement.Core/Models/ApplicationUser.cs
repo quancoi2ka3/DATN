@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace SunMovement.Core.Models
@@ -22,5 +23,8 @@ namespace SunMovement.Core.Models
         public int OrderCount => Orders?.Count ?? 0;
         public decimal TotalSpent => Orders?.Sum(o => o.TotalAmount) ?? 0;
         public DateTime? LastOrderDate => Orders?.OrderByDescending(o => o.OrderDate).FirstOrDefault()?.OrderDate;
+
+        [ReadOnly(true)]
+        public string FullName => (FirstName + " " + LastName).Trim();
     }
 }

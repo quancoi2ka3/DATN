@@ -13,10 +13,12 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 {
     public class CustomersAdminController : BaseAdminController
     {
+        private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public CustomersAdminController(UserManager<ApplicationUser> userManager)
+        public CustomersAdminController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
 
@@ -59,11 +61,32 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 {
                     return NotFound();
                 }
+                var orders = await _unitOfWork.Orders.FindAsync(o => o.UserId == id);
+                var orderList = orders.ToList();
+                Console.WriteLine($"Order count for user {id}: {orderList.Count}");
+                        foreach (var order in orderList)
+                        {
+                            Console.WriteLine($"OrderId: {order.Id}, TotalAmount: {order.TotalAmount}, UserId: {order.UserId}");
+                        }
 
-                if (!await _userManager.IsInRoleAsync(customer, "Customer"))
+                var viewModel = new CustomerDetailsViewModel
                 {
-                    return NotFound();
-                }
+                    UserId = customer.Id,
+                    FullName = (customer.FirstName + " " + customer.LastName).Trim(),
+                    FirstName = customer.FirstName,
+                    LastName = customer.LastName,
+                    Email = customer.Email,
+                    PhoneNumber = customer.PhoneNumber,
+                    Address = customer.Address,
+                    DateOfBirth = customer.DateOfBirth,
+                    CreatedAt = customer.CreatedAt,
+                    LastLogin = customer.LastLogin,
+                    IsActive = customer.IsActive,
+                    OrderCount = orderList.Count,
+                    TotalSpent = orderList.Sum(o => o.TotalAmount),
+                    LastOrderDate = orderList.Any() ? orderList.Max(o => o.CreatedAt) : (DateTime?)null,
+                    Orders = orderList
+                };
 
                 return View(customer);
             }

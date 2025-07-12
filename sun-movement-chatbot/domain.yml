@@ -9,6 +9,7 @@ actions:
 - action_reject_english
 - action_get_nutrition_info
 - action_get_workout_plan
+- action_answer_specialized_question
 entities:
 - product
 - product_category
@@ -55,6 +56,7 @@ intents:
 - membership_benefits
 - product_availability
 - out_of_scope
+- câu hỏi chuyên sâu
 responses:
   utter_after_sales_service:
   - text: '🛠️ **Dịch vụ hậu mãi:**
@@ -509,6 +511,41 @@ responses:
       • Uống đủ nước (2-3 lít/ngày)
 
       • Lắng nghe cơ thể, tránh quá sức'
+  utter_dinh_dưỡng_người_gầy:
+    - text: "Đối với người gầy muốn tăng cân, bạn nên: 1) Tăng calo tiêu thụ khoảng 300-500 calo/ngày so với nhu cầu cơ thể, 2) Ăn nhiều protein (1.6-2g/kg cân nặng), 3) Tăng cường carbs phức hợp và chất béo lành mạnh, 4) Ăn 5-6 bữa nhỏ mỗi ngày thay vì 3 bữa lớn, 5) Kết hợp với tập luyện sức mạnh để tăng cơ. Sun Movement có thể tư vấn thực đơn chi tiết phù hợp với bạn."
+
+  utter_dinh_dưỡng_người_béo:
+    - text: "Đối với người thừa cân muốn giảm cân, bạn nên: 1) Giảm calo tiêu thụ khoảng 300-500 calo/ngày so với nhu cầu cơ thể, 2) Vẫn đảm bảo đủ protein (1.6-2g/kg cân nặng), 3) Giảm carbs đơn giản và chất béo xấu, 4) Tăng cường rau xanh và thực phẩm giàu chất xơ, 5) Kết hợp với tập cardio và sức mạnh. Sun Movement có thể lên kế hoạch dinh dưỡng cá nhân hóa cho bạn."
+
+  utter_tăng_cơ:
+    - text: "Để tăng cơ hiệu quả, chế độ ăn cần: 1) Dư thừa calo vừa phải (200-300 calo/ngày), 2) Protein cao (1.6-2.2g/kg cân nặng), 3) Carbs đủ để nạp năng lượng tập luyện (3-5g/kg), 4) Timing dinh dưỡng - ăn trước và sau tập, 5) Hydrat hóa đầy đủ. Kết hợp với tập luyện sức mạnh tăng dần tải trọng. Bạn có thể đặt lịch tư vấn chi tiết với huấn luyện viên của Sun Movement."
+
+  utter_giảm_mỡ:
+    - text: "Để giảm mỡ hiệu quả: 1) Tạo thâm hụt calo vừa phải (300-500 calo/ngày), 2) Duy trì protein cao để bảo vệ cơ (1.8-2.2g/kg), 3) Giảm carbs đơn giản, 4) Tăng cường rau xanh và chất xơ, 5) Phân chia bữa ăn nhỏ, 6) Kết hợp cardio và tập sức mạnh. Sun Movement có chuyên gia dinh dưỡng sẵn sàng tư vấn kế hoạch phù hợp với mục tiêu của bạn."
+
+  utter_chế_độ_ăn_tập_luyện:
+    - text: "Chế độ ăn cho người tập luyện cần đảm bảo: 1) Đủ calo dựa trên mục tiêu (tăng/giảm/duy trì cân), 2) Protein cao (1.6-2.2g/kg), 3) Carbs phù hợp với cường độ tập, 4) Chất béo lành mạnh 0.5-1g/kg, 5) Đủ vitamin và khoáng chất từ rau củ quả, 6) Hydrat hóa đầy đủ. Timing dinh dưỡng cũng rất quan trọng, đặc biệt bữa ăn trước và sau tập. Sun Movement có thể cung cấp thực đơn chi tiết theo nhu cầu của bạn."
+
+  utter_tần_suất_tập:
+    - text: "Một tuần nên tập 3-5 buổi là hiệu quả nhất cho người bình thường. Người mới bắt đầu nên tập 3 buổi/tuần, sau đó tăng dần. Nhớ để 1-2 ngày nghỉ để cơ bắp hồi phục. Mỗi nhóm cơ chính nên được tập 1-2 lần/tuần. Quá trình nghỉ ngơi cũng quan trọng như quá trình tập luyện. Huấn luyện viên của Sun Movement có thể thiết kế lịch tập phù hợp với thể trạng và mục tiêu của bạn."
+
+  utter_thời_lượng_tập:
+    - text: "Một buổi tập hiệu quả thường kéo dài 45-60 phút, bao gồm: 5-10 phút khởi động, 30-40 phút tập chính, 5-10 phút giãn cơ. Tập quá lâu (>90 phút) có thể gây mệt mỏi và tăng cortisol không có lợi. Chất lượng tập quan trọng hơn thời lượng. Nên tập với cường độ vừa phải, tập trung vào kỹ thuật đúng. Các PT tại Sun Movement luôn đảm bảo buổi tập hiệu quả, an toàn và phù hợp với thể trạng của bạn."
+
+  utter_thời_gian_có_kết_quả:
+    - text: "Kết quả tập luyện phụ thuộc vào nhiều yếu tố: 1) Người mới thường thấy thay đổi sớm hơn, 2) Sức mạnh có thể tăng sau 2-3 tuần, 3) Thay đổi ngoại hình thường thấy rõ sau 8-12 tuần, 4) Giảm mỡ thường cần 4-6 tuần để thấy khác biệt rõ, 5) Tăng cơ đáng kể cần 3-6 tháng kiên trì. Điều quan trọng là sự nhất quán và kết hợp dinh dưỡng phù hợp. Sun Movement cam kết đồng hành cùng bạn trong suốt hành trình này."
+
+  utter_phòng_chấn_thương:
+    - text: "Để tránh chấn thương khi tập: 1) Luôn khởi động kỹ 5-10 phút, 2) Học kỹ thuật đúng trước khi tăng tải, 3) Tăng cường độ và khối lượng từ từ, 4) Sử dụng dụng cụ hỗ trợ khi cần (đai lưng, băng cổ tay...), 5) Lắng nghe cơ thể và nghỉ ngơi đủ, 6) Thực hiện các bài tập linh hoạt và cân bằng. Huấn luyện viên tại Sun Movement luôn đảm bảo bạn tập đúng kỹ thuật và an toàn."
+
+  utter_sử_dụng_thực_phẩm_bổ_sung:
+    - text: "Hướng dẫn sử dụng thực phẩm bổ sung: 1) Protein: 20-30g sau tập hoặc giữa các bữa, 2) Creatine: 3-5g mỗi ngày, không cần load, 3) BCAA: 5-10g trước/trong/sau tập nếu tập trong tình trạng đói, 4) Pre-workout: 30 phút trước tập, chú ý hàm lượng caffeine, 5) Vitamin và khoáng chất: theo chỉ dẫn trên bao bì. Lưu ý TPBS chỉ là bổ sung, không thay thế chế độ ăn lành mạnh. Sun Movement có các sản phẩm chất lượng cao và tư vấn sử dụng phù hợp."
+
+  utter_câu_hỏi_chuyên_sâu:
+    - text: "Đây là câu hỏi chuyên sâu cần tư vấn kỹ hơn. Sun Movement có đội ngũ huấn luyện viên và chuyên gia dinh dưỡng sẵn sàng tư vấn chi tiết cho bạn. Bạn có thể đặt lịch tư vấn trực tiếp hoặc online, hoặc cho tôi biết cụ thể hơn về câu hỏi để tôi có thể giúp bạn ngay bây giờ."
+    
+    
+    
 slots:
   order_id:
     type: text

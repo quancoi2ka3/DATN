@@ -251,7 +251,7 @@ export default function SportswearPage() {
       {/* Hero Section */}
       <div className="relative py-20 md:py-28 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-red-500/15 via-orange-500/10 to-blue-500/10 z-0"></div>
-        <div className="absolute inset-0 bg-[url('/images/pattern-grid.png')] bg-repeat opacity-5 z-0"></div>
+        <div className="absolute inset-0 bg-[url('/images/dichvu/Strength-Thumb.webp')] bg-repeat opacity-5 z-0"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-transparent to-slate-950/50 z-0"></div>
         
         <div className="container relative z-10">

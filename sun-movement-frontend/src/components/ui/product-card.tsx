@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 import { useState } from "react";
+import { ErrorBoundary } from "./error-boundary";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
@@ -23,7 +24,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
   const { addToCart, isLoading } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
@@ -42,8 +43,15 @@ export function ProductCard({ product }: ProductCardProps) {
     try {
       const success = await addToCart(product, quantity, selectedSize, selectedColor);
       if (success) {
-        // Track add to cart event
-        trackAddToCart('anonymous', product, quantity);
+        // Track add to cart event - make it non-blocking
+        try {
+          // Use actual user ID when authenticated, otherwise skip tracking
+          if (user?.id) {
+            trackAddToCart(user.id, product, quantity);
+          }
+        } catch (trackingError) {
+          console.warn('Analytics tracking failed but cart operation succeeded:', trackingError);
+        }
         setIsOpen(false);
         setQuantity(1);
       }
@@ -55,13 +63,16 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const handleProductClick = () => {
-    // Track product view
-    trackProductView('anonymous', product);
+    // Track product view - only for authenticated users
+    if (user?.id) {
+      trackProductView(user.id, product);
+    }
     setIsOpen(true);
   };
 
   return (
-    <>
+    <ErrorBoundary>
+      <>
       <div 
         className="bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-lg shadow-xl overflow-hidden hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 cursor-pointer group hover:scale-[1.02] hover:border-red-500/30"
         onClick={handleProductClick}
@@ -191,6 +202,7 @@ export function ProductCard({ product }: ProductCardProps) {
         message="Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng"
         returnUrl={`/products/${product.id}`}
       />
-    </>
+      </>
+    </ErrorBoundary>
   );
 }

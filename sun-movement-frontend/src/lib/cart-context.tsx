@@ -2,7 +2,7 @@
 
 import { CartItem, Product } from "./types";
 import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from "react";
-import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart, apiMergeGuestCart } from "./cart-service";
+import { addToCart as apiAddToCart, getCart, updateCartItem, removeCartItem, clearCart as apiClearCart } from "./cart-service";
 import { processCheckout, CheckoutRequest } from "./checkout-service";
 import { useAuth } from "./auth-context";
 import { useNotification } from "./notification-context";
@@ -92,7 +92,6 @@ interface CartContextType {
   clearCart: () => Promise<boolean>;
   checkout: (checkoutDetails: CheckoutRequest) => Promise<{ success: boolean; orderId?: string; error?: string }>;
   preserveGuestCart: () => void;
-  syncCartAfterLogin: () => Promise<void>;
   retryLastAction: () => Promise<void>;
   getPerformanceMetrics: () => PerformanceMetrics;
   totalItems: number;
@@ -200,12 +199,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     fetchCart();
   }, [cache, updateMetrics, isAuthenticated]);
 
-  // Auto-sync cart when user logs in
-  useEffect(() => {
-    if (isAuthenticated) {
-      syncCartAfterLogin();
-    }
-  }, [isAuthenticated]);
 
   const addToCart = async (product: Product, quantity: number, size?: string, color?: string): Promise<boolean> => {
     const operationKey = `add-${product.id}-${size || ''}-${color || ''}`;
@@ -564,28 +557,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       console.error('Error preserving guest cart:', err);
     }
   };
-
-  const syncCartAfterLogin = async () => {
-    // Implementation for syncing cart after user login
-    try {
-      const guestCart = localStorage.getItem('guestCart');
-      if (guestCart) {
-        const parsedCart: CartItem[] = JSON.parse(guestCart);
-        // Assuming the API has a method to merge guest cart with user cart
-        const response = await apiMergeGuestCart(parsedCart);
-        
-        if (response.success) {
-          setItems(response.items);
-          localStorage.removeItem('guestCart'); // Clear guest cart after merging
-        } else {
-          setError(response.error);
-        }
-      }
-    } catch (err) {
-      console.error('Error syncing cart after login:', err);
-    }
-  };
-
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
   
   const totalPrice = items.reduce(
@@ -601,7 +572,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       checkout,
       preserveGuestCart,
-      syncCartAfterLogin,
       retryLastAction,
       getPerformanceMetrics,
       totalItems,

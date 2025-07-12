@@ -157,13 +157,16 @@ class OrderTrackingService {
 
       // Fetch from API with retry
       const orderData = await this.withRetry(async () => {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+        }
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/track?orderId=${encodeURIComponent(orderId)}&email=${encodeURIComponent(email)}`,
           {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers,
             credentials: 'include',
           }
         );
@@ -256,13 +259,16 @@ class OrderTrackingService {
   async getOrderStatusUpdates(orderId: string): Promise<{ success: boolean; statusHistory?: OrderStatus[]; error?: string }> {
     try {
       const response = await this.withRetry(async () => {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+        }
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/status-history`,
           {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers,
             credentials: 'include',
           }
         );
@@ -315,13 +321,16 @@ class OrderTrackingService {
   async getEstimatedDelivery(orderId: string): Promise<{ success: boolean; estimatedDate?: Date; error?: string }> {
     try {
       const response = await this.withRetry(async () => {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (typeof window !== 'undefined') {
+          const token = localStorage.getItem('token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+        }
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/orders/${orderId}/estimated-delivery`,
           {
             method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers,
             credentials: 'include',
           }
         );

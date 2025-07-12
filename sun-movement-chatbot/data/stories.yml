@@ -449,3 +449,77 @@ stories:
   - action: action_get_service_info
   - intent: thank
   - action: utter_thank
+
+- story: câu hỏi dinh dưỡng cho người gầy
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "dinh dưỡng người gầy"
+    - action: utter_dinh_dưỡng_người_gầy
+- story: câu hỏi dinh dưỡng cho người béo
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "dinh dưỡng người béo"
+    - action: utter_dinh_dưỡng_người_béo
+
+- story: câu hỏi tăng cơ
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "tăng cơ"
+    - action: utter_tăng_cơ
+
+- story: câu hỏi giảm mỡ
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "giảm mỡ"
+    - action: utter_giảm_mỡ
+
+- story: câu hỏi chế độ ăn
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "chế độ ăn"
+    - action: utter_chế_độ_ăn_tập_luyện
+
+- story: câu hỏi tần suất tập
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "tần suất tập"
+    - action: utter_tần_suất_tập
+
+- story: câu hỏi thời lượng tập
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "thời lượng tập"
+    - action: utter_thời_lượng_tập
+
+- story: câu hỏi kết quả
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "kết quả"
+    - action: utter_thời_gian_có_kết_quả
+
+- story: câu hỏi chấn thương
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "chấn thương"
+    - action: utter_phòng_chấn_thương
+
+- story: câu hỏi thực phẩm bổ sung
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "thực phẩm bổ sung"
+    - action: utter_sử_dụng_thực_phẩm_bổ_sung
+
+- story: câu hỏi chuyên sâu chung
+  steps:
+    - intent: câu hỏi chuyên sâu
+    - action: utter_câu_hỏi_chuyên_sâu

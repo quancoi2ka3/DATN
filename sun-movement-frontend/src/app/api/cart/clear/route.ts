@@ -12,9 +12,9 @@ export async function DELETE(request: Request) {
     
     // Function to try API call with different URLs
     const tryApiCall = async (apiUrl: string) => {
-      console.log('Cart CLEAR API - Trying:', `${apiUrl}/api/ShoppingCart/clear`);
+      console.log('Cart CLEAR API - Trying:', `${apiUrl}/api/cart/clear`);
       
-      const response = await fetch(`${apiUrl}/api/ShoppingCart/clear`, {
+      const response = await fetch(`${apiUrl}/api/cart/clear`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

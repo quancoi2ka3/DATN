@@ -131,3 +131,36 @@ rules:
   steps:
   - intent: service_info
   - action: action_get_service_info
+
+- rule: Trả lời câu hỏi dinh dưỡng cho người gầy
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "dinh dưỡng người gầy"
+    - action: utter_dinh_dưỡng_người_gầy
+
+- rule: Trả lời câu hỏi dinh dưỡng cho người béo
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "dinh dưỡng người béo"
+    - action: utter_dinh_dưỡng_người_béo
+
+- rule: Trả lời câu hỏi về tăng cơ
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "tăng cơ"
+    - action: utter_tăng_cơ
+
+- rule: Trả lời câu hỏi về giảm mỡ
+  steps:
+    - intent: câu hỏi chuyên sâu
+      entities:
+        - topic: "giảm mỡ"
+    - action: utter_giảm_mỡ
+
+- rule: Trả lời câu hỏi chuyên sâu bằng custom action
+  steps:
+    - intent: câu hỏi chuyên sâu
+    - action: action_answer_specialized_question

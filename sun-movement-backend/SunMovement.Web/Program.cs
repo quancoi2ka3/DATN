@@ -109,10 +109,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 // Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
-    // Set default authentication scheme to Cookies
-    options.DefaultAuthenticateScheme = "MultiScheme";
-    options.DefaultChallengeScheme = "MultiScheme";
+    // Set default authentication scheme to MultiScheme
     options.DefaultScheme = "MultiScheme";
+    options.DefaultChallengeScheme = "MultiScheme";
+    options.DefaultAuthenticateScheme = "MultiScheme";
 })
 .AddJwtBearer(options =>
 {
@@ -135,14 +135,19 @@ builder.Services.AddAuthentication(options =>
 {
     options.ForwardDefaultSelector = context =>
     {
-        // Check for JWT Bearer token
+        var path = context.Request.Path.Value?.ToLower() ?? "";
+        // Ưu tiên cookie cho admin/backend
+        if (path.StartsWith("/admin") || path.StartsWith("/account"))
+        {
+            return IdentityConstants.ApplicationScheme;
+        }
+        // Ưu tiên JWT cho API và frontend
         if (context.Request.Headers.ContainsKey("Authorization") && 
             context.Request.Headers["Authorization"].ToString().StartsWith("Bearer "))
         {
             return JwtBearerDefaults.AuthenticationScheme;
         }
-        
-        // Otherwise use cookies
+        // Nếu không có JWT thì fallback về cookie
         return IdentityConstants.ApplicationScheme;
     };
 });
@@ -224,25 +229,25 @@ builder.Services.AddCors(options =>
             .AllowCredentials()); // Allow credentials for session management
     
     // Add a permissive policy for development/testing
-    options.AddPolicy("AllowAll",
-        corsBuilder => corsBuilder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    // options.AddPolicy("AllowAll",
+    //     corsBuilder => corsBuilder
+    //         .AllowAnyOrigin()
+    //         .AllowAnyMethod()
+    //         .AllowAnyHeader());
     
-    // Also add a more specific policy for frontend if needed
-    options.AddPolicy("AllowSpecificOrigins",
-        corsBuilder => corsBuilder
-            .WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:5000",
-                "https://localhost:5001",
-                "http://127.0.0.1:3000",
-                "https://127.0.0.1:3000",
-                "file://") // Allow file:// protocol for local HTML files
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials());
+    // // Also add a more specific policy for frontend if needed
+    // options.AddPolicy("AllowSpecificOrigins",
+    //     corsBuilder => corsBuilder
+    //         .WithOrigins(
+    //             "http://localhost:3000",
+    //             "http://localhost:5000",
+    //             "https://localhost:5001",
+    //             "http://127.0.0.1:3000",
+    //             "https://127.0.0.1:3000",
+    //             "file://") // Allow file:// protocol for local HTML files
+    //         .AllowAnyMethod()
+    //         .AllowAnyHeader()
+    //         .AllowCredentials());
 });
 
 // Add Swagger for API documentation
@@ -341,25 +346,26 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler(configure =>
+    app.UseExceptionHandler(errorApp =>
     {
-        configure.Run(async context =>
+        errorApp.Run(async context =>
         {
-            // Check if this is an API request
+            context.Response.StatusCode = 500;
+            // Nếu là API request thì trả về JSON, ngược lại redirect về trang lỗi
             if (context.Request.Path.StartsWithSegments("/api"))
             {
-                context.Response.StatusCode = 500;
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync("{\"success\": false, \"error\": \"Internal server error\"}");
+                var errorFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+                var errorMessage = errorFeature?.Error?.Message ?? "Internal server error";
+                // Có thể trả thêm stacktrace nếu muốn debug
+                await context.Response.WriteAsync($"{{\"success\": false, \"error\": \"{errorMessage}\"}}");
             }
             else
             {
-                // For non-API requests, redirect to error page
                 context.Response.Redirect("/Home/Error");
             }
         });
     });
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -375,11 +381,34 @@ app.UseRouting();
 
 // Add session middleware
 app.UseSession();
+app.Use(async (context, next) =>
+{
+    await next();
 
+    if (
+        context.Request.Path.StartsWithSegments("/api") &&
+        context.Response.StatusCode >= 400 &&
+        !context.Response.HasStarted &&
+        (context.Response.ContentType == null || !context.Response.ContentType.Contains("application/json"))
+    )
+    {
+        context.Response.ContentType = "application/json";
+        var message = context.Response.StatusCode switch
+        {
+            404 => "Not found",
+            401 => "Unauthorized",
+            403 => "Forbidden",
+            400 => "Bad request",
+            405 => "Method not allowed",
+            _ => "Internal server error"
+        };
+        await context.Response.WriteAsync($"{{\"success\": false, \"error\": \"{message}\", \"status\": {context.Response.StatusCode}}}");
+    }
+});
 // Use more permissive CORS in development for testing
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("AllowAll");
+    app.UseCors("AllowFrontend");
 }
 else
 {
@@ -390,7 +419,7 @@ app.UseApiResponseHeaders();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapControllers();
 // Add localization middleware right after app.UseRouting()
 app.UseRequestLocalization();
 

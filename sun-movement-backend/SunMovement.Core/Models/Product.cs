@@ -115,6 +115,7 @@ namespace SunMovement.Core.Models
         public virtual ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public virtual ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
         public virtual ICollection<ProductTag> ProductTags { get; set; } = new List<ProductTag>();
+        public virtual ICollection<ProductSize> Sizes { get; set; } // Only for sportwear
         
         // Computed properties
         public bool IsInStock => StockQuantity > 0;

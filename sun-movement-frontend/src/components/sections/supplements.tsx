@@ -29,6 +29,7 @@ const fallbackSupplements: Product[] = [
     name: "Whey Protein Isolate",
     description: "Protein whey đạm tinh khiết hấp thu nhanh, hỗ trợ tăng cơ hiệu quả.",
     price: 850000,
+    StockQuantity: 50,
     imageUrl: "/images/supplements/protein.jpg",
     category: "protein",
   },
@@ -37,6 +38,7 @@ const fallbackSupplements: Product[] = [
     name: "Creatine Monohydrate",
     description: "Tăng sức mạnh và hiệu suất tập luyện, hỗ trợ phát triển cơ bắp nhanh chóng.",
     price: 400000,
+    StockQuantity: 50,
     imageUrl: "/images/supplements/creatine.jpg",
     category: "performance",
   },
@@ -45,6 +47,7 @@ const fallbackSupplements: Product[] = [
     name: "BCAA 2:1:1",
     description: "Hỗ trợ phục hồi cơ bắp và giảm đau nhức sau tập luyện cường độ cao.",
     price: 450000,
+    StockQuantity: 50,
     imageUrl: "/images/supplements/bcaa.jpg",
     category: "amino-acids",
   },
@@ -75,6 +78,7 @@ const convertBackendToFrontend = (backendProducts: BackendProduct[]): Product[] 
     imageUrl: item.imageUrl,
     category: item.category,
     subCategory: item.subCategory || "general",
+    StockQuantity: (item as any).StockQuantity ?? (item as any).StockQuantity ?? 0,
     isNew: false,
     isBestseller: !!item.isBestseller,
     isFeatured: !!item.isFeatured,
@@ -98,6 +102,7 @@ const mockProductService = {
           price: product.price,
           imageUrl: product.imageUrl,
           category: product.category.toString(),
+          StockQuantity: product.StockQuantity ?? 100, // Default stock quantity
           isBestseller: true,
           isFeatured: true
         })));

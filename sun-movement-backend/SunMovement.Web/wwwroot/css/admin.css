@@ -1,3 +1,91 @@
+/* Dashboard container tối ưu trải nghiệm */
+.dashboard-container {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* Dashboard row: grid responsive 3-2-1 cột */
+.dashboard-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 24px;
+    margin-bottom: 0;
+    align-items: stretch;
+}
+@media (max-width: 1399.98px) {
+    .dashboard-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 991.98px) {
+    .dashboard-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 575.98px) {
+    .dashboard-row {
+        grid-template-columns: 1fr;
+    }
+}
+.dashboard-row > [class^="col-"],
+.dashboard-row > [class*=" col-"] {
+    margin: 0 !important;
+    min-width: 0;
+    display: flex;
+}
+.dashboard-row .card {
+    width: 100%;
+    margin-bottom: 0;
+    height: 100%;
+}
+
+/* Row 2 cột cho các block lớn */
+.dashboard-row-2col {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 24px;
+    margin-bottom: 0;
+    align-items: stretch;
+}
+@media (max-width: 991.98px) {
+    .dashboard-row-2col {
+        grid-template-columns: 1fr;
+    }
+}
+.dashboard-row-2col > [class^="col-"],
+.dashboard-row-2col > [class*=" col-"] {
+    margin: 0 !important;
+    min-width: 0;
+    display: flex;
+}
+.dashboard-row-2col .card {
+    width: 100%;
+    margin-bottom: 0;
+    height: 100%;
+}
+@media (max-width: 1199.98px) {
+    .dashboard-row > [class^="col-"],
+    .dashboard-row > [class*=" col-"] {
+        min-width: 240px;
+        max-width: 100%;
+        flex: 1 1 48%;
+    }
+}
+@media (max-width: 767.98px) {
+    .dashboard-row > [class^="col-"],
+    .dashboard-row > [class*=" col-"] {
+        min-width: 100%;
+        flex: 1 1 100%;
+    }
+}
+
+/* Margin dưới cho các block lớn */
+.dashboard-block {
+    margin-bottom: 32px;
+}
 /* Admin panel styles */
 :root {
     --primary-color: #0d6efd;
@@ -45,7 +133,12 @@ body {
 .card {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: none;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
+    border-radius: 0.5rem;
+    background: #fff;
+    margin-right: 0;
+    margin-left: 0;
+    margin-top: 0;
 }
 
 .card-header {
@@ -104,6 +197,8 @@ body {
     display: flex;
 }
 
+
+/* Sidebar base styles */
 #layoutSidenav #layoutSidenav_nav {
     flex-basis: 225px;
     flex-shrink: 0;
@@ -111,11 +206,14 @@ body {
     z-index: 1038;
     transform: translateX(0);
     position: fixed;
-    top: 56px;
+    top: 0;
     left: 0;
-    height: calc(100vh - 56px);
+    height: 100vh;
+    min-height: 100vh;
+    background: var(--sidebar-bg);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.10);
+    overflow-y: auto;
 }
-
 #layoutSidenav #layoutSidenav_content {
     position: relative;
     display: flex;
@@ -123,17 +221,89 @@ body {
     justify-content: space-between;
     min-width: 0;
     flex-grow: 1;
-    min-height: calc(100vh - 56px);
+    min-height: 100vh;
     margin-left: 225px;
     transition: margin-left 0.15s ease-in-out;
+    background: var(--light-color);
+    padding-top: 56px;
+}
+/* Add gap between dashboard cards and padding for container */
+.container-fluid {
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+/* Chỉ áp dụng grid cho dashboard-row, không ảnh hưởng .row khác */
+.dashboard-row {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 28px 24px;
+    margin-bottom: 0;
+    align-items: stretch;
+}
+.dashboard-row > [class^="col-"],
+.dashboard-row > [class*=" col-"] {
+    margin: 0 !important;
+    min-width: 260px;
+    flex: 1 1 0;
+    display: flex;
+}
+.dashboard-row .card {
+    width: 100%;
+    margin-bottom: 0;
+    height: 100%;
+}
+@media (min-width: 992px) {
+    .container-fluid .row {
+        gap: 32px 24px;
+    }
+}
+@media (max-width: 991.98px) {
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    .container-fluid .row {
+        gap: 16px 8px;
+    }
 }
 
-.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
-    transform: translateX(-225px);
+/* Desktop: Sidebar always visible, toggled hides it */
+@media (min-width: 992px) {
+    .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(-225px);
+    }
+    .sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
+        margin-left: 0;
+    }
+    #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(0);
+    }
+    #layoutSidenav #layoutSidenav_content {
+        margin-left: 225px;
+    }
 }
 
-.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content {
-    margin-left: 0;
+/* Mobile: Sidebar hidden by default, toggled shows it */
+@media (max-width: 991.98px) {
+    #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(-225px);
+        position: fixed;
+        left: 0;
+        top: 56px;
+        height: calc(100vh - 56px);
+        background: var(--sidebar-bg);
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    }
+    .sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav {
+        transform: translateX(0);
+    }
+    #layoutSidenav #layoutSidenav_content {
+        margin-left: 0;
+    }
 }
 
 .sb-sidenav {

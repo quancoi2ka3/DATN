@@ -1,201 +1,145 @@
-@model SunMovement.Web.ViewModels.ProductViewModel
+@model SunMovement.Core.DTOs.ProductDto
 @{
-    ViewData["Title"] = "Chỉnh Sửa Sản Phẩm";
-    Layout = "_AdminLayout";
+    var isSportwear = Model.Category == SunMovement.Core.Models.ProductCategory.Sportswear;
+    var isSupplement = Model.Category == SunMovement.Core.Models.ProductCategory.Supplements;
+    var allowedSizes = new[] { "S", "M", "L", "XL", "XXL", "XXXL" };
 }
 
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Chỉnh Sửa Sản Phẩm</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang Chủ Quản Trị</a></li>
-        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">Sản Phẩm</a></li>
-        <li class="breadcrumb-item active">Chỉnh Sửa</li>
-    </ol>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-edit me-1"></i> Chỉnh Sửa Sản Phẩm
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Cột trái: Thông tin sản phẩm -->
+        <div class="col-md-7">
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label">Tên sản phẩm</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label">Mô tả</label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Price" class="control-label">Giá bán (VNĐ)</label>
+                        <input asp-for="Price" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="DiscountPrice" class="control-label">Giá khuyến mãi (VNĐ)</label>
+                        <input asp-for="DiscountPrice" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="DiscountPrice" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="Category" class="control-label">Danh mục</label>
+                        <select asp-for="Category" class="form-control">
+                            <option value="0">Đồ thể thao</option>
+                            <option value="1">Thực phẩm bổ sung</option>
+                            <option value="2">Thiết bị</option>
+                            <option value="3">Phụ kiện</option>
+                            <option value="4">Dinh dưỡng</option>
+                        </select>
+                        <span asp-validation-for="Category" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="SubCategory" class="control-label">Danh mục con</label>
+                        <input asp-for="SubCategory" class="form-control" />
+                        <span asp-validation-for="SubCategory" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="IsFeatured" class="control-label">Nổi bật</label>
+                        <input asp-for="IsFeatured" type="checkbox" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="IsActive" class="control-label">Hoạt động</label>
+                        <input asp-for="IsActive" type="checkbox" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Specifications" class="control-label">Thông số kỹ thuật</label>
+                <textarea asp-for="Specifications" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Specifications" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="StockQuantity" class="control-label">Tổng tồn kho</label>
+                <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+            </div>
         </div>
-        <div class="card-body">
-            <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Name" class="control-label required">Tên Sản Phẩm</label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Category" class="control-label required">Danh Mục</label>
-                            <select asp-for="Category" class="form-select" asp-items="Html.GetEnumSelectList<SunMovement.Core.Models.ProductCategory>()"></select>
-                            <span asp-validation-for="Category" class="text-danger"></span>
-                        </div>
-                    </div>
+        <!-- Cột phải: Ảnh sản phẩm & tồn kho size -->
+        <div class="col-md-5">
+            <div class="form-group mb-3">
+                <label>Ảnh sản phẩm hiện tại</label>
+                <div class="mb-2">
+                    <img id="productImagePreview" src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl)" alt="Ảnh sản phẩm" class="img-thumbnail" style="max-width: 220px; max-height: 220px; object-fit: contain;" />
                 </div>
-                
+                <label for="ImageFile" class="btn btn-outline-primary btn-sm">Chọn ảnh mới</label>
+                <input type="file" id="ImageFile" name="ImageFile" class="form-control d-none" accept="image/*" onchange="previewProductImage(event)" />
+                <input type="hidden" asp-for="ImageUrl" />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            </div>
+            @if (Model.Category == SunMovement.Core.Models.ProductCategory.Sportswear && Model.Sizes != null && Model.Sizes.Count > 0)
+            {
                 <div class="form-group mb-3">
-                    <label asp-for="Description" class="control-label required">Mô Tả</label>
-                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
+                    <h5 class="mb-2">Tồn kho từng size</h5>
+                    <table class="table table-bordered table-sm bg-white shadow-sm rounded">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Size</th>
+                                <th class="text-center">Tồn kho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Sizes.Count; i++)
+                            {
+                                <tr>
+                                    <td class="text-center align-middle">
+                                        <input type="text" name="Sizes[@i].SizeLabel" value="@Model.Sizes[i].SizeLabel" class="form-control text-center" readonly />
+                                        <input type="hidden" name="Sizes[@i].Id" value="@Model.Sizes[i].Id" />
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <input type="number" name="Sizes[@i].StockQuantity" value="@Model.Sizes[i].StockQuantity" min="0" class="form-control text-center" required />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="CostPrice" class="control-label">Giá Vốn</label>
-                            <input asp-for="CostPrice" class="form-control bg-light" type="number" step="0.01" min="0" readonly />
-                            <span asp-validation-for="CostPrice" class="text-danger"></span>
-                            <small class="form-text text-muted">
-                                <i class="fas fa-info-circle"></i> Giá vốn được quản lý thông qua hệ thống nhập kho.
-                                <a href="/Admin/InventoryAdmin/AddStock" class="text-primary">Nhập kho</a> để cập nhật giá vốn.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Price" class="control-label required">Giá Bán</label>
-                            <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
-                            <span asp-validation-for="Price" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="DiscountPrice" class="control-label">Giá Khuyến Mãi</label>
-                            <input asp-for="DiscountPrice" class="form-control" type="number" step="0.01" min="0" />
-                            <span asp-validation-for="DiscountPrice" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Hiển thị lợi nhuận ước tính -->
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <div class="alert alert-info" id="profitInfo" style="display:none;">
-                            <strong>Ước tính lợi nhuận:</strong> <span id="profitAmount">0</span> VND (<span id="profitPercent">0</span>%)
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="StockQuantity" class="control-label required">Số Lượng Trong Kho</label>
-                            <input asp-for="StockQuantity" class="form-control" type="number" step="1" min="0" />
-                            <span asp-validation-for="StockQuantity" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="SubCategory" class="control-label">Danh Mục Phụ</label>
-                            <input asp-for="SubCategory" class="form-control" />
-                            <span asp-validation-for="SubCategory" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label asp-for="Specifications" class="control-label">Thông Số Kỹ Thuật</label>
-                    <textarea asp-for="Specifications" class="form-control" rows="3" placeholder="Nhập thông số kỹ thuật theo định dạng JSON"></textarea>
-                    <span asp-validation-for="Specifications" class="text-danger"></span>
-                </div>
-                
-                <div class="form-group mb-3">
-                    <label for="imageFile" class="control-label">Hình Ảnh Sản Phẩm</label>
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                    {
-                        <div class="mb-2">
-                            <img src="@Url.Content(Model.ImageUrl)" alt="@Model.Name" class="image-preview" />
-                        </div>
-                    }
-                    <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
-                    <input type="hidden" asp-for="ImageUrl" />
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input asp-for="IsActive" class="form-check-input" />
-                            <label asp-for="IsActive" class="form-check-label">Kích Hoạt</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input asp-for="IsFeatured" class="form-check-input" />
-                            <label asp-for="IsFeatured" class="form-check-label">Nổi Bật</label>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
-                    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
-                </div>
-            </form>
+            }
         </div>
     </div>
-</div>
+    <div class="mt-4 text-end">
+        <button type="submit" class="btn btn-success px-4 py-2">Lưu sản phẩm</button>
+    </div>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
-    <script>
-        $(document).ready(function() {
-            $('#imageFile').on('change', function() {
-                var fileInput = this;
-                var reader = new FileReader();
-                var previewContainer = $(this).closest('.form-group').find('.image-preview');
-                
-                if (fileInput.files && fileInput.files[0]) {
-                    reader.onload = function(e) {
-                        if (previewContainer.length) {
-                            previewContainer.attr('src', e.target.result);
-                        } else {
-                            $('<img class="image-preview img-fluid rounded mt-2" src="' + e.target.result + '">').insertAfter($(fileInput));
-                        }
-                    }
-                    reader.readAsDataURL(fileInput.files[0]);
-                }
-            });
-            
-            // Tính toán lợi nhuận khi thay đổi giá
-            function calculateProfit() {
-                var costPrice = parseFloat($('#CostPrice').val()) || 0;
-                var price = parseFloat($('#Price').val()) || 0;
-                var discountPrice = parseFloat($('#DiscountPrice').val()) || 0;
-                
-                var sellingPrice = discountPrice > 0 ? discountPrice : price;
-                
-                if (costPrice > 0 && sellingPrice > 0) {
-                    var profit = sellingPrice - costPrice;
-                    var profitPercent = (profit / costPrice) * 100;
-                    
-                    $('#profitAmount').text(profit.toLocaleString('vi-VN'));
-                    $('#profitPercent').text(profitPercent.toFixed(1));
-                    $('#profitInfo').show();
-                    
-                    // Thay đổi màu sắc dựa trên tỷ lệ lợi nhuận
-                    var alertClass = 'alert-info';
-                    if (profitPercent < 15) {
-                        alertClass = 'alert-danger';
-                    } else if (profitPercent > 50) {
-                        alertClass = 'alert-success';
-                    }
-                    
-                    $('#profitInfo').removeClass('alert-info alert-success alert-danger').addClass(alertClass);
-                } else {
-                    $('#profitInfo').hide();
-                }
-            }
-            
-            $('#CostPrice, #Price, #DiscountPrice').on('input', calculateProfit);
-            
-            // Tính toán ngay khi trang load
-            calculateProfit();
-        });
-    </script>
+<script>
+    function previewProductImage(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('productImagePreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 }

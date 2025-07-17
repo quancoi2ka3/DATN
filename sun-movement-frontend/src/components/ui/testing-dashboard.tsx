@@ -230,7 +230,7 @@ export function TestingDashboard() {
 
       {/* Test Controls */}
       <div className="mb-4">
-        <h4 className="font-semibold mb-2">Quick Tests</h4>
+        <h4 className="font-semibold mb-2">Kiểm thử nhanh</h4>
         <div className="space-y-2">
           <div className="flex space-x-2">
             <button 
@@ -238,21 +238,21 @@ export function TestingDashboard() {
               className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
               disabled={isRunning}
             >
-              Add Item
+              Thêm sản phẩm
             </button>
             <button 
               onClick={() => runCartTest('update')}
               className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
               disabled={isRunning || cart.items.length === 0}
             >
-              Update
+              Cập nhật
             </button>
             <button 
               onClick={() => runCartTest('remove')}
               className="px-3 py-1 bg-yellow-500 text-white rounded text-sm hover:bg-yellow-600"
               disabled={isRunning || cart.items.length === 0}
             >
-              Remove
+              Xóa
             </button>
           </div>
           <div className="flex space-x-2">
@@ -261,14 +261,14 @@ export function TestingDashboard() {
               className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
               disabled={isRunning}
             >
-              Clear Cart
+              Xóa giỏ hàng
             </button>
             <button 
               onClick={runRetryTest}
               className="px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600"
               disabled={isRunning}
             >
-              Test Retry
+              Kiểm thử lại
             </button>
           </div>
           <button 
@@ -276,7 +276,7 @@ export function TestingDashboard() {
             className="w-full px-3 py-2 bg-indigo-500 text-white rounded text-sm hover:bg-indigo-600"
             disabled={isRunning}
           >
-            {isRunning ? 'Running Tests...' : 'Run All Tests'}
+            {isRunning ? 'Đang chạy kiểm thử...' : 'Chạy tất cả kiểm thử'}
           </button>
         </div>
       </div>

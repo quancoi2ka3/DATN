@@ -16,259 +16,51 @@
     @await RenderSectionAsync("Styles", required: false)
     
     <style>
-        /* CRITICAL: Reset and prevent any CSS interference */
+        /* Reset only: giữ lại các thuộc tính reset, loại bỏ layout sidebar để file admin.css quản lý */
         html, body {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
             height: 100% !important;
+            min-height: 100vh !important;
             overflow-x: hidden !important;
             box-sizing: border-box !important;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
         }
-        
         *, *:before, *:after {
             box-sizing: border-box !important;
         }
-        
-        /* Body with fixed nav */
-        .sb-nav-fixed {
-            padding-top: 56px !important;
-            margin: 0 !important;
-        }
-        
-        /* CRITICAL: Fixed top navigation - must be absolute positioned */
-        .sb-topnav {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            height: 56px !important;
-            z-index: 1030 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        /* CRITICAL: Layout container - must be block, not flex */
         #layoutSidenav {
-            position: relative !important;
-            display: block !important;
-            width: 100% !important;
-            min-height: calc(100vh - 56px) !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: visible !important;
+            display: flex;
+            min-height: 100vh;
         }
-        
-        /* CRITICAL: Sidebar navigation - must be completely fixed and isolated */
         #layoutSidenav_nav {
-            position: fixed !important;
-            top: 56px !important;
-            left: 0 !important;
-            width: 225px !important;
-            height: calc(100vh - 56px) !important;
-            z-index: 1020 !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            transition: transform 0.15s ease-in-out !important;
-            transform: translateX(0) !important;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background-color: #212529 !important;
+            min-height: 100vh;
         }
-        
-        /* CRITICAL: Main content area - must have exact left margin to match sidebar width */
         #layoutSidenav_content {
-            position: relative !important;
-            margin-left: 225px !important;
-            margin-top: 0 !important;
-            margin-right: 0 !important;
-            margin-bottom: 0 !important;
-            padding: 0 !important;
-            width: auto !important;
-            min-height: calc(100vh - 56px) !important;
-            display: flex !important;
-            flex-direction: column !important;
-            transition: margin-left 0.15s ease-in-out !important;
-            overflow: visible !important;
+            flex: 1 1 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        
-        /* Main content and footer layout */
-        main {
-            flex: 1 0 auto !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            width: 100% !important;
-        }
-        
-        footer {
-            flex-shrink: 0 !important;
-            margin-top: auto !important;
-            width: 100% !important;
-        }
-        
-        /* CRITICAL: Sidebar toggle states */
-        .sb-sidenav-toggled #layoutSidenav_nav {
-            transform: translateX(-225px) !important;
-        }
-        
-        .sb-sidenav-toggled #layoutSidenav_content {
-            margin-left: 0 !important;
-        }
-        
-        /* CRITICAL: Mobile responsive behavior */
-        @@media (max-width: 991.98px) {
-            #layoutSidenav_nav {
-                transform: translateX(-225px) !important;
-            }
-            
-            #layoutSidenav_content {
-                margin-left: 0 !important;
-            }
-            
-            .sb-sidenav-toggled #layoutSidenav_nav {
-                transform: translateX(0) !important;
-            }
-        }
-        
-        /* Sidebar navigation styling */
-        .sb-sidenav {
-            background-color: #212529 !important;
-            height: 100% !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu {
-            padding: 0 !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu .nav-link {
-            display: flex !important;
-            align-items: center !important;
-            padding: 0.75rem !important;
-            position: relative !important;
-            color: rgba(255, 255, 255, 0.5) !important;
-            text-decoration: none !important;
-            border: none !important;
-            margin: 0 !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu .nav-link:hover {
-            color: #fff !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu .nav-link.active {
-            color: #fff !important;
-            background-color: rgba(255, 255, 255, 0.15) !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu .nav-link .sb-nav-link-icon {
-            width: 1rem !important;
-            font-size: 0.9rem !important;
-            margin-right: 0.5rem !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-menu .sb-sidenav-menu-heading {
-            padding: 1.75rem 1rem 0.75rem !important;
-            font-size: 0.75rem !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            color: #adb5bd !important;
-        }
-        
-        /* Nested navigation */
-        .sb-sidenav .sb-sidenav-menu .sb-sidenav-menu-nested {
-            margin-left: 1rem !important;
-        }
-        
-        .sb-sidenav .sb-sidenav-collapse-arrow {
-            margin-left: auto !important;
-            transition: transform 0.15s ease-in-out !important;
-        }
-        
-        /* Custom scrollbar for sidebar */
-        #layoutSidenav_nav::-webkit-scrollbar {
-            width: 5px !important;
-        }
-        
-        #layoutSidenav_nav::-webkit-scrollbar-track {
-            background: #343a40 !important;
-        }
-        
-        #layoutSidenav_nav::-webkit-scrollbar-thumb {
-            background: #495057 !important;
-            border-radius: 3px !important;
-        }
-        
-        /* CRITICAL: Override any Bootstrap or external CSS that might interfere */
-        .container-fluid {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-        
-        /* Ensure no margin/padding interference from Bootstrap */
-        .navbar {
-            margin-bottom: 0 !important;
-        }
-        
-        /* Fix any potential z-index conflicts */
-        .modal {
-            z-index: 1050 !important;
-        }
-        
-        .tooltip {
-            z-index: 1070 !important;
-        }
-        
-        .popover {
-            z-index: 1060 !important;
-        }
-        
-        #layoutSidenav_nav::-webkit-scrollbar-thumb:hover {
-            background: #6c757d;
-        }
-        
-        /* Fix container overflow */
         .container-fluid {
             max-width: 100%;
             overflow-x: hidden;
         }
-        
-        /* Dropdown arrow for collapsible menus */
-        .sb-sidenav-collapse-arrow {
-            display: inline-block;
-            margin-left: auto;
-            transition: transform 0.15s ease;
+        .navbar {
+            margin-bottom: 0 !important;
         }
-        
-        .nav-link[aria-expanded="true"] .sb-sidenav-collapse-arrow {
-            transform: rotate(180deg);
+        .modal { z-index: 1050 !important; }
+        .tooltip { z-index: 1070 !important; }
+        .popover { z-index: 1060 !important; }
+        /* Card responsive fix */
+        .container-fluid .row {
+            flex-wrap: wrap;
         }
-        
-        /* Nested navigation styling */
-        .sb-sidenav-menu-nested {
-            margin-left: 1rem;
-        }
-        
-        .sb-sidenav-menu-nested .nav-link {
-            padding-left: 2.25rem;
-            font-size: 0.875rem;
-        }
-        
-        /* Active link styling */
-        .sb-sidenav .sb-sidenav-menu .nav-link.active {
-            color: #fff;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Footer styling */
-        .sb-sidenav-footer {
-            padding: 0.75rem;
-            font-size: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.1);
+        .container-fluid .card {
+            min-width: 220px;
+            flex: 1 1 220px;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
@@ -474,72 +266,53 @@
     
     <script>
         $(document).ready(function() {
-            // CRITICAL: Ensure body has proper class for layout
+            // Ensure body has proper class for layout
             $('body').addClass('sb-nav-fixed');
-            
-            // Sidebar toggle functionality
+
+
+            // Sidebar toggle chỉ hoạt động trên mobile
             $('#sidebarToggle').click(function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                $('body').toggleClass('sb-sidenav-toggled');
-                
-                // Store state in localStorage
-                var isToggled = $('body').hasClass('sb-sidenav-toggled');
-                localStorage.setItem('sb|sidebar-toggle', isToggled.toString());
-                
-                console.log('Sidebar toggled:', isToggled);
-            });
-            
-            // Restore sidebar state from localStorage
-            try {
-                var storedState = localStorage.getItem('sb|sidebar-toggle');
-                if (storedState === 'true') {
-                    $('body').addClass('sb-sidenav-toggled');
-                } else if (storedState === 'false') {
-                    $('body').removeClass('sb-sidenav-toggled');
+                if ($(window).width() < 992) {
+                    $('body').toggleClass('sb-sidenav-toggled');
+                    var isToggled = $('body').hasClass('sb-sidenav-toggled');
+                    localStorage.setItem('sb|sidebar-toggle', isToggled.toString());
+                    console.log('Sidebar toggled (mobile):', isToggled);
                 }
-            } catch (e) {
-                console.log('localStorage access failed:', e);
-            }
-            
-            // Handle mobile behavior
-            function handleMobileLayout() {
+            });
+
+            // Khôi phục trạng thái sidebar khi load trang và khi resize
+            function restoreSidebarState() {
                 var windowWidth = $(window).width();
-                
-                if (windowWidth < 992) {
-                    // Mobile: sidebar should be hidden by default
-                    if (!localStorage.getItem('sb|sidebar-toggle')) {
+                if (windowWidth >= 992) {
+                    // Desktop: luôn hiện sidebar
+                    $('body').removeClass('sb-sidenav-toggled');
+                    $('#layoutSidenav_content').off('click.mobileSidebar');
+                } else {
+                    // Mobile: khôi phục trạng thái từ localStorage
+                    var storedState = localStorage.getItem('sb|sidebar-toggle');
+                    if (storedState === 'true') {
                         $('body').addClass('sb-sidenav-toggled');
+                    } else {
+                        $('body').removeClass('sb-sidenav-toggled');
                     }
-                    
-                    // Auto-close sidebar when clicking on content in mobile
+                    // Auto-close sidebar khi click ngoài sidebar trên mobile
                     $('#layoutSidenav_content').off('click.mobileSidebar').on('click.mobileSidebar', function(e) {
                         if (!$(e.target).closest('#sidebarToggle').length) {
                             $('body').addClass('sb-sidenav-toggled');
                         }
                     });
-                } else {
-                    // Desktop: respect user preference
-                    $('#layoutSidenav_content').off('click.mobileSidebar');
-                    
-                    // Only apply stored state if exists
-                    var storedState = localStorage.getItem('sb|sidebar-toggle');
-                    if (storedState === 'true') {
-                        $('body').addClass('sb-sidenav-toggled');
-                    } else if (storedState === 'false') {
-                        $('body').removeClass('sb-sidenav-toggled');
-                    }
                 }
             }
-            
-            // Initial mobile layout handling
-            handleMobileLayout();
-            
-            // Handle window resize
+
+            // Initial state
+            restoreSidebarState();
+            // On resize
             $(window).resize(function() {
-                handleMobileLayout();
+                restoreSidebarState();
             });
-            
+
             // Initialize toastr notifications
             if (typeof toastr !== 'undefined') {
                 toastr.options = {
@@ -560,7 +333,7 @@
                     "hideMethod": "fadeOut"
                 };
             }
-            
+
             // Debug layout state
             console.log('Layout initialized');
             console.log('Body classes:', $('body').attr('class'));

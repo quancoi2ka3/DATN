@@ -25,7 +25,10 @@ namespace SunMovement.Core.Mappings
                     src.UnitPrice));
 
             // Product Mappings (placeholder - update with actual properties)
-            CreateMap<Product, ProductDto>();
+            CreateMap<ProductSize, ProductSizeDto>().ReverseMap();
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.Sizes, opt => opt.MapFrom(src => src.Sizes))
+                .ReverseMap();
             CreateMap<Service, ServiceDto>();
         }
     }

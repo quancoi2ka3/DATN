@@ -105,7 +105,7 @@
                         data: { productId: productId },
                         success: function(response) {
                             if (response.success) {
-                                $("#currentStock").val(response.stockQuantity);
+                                $("#currentStock").val(response.StockQuantity);
                                 validateQuantity();
                             }
                         },

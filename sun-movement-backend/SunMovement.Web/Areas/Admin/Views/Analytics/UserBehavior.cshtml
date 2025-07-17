@@ -223,7 +223,24 @@
             
             // Initialize DataTable for user interactions
             $('#userInteractionsTable').DataTable({
-                order: [[5, 'desc']] // Sort by score
+                order: [[5, 'desc']], // Sort by score
+                language: {
+                    emptyTable: "Không có dữ liệu",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 mục",
+                    infoFiltered: "(lọc từ _MAX_ mục)",
+                    lengthMenu: "Hiển thị _MENU_ mục",
+                    loadingRecords: "Đang tải...",
+                    processing: "Đang xử lý...",
+                    search: "Tìm kiếm:",
+                    zeroRecords: "Không tìm thấy kết quả phù hợp",
+                    paginate: {
+                        first: "Đầu",
+                        last: "Cuối",
+                        next: "Tiếp",
+                        previous: "Trước"
+                    }
+                }
             });
         });
     </script>

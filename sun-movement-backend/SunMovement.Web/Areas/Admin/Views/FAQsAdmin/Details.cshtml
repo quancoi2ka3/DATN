@@ -35,35 +35,35 @@
                 </div>
             </div>
               <dl class="row">
-                <dt class="col-sm-3">Category</dt>
+                <dt class="col-sm-3">Danh mục</dt>
                 <dd class="col-sm-9">@Model.Category.ToString()</dd>
                 
-                <dt class="col-sm-3">Display Order</dt>
+                <dt class="col-sm-3">Thứ tự hiển thị</dt>
                 <dd class="col-sm-9">@Model.DisplayOrder</dd>
                 
-                <dt class="col-sm-3">Status</dt>
+                <dt class="col-sm-3">Trạng thái</dt>
                 <dd class="col-sm-9">
                     @if (Model.IsActive)
                     {
-                        <span class="badge bg-success">Active</span>
+                        <span class="badge bg-success">Hoạt động</span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">Inactive</span>
+                        <span class="badge bg-secondary">Không hoạt động</span>
                     }
                 </dd>
                 
-                <dt class="col-sm-3">Created</dt>
+                <dt class="col-sm-3">Ngày tạo</dt>
                 <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
                 
-                <dt class="col-sm-3">Last Updated</dt>
+                <dt class="col-sm-3">Cập nhật lần cuối</dt>
                 <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Never")</dd>
             </dl>
             
             <div class="mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Chỉnh sửa</a>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
             </div>
         </div>
     </div>

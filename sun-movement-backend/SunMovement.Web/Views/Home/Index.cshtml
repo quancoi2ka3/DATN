@@ -1,56 +1,63 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ quản trị";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Sun Movement Administration</h1>
-    <p class="lead">Welcome to the Sun Movement management portal.</p>
+    <h1 class="display-4 mb-3">Quản trị Sun Movement</h1>
+    <p class="lead">Chào mừng bạn đến với hệ thống quản trị Sun Movement.</p>
     
     @if (User.Identity != null && User.Identity.IsAuthenticated)
     {
         @if (User.IsInRole("Admin"))
         {
             <div class="mt-4">
-                <a asp-controller="Admin" asp-action="Index" class="btn btn-primary">Go to Admin Dashboard</a>
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-success btn-lg"><i class="bi bi-speedometer2 me-2"></i>Vào trang quản trị</a>
             </div>
         }
         else
         {
-            <p>You are logged in, but you don't have admin privileges.</p>
+            <p class="text-danger mt-3">Bạn đã đăng nhập nhưng không có quyền quản trị.</p>
         }
     }
     else
     {
         <div class="mt-4">
-            <p>Please log in to access the administration features.</p>
-            <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Login</a>
+            <p>Vui lòng đăng nhập để sử dụng các chức năng quản trị.</p>
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg"><i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập</a>
         </div>
     }
 </div>
 
-<div class="row mt-5">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Products</h5>
-                <p class="card-text">Manage your store's products including sportswear and supplements.</p>
+<div class="row mt-5 justify-content-center">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-box-seam display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Sản phẩm</h5>
+                <p class="card-text">Quản lý các sản phẩm như quần áo thể thao, thực phẩm bổ sung...</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Services</h5>
-                <p class="card-text">Manage services such as Yoga, Strength Training, and Calisthenics.</p>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-people display-4 text-success mb-3"></i>
+                <h5 class="card-title">Dịch vụ</h5>
+                <p class="card-text">Quản lý các dịch vụ như Yoga, Huấn luyện thể lực, Calisthenics...</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Orders</h5>
-                <p class="card-text">Track and manage customer orders and payments.</p>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-receipt display-4 text-warning mb-3"></i>
+                <h5 class="card-title">Đơn hàng</h5>
+                <p class="card-text">Theo dõi, quản lý đơn hàng và thanh toán của khách hàng.</p>
             </div>
         </div>
     </div>
 </div>
+
+<footer class="text-center mt-5 mb-3 text-muted small">
+    © 2025 - Sun Movement | Liên hệ: info@sunmovement.vn
+</footer>

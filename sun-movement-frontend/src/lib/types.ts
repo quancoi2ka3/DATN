@@ -19,7 +19,7 @@ export interface Product {
   isBestseller?: boolean;
   isFeatured?: boolean;
   isActive?: boolean;
-  stockQuantity?: number;
+  StockQuantity : number;
   specifications?: string;
 }
 

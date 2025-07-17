@@ -244,14 +244,28 @@ $(document).ready(function() {
 
 function initializeDataTable() {
     dataTable = $('#searchTable').DataTable({
-        "order": [[ 1, "desc" ]], // Sort by search count descending
-        "pageLength": 25,
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
+        order: [[ 1, "desc" ]],
+        pageLength: 25,
+        language: {
+            emptyTable: "Không có dữ liệu",
+            info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+            infoEmpty: "Hiển thị 0 đến 0 của 0 mục",
+            infoFiltered: "(lọc từ _MAX_ mục)",
+            lengthMenu: "Hiển thị _MENU_ mục",
+            loadingRecords: "Đang tải...",
+            processing: "Đang xử lý...",
+            search: "Tìm kiếm:",
+            zeroRecords: "Không tìm thấy kết quả phù hợp",
+            paginate: {
+                first: "Đầu",
+                last: "Cuối",
+                next: "Tiếp",
+                previous: "Trước"
+            }
         },
-        "columnDefs": [
-            { "targets": [1, 2], "className": "text-center" },
-            { "targets": [3], "className": "text-center" }
+        columnDefs: [
+            { targets: [1, 2], className: "text-center" },
+            { targets: [3], className: "text-center" }
         ]
     });
 }

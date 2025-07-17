@@ -66,23 +66,23 @@
                         <dd class="col-sm-9">
                             @if (Model.IsActive)
                             {
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-success">Đang hoạt động</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Inactive</span>
+                                <span class="badge bg-secondary">Không hoạt động</span>
                             }
                             
                             @if (Model.IsFeatured)
                             {
-                                <span class="badge bg-warning text-dark ms-2">Featured</span>
+                                <span class="badge bg-warning text-dark ms-2">Nổi bật</span>
                             }
                         </dd>
                         
-                        <dt class="col-sm-3">Created</dt>
+                        <dt class="col-sm-3">Ngày tạo</dt>
                         <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
                         
-                        <dt class="col-sm-3">Last Updated</dt>
+                        <dt class="col-sm-3">Cập nhật lần cuối</dt>
                         <dd class="col-sm-9">@(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("g") : "Never")</dd>
                     </dl>
                 </div>
@@ -90,7 +90,7 @@
             
             <div class="row mt-4">
                 <div class="col">
-                    <h5>Description</h5>
+                    <h5>Mô tả</h5>
                     <div class="border p-3 bg-light">
                         @Html.Raw(Model.Description.Replace("\n", "<br>"))
                     </div>
@@ -98,9 +98,9 @@
             </div>
             
             <div class="mt-4">
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Chỉnh sửa</a>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
             </div>
         </div>
     </div>

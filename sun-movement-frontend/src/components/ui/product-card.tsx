@@ -11,7 +11,7 @@ import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
 import { trackProductView, trackAddToCart } from "@/services/analytics";
-
+import ProductDetailModal from "@/components/ui/product-detail-modal";
 interface ProductCardProps {
   product: Product;
 }
@@ -26,28 +26,39 @@ export function ProductCard({ product }: ProductCardProps) {
   const { addToCart, isLoading } = useCart();
   const { isAuthenticated, user } = useAuth();
 
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
+  // Chặn tăng vượt tồn kho
+  const increaseQuantity = () => {
+    if (product.StockQuantity && quantity < product.StockQuantity) {
+      setQuantity(prev => prev + 1);
+    }
+  };
   const decreaseQuantity = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
     // Check if user is authenticated
     if (!isAuthenticated) {
       setIsLoginPromptOpen(true);
       return;
     }
-    
+    // Kiểm tra tồn kho trước khi thêm
+    if (product.StockQuantity && quantity > product.StockQuantity) {
+      alert(`Chỉ còn ${product.StockQuantity} sản phẩm trong kho!`);
+      return;
+    }
     setIsAdding(true);
-    
     try {
-      const success = await addToCart(product, quantity, selectedSize, selectedColor);
+      // Luôn truyền đúng giá khuyến mãi nếu có
+      const productToAdd = {
+        ...product,
+        price: product.salePrice ?? product.price
+      };
+      const success = await addToCart(productToAdd, quantity, selectedSize, selectedColor);
       if (success) {
         // Track add to cart event - make it non-blocking
         try {
-          // Use actual user ID when authenticated, otherwise skip tracking
           if (user?.id) {
-            trackAddToCart(user.id, product, quantity);
+            trackAddToCart(user.id, productToAdd, quantity);
           }
         } catch (trackingError) {
           console.warn('Analytics tracking failed but cart operation succeeded:', trackingError);
@@ -103,6 +114,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-slate-300 mb-4 line-clamp-2 leading-relaxed text-sm group-hover:text-slate-200 transition-colors duration-300">{product.description}</p>
           <div className="flex justify-between items-end">
             <div className="flex flex-col">
+              {/* Hiển thị giá */}
               {product.salePrice ? (
                 <>
                   <span className="text-sm line-through text-slate-500 mb-1">{product.price.toLocaleString()} VNĐ</span>
@@ -111,23 +123,29 @@ export function ProductCard({ product }: ProductCardProps) {
               ) : (
                 <span className="text-xl font-bold text-white drop-shadow-sm">{product.price.toLocaleString()} VNĐ</span>
               )}
-              {product.rating && (
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="flex">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <svg 
-                        key={i} 
-                        className={`w-3 h-3 ${i < Math.floor(product.rating ?? 0) ? 'text-yellow-400' : 'text-slate-600'}`} 
-                        fill="currentColor" 
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-slate-400 text-xs">({product.reviews})</span>
-                </div>
-              )}
+              {/* Hiển thị tồn kho */}
+{product.StockQuantity === 0 ? (
+  <span className="text-xs font-bold text-white bg-red-600 px-2 py-1 rounded ml-0 mt-1 inline-block animate-pulse shadow">HẾT HÀNG</span>
+) : (
+  <span className="text-xs text-gray-400 mt-1">Tồn kho: {product.StockQuantity??0}</span>
+)}
+{product.rating && (
+  <div className="flex items-center gap-1 mt-1">
+    <div className="flex">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg 
+          key={i} 
+          className={`w-3 h-3 ${i < Math.floor(product.rating ?? 0) ? 'text-yellow-400' : 'text-slate-600'}`} 
+          fill="currentColor" 
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+    <span className="text-slate-400 text-xs">({product.reviews})</span>
+  </div>
+)}
             </div>
             <Button size="sm" className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold">
               Chi tiết
@@ -136,64 +154,11 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[725px]">
-          <DialogHeader>
-            <DialogTitle>{product.name}</DialogTitle>
-            <DialogDescription>Chi tiết sản phẩm</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative h-[300px] w-full">
-              <Image
-                src={product.imageUrl}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover rounded-md"
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-gray-700 mb-4">{product.description}</p>
-              <div className="text-2xl font-bold mb-4">{product.price.toLocaleString()} VNĐ</div>
-              
-              <div className="flex items-center gap-2 mb-6">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={(e) => { e.stopPropagation(); decreaseQuantity(); }}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-8 text-center">{quantity}</span>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={(e) => { e.stopPropagation(); increaseQuantity(); }}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-                <Button 
-                className="mt-auto" 
-                onClick={handleAddToCart} 
-                disabled={isAdding}
-              >
-                {isAdding ? (
-                  <>
-                    <span className="animate-spin mr-2">⟳</span>
-                    Đang thêm...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Thêm vào giỏ hàng
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ProductDetailModal
+        product={product}
+        open={isOpen}
+        onOpenChange={setIsOpen}
+      />
       
       {/* Login Prompt Dialog */}
       <LoginPromptDialog 

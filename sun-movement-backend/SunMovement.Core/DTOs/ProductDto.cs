@@ -37,5 +37,7 @@ namespace SunMovement.Core.DTOs
         public bool IsFeatured { get; set; }
         
         public bool IsActive { get; set; } = true;
+
+        public List<ProductSizeDto> Sizes { get; set; }
     }
 }

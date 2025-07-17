@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using SunMovement.Web.Areas.Admin.Models;
 using CoreBatchInventoryUpdateViewModel = SunMovement.Core.ViewModels.BatchInventoryUpdateViewModel;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -94,8 +96,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                await LoadProductsAndSuppliersToViewBag();
-                return View(new InventoryTransaction { TransactionType = InventoryTransactionType.Purchase });
+                await LoadProductsCategoriesSuppliersToViewBag();
+                return View(new InventoryStockInViewModel());
             }
             catch (Exception ex)
             {
@@ -108,37 +110,191 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         // POST: Admin/InventoryAdmin/StockIn
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StockIn(InventoryTransaction transaction)
+        public async Task<IActionResult> StockIn(InventoryStockInViewModel model, string NewSupplierName)
         {
             try
             {
-                if (ModelState.IsValid)
+                _logger.LogInformation("Bắt đầu nhập kho: IsNewProduct={IsNewProduct}, ProductId={ProductId}, SupplierId={SupplierId}, NewSupplierName={NewSupplierName}", model.IsNewProduct, model.ProductId, model.SupplierId, NewSupplierName);
+                // Validation động
+                if (model.IsNewProduct)
                 {
-                    transaction.TransactionType = InventoryTransactionType.Purchase;
-                    transaction.TransactionDate = DateTime.Now;
-
-                    var result = await _inventoryService.AddStockAsync(
-                        transaction.ProductId,
-                        transaction.Quantity,
-                        transaction.UnitPrice,
-                        transaction.SupplierId,
-                        transaction.ReferenceNumber ?? string.Empty,
-                        transaction.Notes ?? string.Empty);
-
-                    // Success if transaction was created
+                    if (string.IsNullOrWhiteSpace(model.Name))
+                        ModelState.AddModelError("Name", "Vui lòng nhập tên sản phẩm mới.");
+                    if (!model.CategoryId.HasValue)
+                        ModelState.AddModelError("CategoryId", "Vui lòng chọn danh mục cho sản phẩm mới.");
+                    if (!model.Price.HasValue || model.Price <= 0)
+                        ModelState.AddModelError("Price", "Vui lòng nhập giá bán hợp lệ cho sản phẩm mới.");
+                }
+                else if (!model.ProductId.HasValue || model.ProductId.Value <= 0)
+                {
+                    ModelState.AddModelError("ProductId", "Vui lòng chọn sản phẩm.");
+                }
+                if (model.IsNewSupplier)
+                {
+                    if (string.IsNullOrWhiteSpace(NewSupplierName))
+                        ModelState.AddModelError("NewSupplierName", "Vui lòng nhập tên nhà cung cấp mới.");
+                }
+                else if (!model.SupplierId.HasValue || model.SupplierId.Value <= 0)
+                {
+                    ModelState.AddModelError("SupplierId", "Vui lòng chọn nhà cung cấp.");
+                }
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("ModelState không hợp lệ khi nhập kho: {Errors}", string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    await LoadProductsCategoriesSuppliersToViewBag();
+                    return View(model);
+                }
+                int? supplierId = null;
+                if (model.IsNewSupplier && !string.IsNullOrWhiteSpace(NewSupplierName))
+                {
+                    var existing = (await _unitOfWork.Suppliers.GetActiveAsync()).FirstOrDefault(s => s.Name.Trim().ToLower() == NewSupplierName.Trim().ToLower());
+                    if (existing != null)
+                    {
+                        supplierId = existing.Id;
+                        _logger.LogInformation("Nhà cung cấp đã tồn tại: {SupplierId}", supplierId);
+                    }
+                    else
+                    {
+                        var newSupplier = new Supplier { Name = NewSupplierName.Trim(), IsActive = true };
+                        await _unitOfWork.Suppliers.AddAsync(newSupplier);
+                        await _unitOfWork.CompleteAsync();
+                        supplierId = newSupplier.Id;
+                        _logger.LogInformation("Tạo mới nhà cung cấp: {SupplierId}", supplierId);
+                    }
+                }
+                else if (model.SupplierId.HasValue)
+                {
+                    supplierId = model.SupplierId;
+                }
+                if (!supplierId.HasValue)
+                {
+                    _logger.LogWarning("Không có nhà cung cấp hợp lệ khi nhập kho");
+                    ModelState.AddModelError("SupplierId", "Vui lòng chọn hoặc nhập nhà cung cấp.");
+                    await LoadProductsCategoriesSuppliersToViewBag();
+                    return View(model);
+                }
+                if (model.IsNewProduct)
+                {
+                    var product = new Product
+                    {
+                        Name = model.Name,
+                        Description = model.Description,
+                        Category = (ProductCategory)(model.CategoryId ?? 0),
+                        Price = model.Price ?? 0,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        IsFeatured = false,
+                        TrackInventory = true
+                    };
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(model.ImageFile.FileName);
+                        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/products", fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.ImageFile.CopyToAsync(stream);
+                        }
+                        product.ImageUrl = "/uploads/products/" + fileName;
+                    }
+                    if (model.IsSportwear && model.Sizes != null && model.Sizes.Count > 0)
+                    {
+                        product.Sizes = model.Sizes.Select(s => new ProductSize
+                        {
+                            SizeLabel = s.Size,
+                            StockQuantity = s.Quantity
+                        }).ToList();
+                        product.StockQuantity = model.Sizes.Sum(s => s.Quantity);
+                    }
+                    else
+                    {
+                        product.StockQuantity = model.Quantity;
+                    }
+                    await _unitOfWork.Products.AddAsync(product);
+                    await _unitOfWork.CompleteAsync();
+                    _logger.LogInformation("Tạo mới sản phẩm thành công: ProductId={ProductId}", product.Id);
+                    if (supplierId.HasValue)
+                    {
+                        var productSupplier = new ProductSupplier
+                        {
+                            ProductId = product.Id,
+                            SupplierId = supplierId.Value,
+                            DefaultUnitPrice = model.UnitPrice ?? 0,
+                            IsPreferredSupplier = true,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _unitOfWork.ProductSuppliers.AddAsync(productSupplier);
+                        await _unitOfWork.CompleteAsync();
+                        _logger.LogInformation("Tạo mới ProductSupplier: ProductId={ProductId}, SupplierId={SupplierId}", product.Id, supplierId);
+                    }
+                    var transaction = new InventoryTransaction
+                    {
+                        ProductId = product.Id,
+                        Quantity = product.StockQuantity,
+                        UnitPrice = model.UnitPrice ?? 0,
+                        SupplierId = supplierId,
+                        TransactionType = InventoryTransactionType.Purchase,
+                        TransactionDate = DateTime.Now,
+                        Notes = model.Notes
+                    };
+                    await _unitOfWork.InventoryTransactions.AddAsync(transaction);
+                    await _unitOfWork.CompleteAsync();
+                    _logger.LogInformation("Ghi nhận nhập kho thành công cho sản phẩm mới: ProductId={ProductId}, TransactionId={TransactionId}", product.Id, transaction.Id);
+                    TempData["SuccessMessage"] = "Đã tạo sản phẩm mới và nhập kho thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                else if (model.ProductId.HasValue)
+                {
+                    var product = await _unitOfWork.Products.GetByIdAsync(model.ProductId.Value);
+                    if (product == null)
+                    {
+                        _logger.LogWarning("Không tìm thấy sản phẩm khi nhập kho: ProductId={ProductId}", model.ProductId);
+                        ModelState.AddModelError("ProductId", "Không tìm thấy sản phẩm.");
+                        await LoadProductsCategoriesSuppliersToViewBag();
+                        return View(model);
+                    }
+                    if (product.Category == ProductCategory.Sportswear && model.Sizes != null && model.Sizes.Count > 0)
+                    {
+                        foreach (var sizeDto in model.Sizes)
+                        {
+                            var size = product.Sizes.FirstOrDefault(s => s.SizeLabel == sizeDto.Size);
+                            if (size != null)
+                            {
+                                size.StockQuantity += sizeDto.Quantity;
+                            }
+                        }
+                        product.StockQuantity = product.Sizes.Sum(s => s.StockQuantity);
+                    }
+                    else
+                    {
+                        product.StockQuantity += model.Quantity;
+                    }
+                    await _unitOfWork.Products.UpdateAsync(product);
+                    var transaction = new InventoryTransaction
+                    {
+                        ProductId = product.Id,
+                        Quantity = model.Quantity,
+                        UnitPrice = model.UnitPrice ?? 0,
+                        SupplierId = supplierId,
+                        TransactionType = InventoryTransactionType.Purchase,
+                        TransactionDate = DateTime.Now,
+                        Notes = model.Notes
+                    };
+                    await _unitOfWork.InventoryTransactions.AddAsync(transaction);
+                    await _unitOfWork.CompleteAsync();
+                    _logger.LogInformation("Ghi nhận nhập kho thành công cho sản phẩm cũ: ProductId={ProductId}, TransactionId={TransactionId}", product.Id, transaction.Id);
                     TempData["SuccessMessage"] = "Nhập kho thành công!";
                     return RedirectToAction(nameof(Index));
                 }
-
-                await LoadProductsAndSuppliersToViewBag();
-                return View(transaction);
+                _logger.LogWarning("Không xác định được loại nhập kho (mới/cũ)");
+                await LoadProductsCategoriesSuppliersToViewBag();
+                return View(model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing stock in");
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi nhập kho.";
-                await LoadProductsAndSuppliersToViewBag();
-                return View(transaction);
+                _logger.LogError(ex, "Lỗi khi nhập kho: {Message}", ex.Message);
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi nhập kho: " + ex.Message;
+                await LoadProductsCategoriesSuppliersToViewBag();
+                return View(model);
             }
         }
 
@@ -601,7 +757,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     TransactionDate = DateTime.Now
                 };
                 
-                await LoadSuppliersToViewBag();
+                await LoadProductsCategoriesSuppliersToViewBag();
                 
                 return View(transaction);
             }
@@ -640,7 +796,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
                 ViewBag.Product = product;
                 
-                await LoadSuppliersToViewBag();
+                await LoadProductsCategoriesSuppliersToViewBag();
                 
                 return View(transaction);
             }
@@ -652,7 +808,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 var product = await _unitOfWork.Products.GetByIdAsync(transaction.ProductId);
                 ViewBag.Product = product;
                 
-                await LoadSuppliersToViewBag();
+                await LoadProductsCategoriesSuppliersToViewBag();
                 
                 return View(transaction);
             }
@@ -752,14 +908,14 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             });
         }
 
-        private async Task LoadSuppliersToViewBag()
+        private async Task LoadProductsCategoriesSuppliersToViewBag()
         {
+            var products = await _unitOfWork.Products.GetAllAsync();
+            var categories = Enum.GetValues(typeof(ProductCategory)).Cast<ProductCategory>().ToList();
             var suppliers = await _unitOfWork.Suppliers.GetActiveAsync();
-            ViewBag.Suppliers = suppliers.Select(s => new SelectListItem
-            {
-                Value = s.Id.ToString(),
-                Text = s.Name
-            });
+            ViewBag.Products = products.Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name });
+            ViewBag.Categories = categories.Select(c => new SelectListItem { Value = ((int)c).ToString(), Text = c.ToString() });
+            ViewBag.Suppliers = suppliers.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name });
         }
 
         private string GetTransactionTypeDisplayName(InventoryTransactionType type)

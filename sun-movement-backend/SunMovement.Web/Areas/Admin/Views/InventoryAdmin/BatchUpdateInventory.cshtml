@@ -91,14 +91,26 @@
     <script>
         $(document).ready(function() {
             $('.datatable').DataTable({
-                "paging": false,
-                "ordering": true,
-                "info": false,
-                "searching": true,
-                "language": {
-                    "search": "Tìm kiếm:",
-                    "zeroRecords": "Không tìm thấy sản phẩm nào",
-                    "emptyTable": "Không có sản phẩm nào trong danh sách"
+                paging: false,
+                ordering: true,
+                info: false,
+                searching: true,
+                language: {
+                    search: "Tìm kiếm:",
+                    zeroRecords: "Không tìm thấy sản phẩm nào",
+                    emptyTable: "Không có sản phẩm nào trong danh sách",
+                    lengthMenu: "Hiển thị _MENU_ mục",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 mục",
+                    infoFiltered: "(lọc từ _MAX_ mục)",
+                    loadingRecords: "Đang tải...",
+                    processing: "Đang xử lý...",
+                    paginate: {
+                        first: "Đầu",
+                        last: "Cuối",
+                        next: "Tiếp",
+                        previous: "Trước"
+                    }
                 }
             });
         });

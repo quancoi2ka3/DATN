@@ -337,11 +337,11 @@ export const EnhancedProductCard = memo(({
           <PriceDisplay product={product} />
 
           {/* Stock Status */}
-          {product.stockQuantity !== undefined && (
+          {product.StockQuantity !== undefined && (
             <div className="mt-2">
-              {product.stockQuantity > 0 ? (
+              {product.StockQuantity > 0 ? (
                 <span className="text-green-600 text-sm font-medium">
-                  Còn hàng ({product.stockQuantity})
+                  Còn hàng ({product.StockQuantity})
                 </span>
               ) : (
                 <span className="text-red-600 text-sm font-medium">
@@ -491,11 +491,11 @@ export const EnhancedProductCard = memo(({
               </div>
 
               {/* Stock Status */}
-              {product.stockQuantity !== undefined && (
+              {product.StockQuantity !== undefined && (
                 <div>
-                  {product.stockQuantity > 0 ? (
+                  {product.StockQuantity > 0 ? (
                     <span className="text-green-600 font-medium">
-                      ✓ Còn hàng ({product.stockQuantity} sản phẩm)
+                      ✓ Còn hàng ({product.StockQuantity} sản phẩm)
                     </span>
                   ) : (
                     <span className="text-red-600 font-medium">
@@ -508,7 +508,7 @@ export const EnhancedProductCard = memo(({
               {/* Add to Cart Button */}
               <Button
                 onClick={handleAddToCart}
-                disabled={isAdding || (product.stockQuantity !== undefined && product.stockQuantity === 0)}
+                disabled={isAdding || (product.StockQuantity !== undefined && product.StockQuantity === 0)}
                 className="w-full h-12 text-lg font-semibold"
                 size="lg"
               >
@@ -520,7 +520,7 @@ export const EnhancedProductCard = memo(({
                 ) : (
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5" />
-                    {product.stockQuantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+                    {product.StockQuantity === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
                   </div>
                 )}
               </Button>

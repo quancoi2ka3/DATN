@@ -422,6 +422,22 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         }
                     }
 
+                    // Sau khi tạo product thành công:
+                    if ((product.StockQuantity > 0 || (product.Sizes != null && product.Sizes.Any(s => s.StockQuantity > 0))))
+                    {
+                        var transaction = new InventoryTransaction
+                        {
+                            ProductId = product.Id,
+                            Quantity = product.StockQuantity,
+                            UnitPrice = model.CostPrice,
+                            TransactionType = InventoryTransactionType.Purchase,
+                            TransactionDate = DateTime.Now,
+                            Notes = "Nhập kho khi tạo sản phẩm mới"
+                        };
+                        await _unitOfWork.InventoryTransactions.AddAsync(transaction);
+                        await _unitOfWork.CompleteAsync();
+                    }
+
                     TempData["SuccessMessage"] = "Đã tạo sản phẩm thành công từ hàng tồn kho!";
                     return RedirectToAction(nameof(Details), new { id = product.Id });
                 }
@@ -454,7 +470,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     return NotFound();
                 }
 
-                var model = new ProductViewModel
+                // Map Product -> ProductDto (bao gồm cả size)
+                var model = new SunMovement.Core.DTOs.ProductDto
                 {
                     Id = product.Id,
                     Name = product.Name,
@@ -463,25 +480,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     DiscountPrice = product.DiscountPrice,
                     Category = product.Category,
                     SubCategory = product.SubCategory,
-                    Sku = product.Sku,
-                    Barcode = product.Barcode,
-                    Weight = product.Weight,
-                    Dimensions = product.Dimensions,
-                    MinimumStockLevel = product.MinimumStockLevel,
-                    OptimalStockLevel = product.OptimalStockLevel,
+                    ImageUrl = product.ImageUrl ?? string.Empty,
+                    StockQuantity = product.StockQuantity,
+                    Specifications = product.Specifications ?? string.Empty,
                     IsFeatured = product.IsFeatured,
-                    TrackInventory = product.TrackInventory,
-                    AllowBackorder = product.AllowBackorder,
                     IsActive = product.IsActive,
-                    ImageUrl = product.ImageUrl,
-                    CostPrice = product.CostPrice
+                    Sizes = product.Sizes != null ? product.Sizes.Select(s => new SunMovement.Core.DTOs.ProductSizeDto
+                    {
+                        Id = s.Id,
+                        SizeLabel = s.SizeLabel,
+                        StockQuantity = s.StockQuantity
+                    }).ToList() : new List<SunMovement.Core.DTOs.ProductSizeDto>()
                 };
 
-                // Load current coupons
-                var productCoupons = await _couponService.GetProductCouponsAsync(id.Value);
-                model.SelectedCouponIds = productCoupons.Select(c => c.Id).ToList();
-
-                await LoadEditPageData(model);
+                // Nếu cần, load thêm các ViewBag khác ở đây
+                // await LoadEditPageData(model); // Nếu có
                 return View(model);
             }
             catch (Exception ex)
@@ -564,6 +577,24 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     if (couponsToAdd.Any())
                     {
                         await _couponService.ApplyCouponsToProductAsync(id, couponsToAdd);
+                    }
+
+                    // Kiểm tra thay đổi tồn kho tổng hoặc size
+                    int oldStock = product.StockQuantity;
+                    int newStock = model.StockQuantity;
+                    if (oldStock != newStock)
+                    {
+                        var transaction = new InventoryTransaction
+                        {
+                            ProductId = product.Id,
+                            Quantity = newStock - oldStock,
+                            UnitPrice = model.CostPrice,
+                            TransactionType = InventoryTransactionType.Adjustment,
+                            TransactionDate = DateTime.Now,
+                            Notes = "Điều chỉnh kho khi sửa sản phẩm"
+                        };
+                        await _unitOfWork.InventoryTransactions.AddAsync(transaction);
+                        await _unitOfWork.CompleteAsync();
                     }
 
                     await _unitOfWork.CompleteAsync();

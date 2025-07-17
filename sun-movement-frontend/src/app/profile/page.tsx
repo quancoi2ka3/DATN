@@ -176,10 +176,10 @@ export default function ProfilePage() {
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Button variant="outline" asChild>
-                  <Link href="/store">
+                  <Link href="/faq">
                     <div className="text-center">
-                      <div className="text-sm font-medium">Cửa hàng</div>
-                      <div className="text-xs text-gray-500">Mua sắm</div>
+                      <div className="text-sm font-medium">FAQ</div>
+                      <div className="text-xs text-gray-500">Tra cứu</div>
                     </div>
                   </Link>
                 </Button>

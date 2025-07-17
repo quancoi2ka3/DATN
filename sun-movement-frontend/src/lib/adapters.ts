@@ -10,7 +10,7 @@ export interface ProductDto {
   price: number;
   discountPrice?: number | null;
   imageUrl?: string;
-  stockQuantity: number;
+  StockQuantity: number;
   category: string|number;
   subCategory?: string;
   specifications?: string;

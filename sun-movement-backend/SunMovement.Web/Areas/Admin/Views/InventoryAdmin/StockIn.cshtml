@@ -1,117 +1,205 @@
-@model SunMovement.Core.Models.InventoryTransaction
-
+@model SunMovement.Web.Areas.Admin.Models.InventoryStockInViewModel
 @{
-    ViewData["Title"] = "Nhập kho";
+    ViewBag.Title = "Nhập kho";
 }
-
-<div class="container-fluid">
-    <h1 class="h3 mb-2 text-gray-800">Nhập kho</h1>
-    <p class="mb-4">Thêm sản phẩm mới vào kho hoặc nhập thêm số lượng cho sản phẩm đã có.</p>
-
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Thông tin nhập kho</h6>
-                </div>
-                <div class="card-body">
-                    <form asp-action="StockIn" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        
-                        <div class="form-group">
-                            <label asp-for="ProductId" class="control-label">Sản phẩm</label>
-                            <select asp-for="ProductId" class="form-control" 
-                                    asp-items="ViewBag.Products" required>
-                                <option value="">-- Chọn sản phẩm --</option>
-                            </select>
-                            <span asp-validation-for="ProductId" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label asp-for="Quantity" class="control-label">Số lượng nhập</label>
-                            <input asp-for="Quantity" class="form-control" min="1" required />
-                            <span asp-validation-for="Quantity" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label asp-for="UnitPrice" class="control-label">Đơn giá nhập (VNĐ)</label>
-                            <input asp-for="UnitPrice" class="form-control" required />
-                            <span asp-validation-for="UnitPrice" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label asp-for="SupplierId" class="control-label">Nhà cung cấp</label>
-                            <select asp-for="SupplierId" class="form-control"
-                                    asp-items="ViewBag.Suppliers">
-                                <option value="">-- Chọn nhà cung cấp (nếu có) --</option>
-                            </select>
-                            <span asp-validation-for="SupplierId" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label asp-for="ReferenceNumber" class="control-label">Số tham chiếu</label>
-                            <input asp-for="ReferenceNumber" class="form-control" placeholder="Phiếu nhập, hóa đơn, v.v." />
-                            <span asp-validation-for="ReferenceNumber" class="text-danger"></span>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label asp-for="Notes" class="control-label">Ghi chú</label>
-                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
-                            <span asp-validation-for="Notes" class="text-danger"></span>
-                        </div>
-                        
-                        <input type="hidden" asp-for="TransactionType" value="@SunMovement.Core.Models.InventoryTransactionType.Purchase" />
-                        
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Lưu nhập kho
-                            </button>
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Quay lại
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<h2>Nhập kho test</h2>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<form asp-action="StockIn" method="post" enctype="multipart/form-data">
+    <div class="form-group mb-3">
+        <label>Sản phẩm</label>
+        <select asp-for="ProductId" class="form-control" id="ProductSelect" name="ProductId" onchange="onProductChange(); validateProductField();">
+            <option value="">-- Chọn sản phẩm --</option>
+            <option value="_addnew">+ Thêm sản phẩm mới</option>
+            @foreach (var item in ViewBag.Products as IEnumerable<SelectListItem>)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+        <input type="hidden" asp-for="IsNewProduct" id="IsNewProduct" />
+        <span asp-validation-for="ProductId" class="text-danger"></span>
+    </div>
+    <div id="newProductFields" style="display:none;">
+        <div class="form-group mb-3">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" id="NewProductName" />
+            <span asp-validation-for="Name" class="text-danger"></span>
         </div>
-        
-        <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Hướng dẫn</h6>
-                </div>
-                <div class="card-body">
-                    <p>Việc nhập kho sẽ:</p>
-                    <ul>
-                        <li>Tăng số lượng tồn kho của sản phẩm</li>
-                        <li>Tính lại giá vốn trung bình theo phương pháp bình quân gia quyền</li>
-                        <li>Ghi nhận thời điểm nhập/xuất gần nhất</li>
-                    </ul>
-                    <p>Khi nhập kho, bạn nên ghi rõ:</p>
-                    <ul>
-                        <li>Số lượng chính xác</li>
-                        <li>Đơn giá nhập thực tế</li>
-                        <li>Nhà cung cấp (nếu có)</li>
-                        <li>Tham chiếu đến phiếu nhập hoặc hóa đơn</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="form-group mb-3">
+            <label asp-for="CategoryId"></label>
+            <select asp-for="CategoryId" class="form-control" id="CategorySelect">
+                <option value="">-- Chọn danh mục --</option>
+                @foreach (var item in ViewBag.Categories as IEnumerable<SelectListItem>)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Price"></label>
+            <input asp-for="Price" class="form-control" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+        <div class="form-group mb-3">
+            <label asp-for="ImageFile"></label>
+            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" onchange="previewImage(event)" />
+            <img id="imagePreview" src="#" alt="Preview" style="max-width:200px;display:none;margin-top:10px;" />
+        </div>
+        <div class="form-group mb-3">
+            <label><input type="checkbox" asp-for="IsSportwear" id="IsSportwearCheckbox" onchange="onCategoryChange()" /> Là đồ thể thao (quản lý size)</label>
         </div>
     </div>
-</div>
-
+    <div id="sizeFields" style="display:none;">
+        <label>Tồn kho từng size</label>
+        <table class="table table-bordered">
+            <thead><tr><th>Size</th><th>Số lượng</th></tr></thead>
+            <tbody>
+                @foreach (var size in new[] { "S", "M", "L", "XL", "XXL", "XXXL" })
+                {
+                    <tr>
+                        <td><input type="text" name="Sizes[@size].Size" value="@size" readonly class="form-control" /></td>
+                        <td><input type="number" name="Sizes[@size].Quantity" value="0" min="0" class="form-control" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div id="quantityField" class="form-group mb-3">
+        <label asp-for="Quantity"></label>
+        <input asp-for="Quantity" class="form-control" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="UnitPrice"></label>
+        <input asp-for="UnitPrice" class="form-control" />
+    </div>
+    <div class="form-group mb-3">
+        <label>Nhà cung cấp</label>
+        <select asp-for="SupplierId" class="form-control" id="SupplierSelect" name="SupplierId" onchange="onSupplierChange(); validateSupplierField()">
+            <option value="">-- Chọn nhà cung cấp --</option>
+            <option value="_addnew">+ Thêm nhà cung cấp mới</option>
+            @foreach (var item in ViewBag.Suppliers as IEnumerable<SelectListItem>)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        </select>
+        <input type="hidden" asp-for="IsNewSupplier" id="IsNewSupplier" />
+        <span asp-validation-for="SupplierId" class="text-danger"></span>
+    </div>
+    <div id="newSupplierField" class="form-group mb-3" style="display:none;">
+        <label for="NewSupplierName">Tên nhà cung cấp mới</label>
+        <input type="text" name="NewSupplierName" id="NewSupplierName" class="form-control" />
+        <span class="text-danger" id="NewSupplierNameError"></span>
+    </div>
+    <div class="form-group mb-3">
+        <label asp-for="Notes"></label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Nhập kho</button>
+</form>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
     <script>
-        $(document).ready(function () {
-            // Tự động tính tổng giá trị khi nhập số lượng hoặc đơn giá
-            $("#Quantity, #UnitPrice").on("change keyup", function() {
-                var quantity = parseFloat($("#Quantity").val()) || 0;
-                var unitPrice = parseFloat($("#UnitPrice").val()) || 0;
-                var total = quantity * unitPrice;
-                $("#TotalCost").val(total.toFixed(0));
-            });
+        function onProductChange() {
+            var val = document.getElementById('ProductSelect').value;
+            var newFields = document.getElementById('newProductFields');
+            var sizeFields = document.getElementById('sizeFields');
+            var quantityField = document.getElementById('quantityField');
+            var isNewProductInput = document.getElementById('IsNewProduct');
+            if (val === "_addnew") {
+                newFields.style.display = '';
+                isNewProductInput.value = 'true';
+                document.getElementById('ProductSelect').value = '';
+            } else {
+                newFields.style.display = 'none';
+                isNewProductInput.value = 'false';
+            }
+            onCategoryChange();
+        }
+        function onCategoryChange() {
+            var isSportwear = document.getElementById('IsSportwearCheckbox') && document.getElementById('IsSportwearCheckbox').checked;
+            var sizeFields = document.getElementById('sizeFields');
+            var quantityField = document.getElementById('quantityField');
+            if (isSportwear) {
+                sizeFields.style.display = '';
+                quantityField.style.display = 'none';
+            } else {
+                sizeFields.style.display = 'none';
+                quantityField.style.display = '';
+            }
+        }
+        function onSupplierChange() {
+            var val = document.getElementById('SupplierSelect').value;
+            var newSupplierField = document.getElementById('newSupplierField');
+            var isNewSupplierInput = document.getElementById('IsNewSupplier');
+            if (val === "_addnew") {
+                newSupplierField.style.display = '';
+                isNewSupplierInput.value = 'true';
+                document.getElementById('SupplierSelect').value = '';
+            } else {
+                newSupplierField.style.display = 'none';
+                isNewSupplierInput.value = 'false';
+            }
+        }
+        function previewImage(event) {
+            var input = event.target;
+            var preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none';
+            }
+        }
+        function validateProductField() {
+            var productSelect = document.getElementById('ProductSelect');
+            var newProductName = document.getElementById('NewProductName');
+            var isNewProductInput = document.getElementById('IsNewProduct');
+            if (productSelect.value === "_addnew") {
+                productSelect.removeAttribute('required');
+                if (newProductName) newProductName.setAttribute('required', 'required');
+                isNewProductInput.value = 'true';
+            } else {
+                productSelect.setAttribute('required', 'required');
+                if (newProductName) newProductName.removeAttribute('required');
+                isNewProductInput.value = 'false';
+            }
+        }
+        function validateSupplierField() {
+            var supplierSelect = document.getElementById('SupplierSelect');
+            var newSupplierName = document.getElementById('NewSupplierName');
+            var isNewSupplierInput = document.getElementById('IsNewSupplier');
+            if (supplierSelect.value === "_addnew") {
+                supplierSelect.removeAttribute('required');
+                if (newSupplierName) newSupplierName.setAttribute('required', 'required');
+                isNewSupplierInput.value = 'true';
+            } else {
+                supplierSelect.setAttribute('required', 'required');
+                if (newSupplierName) newSupplierName.removeAttribute('required');
+                isNewSupplierInput.value = 'false';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            onProductChange();
+            onSupplierChange();
+            validateProductField();
+            validateSupplierField();
         });
     </script>
 }

@@ -130,8 +130,22 @@
     <script>
         $(document).ready(function() {
             $('#dataTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json"
+                language: {
+                    emptyTable: "Không có dữ liệu",
+                    info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
+                    infoEmpty: "Hiển thị 0 đến 0 của 0 mục",
+                    infoFiltered: "(lọc từ _MAX_ mục)",
+                    lengthMenu: "Hiển thị _MENU_ mục",
+                    loadingRecords: "Đang tải...",
+                    processing: "Đang xử lý...",
+                    search: "Tìm kiếm:",
+                    zeroRecords: "Không tìm thấy kết quả phù hợp",
+                    paginate: {
+                        first: "Đầu",
+                        last: "Cuối",
+                        next: "Tiếp",
+                        previous: "Trước"
+                    }
                 },
                 "order": [[ 3, "asc" ]], // Sort by stock quantity ascending
                 "columnDefs": [

@@ -10,7 +10,7 @@ export interface Product {
   specifications?: string;
   isFeatured?: boolean;
   isActive?: boolean;
-  stockQuantity?: number;
+  StockQuantity : number;
   isBestseller?: boolean;
   colors?: string[];
   sizes?: string[];
@@ -164,21 +164,24 @@ class ProductService {
 
   // Helper method to map backend products to frontend format
   private mapToFrontendProducts(backendProducts: any[]): Product[] {
-    return backendProducts.map(item => ({
+    console.log('mapToFrontendProducts - input:', backendProducts);
+    const mapped = backendProducts.map(item => ({
       id: item.id.toString(),
       name: item.name,
       description: item.description,
       price: item.price,
-      discountPrice: item.discountPrice || undefined,
+      salePrice: item.discountPrice ?? null,
       imageUrl: item.imageUrl || "/images/default-product.jpg",
       category: item.category === 0 ? "sportswear" : "supplements",
       subCategory: item.subCategory || "general",
       specifications: item.specifications || "",
       isFeatured: !!item.isFeatured,
       isActive: !!item.isActive,
-      stockQuantity: item.stockQuantity || 0,
-      isBestseller: !!item.isFeatured // Use featured as bestseller for now
+      StockQuantity: item.StockQuantity ?? 0,
+      isBestseller: !!item.isFeatured
     }));
+    console.log('mapToFrontendProducts - output:', mapped);
+    return mapped;
   }
 }
 

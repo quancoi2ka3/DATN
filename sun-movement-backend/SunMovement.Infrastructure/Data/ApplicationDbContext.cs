@@ -45,6 +45,7 @@ namespace SunMovement.Infrastructure.Data
         public DbSet<ProductVariantImage> ProductVariantImages { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<ProductTag> ProductTags { get; set; }
+        public DbSet<ProductSize> ProductSizes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -338,6 +339,13 @@ namespace SunMovement.Infrastructure.Data
                 .HasForeignKey(pt => pt.TagId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configure ProductSize relationships
+            builder.Entity<ProductSize>()
+                .HasOne(ps => ps.Product)
+                .WithMany(p => p.Sizes)
+                .HasForeignKey(ps => ps.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configure indexes for performance
             builder.Entity<InventoryTransaction>()
                 .HasIndex(it => it.TransactionDate);
@@ -397,6 +405,10 @@ namespace SunMovement.Infrastructure.Data
                 .HasIndex(t => t.Slug)
                 .IsUnique()
                 .HasFilter("[Slug] IS NOT NULL");
+
+            builder.Entity<ProductSize>()
+                .HasIndex(ps => new { ps.ProductId, ps.SizeLabel })
+                .IsUnique(); // Prevent duplicate sizes per product
         }
     }
 }

@@ -144,7 +144,7 @@ interface ProductDto {
   price: number;
   discountPrice?: number;
   imageUrl?: string;
-  stockQuantity: number;
+  StockQuantity: number;
   categoryId: number;
   category?: CategoryDto;
   // Add other fields based on your backend model

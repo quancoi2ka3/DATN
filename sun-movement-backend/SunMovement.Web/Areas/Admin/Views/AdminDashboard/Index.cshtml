@@ -1,530 +1,630 @@
+@model SunMovement.Web.Areas.Admin.Models.AdminDashboardViewModel
 @{
     ViewData["Title"] = "Trang Quản Trị";
+    Layout = "_AdminLayout";
 }
 
-<div class="container-fluid px-4">
-    <!-- Dashboard Header -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-tachometer-alt me-2"></i>Trang Quản Trị
-            </h1>
-            <p class="mb-0 text-muted">Chào mừng trở lại! Đây là những gì đang xảy ra với doanh nghiệp của bạn hôm nay.</p>
-        </div>
-        <div class="d-none d-sm-inline-block">
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-download me-1"></i>Tạo Báo Cáo
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Báo Cáo Bán Hàng</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-users me-2"></i>Phân Tích Người Dùng</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-search me-2"></i>Phân Tích Tìm Kiếm</a></li>
-                </ul>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Trị - Giao diện Tối ưu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --light: #f8f9fc;
+            --dark: #5a5c69;
+            --border-radius: 0.75rem;
+            --box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-container {
+            padding: 1.5rem;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .dashboard-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .dashboard-header h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #2e2e2e;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Grid Layout */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .double-column {
+            grid-column: span 2;
+        }
+        
+        .full-column {
+            grid-column: 1 / -1;
+        }
+        
+        /* Cards */
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 2rem rgba(58, 59, 69, 0.2);
+        }
+        
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e3e6f0;
+            background: white;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        .card-footer {
+            padding: 1rem 1.5rem;
+            background: #f8f9fc;
+            border-top: 1px solid #e3e6f0;
+        }
+        
+        /* Stats Cards */
+        .stats-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stats-value {
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin: 0.25rem 0;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+        }
+        
+        .stats-change {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        /* Activity Items */
+        .activity-item {
+            display: flex;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .activity-content {
+            flex-grow: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-desc {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+        
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background: #f8f9fc;
+            transition: all 0.2s ease;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .quick-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        
+        .quick-action i {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+        }
+        
+        .quick-action span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        /* System Status */
+        .system-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .system-name {
+            display: flex;
+            align-items: center;
+        }
+        
+        .system-name i {
+            margin-right: 0.75rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin: 1.5rem 0;
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        /* Responsive adjustments */
+        @@media (max-width: 1200px) {
+            .double-column {
+                grid-column: span 1;
+            }
+        }
+        
+        @@media (max-width: 992px) {
+            .grid-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+        }
+        
+        @@media (max-width: 768px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-value {
+                font-size: 1.5rem;
+            }
+            
+            .chart-container {
+                height: 220px;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+            
+            .quick-actions-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .stats-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+        }
+        
+        /* Animation */
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .dashboard-card {
+            animation: fadeIn 0.4s ease forwards;
+            opacity: 0;
+        }
+        
+        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+        .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+        .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+        .dashboard-card:nth-child(7) { animation-delay: 0.7s; }
+        .dashboard-card:nth-child(8) { animation-delay: 0.8s; }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Trang Quản Trị
+                    </h1>
+                    <p class="text-muted mb-0">Chào mừng trở lại! Đây là bảng điều khiển quản trị hệ thống.</p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-1"></i>Cập nhật
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+        <!-- Main Grid Layout -->
+        <div class="grid-layout">
+            <!-- Sản phẩm -->
+            <div class="dashboard-card">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Sản Phẩm</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalProducts</div>
-                            @{
-                                var productGrowth = ViewBag.GrowthStatistics?.ProductGrowth ?? 0m;
-                            }
-                            @if (productGrowth != 0)
-                            {
-                                <div class="small text-@(productGrowth > 0 ? "success" : "danger")">
-                                    <i class="fas fa-arrow-@(productGrowth > 0 ? "up" : "down")"></i> @Math.Abs(productGrowth)% so với tháng trước
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="small text-muted">Không có thay đổi</div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-box fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <a class="small text-primary stretched-link" asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tổng Dịch Vụ</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalServices</div>
-                            <div class="small text-success"><i class="fas fa-arrow-up"></i> 8% so với tháng trước</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-concierge-bell fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <a class="small text-warning stretched-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng Đơn Hàng</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalOrders</div>
-                            @{
-                                var orderGrowth = ViewBag.GrowthStatistics?.OrderGrowth ?? 0m;
-                            }
-                            @if (orderGrowth != 0)
-                            {
-                                <div class="small text-@(orderGrowth > 0 ? "success" : "danger")">
-                                    <i class="fas fa-arrow-@(orderGrowth > 0 ? "up" : "down")"></i> @Math.Abs(orderGrowth)% so với tháng trước
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="small text-muted">Không có thay đổi</div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <a class="small text-success stretched-link" asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tổng Dịch Vụ</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalServices</div>
-                            @{
-                                var serviceGrowth = ViewBag.GrowthStatistics?.ServiceGrowth ?? 0m;
-                            }
-                            @if (serviceGrowth != 0)
-                            {
-                                <div class="small text-@(serviceGrowth > 0 ? "success" : "danger")">
-                                    <i class="fas fa-arrow-@(serviceGrowth > 0 ? "up" : "down")"></i> @Math.Abs(serviceGrowth)% so với tháng trước
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="small text-muted">Không có thay đổi</div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-concierge-bell fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <a class="small text-info stretched-link" asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Index">
-                        <i class="fas fa-external-link-alt me-1"></i>Xem Chi Tiết
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Analytics Section -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Lượt Xem (Hôm Nay)</div>
-                            @if (ViewBag.TodayPageViews != null && (int)ViewBag.TodayPageViews > 0)
-                            {
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TodayPageViews</div>
-                                <div class="small text-success">
-                                    <i class="fas fa-chart-line me-1"></i>Dữ liệu từ Mixpanel
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="h6 mb-0 text-warning">
-                                    <i class="fas fa-clock me-1"></i>Đang chờ dữ liệu...
-                                </div>
-                                <div class="small text-muted">
-                                    Export API có thể có độ trễ 15-30 phút
-                                </div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-eye fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Doanh Thu (Tháng Này)</div>
-                            @if (ViewBag.MonthlyRevenue != null && ViewBag.MonthlyRevenue.ToString() != "0")
-                            {
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.MonthlyRevenue VND</div>
-                            }
-                            else
-                            {
-                                <div class="h6 mb-0 text-muted">
-                                    <i class="fas fa-info-circle me-1"></i>Chưa có dữ liệu
-                                </div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Lượt Tìm Kiếm (Hôm Nay)</div>
-                            @if (ViewBag.TodaySearches != null && (int)ViewBag.TodaySearches > 0)
-                            {
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TodaySearches</div>
-                                <div class="small text-success">
-                                    <i class="fas fa-chart-line me-1"></i>Dữ liệu từ Mixpanel
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="h6 mb-0 text-warning">
-                                    <i class="fas fa-clock me-1"></i>Đang chờ dữ liệu...
-                                </div>
-                                <div class="small text-muted">
-                                    Export API có thể có độ trễ 15-30 phút
-                                </div>
-                            }
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-search fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Thanh Toán Đang Chờ</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(ViewBag.PendingPayments ?? 0)</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-credit-card fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>    <!-- Charts and Analytics Section -->
-    <div class="row mb-4">
-        <div class="col-xl-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-area me-2"></i>Tổng Quan Doanh Thu
-                    </h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-                            <a class="dropdown-item" href="#">7 ngày qua</a>
-                            <a class="dropdown-item" href="#">30 ngày qua</a>
-                            <a class="dropdown-item" href="#">90 ngày qua</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="revenueChart" width="100%" height="40"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-pie me-2"></i>Nguồn Doanh Thu
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="chart-pie pt-4 pb-2">
-                        <canvas id="sourcesChart"></canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-primary"></i> Sản Phẩm
-                        </span>
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-success"></i> Dịch Vụ
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Management Cards Row -->
-    <div class="row mb-4">
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-bell me-2"></i>Hoạt Động Gần Đây & Thông Báo
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        @if (ViewBag.PendingOrders > 0)
-                        {
-                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                                <div>
-                                    <i class="fas fa-clock text-warning me-2"></i>
-                                    <span class="small">Đơn Hàng Đang Chờ</span>
-                                </div>
-                                <span class="badge bg-warning rounded-pill">@ViewBag.PendingOrders</span>
-                            </div>
-                        }
-                        @if (ViewBag.UnreadMessages > 0)
-                        {
-                            <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
-                                <div>
-                                    <i class="fas fa-envelope text-info me-2"></i>
-                                    <span class="small">Tin Nhắn Chưa Đọc</span>
-                                </div>
-                                <span class="badge bg-info rounded-pill">@ViewBag.UnreadMessages</span>
-                            </div>
-                        }
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                    <div class="stats-card">
+                        <div class="stats-header">
                             <div>
-                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
-                                <span class="small">Sản Phẩm Sắp Hết Hàng</span>
+                                <div class="stats-label">TỔNG SẢN PHẨM</div>
+                                <div class="stats-value">@Model.ProductCount</div>
                             </div>
-                            <span class="badge bg-danger rounded-pill">@(ViewBag.LowStockItems ?? 0)</span>
+                            <div class="stats-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-box"></i>
+                            </div>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/products" class="text-primary text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Dịch vụ -->
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <div class="stats-card">
+                        <div class="stats-header">
                             <div>
-                                <i class="fas fa-star text-warning me-2"></i>
-                                <span class="small">Đánh Giá Mới</span>
+                                <div class="stats-label">TỔNG DỊCH VỤ</div>
+                                <div class="stats-value">@Model.ServiceCount</div>
                             </div>
-                            <span class="badge bg-warning rounded-pill">@(ViewBag.NewReviews ?? 12)</span>
-                        </div>
-                        @if (ViewBag.PendingOrders == 0 && ViewBag.UnreadMessages == 0)
-                        {
-                            <div class="list-group-item border-0 px-0">
-                                <i class="fas fa-check-circle text-success me-2"></i>
-                                <span class="small text-success">Tất cả thông báo đã được xử lý!</span>
+                            <div class="stats-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-concierge-bell"></i>
                             </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-tools me-2"></i>Thao Tác Quản Lý Nhanh
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="ProductsAdmin" asp-action="Create" class="btn btn-outline-primary w-100 py-3">
-                                <i class="fas fa-plus-circle fa-lg mb-2 d-block"></i>
-                                <span class="small">Thêm Sản Phẩm</span>
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="ServicesAdmin" asp-action="Create" class="btn btn-outline-warning w-100 py-3">
-                                <i class="fas fa-concierge-bell fa-lg mb-2 d-block"></i>
-                                <span class="small">Thêm Dịch Vụ</span>
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="OrdersAdmin" asp-action="Index" class="btn btn-outline-success w-100 py-3">
-                                <i class="fas fa-clipboard-list fa-lg mb-2 d-block"></i>
-                                <span class="small">Quản Lý Đơn Hàng</span>
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="PaymentsAdmin" asp-action="Index" class="btn btn-outline-info w-100 py-3">
-                                <i class="fas fa-credit-card fa-lg mb-2 d-block"></i>
-                                <span class="small">Quản Lý Thanh Toán</span>
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="AnalyticsAdmin" asp-action="Index" class="btn btn-outline-secondary w-100 py-3">
-                                <i class="fas fa-chart-bar fa-lg mb-2 d-block"></i>
-                                <span class="small">Phân Tích</span>
-                            </a>
-                        </div>
-                        <div class="col-lg-4 col-md-6 mb-3">
-                            <a asp-area="Admin" asp-controller="ContactMessagesAdmin" asp-action="Index" class="btn btn-outline-dark w-100 py-3">
-                                <i class="fas fa-envelope fa-lg mb-2 d-block"></i>
-                                <span class="small">Tin Nhắn</span>
-                            </a>
                         </div>
                     </div>
                 </div>
+                <div class="card-footer">
+                    <a href="/admin/services" class="text-success text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Search Analytics & Payment Management Section -->
-    <div class="row mb-4">
-        <div class="col-xl-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-search me-2"></i>Phân Tích Tìm Kiếm
-                    </h6>
+            
+            <!-- Đơn hàng -->
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-label">TỔNG ĐƠN HÀNG</div>
+                                <div class="stats-value">@Model.OrderCount</div>
+                            </div>
+                            <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/orders" class="text-warning text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Sự kiện -->
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-label">SỰ KIỆN</div>
+                                <div class="stats-value">@Model.EventCount</div>
+                            </div>
+                            <div class="stats-icon bg-info bg-opacity-10 text-info">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/events" class="text-info text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Tin nhắn -->
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-label">TIN NHẮN</div>
+                                <div class="stats-value">@Model.UnreadMessageCount / @Model.TotalMessageCount</div>
+                            </div>
+                            <div class="stats-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/contactmessages" class="text-danger text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="dashboard-card">
+                <div class="card-body">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div>
+                                <div class="stats-label">CÂU HỎI THƯỜNG GẶP</div>
+                                <div class="stats-value">@Model.FAQCount</div>
+                            </div>
+                            <div class="stats-icon bg-secondary bg-opacity-10 text-secondary">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/faqs" class="text-secondary text-decoration-none d-flex align-items-center">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem chi tiết
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Đơn hàng gần đây -->
+            <div class="dashboard-card double-column">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-history me-2"></i>ĐƠN HÀNG GẦN ĐÂY</h3>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.TopSearchQueries != null && ViewBag.TopSearchQueries.Count > 0)
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Từ Khóa Tìm Kiếm</th>
-                                        <th class="text-center">Số Lượng</th>
-                                        <th class="text-center">Kết Quả</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var query in ViewBag.TopSearchQueries)
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày</th>
+                                    <th>Tổng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentOrders != null)
+                                {
+                                    foreach (var order in (dynamic)Model.RecentOrders)
                                     {
                                         <tr>
-                                            <td>@query.Query</td>
-                                            <td class="text-center">@query.Count</td>
-                                            <td class="text-center">
-                                                <span class="badge @(query.ResultCount > 5 ? "bg-success" : query.ResultCount > 0 ? "bg-warning" : "bg-danger")">
-                                                    @query.ResultCount
-                                                </span>
+                                            <td>@order.Id</td>
+                                            <td>@order.CustomerName</td>
+                                            <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>@order.Status</td>
+                                            <td>
+                                                <a href="/admin/orders/details/@order.Id" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> Xem
+                                                </a>
                                             </td>
                                         </tr>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="text-center mt-3">
-                            <a href="@Url.Action("Index", "AnalyticsAdmin", new { area = "Admin" })" class="btn btn-sm btn-primary">
-                                <i class="fas fa-chart-line me-1"></i>Xem Báo Cáo Đầy Đủ
-                            </a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">Chưa có dữ liệu tìm kiếm</h6>
-                            <p class="small text-muted">
-                                Dữ liệu tìm kiếm sẽ xuất hiện khi có người dùng thực hiện tìm kiếm trên website.
-                                <br>Hãy tích hợp Mixpanel tracking để thu thập dữ liệu này.
-                            </p>
-                            <a href="@Url.Action("Index", "AnalyticsAdmin", new { area = "Admin" })" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-cog me-1"></i>Cấu Hình Tracking
-                            </a>
-                        </div>
-                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center">Không có đơn hàng nào gần đây</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="/admin/OrdersAdmin" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>Xem tất cả đơn hàng
+                    </a>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-xl-6">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-credit-card me-2"></i>Tổng Quan Thanh Toán
-                    </h6>
+            
+            <!-- Thao tác nhanh -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-bolt me-2"></i>THAO TÁC NHANH</h3>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center mb-3">
-                        <div class="col-4">
-                            <div class="border-end">
-                                <div class="h5 font-weight-bold text-success">@(ViewBag.TodayRevenue ?? "0") VND</div>
-                                <div class="small text-muted">Hôm Nay</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="border-end">
-                                <div class="h5 font-weight-bold text-info">@(ViewBag.WeekRevenue ?? "0") VND</div>
-                                <div class="small text-muted">Tuần Này</div>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="h5 font-weight-bold text-primary">@(ViewBag.MonthlyRevenue ?? "0") VND</div>
-                            <div class="small text-muted">Tháng Này</div>
-                        </div>
+                    <div class="quick-actions-grid">
+                        <a href="/admin/products/create" class="quick-action">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Thêm SP</span>
+                        </a>
+                        <a href="/admin/services/create" class="quick-action">
+                            <i class="fas fa-concierge-bell"></i>
+                            <span>Thêm DV</span>
+                        </a>
+                        <a href="/admin/orders" class="quick-action">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+                        <a href="/admin/payments" class="quick-action">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Thanh toán</span>
+                        </a>
+                        <a href="/admin/reports" class="quick-action">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Báo cáo</span>
+                        </a>
+                        <a href="/admin/settings" class="quick-action">
+                            <i class="fas fa-cog"></i>
+                            <span>Cài đặt</span>
+                        </a>
                     </div>
-                    
-                    <div class="progress mb-2" style="height: 20px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: @(ViewBag.CompletedPercentage ?? 0)%" aria-valuenow="@(ViewBag.CompletedPercentage ?? 0)" aria-valuemin="0" aria-valuemax="100">
-                            Hoàn thành: @(ViewBag.CompletedPercentage ?? 0)%
+                </div>
+            </div>
+            
+            <!-- Trạng thái hệ thống -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-server me-2"></i>TRẠNG THÁI HỆ THỐNG</h3>
+                </div>
+                <div class="card-body">
+                    <div class="system-list">
+                        <div class="system-item">
+                            <div class="system-name">
+                                <i class="fas fa-server text-primary"></i>
+                                <span>Máy chủ</span>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Online</span>
                         </div>
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: @(ViewBag.PendingPercentage ?? 0)%" aria-valuenow="@(ViewBag.PendingPercentage ?? 0)" aria-valuemin="0" aria-valuemax="100">
-                            Đang chờ: @(ViewBag.PendingPercentage ?? 0)%
+                        
+                        <div class="system-item">
+                            <div class="system-name">
+                                <i class="fas fa-database text-info"></i>
+                                <span>Database</span>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Kết nối</span>
                         </div>
-                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(ViewBag.CancelledPercentage ?? 0)%" aria-valuenow="@(ViewBag.CancelledPercentage ?? 0)" aria-valuemin="0" aria-valuemax="100">
-                            Đã hủy: @(ViewBag.CancelledPercentage ?? 0)%
+                        
+                        <div class="system-item">
+                            <div class="system-name">
+                                <i class="fas fa-plug text-warning"></i>
+                                <span>API</span>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Hoạt động</span>
                         </div>
-                    </div>
-                    
-                    <div class="row mt-3">
-                        <div class="col-6">
-                            <a href="#" class="btn btn-sm btn-outline-success w-100">
-                                <i class="fas fa-check me-1"></i>Xử Lý Đang Chờ
-                            </a>
+                        
+                        <div class="system-item">
+                            <div class="system-name">
+                                <i class="fas fa-envelope text-danger"></i>
+                                <span>Email Service</span>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Đang chạy</span>
                         </div>
-                        <div class="col-6">
-                            <a href="#" class="btn btn-sm btn-outline-info w-100">
-                                <i class="fas fa-eye me-1"></i>Xem Tất Cả
-                            </a>
+                        
+                        <div class="system-item">
+                            <div class="system-name">
+                                <i class="fas fa-save text-secondary"></i>
+                                <span>Sao lưu</span>
+                            </div>
+                            <span class="text-muted">Hôm nay, 03:00</span>
                         </div>
                     </div>
                 </div>
@@ -532,324 +632,6 @@
         </div>
     </div>
 
-    <!-- Recent Activity & System Status -->
-    <div class="row mb-4">
-        <div class="col-xl-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-history me-2"></i>Hoạt Động Gần Đây
-                    </h6>
-                </div>
-                <div class="card-body">
-                    @if (ViewBag.RecentActivities != null && ViewBag.RecentActivities.Count > 0)
-                    {
-                        <div class="timeline">
-                            @foreach (var activity in ViewBag.RecentActivities)
-                            {
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-@activity.Type"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="timeline-title">@activity.Title</h6>
-                                        <p class="timeline-text small text-muted">@activity.Description</p>
-                                        <small class="text-muted">@activity.TimeAgo</small>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-4">
-                            <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                            <h6 class="text-muted">Chưa có hoạt động gần đây</h6>
-                            <p class="small text-muted">
-                                Hoạt động sẽ xuất hiện khi có đơn hàng mới, thanh toán, đăng ký người dùng, v.v.
-                                <br>Dữ liệu sẽ được cập nhật tự động từ hệ thống.
-                            </p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-server me-2"></i>Trạng Thái Hệ Thống
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Máy Chủ</span>
-                        <span class="badge bg-success">Trực tuyến</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Cơ Sở Dữ Liệu</span>
-                        <span class="badge bg-success">Đã kết nối</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Cổng Thanh Toán</span>
-                        <span class="badge bg-success">Hoạt động</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Dịch Vụ Email</span>
-                        <span class="badge bg-success">Đang chạy</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="small">Trạng Thái Sao Lưu</span>
-                        <span class="badge bg-info">Lần cuối: 2 giờ trước</span>
-                    </div>
-                    <hr>
-                    <div class="text-center">
-                        <small class="text-muted">Cập nhật lần cuối: @DateTime.Now.ToString("HH:mm")</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Debug Panel for Mixpanel Status -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-info">
-                <div class="card-header bg-info text-white">
-                    <h6 class="m-0">
-                        <i class="fas fa-chart-bar me-2"></i>Trạng Thái Mixpanel Analytics
-                        <button class="btn btn-sm btn-outline-light float-end" type="button" data-bs-toggle="collapse" data-bs-target="#mixpanelDebug">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                    </h6>
-                </div>
-                <div class="collapse" id="mixpanelDebug">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <h6><i class="fas fa-eye text-primary"></i> Page Views</h6>
-                                <p class="mb-2">Giá trị hiện tại: <strong>@ViewBag.TodayPageViews</strong></p>
-                                <small class="text-muted">Nguồn: Mixpanel Export API</small>
-                            </div>
-                            <div class="col-md-4">
-                                <h6><i class="fas fa-search text-warning"></i> Searches</h6>
-                                <p class="mb-2">Giá trị hiện tại: <strong>@ViewBag.TodaySearches</strong></p>
-                                <small class="text-muted">Nguồn: Mixpanel Export API</small>
-                            </div>
-                            <div class="col-md-4">
-                                <h6><i class="fas fa-clock text-info"></i> Cập nhật lần cuối</h6>
-                                <p class="mb-2">@DateTime.Now.ToString("HH:mm:ss dd/MM/yyyy")</p>
-                                <small class="text-muted">Tự động refresh mỗi lần tải trang</small>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="alert alert-info mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong>Lưu ý:</strong> Mixpanel Export API có thể có độ trễ 15-30 phút. 
-                                    Nếu bạn vừa gửi events, hãy kiểm tra 
-                                    <a href="https://mixpanel.com/project/8e22b9a79446802234818ec75fbf40f0/view/live" target="_blank" class="alert-link">
-                                        Mixpanel Live View
-                                    </a> 
-                                    để xem dữ liệu realtime.
-                                    <button class="btn btn-sm btn-outline-info ms-2" onclick="testMixpanelAPI()">
-                                        <i class="fas fa-sync-alt"></i> Test API
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Include Chart.js for analytics charts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Revenue Chart
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    const revenueData = @Html.Raw(ViewBag.RevenueChartData ?? "{}");
-    const revenueChart = new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: revenueData.labels || ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
-            datasets: [{
-                label: 'Doanh Thu',
-                data: revenueData.data || [0, 0, 0, 0, 0, 0],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString() + ' VND';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Dữ liệu thực từ đơn hàng (các tháng trước chưa có dữ liệu)'
-                }
-            }
-        }
-    });
-
-    // Revenue Sources Pie Chart
-    const sourcesCtx = document.getElementById('sourcesChart').getContext('2d');
-    const sourcesData = @Html.Raw(ViewBag.SalesSourceData ?? "{}");
-    const sourcesChart = new Chart(sourcesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: sourcesData.labels || ['Sản Phẩm', 'Dịch Vụ'],
-            datasets: [{
-                data: sourcesData.data || [0, 0],
-                backgroundColor: ['#4e73df', '#1cc88a']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Số lượng sản phẩm vs dịch vụ trong hệ thống'
-                }
-            }
-        }
-    });
-</script>
-
-<style>
-    .border-left-primary {
-        border-left: 0.25rem solid #4e73df !important;
-    }
-    .border-left-success {
-        border-left: 0.25rem solid #1cc88a !important;
-    }
-    .border-left-info {
-        border-left: 0.25rem solid #36b9cc !important;
-    }
-    .border-left-warning {
-        border-left: 0.25rem solid #f6c23e !important;
-    }
-    .border-left-danger {
-        border-left: 0.25rem solid #e74a3b !important;
-    }
-
-    .timeline {
-        position: relative;
-        padding-left: 3rem;
-    }
-    .timeline-item {
-        position: relative;
-        padding-bottom: 1.5rem;
-    }
-    .timeline-item:not(:last-child):before {
-        content: '';
-        position: absolute;
-        left: -2.5rem;
-        top: 1rem;
-        height: calc(100% - 1rem);
-        width: 2px;
-        background-color: #e3e6f0;
-    }
-    .timeline-marker {
-        position: absolute;
-        left: -2.75rem;
-        top: 0.25rem;
-        width: 0.5rem;
-        height: 0.5rem;
-        border-radius: 50%;
-    }
-    .timeline-title {
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-    .timeline-text {
-        margin-bottom: 0.25rem;
-    }
-
-    .card {
-        transition: all 0.3s ease;
-    }
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .chart-area {
-        position: relative;
-        height: 320px;
-    }
-    .chart-pie {
-        position: relative;
-        height: 200px;
-    }
-</style>
-
-@section Scripts {
-<script>
-    // Mixpanel API Testing
-    function testMixpanelAPI() {
-        const btn = event.target;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
-        btn.disabled = true;
-        
-        fetch('/api/mixpaneldebug/test-recent-events')
-            .then(response => response.json())
-            .then(data => {
-                let message = `API Test Results:\n`;
-                message += `✅ Total Page Views: ${data.Summary.TotalPageViews}\n`;
-                message += `🔍 Total Searches: ${data.Summary.TotalSearches}\n`;
-                message += `📊 Status: ${data.Summary.Message}\n\n`;
-                message += `Note: Export API may have 15-30 minute delay for new events.`;
-                
-                alert(message);
-                
-                // If we got new data, offer to refresh the page
-                if (data.Summary.HasData) {
-                    if (confirm('New data found! Refresh page to update dashboard?')) {
-                        location.reload();
-                    }
-                }
-            })
-            .catch(error => {
-                alert('❌ API Test Failed: ' + error.message);
-                console.error('Mixpanel API test error:', error);
-            })
-            .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-    }
-
-    // Auto-refresh every 5 minutes if no data is shown
-    @if ((ViewBag.TodayPageViews == null || (int)ViewBag.TodayPageViews == 0) && 
-         (ViewBag.TodaySearches == null || (int)ViewBag.TodaySearches == 0))
-    {
-        <text>
-        console.log('🔄 No analytics data found. Setting up auto-refresh...');
-        setTimeout(function() {
-            console.log('🔄 Auto-refreshing dashboard to check for new Mixpanel data...');
-            location.reload();
-        }, 5 * 60 * 1000); // 5 minutes
-        </text>
-    }
-</script>
-}
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -47,7 +47,7 @@ export default async function Home() {
       </LazyOnScroll>
       
       {/* Personalized Recommendations Section */}
-      <LazyOnScroll>
+      {/* <LazyOnScroll>
         <ScrollAnimation animation="fade-in-up" delay={0.3}>
           <section className="py-12 bg-white">
             <div className="container mx-auto px-4">
@@ -58,7 +58,7 @@ export default async function Home() {
             </div>
           </section>
         </ScrollAnimation>
-      </LazyOnScroll>
+      </LazyOnScroll> */}
       
       {/* Lazy loaded sections with IntersectionObserver */}
       <LazyOnScroll>

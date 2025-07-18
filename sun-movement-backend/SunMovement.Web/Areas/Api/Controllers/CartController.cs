@@ -31,78 +31,30 @@ namespace SunMovement.Web.Areas.Api.Controllers
             return User.FindFirstValue(JwtRegisteredClaimNames.Sub)
                 ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
-        [HttpPost("validate-coupon")]
-        public async Task<IActionResult> ValidateCoupon([FromBody] ValidateCouponRequest request)
-        {
-            try
-            {
-                var userId = GetUserId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized(new { error = "User not authenticated" });
-                }
-
-                // Convert request items to CartItem objects
-                var cartItems = request.Items.Select(item => new CartItem
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.Price
-                }).ToList();
-
-                var result = await _couponService.ValidateCouponAsync(
-                    request.CouponCode, 
-                    request.OrderTotal, 
-                    userId, 
-                    cartItems);
-
-                return Ok(new
-                {
-                    isValid = result.IsValid,
-                    discountAmount = result.DiscountAmount,
-                    error = result.ErrorMessage,
-                    couponDetails = result.IsValid && result.Coupon != null ? new
-                    {
-                        code = request.CouponCode,
-                        type = result.Coupon.Type.ToString(),
-                        value = result.DiscountAmount,
-                        description = result.Coupon.Description ?? ""
-                    } : null
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating coupon {CouponCode}", request.CouponCode);
-                return StatusCode(500, new { 
-                    isValid = false, 
-                    discountAmount = 0, 
-                    error = "Lỗi hệ thống khi xác thực mã giảm giá" 
-                });
-            }
-        }
-
         [HttpPost("apply-coupon")]
-        public async Task<IActionResult> ApplyCoupon([FromBody] ApplyCouponRequest request)
+        public async Task<IActionResult> ApplyCoupon([FromBody] CouponRequest request)
         {
             try
             {
                 var userId = GetUserId();
                 if (string.IsNullOrEmpty(userId))
                 {
-                    return Unauthorized(new { error = "User not authenticated" });
+                    _logger.LogWarning("[APPLY COUPON] Người dùng chưa đăng nhập");
+                    return Unauthorized(new { success = false, error = "Bạn cần đăng nhập để sử dụng mã giảm giá." });
                 }
 
-                // Get current cart
+                // Lấy giỏ hàng thực tế
                 var cart = await _cartService.GetCartWithItemsAsync(userId);
                 if (cart == null || !cart.Items.Any())
                 {
-                    return BadRequest(new { 
-                        success = false, 
-                        error = "Giỏ hàng trống" 
+                    _logger.LogWarning("[APPLY COUPON] Giỏ hàng trống cho user {UserId}", userId);
+                    return BadRequest(new {
+                        success = false,
+                        error = "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi áp dụng mã giảm giá."
                     });
                 }
 
-                // Validate coupon first
+                // Chuẩn bị dữ liệu cho validate
                 var cartItems = cart.Items.Select(item => new CartItem
                 {
                     ProductId = item.ProductId ?? 0,
@@ -110,29 +62,36 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     UnitPrice = item.UnitPrice
                 }).ToList();
 
-                var orderTotal = cart.Items.Sum(item => item.Subtotal);
+                var orderTotal = cart.Items.Sum(item => item.UnitPrice * item.Quantity);
                 var validation = await _couponService.ValidateCouponAsync(
-                    request.CouponCode, 
-                    orderTotal, 
-                    userId, 
+                    request.CouponCode,
+                    orderTotal,
+                    userId,
                     cartItems);
 
                 if (!validation.IsValid)
                 {
-                    return BadRequest(new { 
-                        success = false, 
-                        error = validation.ErrorMessage ?? "Mã giảm giá không hợp lệ" 
+                    _logger.LogWarning("[APPLY COUPON] Coupon validation failed: {Error}", validation.ErrorMessage);
+                    return BadRequest(new {
+                        success = false,
+                        isValid = false,
+                        error = validation.ErrorMessage ?? "Mã giảm giá không hợp lệ hoặc không áp dụng được cho đơn hàng này.",
+                        discountAmount = 0,
+                        couponDetails = (object?)null
                     });
                 }
 
-                // Apply coupon to cart items and return enhanced cart items
+                // Tính giảm giá cho từng sản phẩm
                 var enhancedItems = new List<object>();
+                decimal totalDiscount = 0;
                 foreach (var item in cart.Items)
                 {
                     var discountAmount = await _couponService.CalculateProductDiscountAsync(
-                        item.ProductId ?? 0, 
-                        validation.Coupon?.Id ?? 0);
-
+                        item.ProductId ?? 0,
+                        validation.Coupon?.Id ?? 0,
+                        orderTotal // truyền tổng giá trị đơn hàng
+                    );
+                    totalDiscount += discountAmount * item.Quantity;
                     enhancedItems.Add(new
                     {
                         id = item.Id.ToString(),
@@ -145,23 +104,39 @@ namespace SunMovement.Web.Areas.Api.Controllers
                         couponCode = discountAmount > 0 ? request.CouponCode : null,
                         couponType = discountAmount > 0 && validation.Coupon != null ? validation.Coupon.Type.ToString() : null,
                         quantity = item.Quantity,
-                        size = (string?)null, // Add if you have size info
-                        color = (string?)null, // Add if you have color info
+                        size = (string?)null,
+                        color = (string?)null,
                         addedAt = item.CreatedAt
                     });
                 }
+                var orderTotalValue = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
+                var finalTotal = orderTotalValue - totalDiscount;
 
-                return Ok(new { 
-                    success = true, 
-                    items = enhancedItems 
+                return Ok(new {
+                    success = true,
+                    isValid = true,
+                    items = enhancedItems,
+                    orderTotal = orderTotalValue,
+                    totalDiscount = totalDiscount,
+                    finalTotal = finalTotal,
+                    couponDetails = validation.Coupon != null ? new {
+                        code = validation.Coupon.Code,
+                        type = validation.Coupon.Type.ToString(),
+                        value = validation.Coupon.Value,
+                        description = validation.Coupon.Description ?? "",
+                        minimumOrderAmount = validation.Coupon.MinimumOrderAmount
+                    } : null
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error applying coupon {CouponCode}", request.CouponCode);
-                return StatusCode(500, new { 
-                    success = false, 
-                    error = "Lỗi hệ thống khi áp dụng mã giảm giá" 
+                _logger.LogError(ex, "[APPLY COUPON] Lỗi hệ thống khi áp dụng mã giảm giá {CouponCode}", request.CouponCode);
+                return StatusCode(500, new {
+                    success = false,
+                    isValid = false,
+                    discountAmount = 0,
+                    error = "Lỗi hệ thống khi áp dụng mã giảm giá. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.",
+                    couponDetails = (object?)null
                 });
             }
         }
@@ -188,20 +163,15 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 }
 
                 // Return cart items without coupon discounts
-                var enhancedItems = cart.Items.Select(item => new
-                {
+                var enhancedItems = cart.Items.Select(item => new {
                     id = item.Id.ToString(),
                     productId = item.ProductId?.ToString() ?? "",
-                    name = item.ItemName,
-                    imageUrl = item.ItemImageUrl ?? "",
-                    originalPrice = item.UnitPrice,
+                    itemName = item.ItemName ?? (item.ProductId != null ? (item.Product?.Name ?? "") : ""),
+                    itemImageUrl = item.ItemImageUrl ?? (item.ProductId != null ? (item.Product?.ImageUrl ?? "") : ""),
+                    unitPrice = item.UnitPrice,
                     finalPrice = item.UnitPrice,
                     discountAmount = 0,
-                    couponCode = (string?)null,
-                    couponType = (string?)null,
                     quantity = item.Quantity,
-                    size = (string?)null,
-                    color = (string?)null,
                     addedAt = item.CreatedAt
                 }).ToList();
 
@@ -223,28 +193,13 @@ namespace SunMovement.Web.Areas.Api.Controllers
     
 
     // Request models
-    public class ValidateCouponRequest
+    public class CouponRequest
     {
         public string CouponCode { get; set; } = "";
-        public decimal OrderTotal { get; set; }
-        public List<CartItemRequest> Items { get; set; } = new();
-    }
-
-    public class ApplyCouponRequest
-    {
-        public string CouponCode { get; set; } = "";
-        public List<CartItemRequest> Items { get; set; } = new();
     }
 
     public class RemoveCouponRequest
     {
         public string CouponCode { get; set; } = "";
-    }
-
-    public class CartItemRequest
-    {
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
     }
 }

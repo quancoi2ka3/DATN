@@ -6,7 +6,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/lib/types";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { cn } from "@/lib/utils";
 import productService from "@/services/productService";
 import { OptimizedImage } from "./optimized-image";
@@ -29,7 +29,7 @@ export default function ProductDetailModal({ productId, product: productProp, op
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart } = useEnhancedCart();
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {

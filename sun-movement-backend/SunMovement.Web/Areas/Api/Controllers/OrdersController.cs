@@ -106,7 +106,33 @@ namespace SunMovement.Web.Areas.Api.Controllers
                             Subtotal = subtotal
                         });
                     }
-                }                // Create the order first (without items)
+                }
+
+                // Xử lý mã giảm giá nếu có
+                decimal discountAmount = 0;
+                string? appliedCouponCode = null;
+                if (!string.IsNullOrWhiteSpace(checkoutModel.CouponCode))
+                {
+                    var couponService = HttpContext.RequestServices.GetRequiredService<ICouponService>();
+                    var userIdForCoupon = orderUserId;
+                    var cartItemsForCoupon = cart.Items.Select(item => new CartItem
+                    {
+                        ProductId = item.ProductId ?? 0,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    }).ToList();
+                    var validation = await couponService.ValidateCouponAsync(checkoutModel.CouponCode, totalAmount, userIdForCoupon, cartItemsForCoupon);
+                    if (!validation.IsValid)
+                    {
+                        return BadRequest(new { success = false, error = validation.ErrorMessage ?? "Mã giảm giá không hợp lệ" });
+                    }
+                    discountAmount = validation.DiscountAmount;
+                    appliedCouponCode = checkoutModel.CouponCode;
+                    totalAmount -= discountAmount;
+                    if (totalAmount < 0) totalAmount = 0;
+                }
+
+                // Create the order first (without items)
                 var order = new Order
                 {
                     UserId = orderUserId,
@@ -119,7 +145,9 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     PaymentMethod = checkoutModel.PaymentMethod,
                     Notes = checkoutModel.ContactInfo.Notes,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
+                    DiscountAmount = discountAmount,
+                    CouponCode = appliedCouponCode
                 };
 
                 Console.WriteLine($"[CHECKOUT DEBUG] Order created with {orderItems.Count} items, total: {totalAmount}");                // Add and save order first to get ID using direct DbContext approach
@@ -137,6 +165,13 @@ namespace SunMovement.Web.Areas.Api.Controllers
 
                 dbContext.OrderItems.AddRange(orderItems);
                 await dbContext.SaveChangesAsync();
+
+                // Áp dụng coupon cho order nếu có
+                if (!string.IsNullOrWhiteSpace(appliedCouponCode) && discountAmount > 0)
+                {
+                    var couponService = HttpContext.RequestServices.GetRequiredService<ICouponService>();
+                    await couponService.ApplyCouponAsync(appliedCouponCode, order.Id, orderUserId, discountAmount);
+                }
 
                 Console.WriteLine($"[CHECKOUT DEBUG] Order and items saved successfully");
 

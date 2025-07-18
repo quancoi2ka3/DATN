@@ -12,6 +12,9 @@ namespace SunMovement.Web.Areas.Api.Models
         
         [Required]
         public string PaymentMethod { get; set; } = "cash_on_delivery";
+        
+        // Thêm trường mã giảm giá (có thể null)
+        public string? CouponCode { get; set; }
     }
 
     public class ShippingAddressModel

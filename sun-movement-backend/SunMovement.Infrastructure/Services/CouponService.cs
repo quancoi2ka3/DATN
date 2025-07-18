@@ -484,51 +484,40 @@ namespace SunMovement.Infrastructure.Services
             }
         }
 
-        public async Task<decimal> CalculateProductDiscountAsync(int productId, int couponId)
+        public async Task<decimal> CalculateProductDiscountAsync(int productId, int couponId, decimal orderTotal)
         {
-            try
+            var product = await _unitOfWork.Products.GetByIdAsync(productId);
+            var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+            if (product == null || coupon == null || !coupon.IsValid)
+                return 0;
+            if (coupon.ApplicationType != DiscountApplicationType.All)
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(productId);
-                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
-                
-                if (product == null || coupon == null || !coupon.IsValid)
-                    return 0;
-                
-                // Check if the product is eligible for this coupon
                 if (!await IsProductEligibleForCouponAsync(productId, couponId))
                     return 0;
-                
-                var originalPrice = product.Price;
-                decimal discountAmount = 0;
-                
-                switch (coupon.Type)
-                {
-                    case CouponType.Percentage:
-                        discountAmount = originalPrice * (coupon.Value / 100);
-                        break;
-                    case CouponType.FixedAmount:
-                        discountAmount = Math.Min(coupon.Value, originalPrice);
-                        break;
-                    case CouponType.FreeShipping:
-                        // For products, free shipping doesn't affect the product price
-                        discountAmount = 0;
-                        break;
-                }
-                
-                // Apply maximum discount limit if set
-                if (coupon.MaximumDiscountAmount > 0)
-                {
-                    discountAmount = Math.Min(discountAmount, coupon.MaximumDiscountAmount);
-                }
-                
-                return Math.Round(discountAmount, 0);
             }
-            catch (Exception ex)
+            var originalPrice = product.Price;
+            decimal discountAmount = 0;
+            switch (coupon.Type)
             {
-                _logger.LogError(ex, "Error calculating discount for product {ProductId} with coupon {CouponId}", 
-                    productId, couponId);
-                return 0;
+                case CouponType.Percentage:
+                    discountAmount = originalPrice * (coupon.Value / 100);
+                    break;
+                case CouponType.FixedAmount:
+                    // Phân bổ giảm giá cố định cho từng sản phẩm theo tỷ lệ giá trị sản phẩm
+                    if (orderTotal > 0)
+                        discountAmount = Math.Min(coupon.Value * (originalPrice / orderTotal), originalPrice);
+                    else
+                        discountAmount = 0;
+                    break;
+                case CouponType.FreeShipping:
+                    discountAmount = 0;
+                    break;
             }
+            if (coupon.MaximumDiscountAmount > 0)
+            {
+                discountAmount = Math.Min(discountAmount, coupon.MaximumDiscountAmount);
+            }
+            return Math.Round(discountAmount, 0);
         }
 
         private decimal CalculateDiscount(Coupon coupon, decimal orderTotal)

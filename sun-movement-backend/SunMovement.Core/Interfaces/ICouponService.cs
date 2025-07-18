@@ -51,7 +51,7 @@ namespace SunMovement.Core.Interfaces
         Task<IEnumerable<Coupon>> GetProductCouponsAsync(int productId);
         Task<IEnumerable<Product>> GetProductsWithCouponAsync(int couponId);
         Task<bool> IsProductEligibleForCouponAsync(int productId, int couponId);
-        Task<decimal> CalculateProductDiscountAsync(int productId, int couponId);
+        Task<decimal> CalculateProductDiscountAsync(int productId, int couponId, decimal orderTotal);
         
         // Quản lý liên kết sản phẩm và mã giảm giá
         Task<IEnumerable<int>> GetCouponProductIdsAsync(int couponId);

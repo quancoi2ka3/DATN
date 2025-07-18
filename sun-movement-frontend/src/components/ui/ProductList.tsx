@@ -3,7 +3,7 @@
 import { Product } from "@/lib/types";
 import { ProductCard } from "./product-card";
 import { useState } from "react";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
 import { CheckCircle } from "lucide-react";
@@ -27,7 +27,7 @@ export function ProductList({
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const [successProductId, setSuccessProductId] = useState<string | null>(null);
-  const { addToCart } = useCart();
+  const { addToCart } = useEnhancedCart();
   const { isAuthenticated } = useAuth();
   
   // Calculate paginated products

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using SunMovement.Core.Interfaces;
 using SunMovement.Core.Models;
 using SunMovement.Infrastructure.Data;
+using Microsoft.Extensions.Logging;
 
 namespace SunMovement.Infrastructure.Repositories
 {
@@ -38,11 +39,13 @@ namespace SunMovement.Infrastructure.Repositories
         private IRepository<OrderStatusHistory>? _orderStatusHistoryRepository;
         
         private readonly ICacheService _cacheService;
+        private readonly ILogger<CouponRepository> _couponLogger;
 
-        public UnitOfWork(ApplicationDbContext context, ICacheService cacheService)
+        public UnitOfWork(ApplicationDbContext context, ICacheService cacheService, ILogger<CouponRepository> couponLogger)
         {
             _context = context;
             _cacheService = cacheService;
+            _couponLogger = couponLogger;
         }
 
         public IProductRepository Products => 
@@ -80,7 +83,7 @@ namespace SunMovement.Infrastructure.Repositories
             _productSupplierRepository ??= new ProductSupplierRepository(_context);
 
         public ICouponRepository Coupons =>
-            _couponRepository ??= new CouponRepository(_context);
+            _couponRepository ??= new CouponRepository(_context, _couponLogger);
 
         public ICouponUsageHistoryRepository CouponUsageHistories =>
             _couponUsageHistoryRepository ??= new CouponUsageHistoryRepository(_context);

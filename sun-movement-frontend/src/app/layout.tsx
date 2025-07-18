@@ -6,7 +6,7 @@ import "@/styles/enhanced-chatbot.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { RasaChatbot } from "@/components/ui/rasa-chatbot";
-import { CartProvider } from "@/lib/cart-context";
+import { EnhancedCartProvider } from "@/lib/enhanced-cart-context";
 import { AuthProvider } from "@/lib/auth-context";
 import { MixpanelProvider } from "@/lib/mixpanel-context";
 import { NotificationProvider } from "@/lib/notification-context";
@@ -133,20 +133,18 @@ export default function RootLayout({
               <ToastProvider>
                 <NotificationProvider>
                   <AuthProvider>
-                    <MixpanelProvider>
-                      <CartProvider>
-                        <Header />
-                        <main className="flex-grow">
-                          <Suspense fallback={<LoadingSpinner />}>
-                            {children}
-                          </Suspense>
-                        </main>
-                        <Footer />
-                        <RasaChatbot />
-                        <FloatingCart />
-                        <ScrollButtons />
-                      </CartProvider>
-                    </MixpanelProvider>
+                    <EnhancedCartProvider>
+                      <Header />
+                      <main className="flex-grow">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          {children}
+                        </Suspense>
+                      </main>
+                      <Footer />
+                      <RasaChatbot />
+                      <FloatingCart />
+                      <ScrollButtons />
+                    </EnhancedCartProvider>
                   </AuthProvider>
                 </NotificationProvider>
               </ToastProvider>

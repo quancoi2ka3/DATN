@@ -30,6 +30,7 @@ const fallbackSportswear: Product[] = [
     description: "Áo tập luyện cao cấp với công nghệ thoáng khí, thích hợp cho mọi hoạt động thể thao.",
     price: 350000,
     imageUrl: "/images/sportswear/casual-white.webp",
+    StockQuantity: 100,
     category: "tops",
   },
   {
@@ -38,6 +39,7 @@ const fallbackSportswear: Product[] = [
     description: "Quần short thể thao co giãn 4 chiều, mang lại sự thoải mái tối đa khi vận động.",
     price: 280000,
     imageUrl: "/images/sportswear/short.webp",
+    StockQuantity: 100,
     category: "bottoms",
   },
   {
@@ -45,6 +47,7 @@ const fallbackSportswear: Product[] = [
     name: "Sport Tank Top",
     description: "Áo ba lỗ thể thao nam thiết kế năng động, chất liệu thấm hút mồ hôi tốt.",
     price: 250000,
+    StockQuantity: 100,
     imageUrl: "/images/sportswear/tank-top.webp",
     category: "tops",
   },
@@ -78,6 +81,7 @@ const convertBackendToFrontend = (backendProducts: BackendProduct[]): Product[] 
     isNew: false,
     isBestseller: !!item.isBestseller,
     isFeatured: !!item.isFeatured,
+    StockQuantity: (item as any).StockQuantity ?? (item as any).StockQuantity ?? 0,
     rating: 4.5,
     reviews: Math.floor(Math.random() * 100) + 10,
     sizes: [],

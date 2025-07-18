@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { CartItem } from "@/lib/types";
 import Image from "next/image";
 import { Plus, Minus, Trash2, Loader2 } from "lucide-react";
@@ -16,7 +16,7 @@ interface CartIconProps {
 }
 
 export function CartIcon({ className }: CartIconProps) {
-  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useCart();
+  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useEnhancedCart();
   const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
   const [removingItemId, setRemovingItemId] = useState<string | null>(null);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);

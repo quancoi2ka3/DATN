@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { couponCode, items } = await request.json();
+    const { couponCode } = await request.json();
 
     if (!couponCode) {
       return NextResponse.json(
@@ -12,17 +12,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to backend API
-    const backendUrl = process.env.BACKEND_API_URL || 'https://localhost:5000';
+    const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:5000';
     const response = await fetch(`${backendUrl}/api/Cart/apply-coupon`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': request.headers.get('Authorization') || '',
       },
-      body: JSON.stringify({
-        couponCode,
-        items
-      }),
+      body: JSON.stringify({ couponCode }),
     });
 
     if (!response.ok) {

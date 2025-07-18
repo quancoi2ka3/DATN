@@ -6,6 +6,7 @@ export interface CheckoutRequest {
   shippingAddress: ShippingAddress;
   paymentMethod: string;
   contactInfo: ContactInfo;
+  couponCode?: string;
 }
 
 export interface ShippingAddress {

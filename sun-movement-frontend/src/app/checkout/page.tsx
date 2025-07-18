@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
@@ -78,10 +78,23 @@ const OrderSummarySkeleton = () => (
 export default function CheckoutPage() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
-  const { items, totalPrice, isLoading, checkout, error } = useCart();
+  const { 
+    items, 
+    totalPrice, 
+    totalDiscount, 
+    finalTotal, 
+    isLoading, 
+    checkout, 
+    error, 
+    applyCoupon, 
+    removeCoupon, 
+    appliedCoupons 
+  } = useEnhancedCart();
   const { showSuccess, showError } = useNotification();
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderId, setOrderId] = useState<string | undefined>();
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   
   // All form state hooks must be declared at the top level
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -154,6 +167,25 @@ export default function CheckoutPage() {
     setContactInfo(prev => ({ ...prev, [field]: value }));
   };
 
+  // Handle coupon apply
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    try {
+      const success = await applyCoupon(couponCode.trim());
+      if (success) {
+        setCouponCode("");
+      }
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  // Handle coupon remove
+  const handleRemoveCoupon = async (code: string) => {
+    await removeCoupon(code);
+  };
+
   // Handle checkout
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,6 +199,8 @@ export default function CheckoutPage() {
       shippingAddress,
       contactInfo,
       paymentMethod,
+      // Truyền couponCode nếu có
+      couponCode: appliedCoupons.length > 0 ? appliedCoupons[0] : undefined
     };
     
     try {
@@ -195,6 +229,32 @@ export default function CheckoutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold mb-8 text-center">Thanh toán</h1>
+            
+            {/* Coupon input UI */}
+            <div className="mb-6 flex flex-col md:flex-row items-center gap-2">
+              <Input
+                placeholder="Nhập mã giảm giá"
+                value={couponCode}
+                onChange={e => setCouponCode(e.target.value)}
+                className="md:w-64"
+                disabled={isApplyingCoupon}
+              />
+              <Button onClick={handleApplyCoupon} disabled={isApplyingCoupon || !couponCode.trim()} type="button">
+                Áp dụng mã
+              </Button>
+              {appliedCoupons.length > 0 && (
+                <div className="flex flex-wrap gap-2 ml-4">
+                  {appliedCoupons.map(code => (
+                    <span key={code} className="inline-flex items-center bg-green-100 text-green-700 px-2 py-1 rounded">
+                      {code}
+                      <button type="button" className="ml-2 text-red-500" onClick={() => handleRemoveCoupon(code)}>
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             
             {items.length === 0 ? (
               <Card className="p-8">
@@ -386,19 +446,23 @@ export default function CheckoutPage() {
                               <div>
                                 <p className="font-medium">{item.name}</p>
                                 <p className="text-sm text-gray-500">
-                                  {item.quantity} x {item.price.toLocaleString()} VNĐ
+                                  {item.quantity} x {(item.originalPrice ?? 0).toLocaleString()} VNĐ
                                   {item.size && ` / ${item.size}`}
                                   {item.color && ` / ${item.color}`}
                                 </p>
                               </div>
-                              <p className="font-medium">{(item.price * item.quantity).toLocaleString()} VNĐ</p>
+                              <p className="font-medium">{((item.finalPrice ?? 0) * item.quantity).toLocaleString()} VNĐ</p>
                             </div>
                           ))}
                         </div>
                         <div className="border-t pt-4 mt-4">
                           <div className="flex justify-between mb-2">
                             <span>Tạm tính</span>
-                            <span>{totalPrice.toLocaleString()} VNĐ</span>
+                            <span>{items.reduce((sum, item) => sum + (item.originalPrice ?? 0) * item.quantity, 0).toLocaleString()} VNĐ</span>
+                          </div>
+                          <div className="flex justify-between mb-2">
+                            <span>Giảm giá</span>
+                            <span className="text-green-600">-{items.reduce((sum, item) => sum + (item.discountAmount ?? 0) * item.quantity, 0).toLocaleString()} VNĐ</span>
                           </div>
                           <div className="flex justify-between mb-2">
                             <span>Phí vận chuyển</span>
@@ -406,7 +470,7 @@ export default function CheckoutPage() {
                           </div>
                           <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
                             <span>Tổng cộng</span>
-                            <span>{totalPrice.toLocaleString()} VNĐ</span>
+                            <span>{items.reduce((sum, item) => sum + (item.finalPrice ?? 0) * item.quantity, 0).toLocaleString()} VNĐ</span>
                           </div>
                         </div>
                       </CardContent>

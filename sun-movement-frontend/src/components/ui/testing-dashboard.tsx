@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useCart } from '@/lib/cart-context';
+import { useEnhancedCart } from '@/lib/enhanced-cart-context';
 import { testCases, manualTestingChecklist, TestRunner } from '@/tests/comprehensive-test-suite';
 
 interface TestResult {
@@ -15,7 +15,7 @@ export function TestingDashboard() {
   const [isVisible, setIsVisible] = useState(false);
   const [testResults, setTestResults] = useState<Map<string, TestResult>>(new Map());
   const [isRunning, setIsRunning] = useState(false);
-  const cart = useCart();
+  const cart = useEnhancedCart();
   const [testProductId] = useState(1);
 
   // Show in development mode only

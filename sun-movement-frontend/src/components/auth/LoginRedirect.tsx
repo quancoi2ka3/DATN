@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { useCart } from '@/lib/cart-context';
+import { useEnhancedCart } from '@/lib/enhanced-cart-context';
 
 interface LoginRedirectProps {
   children: React.ReactNode;
@@ -25,14 +25,11 @@ export default function LoginRedirect({
   redirectTo = '/auth/login' 
 }: LoginRedirectProps) {
   const { isAuthenticated, setReturnUrl } = useAuth();
-  const { preserveGuestCart } = useCart();
   const router = useRouter();
 
   useEffect(() => {
     // If authentication is required and user is not authenticated
     if (requireAuth && !isAuthenticated) {
-      // Preserve guest cart before redirecting to login
-      preserveGuestCart();
       
       // Store current URL as return URL
       setReturnUrl(window.location.pathname + window.location.search);
@@ -47,7 +44,7 @@ export default function LoginRedirect({
       router.push('/');
       return;
     }
-  }, [isAuthenticated, requireAuth, redirectTo, setReturnUrl, preserveGuestCart, router]);
+  }, [isAuthenticated, requireAuth, redirectTo, setReturnUrl, router]);
 
   // Show loading state while redirecting
   if (requireAuth && !isAuthenticated) {

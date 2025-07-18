@@ -124,6 +124,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         ModelState.AddModelError("CategoryId", "Vui lòng chọn danh mục cho sản phẩm mới.");
                     if (!model.Price.HasValue || model.Price <= 0)
                         ModelState.AddModelError("Price", "Vui lòng nhập giá bán hợp lệ cho sản phẩm mới.");
+                    // Không kiểm tra ProductId khi thêm mới
                 }
                 else if (!model.ProductId.HasValue || model.ProductId.Value <= 0)
                 {
@@ -133,6 +134,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 {
                     if (string.IsNullOrWhiteSpace(NewSupplierName))
                         ModelState.AddModelError("NewSupplierName", "Vui lòng nhập tên nhà cung cấp mới.");
+                    // Không kiểm tra SupplierId khi thêm mới
                 }
                 else if (!model.SupplierId.HasValue || model.SupplierId.Value <= 0)
                 {

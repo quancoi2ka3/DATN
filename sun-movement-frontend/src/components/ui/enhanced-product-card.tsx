@@ -6,7 +6,7 @@ import { Product } from "@/lib/types";
 import { useState, memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Minus, ShoppingCart, Star, Heart, Tag, Percent } from "lucide-react";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { useNotification } from "@/lib/notification-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
@@ -116,7 +116,7 @@ const QuickAddButton = memo(({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart } = useEnhancedCart();
   const { isAuthenticated } = useAuth();
 
   const handleQuickAdd = async (e: React.MouseEvent) => {
@@ -225,7 +225,7 @@ export const EnhancedProductCard = memo(({
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart } = useEnhancedCart();
   const { isAuthenticated } = useAuth();
   const { showError } = useNotification();
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);

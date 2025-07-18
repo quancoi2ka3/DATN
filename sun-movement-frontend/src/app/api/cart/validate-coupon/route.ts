@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to backend API
-    const backendUrl = process.env.BACKEND_API_URL || 'https://localhost:7092';
-    const response = await fetch(`${backendUrl}/api/Cart/validate-coupon`, {
+    const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:5000';
+    const response = await fetch(`${backendUrl}/api/Cart/apply-coupon`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

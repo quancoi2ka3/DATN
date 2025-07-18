@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to backend API
-    const backendUrl = process.env.BACKEND_API_URL || 'https://localhost:7092';
+    const backendUrl = process.env.BACKEND_API_URL || 'http://localhost:5000';
     const response = await fetch(`${backendUrl}/api/Cart/remove-coupon`, {
       method: 'POST',
       headers: {

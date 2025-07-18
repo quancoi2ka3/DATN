@@ -6,13 +6,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SunMovement.Infrastructure.Repositories
 {
     public class CouponRepository : Repository<Coupon>, ICouponRepository
     {
-        public CouponRepository(ApplicationDbContext context) : base(context)
+        private readonly ILogger<CouponRepository> _logger;
+
+        public CouponRepository(ApplicationDbContext context, ILogger<CouponRepository> logger) : base(context)
         {
+            _logger = logger;
         }
 
         public async Task<IEnumerable<Coupon>> GetActiveCouponsAsync()
@@ -29,9 +33,22 @@ namespace SunMovement.Infrastructure.Repositories
 
         public async Task<Coupon?> GetCouponByCodeAsync(string code)
         {
-            return await _context.Coupons
-                .Include(c => c.UsageHistory)
-                .FirstOrDefaultAsync(c => c.Code == code);
+            try
+            {
+                var coupon = await _context.Coupons
+                    .Include(c => c.UsageHistory)
+                    .FirstOrDefaultAsync(c => c.Code.ToLower() == code.ToLower());
+                if (coupon == null)
+                {
+                    _logger.LogWarning("Không tìm thấy mã giảm giá: {Code}", code);
+                }
+                return coupon;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi truy vấn mã giảm giá: {Code}", code);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Coupon>> GetExpiredCouponsAsync()

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
-import { useCart } from "@/lib/cart-context";
+import { useEnhancedCart } from "@/lib/enhanced-cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { LoginPromptDialog } from "./login-prompt-dialog";
 import { trackProductView, trackAddToCart } from "@/services/analytics";
@@ -23,7 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [isAdding, setIsAdding] = useState(false);
-  const { addToCart, isLoading } = useCart();
+  const { addToCart, isLoading } = useEnhancedCart();
   const { isAuthenticated, user } = useAuth();
 
   // Chặn tăng vượt tồn kho

@@ -16,8 +16,7 @@
     <div class="form-group mb-3">
         <label>Sản phẩm</label>
         <select asp-for="ProductId" class="form-control" id="ProductSelect" name="ProductId" onchange="onProductChange(); validateProductField();">
-            <option value="">-- Chọn sản phẩm --</option>
-            <option value="_addnew">+ Thêm sản phẩm mới</option>
+            <option value="">+ Thêm sản phẩm mới</option>
             @foreach (var item in ViewBag.Products as IEnumerable<SelectListItem>)
             {
                 <option value="@item.Value">@item.Text</option>
@@ -88,8 +87,7 @@
     <div class="form-group mb-3">
         <label>Nhà cung cấp</label>
         <select asp-for="SupplierId" class="form-control" id="SupplierSelect" name="SupplierId" onchange="onSupplierChange(); validateSupplierField()">
-            <option value="">-- Chọn nhà cung cấp --</option>
-            <option value="_addnew">+ Thêm nhà cung cấp mới</option>
+            <option value="">+ Thêm nhà cung cấp mới</option>
             @foreach (var item in ViewBag.Suppliers as IEnumerable<SelectListItem>)
             {
                 <option value="@item.Value">@item.Text</option>
@@ -114,18 +112,16 @@
         function onProductChange() {
             var val = document.getElementById('ProductSelect').value;
             var newFields = document.getElementById('newProductFields');
-            var sizeFields = document.getElementById('sizeFields');
-            var quantityField = document.getElementById('quantityField');
             var isNewProductInput = document.getElementById('IsNewProduct');
-            if (val === "_addnew") {
+            if (val === "") {
                 newFields.style.display = '';
                 isNewProductInput.value = 'true';
-                document.getElementById('ProductSelect').value = '';
             } else {
                 newFields.style.display = 'none';
                 isNewProductInput.value = 'false';
             }
             onCategoryChange();
+            validateProductField();
         }
         function onCategoryChange() {
             var isSportwear = document.getElementById('IsSportwearCheckbox') && document.getElementById('IsSportwearCheckbox').checked;
@@ -143,14 +139,14 @@
             var val = document.getElementById('SupplierSelect').value;
             var newSupplierField = document.getElementById('newSupplierField');
             var isNewSupplierInput = document.getElementById('IsNewSupplier');
-            if (val === "_addnew") {
+            if (val === "") {
                 newSupplierField.style.display = '';
                 isNewSupplierInput.value = 'true';
-                document.getElementById('SupplierSelect').value = '';
             } else {
                 newSupplierField.style.display = 'none';
                 isNewSupplierInput.value = 'false';
             }
+            validateSupplierField();
         }
         function previewImage(event) {
             var input = event.target;
@@ -171,7 +167,7 @@
             var productSelect = document.getElementById('ProductSelect');
             var newProductName = document.getElementById('NewProductName');
             var isNewProductInput = document.getElementById('IsNewProduct');
-            if (productSelect.value === "_addnew") {
+            if (productSelect.value === "") {
                 productSelect.removeAttribute('required');
                 if (newProductName) newProductName.setAttribute('required', 'required');
                 isNewProductInput.value = 'true';
@@ -185,7 +181,7 @@
             var supplierSelect = document.getElementById('SupplierSelect');
             var newSupplierName = document.getElementById('NewSupplierName');
             var isNewSupplierInput = document.getElementById('IsNewSupplier');
-            if (supplierSelect.value === "_addnew") {
+            if (supplierSelect.value === "") {
                 supplierSelect.removeAttribute('required');
                 if (newSupplierName) newSupplierName.setAttribute('required', 'required');
                 isNewSupplierInput.value = 'true';
@@ -200,6 +196,17 @@
             onSupplierChange();
             validateProductField();
             validateSupplierField();
+        });
+        // Khi submit, nếu là sản phẩm mới thì ProductId sẽ là rỗng
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var isNewProduct = document.getElementById('IsNewProduct').value === 'true';
+            if (isNewProduct) {
+                document.getElementById('ProductSelect').value = '';
+            }
+            var isNewSupplier = document.getElementById('IsNewSupplier').value === 'true';
+            if (isNewSupplier) {
+                document.getElementById('SupplierSelect').value = '';
+            }
         });
     </script>
 }

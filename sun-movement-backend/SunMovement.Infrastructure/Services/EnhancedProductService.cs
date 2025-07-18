@@ -149,7 +149,7 @@ namespace SunMovement.Infrastructure.Services
                 // Find the best discount among all applicable coupons
                 foreach (var coupon in productCoupons.Where(c => c.IsActive && c.IsValid))
                 {
-                    var discount = await _couponService.CalculateProductDiscountAsync(product.Id, coupon.Id);
+                    var discount = await _couponService.CalculateProductDiscountAsync(product.Id, coupon.Id, product.Price);
                     if (discount > bestDiscount)
                     {
                         bestDiscount = discount;

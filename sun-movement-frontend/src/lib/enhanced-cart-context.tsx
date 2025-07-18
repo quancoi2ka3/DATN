@@ -67,14 +67,14 @@ const validateCouponAPI = async (couponCode: string, orderTotal: number, items: 
       const token = localStorage.getItem('token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
     }
-    const response = await fetch('/api/cart/validate-coupon', {
+    const response = await fetch('/api/cart/apply-coupon', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         couponCode,
         orderTotal,
         items: items.map(item => ({
-          productId: item.productId,
+          productId: Number(item.productId),
           quantity: item.quantity,
           price: item.price
         }))
@@ -97,7 +97,7 @@ const validateCouponAPI = async (couponCode: string, orderTotal: number, items: 
   }
 };
 
-const applyCouponAPI = async (couponCode: string, cartItems: CartItem[]): Promise<{ success: boolean; items?: EnhancedCartItem[]; error?: string }> => {
+const applyCouponAPI = async (couponCode: string): Promise<{ success: boolean; items?: EnhancedCartItem[]; error?: string }> => {
   try {
     let headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (typeof window !== 'undefined') {
@@ -107,10 +107,7 @@ const applyCouponAPI = async (couponCode: string, cartItems: CartItem[]): Promis
     const response = await fetch('/api/cart/apply-coupon', {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        couponCode,
-        items: cartItems
-      }),
+      body: JSON.stringify({ couponCode }),
     });
 
     if (!response.ok) {
@@ -154,6 +151,31 @@ const removeCouponAPI = async (couponCode: string): Promise<{ success: boolean; 
       error: 'Không thể gỡ bỏ mã giảm giá'
     };
   }
+};
+
+// Đặt hàm normalizeEnhancedItems ở đầu file, trước EnhancedCartProvider
+const normalizeEnhancedItems = (items: any[], oldItems: EnhancedCartItem[]): EnhancedCartItem[] => {
+  return items.map((item, idx) => {
+    const old: Partial<EnhancedCartItem> = oldItems.find(i => i.id === item.id) || {};
+    const originalPrice = item.originalPrice ?? item.price ?? old.originalPrice ?? old.price ?? 0;
+    const finalPrice = item.finalPrice ?? item.price ?? old.finalPrice ?? old.price ?? 0;
+    return {
+      id: item.id ?? old.id ?? idx.toString(),
+      productId: item.productId ?? old.productId ?? '',
+      name: item.name ?? old.name ?? '',
+      imageUrl: item.imageUrl ?? old.imageUrl ?? '',
+      originalPrice,
+      finalPrice,
+      discountAmount: item.discountAmount ?? 0,
+      couponCode: item.couponCode ?? undefined,
+      couponType: item.couponType ?? undefined,
+      quantity: item.quantity ?? old.quantity ?? 1,
+      size: item.size ?? old.size ?? undefined,
+      color: item.color ?? old.color ?? undefined,
+      addedAt: item.addedAt ?? old.addedAt ?? undefined,
+      price: originalPrice // Để đúng type, không dùng nữa
+    };
+  });
 };
 
 // Enhanced cart provider
@@ -360,24 +382,13 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
       }
 
       // Apply the coupon
-      const cartItems = items.map(item => ({
-        id: item.id,
-        productId: item.productId,
-        name: item.name,
-        imageUrl: item.imageUrl,
-        price: item.originalPrice,
-        quantity: item.quantity,
-        size: item.size,
-        color: item.color,
-        addedAt: item.addedAt
-      }));
-
-      const response = await applyCouponAPI(couponCode, cartItems);
+      const response = await applyCouponAPI(couponCode);
       
       if (response.success && response.items) {
-        setItems(response.items);
+        setItems(normalizeEnhancedItems(response.items, items));
         setAppliedCoupons(prev => [...prev, couponCode]);
         showSuccess(`Đã áp dụng mã giảm giá ${couponCode}`);
+        await fetchCart(); // Đồng bộ lại cart từ backend
         return true;
       } else {
         showError(response.error || 'Không thể áp dụng mã giảm giá');
@@ -392,7 +403,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedCoupons, items, validateCoupon, showSuccess, showError]);
+  }, [appliedCoupons, items, validateCoupon, showSuccess, showError, fetchCart]);
 
   // Remove coupon
   const removeCoupon = useCallback(async (couponCode: string): Promise<boolean> => {
@@ -407,9 +418,10 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
       const response = await removeCouponAPI(couponCode);
       
       if (response.success && response.items) {
-        setItems(response.items);
+        setItems(normalizeEnhancedItems(response.items, items));
         setAppliedCoupons(prev => prev.filter(code => code !== couponCode));
         showSuccess(`Đã gỡ bỏ mã giảm giá ${couponCode}`);
+        await fetchCart(); // Đồng bộ lại cart từ backend
         return true;
       } else {
         showError(response.error || 'Không thể gỡ bỏ mã giảm giá');
@@ -424,7 +436,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedCoupons, showSuccess, showError]);
+  }, [appliedCoupons, items, showSuccess, showError, fetchCart]);
 
   // Checkout
   const checkout = useCallback(async (checkoutDetails: CheckoutRequest): Promise<{ 

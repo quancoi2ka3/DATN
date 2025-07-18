@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ErrorBoundary } from './error-boundary';
 import { ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-react';
-import { useCart } from '@/lib/cart-context';
+import { useEnhancedCart } from '@/lib/enhanced-cart-context';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,7 @@ const getImageUrl = (imagePath: string | null | undefined): string => {
 };
 
 export default function FloatingCart() {
-  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useCart();
+  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, isLoading } = useEnhancedCart();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 

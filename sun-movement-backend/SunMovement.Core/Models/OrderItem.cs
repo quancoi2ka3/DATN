@@ -14,6 +14,9 @@ namespace SunMovement.Core.Models
         public string ProductName { get; set; } = string.Empty;
         public string? ProductOptions { get; set; }
         
+        // Thêm thông tin size cho sản phẩm sportwear
+        public string? Size { get; set; }
+        
         // Navigation properties
         [JsonIgnore] // Prevent circular reference
         public virtual Order? Order { get; set; }

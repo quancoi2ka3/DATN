@@ -1,0 +1,376 @@
+@model SunMovement.Web.Areas.Admin.Models.SendCouponNotificationViewModel
+@using SunMovement.Core.Models
+@{
+    ViewData["Title"] = "Gửi thông báo mã giảm giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">
+        <i class="fas fa-envelope me-2"></i>Gửi thông báo mã giảm giá
+    </h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="AdminDashboard" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="Index">Mã giảm giá</a></li>
+        <li class="breadcrumb-item active">Gửi thông báo</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["WarningMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i> @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-paper-plane me-1"></i>
+                    Gửi thông báo mã giảm giá
+                </div>
+                <div class="card-body">
+                    <form asp-action="SendCouponNotification" method="post" id="sendCouponForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CouponId" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>Chọn mã giảm giá
+                                    </label>
+                                    <select asp-for="CouponId" class="form-select" required>
+                                        <option value="">-- Chọn mã giảm giá --</option>
+                                        @if (ViewBag.ActiveCoupons != null)
+                                        {
+                                            @foreach (var coupon in ViewBag.ActiveCoupons)
+                                            {
+                                                var isActive = coupon.IsActive && DateTime.Now >= coupon.StartDate && DateTime.Now <= coupon.EndDate;
+                                                var statusText = isActive ? " (Đang hoạt động)" : " (Không hoạt động)";
+                                                <option value="@coupon.Id" data-type="@coupon.Type" data-value="@coupon.Value">
+                                                    @coupon.Code - @coupon.Name@statusText
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CouponId" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CampaignType" class="form-label">
+                                        <i class="fas fa-bullhorn me-1"></i>Loại chiến dịch
+                                    </label>
+                                    <select asp-for="CampaignType" class="form-select">
+                                        <option value="general">Thông báo chung</option>
+                                        <option value="welcome">Chào mừng khách hàng mới</option>
+                                        <option value="seasonal">Chiến dịch theo mùa</option>
+                                        <option value="birthday">Sinh nhật khách hàng</option>
+                                        <option value="loyalty">Tri ân khách hàng VIP</option>
+                                        <option value="abandoned-cart">Nhắc nhở giỏ hàng</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-users me-1"></i>Chọn khách hàng nhận thông báo
+                            </label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="sendToAll" name="SendToAllCustomers" value="true" onchange="toggleCustomerSelection()">
+                                <label class="form-check-label" for="sendToAll">
+                                    <strong>Gửi cho tất cả khách hàng có email (@ViewBag.Customers?.Count khách hàng)</strong>
+                                </label>
+                            </div>
+                            <div id="customerSelection" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                @if (ViewBag.Customers != null)
+                                {
+                                    @foreach (var customer in ViewBag.Customers)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input customer-checkbox" type="checkbox" 
+                                                   name="CustomerEmails" value="@customer.Email" 
+                                                   id="customer_@customer.Id">
+                                            <label class="form-check-label" for="customer_@customer.Id">
+                                                @customer.Email - @(customer.FirstName ?? customer.UserName ?? "Khách hàng")
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <span asp-validation-for="CustomerEmails" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>Ghi chú (tùy chọn)
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" 
+                                      placeholder="Ghi chú về chiến dịch gửi email..."></textarea>
+                        </div>
+
+                        <!-- Hidden field for TestEmail to avoid validation issues -->
+                        <input type="hidden" asp-for="TestEmail" value="" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-info me-md-2" onclick="testEmailConfig()">
+                                <i class="fas fa-cog me-1"></i>Test Email Config
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i>Gửi thông báo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Thông tin chiến dịch
+                </div>
+                <div class="card-body">
+                    <div id="couponInfo" class="alert alert-info">
+                        <h6>📋 Chọn mã giảm giá để xem thông tin</h6>
+                        <p class="mb-0">Vui lòng chọn một mã giảm giá từ danh sách bên trái để xem chi tiết.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Thống kê nhanh
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">@ViewBag.ActiveCoupons?.Count</h4>
+                            <small class="text-muted">Mã giảm giá đang hoạt động</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">@ViewBag.Customers?.Count</h4>
+                            <small class="text-muted">Khách hàng có email</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Test Email -->
+<div class="modal fade" id="testEmailModal" tabindex="-1" aria-labelledby="testEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="testEmailModalLabel">
+                    <i class="fas fa-vial me-2"></i>Test Email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="testEmailInput" class="form-label">Email nhận test</label>
+                    <input type="email" class="form-control" id="testEmailInput" 
+                           placeholder="your-email@example.com" required>
+                </div>
+                <div class="alert alert-info">
+                    <h6>📧 Email test sẽ bao gồm:</h6>
+                    <ul class="mb-0">
+                        <li>Template email chuyên nghiệp</li>
+                        <li>Thông tin mã giảm giá chi tiết</li>
+                        <li>Hướng dẫn sử dụng</li>
+                        <li>Responsive design</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="sendTestEmail()">
+                    <i class="fas fa-paper-plane me-1"></i>Gửi test
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Cập nhật thông tin mã giảm giá khi chọn
+            $('#CouponId').change(function() {
+                updateCouponInfo();
+            });
+
+            // Khởi tạo
+            updateCouponInfo();
+        });
+
+        function updateCouponInfo() {
+            var selectedOption = $('#CouponId option:selected');
+            var couponInfo = $('#couponInfo');
+            
+            if (selectedOption.val()) {
+                var couponType = selectedOption.data('type');
+                var couponValue = selectedOption.data('value');
+                var couponText = selectedOption.text();
+                var parts = couponText.split(' - ');
+                var couponCode = parts[0];
+                
+                var typeText = '';
+                if (couponType == 0) {
+                    typeText = 'Giảm ' + couponValue + '%';
+                } else if (couponType == 1) {
+                    typeText = 'Giảm ' + couponValue.toLocaleString() + ' VNĐ';
+                } else if (couponType == 2) {
+                    typeText = 'Miễn phí vận chuyển';
+                } else {
+                    typeText = 'Giảm giá đặc biệt';
+                }
+                
+                var statusText = couponText.indexOf('Đang hoạt động') !== -1 ? '✅ Hoạt động' : '❌ Không hoạt động';
+                var descriptionText = parts.length > 1 ? parts[1] : 'Không có mô tả';
+                
+                var html = '<h6>🎁 Mã giảm giá: <strong>' + couponCode + '</strong></h6>';
+                html += '<p><strong>Loại:</strong> ' + typeText + '</p>';
+                html += '<p><strong>Mô tả:</strong> ' + descriptionText + '</p>';
+                html += '<p class="mb-0"><strong>Trạng thái:</strong> ' + statusText + '</p>';
+                
+                couponInfo.html(html);
+            } else {
+                var html = '<h6>📋 Chọn mã giảm giá để xem thông tin</h6>';
+                html += '<p class="mb-0">Vui lòng chọn một mã giảm giá từ danh sách bên trái để xem chi tiết.</p>';
+                couponInfo.html(html);
+            }
+        }
+
+        function toggleCustomerSelection() {
+            var sendToAll = $('#sendToAll').is(':checked');
+            var customerCheckboxes = $('.customer-checkbox');
+            
+            if (sendToAll) {
+                customerCheckboxes.prop('checked', true);
+                $('#customerSelection').addClass('bg-light');
+            } else {
+                customerCheckboxes.prop('checked', false);
+                $('#customerSelection').removeClass('bg-light');
+            }
+        }
+
+        function testEmail() {
+            var couponId = $('#CouponId').val();
+            if (!couponId) {
+                alert('Vui lòng chọn mã giảm giá trước khi test email.');
+                return;
+            }
+            $('#testEmailModal').modal('show');
+        }
+
+        function sendTestEmail() {
+            var couponId = $('#CouponId').val();
+            var testEmail = $('#testEmailInput').val();
+            var campaignType = $('#CampaignType').val();
+            
+            if (!testEmail) {
+                alert('Vui lòng nhập email test.');
+                return;
+            }
+            
+            $.ajax({
+                url: '@Url.Action("SendTestCouponEmail", "CouponsAdmin")',
+                type: 'POST',
+                data: {
+                    couponId: couponId,
+                    testEmail: testEmail,
+                    campaignType: campaignType,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('✅ ' + response.message);
+                        $('#testEmailModal').modal('hide');
+                    } else {
+                        alert('❌ ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('❌ Có lỗi xảy ra khi gửi email test.');
+                }
+            });
+        }
+
+        function testEmailConfig() {
+            $.ajax({
+                url: '@Url.Action("TestEmailConfig", "CouponsAdmin")',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Email Configuration:', response.config);
+                        alert('✅ Email configuration loaded successfully!\n\n' + 
+                              'Provider: ' + response.config.provider + '\n' +
+                              'SMTP Server: ' + response.config.smtpServer + '\n' +
+                              'Sender: ' + response.config.sender + '\n' +
+                              'Has Password: ' + response.config.hasPassword + '\n' +
+                              'Enable SSL: ' + response.config.enableSsl);
+                    } else {
+                        alert('❌ Error testing email configuration: ' + response.error);
+                    }
+                },
+                error: function() {
+                    alert('❌ Error testing email configuration');
+                }
+            });
+        }
+
+        // Form validation
+        $('#sendCouponForm').on('submit', function(e) {
+            var selectedCustomers = $('.customer-checkbox:checked').length;
+            var sendToAll = $('#sendToAll').is(':checked');
+            
+            if (!sendToAll && selectedCustomers === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn ít nhất một khách hàng hoặc chọn "Gửi cho tất cả khách hàng".');
+                return false;
+            }
+            
+            // Show loading message
+            var submitBtn = $(this).find('button[type="submit"]');
+            var originalText = submitBtn.html();
+            submitBtn.html('<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...');
+            submitBtn.prop('disabled', true);
+            
+            // Re-enable button after 5 seconds in case of error
+            setTimeout(function() {
+                submitBtn.html(originalText);
+                submitBtn.prop('disabled', false);
+            }, 5000);
+        });
+    </script>
+} 

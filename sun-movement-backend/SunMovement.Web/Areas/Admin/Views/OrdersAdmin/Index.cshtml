@@ -164,10 +164,24 @@
                                 <td><strong>@order.Id</strong></td>
                                 <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
-                                    @order.DisplayCustomerName
+                                    @{
+                                        var customerName = !string.IsNullOrEmpty(order.CustomerName) 
+                                            ? order.CustomerName 
+                                            : !string.IsNullOrEmpty(order.UserId) 
+                                                ? "Khách hàng đã đăng ký" 
+                                                : "Khách hàng không đăng ký";
+                                        
+                                        var customerType = !string.IsNullOrEmpty(order.UserId) 
+                                            ? "Đã đăng ký" 
+                                            : "Khách hàng";
+                                    }
+                                    <div>
+                                        <strong>@customerName</strong>
+                                        <span class="badge @(string.IsNullOrEmpty(order.UserId) ? "bg-secondary" : "bg-success") badge-sm">@customerType</span>
+                                    </div>
                                     <div class="small text-muted">
-                                        @order.Email<br>
-                                        @order.PhoneNumber
+                                        <i class="fas fa-envelope"></i> @order.Email<br>
+                                        <i class="fas fa-phone"></i> @order.PhoneNumber
                                     </div>
                                 </td>
                                 <td class="text-end">@order.TotalAmount.ToString("N0") VNĐ</td>

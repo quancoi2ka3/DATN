@@ -30,16 +30,5 @@ namespace SunMovement.Web.ViewModels
         public int AverageAge { get; set; }
         public List<ApplicationUser> RecentCustomers { get; set; } = new List<ApplicationUser>();
         public List<MonthlyRegistrationData> MonthlyRegistrations { get; set; } = new List<MonthlyRegistrationData>();
-
-        // Engagement metrics
-        public double AverageSessionDuration { get; set; }
-        public int TotalPageViews { get; set; }
-        public double BounceRate { get; set; }
-        public Dictionary<string, int> MostViewedProducts { get; set; } = new Dictionary<string, int>();
-
-        // Retention metrics
-        public double CustomerRetentionRate { get; set; }
-        public double CustomerChurnRate { get; set; }
-        public Dictionary<string, int> CustomerRetentionByMonth { get; set; } = new Dictionary<string, int>();
     }
 }

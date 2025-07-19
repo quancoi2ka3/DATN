@@ -28,7 +28,31 @@ namespace SunMovement.Infrastructure.Services
 
         public async Task<Coupon?> GetCouponByCodeAsync(string code)
         {
-            return await _unitOfWork.Coupons.GetCouponByCodeAsync(code);
+            _logger.LogInformation("[GET COUPON] Tìm kiếm coupon với code: '{Code}' (Length: {Length})", code, code?.Length);
+            
+            // Kiểm tra case sensitivity
+            var normalizedCode = code?.Trim().ToUpper();
+            _logger.LogInformation("[GET COUPON] Code sau khi normalize: '{NormalizedCode}'", normalizedCode);
+            
+            var coupon = await _unitOfWork.Coupons.GetCouponByCodeAsync(code);
+            if (coupon == null)
+            {
+                _logger.LogWarning("[GET COUPON] Không tìm thấy coupon với code: '{Code}'", code);
+                
+                // Thử tìm với case khác
+                var allCoupons = await _unitOfWork.Coupons.GetAllAsync();
+                var similarCodes = allCoupons.Where(c => c.Code.Contains(code, StringComparison.OrdinalIgnoreCase)).Select(c => c.Code).ToList();
+                if (similarCodes.Any())
+                {
+                    _logger.LogWarning("[GET COUPON] Tìm thấy các code tương tự: {SimilarCodes}", string.Join(", ", similarCodes));
+                }
+            }
+            else
+            {
+                _logger.LogInformation("[GET COUPON] Tìm thấy coupon: '{Code}', IsActive: {IsActive}, IsValid: {IsValid}", 
+                    coupon.Code, coupon.IsActive, coupon.IsValid);
+            }
+            return coupon;
         }
 
         public async Task<Coupon> CreateCouponAsync(Coupon coupon)
@@ -105,22 +129,49 @@ namespace SunMovement.Infrastructure.Services
             var coupon = await GetCouponByCodeAsync(code);
             if (coupon == null)
             {
+                _logger.LogWarning("[VALIDATE COUPON] Coupon not found: {Code}", code);
                 result.ErrorMessage = "Mã giảm giá không tồn tại";
                 return result;
             }
 
+            _logger.LogInformation("[VALIDATE COUPON] Validating coupon: {Code}, IsActive: {IsActive}, StartDate: {StartDate}, EndDate: {EndDate}, UsageLimit: {UsageLimit}, CurrentUsage: {CurrentUsage}", 
+                coupon.Code, coupon.IsActive, coupon.StartDate, coupon.EndDate, coupon.UsageLimit, coupon.CurrentUsageCount);
+
             // Basic validation
             if (!coupon.IsValid)
             {
+                var now = DateTime.Now; // Local time (GMT+7)
+                var reasons = new List<string>();
+                
+                // Sử dụng DateTime.Now (GMT+7) trực tiếp để so sánh
+                // StartDate và EndDate trong database cũng là GMT+7
+                _logger.LogInformation("[VALIDATE COUPON] Time check - Local Now (GMT+7): {LocalNow}, StartDate (GMT+7): {StartDate}, EndDate (GMT+7): {EndDate}", 
+                    now, coupon.StartDate, coupon.EndDate);
+                
+                if (!coupon.IsActive)
+                    reasons.Add("Coupon is not active");
+                if (now < coupon.StartDate)
+                    reasons.Add($"Coupon not started yet (StartDate: {coupon.StartDate}, Now: {now})");
+                if (now > coupon.EndDate)
+                    reasons.Add($"Coupon expired (EndDate: {coupon.EndDate}, Now: {now})");
+                if (coupon.UsageLimit > 0 && coupon.CurrentUsageCount >= coupon.UsageLimit)
+                    reasons.Add($"Usage limit reached (Limit: {coupon.UsageLimit}, Used: {coupon.CurrentUsageCount})");
+                
+                _logger.LogWarning("[VALIDATE COUPON] Coupon validation failed: {Code}, Reasons: {Reasons}", coupon.Code, string.Join(", ", reasons));
                 result.ErrorMessage = "Mã giảm giá không hợp lệ";
                 return result;
             }
 
             if (orderTotal < coupon.MinimumOrderAmount)
             {
+                _logger.LogWarning("[VALIDATE COUPON] Order total too low: {OrderTotal} < {MinimumAmount} (Type: {OrderTotalType}, MinType: {MinType})", 
+                    orderTotal, coupon.MinimumOrderAmount, orderTotal.GetType(), coupon.MinimumOrderAmount.GetType());
                 result.ErrorMessage = $"Đơn hàng tối thiểu {coupon.MinimumOrderAmount:N0} VNĐ để sử dụng mã này";
                 return result;
             }
+
+            _logger.LogInformation("[VALIDATE COUPON] Coupon validation successful: {Code}, OrderTotal: {OrderTotal}, DiscountAmount: {DiscountAmount}", 
+                coupon.Code, orderTotal, CalculateDiscount(coupon, orderTotal));
 
             result.IsValid = true;
             result.Coupon = coupon;
@@ -488,13 +539,35 @@ namespace SunMovement.Infrastructure.Services
         {
             var product = await _unitOfWork.Products.GetByIdAsync(productId);
             var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+            
+            _logger.LogInformation("[CALCULATE DISCOUNT] ProductId: {ProductId}, CouponId: {CouponId}, OrderTotal: {OrderTotal}", 
+                productId, couponId, orderTotal);
+            
             if (product == null || coupon == null || !coupon.IsValid)
-                return 0;
-            if (coupon.ApplicationType != DiscountApplicationType.All)
             {
-                if (!await IsProductEligibleForCouponAsync(productId, couponId))
-                    return 0;
+                _logger.LogWarning("[CALCULATE DISCOUNT] Invalid product or coupon - Product: {Product}, Coupon: {Coupon}, IsValid: {IsValid}", 
+                    product?.Id, coupon?.Id, coupon?.IsValid);
+                return 0;
             }
+            
+            _logger.LogInformation("[CALCULATE DISCOUNT] Product: {ProductName}, Price: {Price}, Coupon: {CouponCode}, Type: {Type}, Value: {Value}, ApplicationType: {ApplicationType}", 
+                product.Name, product.Price, coupon.Code, coupon.Type, coupon.Value, coupon.ApplicationType);
+            
+            // Chỉ kiểm tra IsProductEligibleForCouponAsync khi coupon có ApplicationType = Product
+            // và có mapping sản phẩm cụ thể
+            if (coupon.ApplicationType == DiscountApplicationType.Product)
+            {
+                var couponProducts = await _unitOfWork.CouponProducts.FindAsync(cp => cp.CouponId == couponId);
+                if (couponProducts.Any()) // Nếu có mapping sản phẩm cụ thể
+                {
+                    var isEligible = await IsProductEligibleForCouponAsync(productId, couponId);
+                    _logger.LogInformation("[CALCULATE DISCOUNT] Product eligibility check: {IsEligible}", isEligible);
+                    if (!isEligible)
+                        return 0;
+                }
+                // Nếu không có mapping sản phẩm cụ thể, cho phép áp dụng cho tất cả sản phẩm
+            }
+            
             var originalPrice = product.Price;
             decimal discountAmount = 0;
             switch (coupon.Type)
@@ -513,11 +586,16 @@ namespace SunMovement.Infrastructure.Services
                     discountAmount = 0;
                     break;
             }
+            
             if (coupon.MaximumDiscountAmount > 0)
             {
                 discountAmount = Math.Min(discountAmount, coupon.MaximumDiscountAmount);
             }
-            return Math.Round(discountAmount, 0);
+            
+            var finalDiscount = Math.Round(discountAmount, 0);
+            _logger.LogInformation("[CALCULATE DISCOUNT] Final discount amount: {DiscountAmount}", finalDiscount);
+            
+            return finalDiscount;
         }
 
         private decimal CalculateDiscount(Coupon coupon, decimal orderTotal)

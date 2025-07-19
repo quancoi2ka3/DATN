@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Thiết lập hệ thống";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Thiết lập hệ thống</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/admin">Trang Chủ</a></li>
+        <li class="breadcrumb-item active">Thiết lập hệ thống</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thống kê hệ thống -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Sản phẩm</div>
+                            <div class="h4">@ViewBag.TotalProducts</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-box fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Dịch vụ</div>
+                            <div class="h4">@ViewBag.TotalServices</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-dumbbell fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Đơn hàng</div>
+                            <div class="h4">@ViewBag.TotalOrders</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="small text-white-50">Khách hàng</div>
+                            <div class="h4">@ViewBag.TotalCustomers</div>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Các tùy chọn cài đặt -->
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs me-1"></i>
+                    Quản lý hệ thống
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("SystemInfo", "SettingsAdmin", new { area = "Admin" })" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Thông tin hệ thống
+                        </a>
+                        <a href="@Url.Action("DatabaseInfo", "SettingsAdmin", new { area = "Admin" })" class="btn btn-outline-info">
+                            <i class="fas fa-database me-2"></i>
+                            Thông tin cơ sở dữ liệu
+                        </a>
+                        <form method="post" asp-action="ClearCache" style="display: inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-warning w-100" onclick="return confirm('Bạn có chắc muốn xóa cache?')">
+                                <i class="fas fa-broom me-2"></i>
+                                Xóa cache
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Bảo mật
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-user-shield me-2"></i>
+                            Quản lý vai trò (Sắp tới)
+                        </button>
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-key me-2"></i>
+                            Cài đặt mật khẩu (Sắp tới)
+                        </button>
+                        <button class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-history me-2"></i>
+                            Lịch sử đăng nhập (Sắp tới)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin phiên bản -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-code me-1"></i>
+            Thông tin phiên bản
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Sun Movement Fitness Center</h6>
+                    <p class="text-muted">Phiên bản: 1.0.0</p>
+                    <p class="text-muted">Framework: .NET 8.0</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Hỗ trợ kỹ thuật</h6>
+                    <p class="text-muted">Email: support@sunmovement.vn</p>
+                    <p class="text-muted">Hotline: 1900-xxxx</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

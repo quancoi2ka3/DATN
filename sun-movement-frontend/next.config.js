@@ -2,11 +2,10 @@
 const nextConfig = {
   reactStrictMode: false,
   
-  // Basic optimizations
+  // Performance optimizations
   experimental: {
     optimizeCss: true,
-    // Removed esmExternals for Turbopack compatibility
-    serverComponentsExternalPackages: [], // Prevent external package issues
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   
   // Optimize loading
@@ -15,7 +14,24 @@ const nextConfig = {
   // Compression
   compress: true,
   
-  // Webpack configuration to fix chunk loading (only for non-Turbopack builds)
+  // Disable ESLint in production for performance
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Bundle analyzer for development
+  ...(process.env.ANALYZE === 'true' && {
+    webpack: (config) => {
+      config.plugins.push(
+        new (require('@next/bundle-analyzer'))({
+          enabled: true,
+        })
+      );
+      return config;
+    },
+  }),
+  
+  // Webpack configuration for production optimization
   webpack: (config, { isServer, dev }) => {
     // Skip webpack customization if using Turbopack
     if (process.env.NEXT_RUNTIME === 'turbopack') {
@@ -31,8 +47,8 @@ const nextConfig = {
       };
     }
     
-    // Only apply chunk optimization in development
-    if (dev) {
+    // Production optimizations
+    if (!dev) {
       // Optimize chunk splitting
       config.optimization = {
         ...config.optimization,
@@ -58,32 +74,29 @@ const nextConfig = {
               priority: 20,
               chunks: 'all',
             },
+            ui: {
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+              name: 'ui',
+              priority: 15,
+              chunks: 'all',
+            },
           },
         },
-      };
-      
-      // Set publicPath to fix chunk loading
-      config.output = {
-        ...config.output,
-        publicPath: '/_next/',
+        // Minimize JavaScript
+        minimize: true,
       };
     }
     
     return config;
   },
   
-  // Add development server configuration
-  devIndicators: {
-    buildActivity: false,
-  },
-  
-  // Optimize for development
+  // Development optimizations
   ...(process.env.NODE_ENV === 'development' && {
     swcMinify: false,
     optimizeFonts: false,
   }),
   
-  // Output configuration for better stability
+  // Output configuration
   output: 'standalone',
   
   // Environment variables

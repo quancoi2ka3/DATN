@@ -222,20 +222,19 @@ export function HeroSection() {
               className="border-2 border-white hover-lift bg-transparent text-white hover:bg-white/10"
               asChild
             >
-              <Link href="https://www.youtube.com/@SUNMovementVN" target="_blank" rel="noopener noreferrer">
-                <Play className="mr-2 h-4 w-4 fill-white" />
-                Xem video
-              </Link>
+              
             </Button>
           </div>
           
-          {/* Slide indicators */}
-          <div className="mt-16 flex items-center gap-3">
+          {/* Slide indicators - Improved positioning */}
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex items-center gap-3 z-20">
             {heroSlides.map((slide, index) => (
               <button
                 key={slide.id}
-                className={`relative h-[3px] transition-all ${
-                  index === activeSlide ? "w-12 bg-red-500 pulse-glow" : "w-6 bg-white/50 hover:bg-white/80"
+                className={`relative h-[4px] rounded-full transition-all duration-300 ${
+                  index === activeSlide 
+                    ? "w-16 bg-red-500 shadow-lg shadow-red-500/50" 
+                    : "w-8 bg-white/40 hover:bg-white/60 hover:w-12"
                 }`}
                 onClick={() => goToSlide(index)}
                 aria-label={`Go to slide ${index + 1}`}
@@ -245,39 +244,39 @@ export function HeroSection() {
         </div>
       </div>
       
-      {/* Navigation arrows with fire effect */}
-      <div className="absolute bottom-8 right-8 flex gap-2">
+      {/* Navigation arrows - Improved positioning and styling */}
+      <div className="absolute bottom-20 right-8 flex gap-3 z-20">
         <button 
           onClick={prevSlide}
-          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-red-500 hover:border-transparent fire-button"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition-all duration-300 hover:bg-red-500 hover:border-red-500 hover:scale-110 shadow-lg"
           aria-label="Previous slide"
         >
-          <ChevronRight className="h-6 w-6 rotate-180" />
+          <ChevronRight className="h-5 w-5 rotate-180" />
         </button>
         <button 
           onClick={nextSlide}
-          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-red-500 hover:border-transparent fire-button"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition-all duration-300 hover:bg-red-500 hover:border-red-500 hover:scale-110 shadow-lg"
           aria-label="Next slide"
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronRight className="h-5 w-5" />
         </button>
       </div>
       
-      {/* Energetic stat counters */}
-      <div className="absolute bottom-0 left-0 w-full">
+      {/* Energetic stat counters - Improved positioning */}
+      <div className="absolute bottom-0 left-0 w-full z-10">
         <div className="container">
-          <div className="flex justify-center gap-6 mb-10">
-            <div className="bg-black/50 backdrop-blur-md px-5 py-3 rounded-t-lg border-t-2 border-red-500 flex flex-col items-center">
-              <div className="text-xl font-bold text-white energy-burst">5000+</div>
-              <div className="text-xs text-slate-300">Thành viên</div>
+          <div className="flex justify-center gap-8 mb-6">
+            <div className="bg-black/60 backdrop-blur-md px-6 py-4 rounded-t-xl border-t-2 border-red-500 flex flex-col items-center shadow-lg">
+              <div className="text-2xl font-bold text-white energy-burst">5000+</div>
+              <div className="text-xs text-slate-300 font-medium">Thành viên</div>
             </div>
-            <div className="bg-black/50 backdrop-blur-md px-5 py-3 rounded-t-lg border-t-2 border-orange-500 flex flex-col items-center">
-              <div className="text-xl font-bold text-white energy-burst">15+</div>
-              <div className="text-xs text-slate-300">Năm kinh nghiệm</div>
+            <div className="bg-black/60 backdrop-blur-md px-6 py-4 rounded-t-xl border-t-2 border-orange-500 flex flex-col items-center shadow-lg">
+              <div className="text-2xl font-bold text-white energy-burst">15+</div>
+              <div className="text-xs text-slate-300 font-medium">Năm kinh nghiệm</div>
             </div>
-            <div className="bg-black/50 backdrop-blur-md px-5 py-3 rounded-t-lg border-t-2 border-yellow-500 flex flex-col items-center">
-              <div className="text-xl font-bold text-white energy-burst">100%</div>
-              <div className="text-xs text-slate-300">Hài lòng</div>
+            <div className="bg-black/60 backdrop-blur-md px-6 py-4 rounded-t-xl border-t-2 border-yellow-500 flex flex-col items-center shadow-lg">
+              <div className="text-2xl font-bold text-white energy-burst">100%</div>
+              <div className="text-xs text-slate-300 font-medium">Hài lòng</div>
             </div>
           </div>
         </div>

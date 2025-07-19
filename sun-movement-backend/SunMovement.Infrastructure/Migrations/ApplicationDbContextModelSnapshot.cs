@@ -1008,6 +1008,9 @@ namespace SunMovement.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("Size")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(18,2)");
 
@@ -1557,16 +1560,17 @@ namespace SunMovement.Infrastructure.Migrations
 
                     b.Property<string>("SizeLabel")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductId", "SizeLabel")
+                        .IsUnique();
 
-                    b.ToTable("ProductSize");
+                    b.ToTable("ProductSizes");
                 });
 
             modelBuilder.Entity("SunMovement.Core.Models.ProductSupplier", b =>

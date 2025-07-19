@@ -423,7 +423,19 @@ namespace SunMovement.Infrastructure.Services
                 var smtpServer = _configuration["Email:SmtpServer"];
                 var smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
                 var smtpUsername = _configuration["Email:Username"];
-                var smtpPassword = _configuration["Email:Password"];                // Check for SMTP configuration
+                var smtpPassword = _configuration["Email:Password"];
+
+                // Debug logging
+                _logger.LogInformation("📧 Email Configuration Debug:");
+                _logger.LogInformation("  From Email: {FromEmail}", fromEmail);
+                _logger.LogInformation("  SMTP Server: {SmtpServer}", smtpServer);
+                _logger.LogInformation("  SMTP Port: {SmtpPort}", smtpPort);
+                _logger.LogInformation("  SMTP Username: {SmtpUsername}", smtpUsername);
+                _logger.LogInformation("  SMTP Password: {HasPassword}", !string.IsNullOrEmpty(smtpPassword));
+                _logger.LogInformation("  To Email: {ToEmail}", to);
+                _logger.LogInformation("  Subject: {Subject}", subject);
+
+                // Check for SMTP configuration
                 if (string.IsNullOrEmpty(smtpServer) || string.IsNullOrEmpty(smtpUsername) || string.IsNullOrEmpty(smtpPassword))
                 {
                     _logger.LogError("SMTP configuration is incomplete. Missing: Server={Server}, Username={Username}, Password={HasPassword}", 
@@ -456,6 +468,7 @@ namespace SunMovement.Infrastructure.Services
                 };
                 mail.To.Add(new MailAddress(to));
 
+                _logger.LogInformation("📧 Attempting to send email via SMTP...");
                 using var client = new SmtpClient(smtpServer, smtpPort)
                 {
                     Credentials = new NetworkCredential(smtpUsername, smtpPassword),
@@ -463,12 +476,12 @@ namespace SunMovement.Infrastructure.Services
                 };
 
                 await client.SendMailAsync(mail);
-                _logger.LogInformation("Email sent successfully to {To} with subject: {Subject}", to, subject);
+                _logger.LogInformation("✅ Email sent successfully to {To} with subject: {Subject}", to, subject);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error sending email to {To}. Error: {Message}", to, ex.Message);
+                _logger.LogError(ex, "❌ Error sending email to {To}. Error: {Message}", to, ex.Message);
                 return false;
             }
         }

@@ -130,23 +130,19 @@ export default function ProductDetailModal({ productId, product: productProp, op
                     <div className="flex gap-2 flex-wrap">
                       {product.sizes.map((size) => (
                         <button
-                          key={size.sizeLabel}
-                          onClick={() => setSelectedSize(size.sizeLabel)}
-                          disabled={size.stockQuantity === 0}
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
                           className={cn(
                             "px-3 py-1 border rounded text-sm font-medium transition-colors",
-                            selectedSize === size.sizeLabel
+                            selectedSize === size
                               ? "bg-blue-600 text-white border-blue-600"
-                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-600",
-                            size.stockQuantity === 0 && "opacity-50 cursor-not-allowed"
+                              : "bg-white text-gray-700 border-gray-300 hover:border-blue-600"
                           )}
                         >
-                          {size.sizeLabel} {size.stockQuantity === 0 ? "(Hết hàng)" : `(Còn ${size.stockQuantity})`}
+                          {size}
                         </button>
                       ))}
                     </div>
-                    <button onClick={() => setShowSizeChart(true)} className="mt-2 underline text-blue-600">Bảng size</button>
-                    {showSizeChart && <SizeChartModal onClose={() => setShowSizeChart(false)} />}
                   </div>
                 )}
                 {/* Quantity */}

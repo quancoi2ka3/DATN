@@ -3,15 +3,17 @@ using System.ComponentModel.DataAnnotations;
 namespace SunMovement.Web.Models
 {    public class LoginViewModel
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Vui lòng nhập email")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Display(Name = "Email")]
         public required string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
         [DataType(DataType.Password)]
+        [Display(Name = "Mật khẩu")]
         public required string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "Ghi nhớ đăng nhập?")]
         public bool RememberMe { get; set; }
     }
 }

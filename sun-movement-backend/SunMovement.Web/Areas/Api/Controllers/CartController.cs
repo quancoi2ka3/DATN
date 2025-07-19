@@ -43,6 +43,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     return Unauthorized(new { success = false, error = "Bạn cần đăng nhập để sử dụng mã giảm giá." });
                 }
 
+                _logger.LogInformation("[APPLY COUPON] Bắt đầu áp dụng mã giảm giá: {CouponCode} cho user: {UserId}", request.CouponCode, userId);
+
                 // Lấy giỏ hàng thực tế
                 var cart = await _cartService.GetCartWithItemsAsync(userId);
                 if (cart == null || !cart.Items.Any())
@@ -54,6 +56,8 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     });
                 }
 
+                _logger.LogInformation("[APPLY COUPON] Giỏ hàng có {ItemCount} sản phẩm", cart.Items.Count);
+
                 // Chuẩn bị dữ liệu cho validate
                 var cartItems = cart.Items.Select(item => new CartItem
                 {
@@ -62,12 +66,21 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     UnitPrice = item.UnitPrice
                 }).ToList();
 
-                var orderTotal = cart.Items.Sum(item => item.UnitPrice * item.Quantity);
+                var orderTotal = cart.Items.Sum(item => {
+                    var unitPrice = item.UnitPrice > 0 ? item.UnitPrice : (item.Product?.Price ?? 0);
+                    return unitPrice * item.Quantity;
+                });
+
+                _logger.LogInformation("[APPLY COUPON] Tổng giá trị đơn hàng: {OrderTotal}", orderTotal);
+
                 var validation = await _couponService.ValidateCouponAsync(
                     request.CouponCode,
                     orderTotal,
                     userId,
                     cartItems);
+
+                _logger.LogInformation("[APPLY COUPON] Kết quả validate: IsValid={IsValid}, Error={Error}", 
+                    validation.IsValid, validation.ErrorMessage);
 
                 if (!validation.IsValid)
                 {
@@ -81,25 +94,32 @@ namespace SunMovement.Web.Areas.Api.Controllers
                     });
                 }
 
+                _logger.LogInformation("[APPLY COUPON] Coupon hợp lệ, bắt đầu tính toán giảm giá");
+
                 // Tính giảm giá cho từng sản phẩm
                 var enhancedItems = new List<object>();
                 decimal totalDiscount = 0;
                 foreach (var item in cart.Items)
                 {
+                    var itemUnitPrice = item.UnitPrice > 0 ? item.UnitPrice : (item.Product?.Price ?? 0);
                     var discountAmount = await _couponService.CalculateProductDiscountAsync(
                         item.ProductId ?? 0,
                         validation.Coupon?.Id ?? 0,
                         orderTotal // truyền tổng giá trị đơn hàng
                     );
                     totalDiscount += discountAmount * item.Quantity;
+                    
+                    _logger.LogInformation("[APPLY COUPON] Sản phẩm {ProductId}: UnitPrice={UnitPrice}, DiscountAmount={DiscountAmount}, Quantity={Quantity}", 
+                        item.ProductId, itemUnitPrice, discountAmount, item.Quantity);
+                    
                     enhancedItems.Add(new
                     {
                         id = item.Id.ToString(),
                         productId = item.ProductId?.ToString() ?? "",
-                        name = item.ItemName,
-                        imageUrl = item.ItemImageUrl ?? "",
-                        originalPrice = item.UnitPrice,
-                        finalPrice = Math.Max(0, item.UnitPrice - discountAmount),
+                        name = item.ItemName ?? (item.Product?.Name ?? "Unknown Product"),
+                        imageUrl = item.ItemImageUrl ?? (item.Product?.ImageUrl ?? ""),
+                        originalPrice = itemUnitPrice,
+                        finalPrice = Math.Max(0, itemUnitPrice - discountAmount),
                         discountAmount = discountAmount,
                         couponCode = discountAmount > 0 ? request.CouponCode : null,
                         couponType = discountAmount > 0 && validation.Coupon != null ? validation.Coupon.Type.ToString() : null,
@@ -109,8 +129,14 @@ namespace SunMovement.Web.Areas.Api.Controllers
                         addedAt = item.CreatedAt
                     });
                 }
-                var orderTotalValue = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
+                var orderTotalValue = cart.Items.Sum(i => {
+                    var unitPrice = i.UnitPrice > 0 ? i.UnitPrice : (i.Product?.Price ?? 0);
+                    return unitPrice * i.Quantity;
+                });
                 var finalTotal = orderTotalValue - totalDiscount;
+
+                _logger.LogInformation("[APPLY COUPON] Hoàn thành: OrderTotal={OrderTotal}, TotalDiscount={TotalDiscount}, FinalTotal={FinalTotal}", 
+                    orderTotalValue, totalDiscount, finalTotal);
 
                 return Ok(new {
                     success = true,
@@ -163,16 +189,19 @@ namespace SunMovement.Web.Areas.Api.Controllers
                 }
 
                 // Return cart items without coupon discounts
-                var enhancedItems = cart.Items.Select(item => new {
-                    id = item.Id.ToString(),
-                    productId = item.ProductId?.ToString() ?? "",
-                    itemName = item.ItemName ?? (item.ProductId != null ? (item.Product?.Name ?? "") : ""),
-                    itemImageUrl = item.ItemImageUrl ?? (item.ProductId != null ? (item.Product?.ImageUrl ?? "") : ""),
-                    unitPrice = item.UnitPrice,
-                    finalPrice = item.UnitPrice,
-                    discountAmount = 0,
-                    quantity = item.Quantity,
-                    addedAt = item.CreatedAt
+                var enhancedItems = cart.Items.Select(item => {
+                    var unitPrice = item.UnitPrice > 0 ? item.UnitPrice : (item.Product?.Price ?? 0);
+                    return new {
+                        id = item.Id.ToString(),
+                        productId = item.ProductId?.ToString() ?? "",
+                        itemName = item.ItemName ?? (item.ProductId != null ? (item.Product?.Name ?? "") : ""),
+                        itemImageUrl = item.ItemImageUrl ?? (item.ProductId != null ? (item.Product?.ImageUrl ?? "") : ""),
+                        unitPrice = unitPrice,
+                        finalPrice = unitPrice,
+                        discountAmount = 0,
+                        quantity = item.Quantity,
+                        addedAt = item.CreatedAt
+                    };
                 }).ToList();
 
                 return Ok(new { 

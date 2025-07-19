@@ -157,6 +157,26 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     }
                 }
 
+                // Tính toán dữ liệu thực từ orders
+                var allOrders = await _unitOfWork.Orders.GetAllAsync();
+                var customerOrders = allOrders.Where(o => !string.IsNullOrEmpty(o.UserId)).ToList();
+                
+                // Tính tổng doanh thu
+                var totalRevenue = customerOrders.Sum(o => o.TotalAmount);
+                
+                // Tính giá trị đơn hàng trung bình
+                var averageOrderValue = customerOrders.Any() ? customerOrders.Average(o => o.TotalAmount) : 0;
+                
+                // Tính số khách hàng có đơn hàng
+                var customersWithOrders = customerOrders.Select(o => o.UserId).Distinct().Count();
+                
+                // Lấy top customers theo chi tiêu
+                var topCustomers = customers
+                    .Where(c => c.Orders != null && c.Orders.Any())
+                    .OrderByDescending(c => c.TotalSpent)
+                    .Take(5)
+                    .ToList();
+
                 var analyticsViewModel = new CustomerAnalyticsViewModel
                 {
                     TotalCustomers = customers.Count,
@@ -164,10 +184,13 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     InactiveCustomers = customers.Count(c => !c.IsActive),
                     NewCustomersThisMonth = customers.Count(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-30)),
                     NewCustomersThisWeek = customers.Count(c => c.CreatedAt >= DateTime.UtcNow.AddDays(-7)),
-                    CustomersWithOrders = 0, // Set to 0 instead of random data - should be calculated from real orders
+                    CustomersWithOrders = customersWithOrders,
                     AverageAge = 0, // Set to 0 instead of hardcoded value - should be calculated from real data
                     RecentCustomers = customers.OrderByDescending(c => c.CreatedAt).Take(10).ToList(),
-                    MonthlyRegistrations = GetMonthlyRegistrations(customers)
+                    MonthlyRegistrations = GetMonthlyRegistrations(customers),
+                    TotalRevenue = totalRevenue,
+                    AverageOrderValue = averageOrderValue,
+                    TopCustomers = topCustomers
                 };
 
                 return View(analyticsViewModel);

@@ -224,17 +224,7 @@ export function OptimizedHeroSection() {
                       <ChevronRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    className="border-2 bg-red-600 border-white text-white hover:bg-black hover:text-sunred px-8 py-3 text-lg rounded-full transition-all duration-300 backdrop-blur-sm hover:scale-105"
-                    asChild
-                  >
-                    <Link href="https://www.youtube.com/@SUNMovementVN">
-                      <Play className="mr-2 h-5 w-5" />
-                      Xem Video
-                    </Link>
-                  </Button>
+                  
                 </div>
               </ScrollAnimation>
             </div>

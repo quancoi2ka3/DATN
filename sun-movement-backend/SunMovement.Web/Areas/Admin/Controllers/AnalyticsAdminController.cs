@@ -5,6 +5,7 @@ using SunMovement.Infrastructure.Services;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -31,45 +32,68 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Get real analytics data
-            var totalProducts = await _unitOfWork.Products.CountAsync();
-            var totalServices = await _unitOfWork.Services.CountAsync();
-            var totalOrders = await _unitOfWork.Orders.CountAsync();
-
-            // Get real analytics data from Mixpanel via service
-            var from = DateTime.Now.AddDays(-30);
-            var to = DateTime.Now;
-            var metrics = await _analyticsService.GetDashboardMetricsAsync(from, to);
-            
-            // Calculate real daily, weekly and monthly page views from Mixpanel
-            var todayFrom = DateTime.Today;
-            var todayTo = DateTime.Today.AddDays(1).AddSeconds(-1);
-            var weekFrom = DateTime.Today.AddDays(-7);
-            var monthFrom = DateTime.Today.AddDays(-30);
-            
-            // Get actual page view data for different periods
-            var todayPageViews = await GetPageViewsForPeriodAsync(todayFrom, todayTo);
-            var weekPageViews = await GetPageViewsForPeriodAsync(weekFrom, DateTime.Now);
-            var monthPageViews = await GetPageViewsForPeriodAsync(monthFrom, DateTime.Now);
-            
-            ViewBag.PageViews = new
+            try
             {
-                Today = todayPageViews,
-                Week = weekPageViews,
-                Month = monthPageViews
-            };
+                // Get real analytics data
+                var totalProducts = await _unitOfWork.Products.CountAsync();
+                var totalServices = await _unitOfWork.Services.CountAsync();
+                var totalOrders = await _unitOfWork.Orders.CountAsync();
 
-            // Get real search queries data from Mixpanel
-            ViewBag.SearchQueries = await GetTopSearchQueriesAsync(from, to);
-            
-            // Get top products with real view data from Mixpanel
-            ViewBag.TopProducts = await GetTopViewedProductsAsync(from, to);
+                // Get real analytics data from Mixpanel via service
+                var from = DateTime.Now.AddDays(-30);
+                var to = DateTime.Now;
+                var metrics = await _analyticsService.GetDashboardMetricsAsync(from, to);
+                
+                // Calculate real daily, weekly and monthly page views from Mixpanel
+                var todayFrom = DateTime.Today;
+                var todayTo = DateTime.Today.AddDays(1).AddSeconds(-1);
+                var weekFrom = DateTime.Today.AddDays(-7);
+                var monthFrom = DateTime.Today.AddDays(-30);
+                
+                // Get actual page view data for different periods
+                var todayPageViews = await GetPageViewsForPeriodAsync(todayFrom, todayTo);
+                var weekPageViews = await GetPageViewsForPeriodAsync(weekFrom, DateTime.Now);
+                var monthPageViews = await GetPageViewsForPeriodAsync(monthFrom, DateTime.Now);
+                
+                ViewBag.PageViews = new
+                {
+                    Today = todayPageViews,
+                    Week = weekPageViews,
+                    Month = monthPageViews
+                };
 
-            ViewBag.TotalProducts = totalProducts;
-            ViewBag.TotalServices = totalServices;
-            ViewBag.TotalOrders = totalOrders;
+                // Get real search queries data from Mixpanel
+                var searchQueries = await GetTopSearchQueriesAsync(from, to);
+                ViewBag.SearchQueries = searchQueries;
+                
+                // Get top products with real view data from Mixpanel
+                var topProducts = await GetTopViewedProductsAsync(from, to);
+                ViewBag.TopProducts = topProducts;
 
-            return View();
+                ViewBag.TotalProducts = totalProducts;
+                ViewBag.TotalServices = totalServices;
+                ViewBag.TotalOrders = totalOrders;
+
+                _logger.LogInformation("Analytics dashboard loaded - PageViews: Today={Today}, Week={Week}, Month={Month}, SearchQueries={SearchCount}, TopProducts={ProductCount}", 
+                    todayPageViews, weekPageViews, monthPageViews, 
+                    searchQueries.Length, topProducts.Length);
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading analytics dashboard");
+                
+                // Fallback data when Mixpanel is not available
+                ViewBag.PageViews = new { Today = 0, Week = 0, Month = 0 };
+                ViewBag.SearchQueries = new[] { new { Term = "Chưa có dữ liệu từ Mixpanel", Count = 0, Results = 0 } };
+                ViewBag.TopProducts = new[] { new { Name = "Chưa có dữ liệu", Category = "N/A", Views = 0 } };
+                ViewBag.TotalProducts = await _unitOfWork.Products.CountAsync();
+                ViewBag.TotalServices = await _unitOfWork.Services.CountAsync();
+                ViewBag.TotalOrders = await _unitOfWork.Orders.CountAsync();
+                
+                return View();
+            }
         }
 
         public IActionResult Reports()
@@ -184,7 +208,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
         }
 
-        private async Task<object> GetTopViewedProductsAsync(DateTime from, DateTime to)
+        private async Task<object[]> GetTopViewedProductsAsync(DateTime from, DateTime to)
         {
             try
             {
@@ -197,7 +221,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     var allProducts = await _unitOfWork.Products.GetAllAsync();
                     return allProducts
                         .Take(10)
-                        .Select(p => new { p.Name, p.Category, Views = 0 });
+                        .Select(p => new { p.Name, p.Category, Views = 0 })
+                        .ToArray();
                 }
 
                 // Group by product and count views
@@ -231,14 +256,15 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         p.Name, 
                         p.Category, 
                         Views = productViews.GetValueOrDefault(p.Id, 0) 
-                    });
+                    }).ToArray();
                 }
 
                 // Fallback to database products
                 var fallbackProducts = await _unitOfWork.Products.GetAllAsync();
                 return fallbackProducts
                     .Take(10)
-                    .Select(p => new { p.Name, p.Category, Views = 0 });
+                    .Select(p => new { p.Name, p.Category, Views = 0 })
+                    .ToArray();
             }
             catch (Exception)
             {
@@ -246,7 +272,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 var fallbackProducts = await _unitOfWork.Products.GetAllAsync();
                 return fallbackProducts
                     .Take(10)
-                    .Select(p => new { p.Name, p.Category, Views = 0 });
+                    .Select(p => new { p.Name, p.Category, Views = 0 })
+                    .ToArray();
             }
         }
 

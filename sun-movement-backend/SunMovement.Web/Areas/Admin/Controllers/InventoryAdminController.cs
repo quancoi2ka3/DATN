@@ -114,10 +114,22 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         {
             try
             {
-                _logger.LogInformation("Bắt đầu nhập kho: IsNewProduct={IsNewProduct}, ProductId={ProductId}, SupplierId={SupplierId}, NewSupplierName={NewSupplierName}", model.IsNewProduct, model.ProductId, model.SupplierId, NewSupplierName);
+                _logger.LogInformation("=== BẮT ĐẦU NHẬP KHO ===");
+                _logger.LogInformation("Model data: IsNewProduct={IsNewProduct}, ProductId={ProductId}, IsSportwear={IsSportwear}, Quantity={Quantity}", 
+                    model.IsNewProduct, model.ProductId, model.IsSportwear, model.Quantity);
+                _logger.LogInformation("Sizes data: {SizesCount} sizes", model.Sizes?.Count ?? 0);
+                if (model.Sizes != null)
+                {
+                    foreach (var size in model.Sizes)
+                    {
+                        _logger.LogInformation("Size: {Size}, Quantity: {Quantity}", size.Size, size.Quantity);
+                    }
+                }
+                
                 // Validation động
                 if (model.IsNewProduct)
                 {
+                    _logger.LogInformation("Xử lý sản phẩm mới");
                     if (string.IsNullOrWhiteSpace(model.Name))
                         ModelState.AddModelError("Name", "Vui lòng nhập tên sản phẩm mới.");
                     if (!model.CategoryId.HasValue)
@@ -125,10 +137,72 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     if (!model.Price.HasValue || model.Price <= 0)
                         ModelState.AddModelError("Price", "Vui lòng nhập giá bán hợp lệ cho sản phẩm mới.");
                     // Không kiểm tra ProductId khi thêm mới
+                    
+                    // Kiểm tra size nếu là sportwear
+                    if (model.IsSportwear)
+                    {
+                        _logger.LogInformation("Sản phẩm mới là sportwear - kiểm tra size");
+                        var hasValidSize = model.Sizes?.Any(s => s.Quantity > 0) ?? false;
+                        if (!hasValidSize)
+                        {
+                            ModelState.AddModelError("Sizes", "Vui lòng nhập số lượng cho ít nhất một size.");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Sản phẩm mới không phải sportwear - kiểm tra quantity");
+                        // Kiểm tra quantity cho sản phẩm không phải sportwear
+                        if (model.Quantity <= 0)
+                        {
+                            ModelState.AddModelError("Quantity", "Vui lòng nhập số lượng hợp lệ.");
+                        }
+                    }
                 }
                 else if (!model.ProductId.HasValue || model.ProductId.Value <= 0)
                 {
+                    _logger.LogInformation("Không có ProductId hợp lệ");
                     ModelState.AddModelError("ProductId", "Vui lòng chọn sản phẩm.");
+                }
+                else
+                {
+                    _logger.LogInformation("Xử lý sản phẩm cũ - ProductId: {ProductId}", model.ProductId);
+                    // Kiểm tra sản phẩm cũ
+                    var product = await _unitOfWork.Products.GetByIdAsync(model.ProductId.Value);
+                    if (product != null)
+                    {
+                        _logger.LogInformation("Tìm thấy sản phẩm: {ProductName}, Category: {Category}", product.Name, product.Category);
+                        
+                        // Clear validation errors cho các field không cần thiết cho sản phẩm cũ
+                        ModelState.Remove("Name");
+                        ModelState.Remove("CategoryId");
+                        ModelState.Remove("Price");
+                        ModelState.Remove("Description");
+                        ModelState.Remove("ImageFile");
+                        
+                        if (product.Category == ProductCategory.Sportswear)
+                        {
+                            _logger.LogInformation("Sản phẩm cũ là sportwear - kiểm tra size");
+                            // Kiểm tra size cho sản phẩm sportwear cũ
+                            var hasValidSize = model.Sizes?.Any(s => s.Quantity > 0) ?? false;
+                            if (!hasValidSize)
+                            {
+                                ModelState.AddModelError("Sizes", "Vui lòng nhập số lượng cho ít nhất một size.");
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Sản phẩm cũ không phải sportwear - kiểm tra quantity");
+                            // Kiểm tra quantity cho sản phẩm không phải sportwear
+                            if (model.Quantity <= 0)
+                            {
+                                ModelState.AddModelError("Quantity", "Vui lòng nhập số lượng hợp lệ.");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Không tìm thấy sản phẩm với ProductId: {ProductId}", model.ProductId);
+                    }
                 }
                 if (model.IsNewSupplier)
                 {
@@ -140,9 +214,40 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("SupplierId", "Vui lòng chọn nhà cung cấp.");
                 }
+                else
+                {
+                    // Clear validation error cho NewSupplierName khi chọn supplier cũ
+                    ModelState.Remove("NewSupplierName");
+                }
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning("ModelState không hợp lệ khi nhập kho: {Errors}", string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    _logger.LogWarning("=== MODELSTATE KHÔNG HỢP LỆ ===");
+                    var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                    _logger.LogWarning("Validation errors: {Errors}", string.Join("; ", errors));
+                    
+                    // Nếu là sản phẩm cũ, clear các validation errors không cần thiết
+                    if (!model.IsNewProduct && model.ProductId.HasValue)
+                    {
+                        _logger.LogInformation("Clearing validation errors for existing product");
+                        ModelState.Remove("Name");
+                        ModelState.Remove("CategoryId");
+                        ModelState.Remove("Price");
+                        ModelState.Remove("Description");
+                        ModelState.Remove("ImageFile");
+                        ModelState.Remove("NewSupplierName");
+                        
+                        // Kiểm tra lại ModelState sau khi clear
+                        if (ModelState.IsValid)
+                        {
+                            _logger.LogInformation("ModelState is now valid after clearing unnecessary errors");
+                        }
+                        else
+                        {
+                            var remainingErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                            _logger.LogWarning("Remaining validation errors: {Errors}", string.Join("; ", remainingErrors));
+                        }
+                    }
+                    
                     await LoadProductsCategoriesSuppliersToViewBag();
                     return View(model);
                 }
@@ -200,12 +305,14 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                     }
                     if (model.IsSportwear && model.Sizes != null && model.Sizes.Count > 0)
                     {
-                        product.Sizes = model.Sizes.Select(s => new ProductSize
-                        {
-                            SizeLabel = s.Size,
-                            StockQuantity = s.Quantity
-                        }).ToList();
-                        product.StockQuantity = model.Sizes.Sum(s => s.Quantity);
+                        product.Sizes = model.Sizes
+                            .Where(s => s.Quantity > 0) // Chỉ lấy size có quantity > 0
+                            .Select(s => new ProductSize
+                            {
+                                SizeLabel = s.Size,
+                                StockQuantity = s.Quantity
+                            }).ToList();
+                        product.StockQuantity = product.Sizes.Sum(s => s.StockQuantity);
                     }
                     else
                     {
@@ -246,6 +353,7 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                 }
                 else if (model.ProductId.HasValue)
                 {
+                    _logger.LogInformation("=== XỬ LÝ SẢN PHẨM CŨ ===");
                     var product = await _unitOfWork.Products.GetByIdAsync(model.ProductId.Value);
                     if (product == null)
                     {
@@ -254,35 +362,78 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         await LoadProductsCategoriesSuppliersToViewBag();
                         return View(model);
                     }
+                    
+                    _logger.LogInformation("Sản phẩm: {ProductName}, Category: {Category}, Current Stock: {CurrentStock}", 
+                        product.Name, product.Category, product.StockQuantity);
+                    
                     if (product.Category == ProductCategory.Sportswear && model.Sizes != null && model.Sizes.Count > 0)
                     {
-                        foreach (var sizeDto in model.Sizes)
+                        _logger.LogInformation("Xử lý sportwear với sizes");
+                        foreach (var sizeDto in model.Sizes.Where(s => s.Quantity > 0))
                         {
+                            _logger.LogInformation("Processing size: {Size}, Quantity: {Quantity}", sizeDto.Size, sizeDto.Quantity);
                             var size = product.Sizes.FirstOrDefault(s => s.SizeLabel == sizeDto.Size);
                             if (size != null)
                             {
+                                _logger.LogInformation("Cập nhật size hiện có: {Size}, Stock cũ: {OldStock}, Thêm: {AddQuantity}", 
+                                    size.SizeLabel, size.StockQuantity, sizeDto.Quantity);
                                 size.StockQuantity += sizeDto.Quantity;
+                            }
+                            else
+                            {
+                                _logger.LogInformation("Tạo size mới: {Size}, Quantity: {Quantity}", sizeDto.Size, sizeDto.Quantity);
+                                // Tạo size mới nếu chưa có
+                                product.Sizes.Add(new ProductSize
+                                {
+                                    SizeLabel = sizeDto.Size,
+                                    StockQuantity = sizeDto.Quantity,
+                                    ProductId = product.Id
+                                });
                             }
                         }
                         product.StockQuantity = product.Sizes.Sum(s => s.StockQuantity);
+                        _logger.LogInformation("Tổng stock sau khi cập nhật: {TotalStock}", product.StockQuantity);
                     }
                     else
                     {
+                        _logger.LogInformation("Xử lý sản phẩm không phải sportwear - thêm quantity: {Quantity}", model.Quantity);
                         product.StockQuantity += model.Quantity;
+                        _logger.LogInformation("Stock sau khi cập nhật: {NewStock}", product.StockQuantity);
                     }
+                    
                     await _unitOfWork.Products.UpdateAsync(product);
+                    _logger.LogInformation("Đã cập nhật sản phẩm thành công");
+                    
+                    // Tính quantity cho transaction
+                    int transactionQuantity;
+                    if (product.Category == ProductCategory.Sportswear && model.Sizes != null && model.Sizes.Count > 0)
+                    {
+                        transactionQuantity = model.Sizes.Where(s => s.Quantity > 0).Sum(s => s.Quantity);
+                        _logger.LogInformation("Transaction quantity (sportwear): {TransactionQuantity}", transactionQuantity);
+                    }
+                    else
+                    {
+                        transactionQuantity = model.Quantity;
+                        _logger.LogInformation("Transaction quantity (non-sportwear): {TransactionQuantity}", transactionQuantity);
+                    }
+                    
                     var transaction = new InventoryTransaction
                     {
                         ProductId = product.Id,
-                        Quantity = model.Quantity,
+                        Quantity = transactionQuantity,
                         UnitPrice = model.UnitPrice ?? 0,
                         SupplierId = supplierId,
                         TransactionType = InventoryTransactionType.Purchase,
                         TransactionDate = DateTime.Now,
                         Notes = model.Notes
                     };
+                    
+                    _logger.LogInformation("Tạo transaction: ProductId={ProductId}, Quantity={Quantity}, UnitPrice={UnitPrice}, SupplierId={SupplierId}", 
+                        transaction.ProductId, transaction.Quantity, transaction.UnitPrice, transaction.SupplierId);
+                    
                     await _unitOfWork.InventoryTransactions.AddAsync(transaction);
                     await _unitOfWork.CompleteAsync();
+                    _logger.LogInformation("=== NHẬP KHO THÀNH CÔNG ===");
                     _logger.LogInformation("Ghi nhận nhập kho thành công cho sản phẩm cũ: ProductId={ProductId}, TransactionId={TransactionId}", product.Id, transaction.Id);
                     TempData["SuccessMessage"] = "Nhập kho thành công!";
                     return RedirectToAction(nameof(Index));
@@ -293,11 +444,42 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi nhập kho: {Message}", ex.Message);
+                _logger.LogError(ex, "=== LỖI KHI NHẬP KHO ===");
+                _logger.LogError("Exception message: {Message}", ex.Message);
+                _logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi nhập kho: " + ex.Message;
                 await LoadProductsCategoriesSuppliersToViewBag();
                 return View(model);
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DebugStockIn([FromForm] InventoryStockInViewModel model, string NewSupplierName)
+        {
+            _logger.LogInformation("=== DEBUG STOCK IN ===");
+            _logger.LogInformation("Model data: IsNewProduct={IsNewProduct}, ProductId={ProductId}, IsSportwear={IsSportwear}, Quantity={Quantity}", 
+                model.IsNewProduct, model.ProductId, model.IsSportwear, model.Quantity);
+            _logger.LogInformation("Sizes data: {SizesCount} sizes", model.Sizes?.Count ?? 0);
+            if (model.Sizes != null)
+            {
+                foreach (var size in model.Sizes)
+                {
+                    _logger.LogInformation("Size: {Size}, Quantity: {Quantity}", size.Size, size.Quantity);
+                }
+            }
+            
+            return Json(new { 
+                success = true, 
+                message = "Debug data logged",
+                modelData = new {
+                    IsNewProduct = model.IsNewProduct,
+                    ProductId = model.ProductId,
+                    IsSportwear = model.IsSportwear,
+                    Quantity = model.Quantity,
+                    SizesCount = model.Sizes?.Count ?? 0
+                }
+            });
         }
 
         // GET: Admin/InventoryAdmin/StockOut
@@ -918,6 +1100,21 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             ViewBag.Products = products.Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Name });
             ViewBag.Categories = categories.Select(c => new SelectListItem { Value = ((int)c).ToString(), Text = c.ToString() });
             ViewBag.Suppliers = suppliers.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name });
+            
+            // Thêm dữ liệu sản phẩm chi tiết cho JavaScript
+            var productsData = products.Select(p => new
+            {
+                id = p.Id,
+                name = p.Name,
+                category = p.Category.ToString(),
+                price = p.Price,
+                stockQuantity = p.StockQuantity,
+                sku = p.Sku,
+                isActive = p.IsActive,
+                createdAt = p.CreatedAt.ToString("yyyy-MM-dd")
+            }).ToList();
+            
+            ViewBag.ProductsData = productsData;
         }
 
         private string GetTransactionTypeDisplayName(InventoryTransactionType type)

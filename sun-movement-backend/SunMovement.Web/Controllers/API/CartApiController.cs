@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using SunMovement.Core.DTOs;
 using SunMovement.Core.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SunMovement.Web.Controllers.API
 {
@@ -49,8 +51,48 @@ namespace SunMovement.Web.Controllers.API
                     return Unauthorized(new { error = "User not authenticated" });
                 }
 
-                var cart = await _cartService.GetCartByUserIdAsync(userId); // Ensure this method returns the cart object
-                return Ok(cart);
+                var cart = await _cartService.GetCartWithItemsAsync(userId);
+                if (cart == null)
+                {
+                    return Ok(new { 
+                        items = new List<object>(), 
+                        totalQuantity = 0, 
+                        totalPrice = 0 
+                    });
+                }
+
+                // Map cart items với đúng giá trị
+                var items = cart.Items.Select(item => {
+                    var unitPrice = item.UnitPrice > 0 ? item.UnitPrice : (item.Product?.Price ?? 0);
+                    return new {
+                        id = item.Id,
+                        cartId = item.ShoppingCartId,
+                        productId = item.ProductId,
+                        serviceId = item.ServiceId,
+                        itemName = item.ItemName ?? (item.Product?.Name ?? "Unknown Product"),
+                        itemImageUrl = item.ItemImageUrl ?? (item.Product?.ImageUrl ?? ""),
+                        unitPrice = unitPrice,
+                        quantity = item.Quantity,
+                        subtotal = unitPrice * item.Quantity,
+                        product = item.Product != null ? new {
+                            id = item.Product.Id,
+                            name = item.Product.Name,
+                            imageUrl = item.Product.ImageUrl,
+                            price = item.Product.Price,
+                            description = item.Product.Description
+                        } : null,
+                        service = item.Service
+                    };
+                }).ToList();
+
+                var totalPrice = items.Sum(item => item.subtotal);
+                var totalQuantity = items.Sum(item => item.quantity);
+
+                return Ok(new {
+                    items = items,
+                    totalQuantity = totalQuantity,
+                    totalPrice = totalPrice
+                });
             }
             catch (Exception ex)
             {

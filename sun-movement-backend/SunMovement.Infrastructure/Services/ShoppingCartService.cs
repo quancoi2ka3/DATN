@@ -198,15 +198,19 @@ namespace SunMovement.Infrastructure.Services
                         Description = i.Product.Description ?? string.Empty
                     };
                 }
+                
+                // Đảm bảo UnitPrice không bị 0, lấy từ database hoặc từ Product
+                var unitPrice = i.UnitPrice > 0 ? i.UnitPrice : (i.Product?.Price ?? 0);
+                
                 return new SunMovement.Core.DTOs.CartItemDto
                 {
                     Id = i.Id,
                     CartId = i.ShoppingCartId,
                     ProductId = i.ProductId,
                     ServiceId = i.ServiceId,
-                    ItemName = i.ItemName,
-                    ItemImageUrl = i.ItemImageUrl,
-                    UnitPrice = i.UnitPrice,
+                    ItemName = i.ItemName ?? (i.Product?.Name ?? "Unknown Product"),
+                    ItemImageUrl = i.ItemImageUrl ?? (i.Product?.ImageUrl ?? ""),
+                    UnitPrice = unitPrice,
                     Quantity = i.Quantity,
                     Product = productDto,
                     Service = null // Nếu cần, map Service tương tự

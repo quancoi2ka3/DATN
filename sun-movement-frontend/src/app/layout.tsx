@@ -13,6 +13,9 @@ import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/components/ui/simple-toast";
 import { ReduxProvider } from "@/store/ReduxProvider";
 import { ScrollToTop, PerformanceMonitor, ResourcePreloader } from "@/components/ui/page-transition";
+import { MainPerformanceOptimizer } from "@/components/ui/performance-optimizer";
+import { MainBundleOptimizer } from "@/components/ui/bundle-optimizer";
+import { MainCSSOptimizer } from "@/components/ui/css-optimizer";
 
 import FloatingCart from "@/components/ui/floating-cart";
 import ScrollButtons from "@/components/ui/scroll-buttons";
@@ -106,20 +109,22 @@ export default function RootLayout({
         {/* Theme color */}
         <meta name="theme-color" content="#eb4d3c" />
         
-        {/* Performance hints */}
+        {/* Performance hints - Load fonts asynchronously */}
         <link rel="preload" href="/fonts/SF-Pro-Display/SF-Pro-Display-Regular.otf" as="font" type="font/otf" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/SF-Pro-Display/SF-Pro-Display-Medium.otf" as="font" type="font/otf" crossOrigin="anonymous" />
         
-        {/* Simple scroll progress script */}
+        {/* Critical scripts - Load non-critical scripts with defer */}
         <script src="/scroll-progress.js" defer></script>
-        {/* UI Enhancement Script */}
         <script src="/ui-enhancements.js" defer></script>
-        {/* Chunk loading fix */}
         <script src="/chunk-fix.js" defer></script>
-        {/* Service Worker for chunk fallback */}
         <script src="/sw-register.js" defer></script>
       </head>
       <body className="min-h-screen bg-sunbg flex flex-col optimize-text smooth-scroll">
+        {/* Performance optimizers - Hidden from UI */}
+        <MainPerformanceOptimizer />
+        <MainBundleOptimizer />
+        <MainCSSOptimizer />
+        
         {/* Enhanced scroll progress bar */}
         <div className="scroll-progress">
           <div className="scroll-progress-bar" id="scroll-progress"></div>
@@ -128,28 +133,28 @@ export default function RootLayout({
         <ResourcePreloader />
         <PerformanceMonitor />
         <ScrollToTop />
-          <Suspense fallback={<LoadingSpinner />}>
-            <ReduxProvider>
-              <ToastProvider>
-                <NotificationProvider>
-                  <AuthProvider>
-                    <EnhancedCartProvider>
-                      <Header />
-                      <main className="flex-grow">
-                        <Suspense fallback={<LoadingSpinner />}>
-                          {children}
-                        </Suspense>
-                      </main>
-                      <Footer />
-                      <RasaChatbot />
-                      <FloatingCart />
-                      <ScrollButtons />
-                    </EnhancedCartProvider>
-                  </AuthProvider>
-                </NotificationProvider>
-              </ToastProvider>
-            </ReduxProvider>
-          </Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
+          <ReduxProvider>
+            <ToastProvider>
+              <NotificationProvider>
+                <AuthProvider>
+                  <EnhancedCartProvider>
+                    <Header />
+                    <main className="flex-grow">
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {children}
+                      </Suspense>
+                    </main>
+                    <Footer />
+                    <RasaChatbot />
+                    <FloatingCart />
+                    <ScrollButtons />
+                  </EnhancedCartProvider>
+                </AuthProvider>
+              </NotificationProvider>
+            </ToastProvider>
+          </ReduxProvider>
+        </Suspense>
       </body>
     </html>
   );

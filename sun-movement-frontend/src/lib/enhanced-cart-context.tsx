@@ -383,12 +383,17 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
 
       // Apply the coupon
       const response = await applyCouponAPI(couponCode);
-      
+
+      console.log('[FRONTEND DEBUG] Apply coupon response:', response);
+
       if (response.success && response.items) {
-        setItems(normalizeEnhancedItems(response.items, items));
+        const normalizedItems = normalizeEnhancedItems(response.items, items);
+        console.log('[FRONTEND DEBUG] Normalized items:', normalizedItems);
+        
+        setItems(normalizedItems);
         setAppliedCoupons(prev => [...prev, couponCode]);
         showSuccess(`Đã áp dụng mã giảm giá ${couponCode}`);
-        await fetchCart(); // Đồng bộ lại cart từ backend
+        // Xóa dòng await fetchCart() - không cần đồng bộ lại vì dữ liệu đã đầy đủ
         return true;
       } else {
         showError(response.error || 'Không thể áp dụng mã giảm giá');
@@ -403,7 +408,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedCoupons, items, validateCoupon, showSuccess, showError, fetchCart]);
+  }, [appliedCoupons, items, validateCoupon, showSuccess, showError]);
 
   // Remove coupon
   const removeCoupon = useCallback(async (couponCode: string): Promise<boolean> => {
@@ -421,7 +426,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
         setItems(normalizeEnhancedItems(response.items, items));
         setAppliedCoupons(prev => prev.filter(code => code !== couponCode));
         showSuccess(`Đã gỡ bỏ mã giảm giá ${couponCode}`);
-        await fetchCart(); // Đồng bộ lại cart từ backend
+        // Xóa dòng await fetchCart() - không cần đồng bộ lại vì dữ liệu đã đầy đủ
         return true;
       } else {
         showError(response.error || 'Không thể gỡ bỏ mã giảm giá');
@@ -436,7 +441,7 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [appliedCoupons, items, showSuccess, showError, fetchCart]);
+  }, [appliedCoupons, items, showSuccess, showError]);
 
   // Checkout
   const checkout = useCallback(async (checkoutDetails: CheckoutRequest): Promise<{ 
@@ -489,6 +494,23 @@ export function EnhancedCartProvider({ children }: { children: ReactNode }) {
   const totalPrice = items.reduce((sum, item) => sum + (item.finalPrice * item.quantity), 0);
   const shippingFee = 0; // Free shipping for now
   const finalTotal = totalPrice + shippingFee;
+
+  // Debug logging
+  console.log('[FRONTEND DEBUG] Cart calculations:', {
+    items: items.map(item => ({
+      id: item.id,
+      name: item.name,
+      originalPrice: item.originalPrice,
+      finalPrice: item.finalPrice,
+      discountAmount: item.discountAmount,
+      quantity: item.quantity
+    })),
+    totalItems,
+    subtotal,
+    totalDiscount,
+    totalPrice,
+    finalTotal
+  });
 
   const value: EnhancedCartContextType = {
     items,

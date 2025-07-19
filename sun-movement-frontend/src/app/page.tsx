@@ -9,7 +9,7 @@ import { RealtimeNotifications } from "@/components/ui/engagement-boosters";
 import { HomePageTracker } from "@/components/tracking/home-page-tracker";
 import { Suspense } from "react";
 
-// Lazy loaded components
+// Lazy loaded components with dynamic imports for better performance
 import { 
   CalisthenicsLazy, 
   StrengthLazy, 
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/lazy-sections";
 import { LazyOnScroll } from "@/components/ui/lazy-skeleton";
 import { ComponentPreloader } from "@/components/ui/lazy-preloader";
-import PersonalRecommendationsWrapper from "@/components/recommendations/PersonalRecommendationsWrapper";
 
 export default async function Home() {
   // Fetch data for all the product sections
@@ -46,21 +45,7 @@ export default async function Home() {
         </ScrollAnimation>
       </LazyOnScroll>
       
-      {/* Personalized Recommendations Section */}
-      {/* <LazyOnScroll>
-        <ScrollAnimation animation="fade-in-up" delay={0.3}>
-          <section className="py-12 bg-white">
-            <div className="container mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center mb-10">Dành riêng cho bạn</h2>
-              <Suspense fallback={<div className="h-64 animate-pulse bg-gray-100 rounded"></div>}>
-                <PersonalRecommendationsWrapper count={4} title="Sản phẩm phù hợp với bạn" />
-              </Suspense>
-            </div>
-          </section>
-        </ScrollAnimation>
-      </LazyOnScroll> */}
-      
-      {/* Lazy loaded sections with IntersectionObserver */}
+      {/* Lazy loaded sections with IntersectionObserver for better performance */}
       <LazyOnScroll>
         <ScrollAnimation animation="fade-in-up" delay={0.3}>
           <CalisthenicsLazy />
@@ -117,13 +102,18 @@ export default async function Home() {
       
       <ContactCTASection />
       
-      {/* Conversion Optimization Components */}
-      <FloatingCTA />
-      <ExitIntentPopup />
+      {/* Conversion Optimization Components - Loaded asynchronously */}
+      <Suspense fallback={null}>
+        <FloatingCTA />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ExitIntentPopup />
+      </Suspense>
       
-      {/* Real-time Engagement Components */}
-      <RealtimeNotifications />
-      {/* Removed FloatingActionButton to avoid conflict with existing FloatingContactButton */}
+      {/* Real-time Engagement Components - Loaded asynchronously */}
+      <Suspense fallback={null}>
+        <RealtimeNotifications />
+      </Suspense>
     </>
   );
 }

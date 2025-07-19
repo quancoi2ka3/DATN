@@ -30,7 +30,8 @@ namespace SunMovement.Web.Areas.Admin.Controllers
             {
                 orders = orders.Where(o => o.Id.ToString().Contains(searchString) ||
                                           o.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-                                          o.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+                                          o.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                                          (o.CustomerName != null && o.CustomerName.Contains(searchString, StringComparison.OrdinalIgnoreCase)));
             }
 
             if (status.HasValue)
@@ -42,6 +43,20 @@ namespace SunMovement.Web.Areas.Admin.Controllers
 
             var totalCount = orders.Count();
             var pagedOrders = orders.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            // Load thông tin User cho các đơn hàng có UserId
+            foreach (var order in pagedOrders)
+            {
+                if (!string.IsNullOrEmpty(order.UserId))
+                {
+                    // Load User information if not already loaded
+                    if (order.User == null)
+                    {
+                        // Note: This would require a User repository or service
+                        // For now, we'll use the existing logic in DisplayCustomerName
+                    }
+                }
+            }
 
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
@@ -346,8 +361,32 @@ namespace SunMovement.Web.Areas.Admin.Controllers
                         var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
                         if (product != null)
                         {
-                            // Reduce stock based on order quantity
-                            product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                            // Xử lý sản phẩm sportwear với size
+                            if (product.Category == ProductCategory.Sportswear && product.Sizes != null && product.Sizes.Any())
+                            {
+                                if (!string.IsNullOrEmpty(item.Size))
+                                {
+                                    // Trừ tồn kho theo size cụ thể
+                                    var size = product.Sizes.FirstOrDefault(s => s.SizeLabel == item.Size);
+                                    if (size != null)
+                                    {
+                                        size.StockQuantity = Math.Max(0, size.StockQuantity - item.Quantity);
+                                    }
+                                    
+                                    // Cập nhật tổng stock quantity
+                                    product.StockQuantity = product.Sizes.Sum(s => s.StockQuantity);
+                                }
+                                else
+                                {
+                                    // Nếu không có thông tin size, trừ tổng stock quantity
+                                    product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                                }
+                            }
+                            else
+                            {
+                                // Sản phẩm thường - trừ tổng stock quantity
+                                product.StockQuantity = Math.Max(0, product.StockQuantity - item.Quantity);
+                            }
                             
                             // Update IsAvailable status if stock is depleted
                             if (product.StockQuantity == 0)

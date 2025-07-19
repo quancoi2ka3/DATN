@@ -15,6 +15,12 @@ using System.Text;
 using System.Reflection;
 using Microsoft.AspNetCore.StaticFiles;
 using SunMovement.Web.Middleware;
+using System.Globalization;
+
+// Cấu hình timezone GMT+7 cho toàn bộ ứng dụng
+AppContext.SetSwitch("System.Globalization.InvariantGlobalization", false);
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("vi-VN");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("vi-VN");
 
 var builder = WebApplication.CreateBuilder(args);
 

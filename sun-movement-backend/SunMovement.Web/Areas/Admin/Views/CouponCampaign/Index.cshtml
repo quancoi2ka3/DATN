@@ -170,18 +170,25 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h5>🧪 Test Email</h5>
                     <p>Gửi email test để kiểm tra cấu hình email server</p>
                     <a asp-action="TestEmail" class="btn btn-outline-primary">
                         <i class="fas fa-paper-plane"></i> Test Email
                     </a>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h5>📊 Thống kê Campaign</h5>
                     <p>Xem báo cáo hiệu quả các chiến dịch email đã gửi</p>
                     <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="CouponStatistics" class="btn btn-outline-info">
                         <i class="fas fa-chart-bar"></i> Xem thống kê
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <h5>📧 Gửi thông báo mã giảm giá</h5>
+                    <p>Gửi thông báo mã giảm giá cho khách hàng</p>
+                    <a asp-area="Admin" asp-controller="CouponsAdmin" asp-action="SendCouponNotification" class="btn btn-outline-success">
+                        <i class="fas fa-envelope"></i> Gửi thông báo
                     </a>
                 </div>
             </div>

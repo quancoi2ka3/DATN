@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace SunMovement.Web.Areas.Admin.Controllers
 {
@@ -21,20 +23,29 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         private readonly ICouponService _couponService;
         private readonly IProductInventoryService _productInventoryService;
         private readonly IAnalyticsService _analyticsService;
+        private readonly IEmailService _emailService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<CouponsAdminController> _logger;
+        private readonly IConfiguration _configuration;
 
         public CouponsAdminController(
             IUnitOfWork unitOfWork, 
             ICouponService couponService,
             IProductInventoryService productInventoryService,
             IAnalyticsService analyticsService,
-            ILogger<CouponsAdminController> logger)
+            IEmailService emailService,
+            UserManager<ApplicationUser> userManager,
+            ILogger<CouponsAdminController> logger,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _couponService = couponService;
             _productInventoryService = productInventoryService;
             _analyticsService = analyticsService;
+            _emailService = emailService;
+            _userManager = userManager;
             _logger = logger;
+            _configuration = configuration;
         }
 
         // GET: Admin/CouponsAdmin
@@ -812,6 +823,317 @@ namespace SunMovement.Web.Areas.Admin.Controllers
         public IActionResult SelectCoupon(int couponId)
         {
             return RedirectToAction(nameof(ApplyCouponToProducts), new { couponId });
+        }
+
+        // GET: Admin/CouponsAdmin/SendCouponNotification
+        public async Task<IActionResult> SendCouponNotification()
+        {
+            try
+            {
+                var activeCoupons = await _unitOfWork.Coupons.GetActiveCouponsAsync();
+                var customers = _userManager.Users.Where(u => !string.IsNullOrEmpty(u.Email)).ToList();
+                
+                ViewBag.ActiveCoupons = activeCoupons;
+                ViewBag.Customers = customers;
+                
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading send coupon notification page");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải trang gửi thông báo mã giảm giá.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: Admin/CouponsAdmin/SendCouponNotification
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendCouponNotification(SendCouponNotificationViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation("📧 Starting coupon notification process...");
+                _logger.LogInformation("📧 Model validation: {IsValid}", ModelState.IsValid);
+                _logger.LogInformation("📧 Coupon ID: {CouponId}", model.CouponId);
+                _logger.LogInformation("📧 Customer emails count: {EmailCount}", model.CustomerEmails?.Count ?? 0);
+                _logger.LogInformation("📧 Campaign type: {CampaignType}", model.CampaignType);
+                _logger.LogInformation("📧 Send to all customers: {SendToAll}", model.SendToAllCustomers);
+
+                // Remove TestEmail validation errors if TestEmail is empty
+                if (string.IsNullOrEmpty(model.TestEmail))
+                {
+                    ModelState.Remove("TestEmail");
+                }
+
+                // Log validation errors if any
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("📧 Model validation failed");
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        _logger.LogWarning("📧 Validation error: {Error}", error.ErrorMessage);
+                    }
+                    
+                    var activeCoupons = await _unitOfWork.Coupons.GetActiveCouponsAsync();
+                    var customers = _userManager.Users.Where(u => !string.IsNullOrEmpty(u.Email)).ToList();
+                    
+                    ViewBag.ActiveCoupons = activeCoupons;
+                    ViewBag.Customers = customers;
+                    
+                    // Add error message to TempData
+                    TempData["ErrorMessage"] = "Vui lòng kiểm tra lại thông tin và thử lại.";
+                    return View(model);
+                }
+
+                // Manual validation
+                if (model.CouponId <= 0)
+                {
+                    TempData["ErrorMessage"] = "Vui lòng chọn mã giảm giá.";
+                    return RedirectToAction(nameof(SendCouponNotification));
+                }
+
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(model.CouponId);
+                if (coupon == null)
+                {
+                    _logger.LogError("📧 Coupon not found with ID: {CouponId}", model.CouponId);
+                    TempData["ErrorMessage"] = "Không tìm thấy mã giảm giá.";
+                    return RedirectToAction(nameof(SendCouponNotification));
+                }
+
+                _logger.LogInformation("📧 Found coupon: {CouponCode} - {CouponName}", coupon.Code, coupon.Name);
+
+                // Get customer emails
+                List<string> emailsToSend = new List<string>();
+                
+                if (model.SendToAllCustomers)
+                {
+                    // Send to all customers with email
+                    emailsToSend = _userManager.Users
+                        .Where(u => !string.IsNullOrEmpty(u.Email))
+                        .Select(u => u.Email)
+                        .ToList();
+                    _logger.LogInformation("📧 Sending to all customers: {Count} emails", emailsToSend.Count);
+                }
+                else if (model.CustomerEmails != null && model.CustomerEmails.Any())
+                {
+                    // Send to selected customers
+                    emailsToSend = model.CustomerEmails.Where(e => !string.IsNullOrEmpty(e)).ToList();
+                    _logger.LogInformation("📧 Sending to selected customers: {Count} emails", emailsToSend.Count);
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Vui lòng chọn ít nhất một khách hàng hoặc chọn 'Gửi cho tất cả khách hàng'.";
+                    return RedirectToAction(nameof(SendCouponNotification));
+                }
+
+                if (!emailsToSend.Any())
+                {
+                    TempData["ErrorMessage"] = "Không có email khách hàng nào để gửi.";
+                    return RedirectToAction(nameof(SendCouponNotification));
+                }
+
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var customerEmail in emailsToSend)
+                {
+                    try
+                    {
+                        _logger.LogInformation("📧 Processing email: {Email}", customerEmail);
+                        
+                        var customer = await _userManager.FindByEmailAsync(customerEmail);
+                        var customerName = customer?.FirstName ?? customer?.UserName ?? "Khách hàng";
+
+                        _logger.LogInformation("📧 Customer name: {CustomerName}", customerName);
+
+                        var emailSent = await _emailService.SendCouponEmailAsync(
+                            customerEmail, 
+                            customerName, 
+                            coupon, 
+                            model.CampaignType
+                        );
+
+                        if (emailSent)
+                        {
+                            successCount++;
+                            _logger.LogInformation("✅ Coupon notification sent successfully to {Email} for coupon {CouponCode}", 
+                                customerEmail, coupon.Code);
+                        }
+                        else
+                        {
+                            failCount++;
+                            _logger.LogWarning("❌ Failed to send coupon notification to {Email} for coupon {CouponCode}", 
+                                customerEmail, coupon.Code);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        failCount++;
+                        _logger.LogError(ex, "❌ Error sending coupon notification to {Email} for coupon {CouponCode}", 
+                            customerEmail, coupon.Code);
+                    }
+                }
+
+                _logger.LogInformation("📧 Email sending completed. Success: {SuccessCount}, Failed: {FailCount}", successCount, failCount);
+
+                if (successCount > 0)
+                {
+                    TempData["SuccessMessage"] = $"Đã gửi thông báo mã giảm giá {coupon.Code} thành công cho {successCount} khách hàng.";
+                }
+                
+                if (failCount > 0)
+                {
+                    TempData["ErrorMessage"] = $"Có {failCount} email không gửi được. Vui lòng kiểm tra lại cấu hình email.";
+                }
+
+                return RedirectToAction(nameof(SendCouponNotification));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Error in SendCouponNotification action");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi thông báo mã giảm giá.";
+                return RedirectToAction(nameof(SendCouponNotification));
+            }
+        }
+
+        // POST: Admin/CouponsAdmin/SendBulkCouponNotification
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendBulkCouponNotification(int couponId, string campaignType = "general")
+        {
+            try
+            {
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+                if (coupon == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy mã giảm giá." });
+                }
+
+                // Lấy tất cả khách hàng có email
+                var customers = _userManager.Users.Where(u => !string.IsNullOrEmpty(u.Email)).ToList();
+
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var customer in customers)
+                {
+                    try
+                    {
+                        var customerName = customer.FirstName ?? customer.UserName ?? "Khách hàng";
+                        
+                        var emailSent = await _emailService.SendCouponEmailAsync(
+                            customer.Email, 
+                            customerName, 
+                            coupon, 
+                            campaignType
+                        );
+
+                        if (emailSent)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        failCount++;
+                        _logger.LogError(ex, "Error sending bulk coupon notification to {Email}", customer.Email);
+                    }
+                }
+
+                return Json(new { 
+                    success = true, 
+                    message = $"Đã gửi thông báo mã giảm giá {coupon.Code} cho {successCount} khách hàng thành công.",
+                    successCount = successCount,
+                    failCount = failCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending bulk coupon notifications");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi gửi thông báo hàng loạt." });
+            }
+        }
+
+        // POST: Admin/CouponsAdmin/SendTestCouponEmail
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendTestCouponEmail(int couponId, string testEmail, string campaignType = "general")
+        {
+            try
+            {
+                var coupon = await _unitOfWork.Coupons.GetByIdAsync(couponId);
+                if (coupon == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy mã giảm giá." });
+                }
+
+                var emailSent = await _emailService.SendCouponEmailAsync(
+                    testEmail, 
+                    "Test User", 
+                    coupon, 
+                    campaignType
+                );
+
+                if (emailSent)
+                {
+                    _logger.LogInformation("Test coupon email sent successfully to {Email} for coupon {CouponCode}", 
+                        testEmail, coupon.Code);
+                    return Json(new { success = true, message = "Email test đã được gửi thành công!" });
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to send test coupon email to {Email} for coupon {CouponCode}", 
+                        testEmail, coupon.Code);
+                    return Json(new { success = false, message = "Không thể gửi email test. Vui lòng kiểm tra cấu hình email." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending test coupon email to {Email} for coupon {CouponId}", 
+                    testEmail, couponId);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi gửi email test." });
+            }
+        }
+
+        // GET: Admin/CouponsAdmin/TestEmailConfig
+        public IActionResult TestEmailConfig()
+        {
+            try
+            {
+                var config = new
+                {
+                    Provider = _configuration["Email:Provider"] ?? "not specified",
+                    SmtpServer = _configuration["Email:SmtpServer"] ?? "not configured",
+                    Sender = _configuration["Email:Sender"] ?? "not specified",
+                    SenderName = _configuration["Email:SenderName"] ?? "not specified",
+                    SmtpPort = _configuration["Email:SmtpPort"] ?? "not configured",
+                    Username = _configuration["Email:Username"] ?? "not configured",
+                    HasPassword = !string.IsNullOrEmpty(_configuration["Email:Password"]),
+                    EnableSsl = _configuration["Email:EnableSsl"] ?? "not specified"
+                };
+
+                _logger.LogInformation("📧 Email Configuration Test:");
+                _logger.LogInformation("  Provider: {Provider}", config.Provider);
+                _logger.LogInformation("  SMTP Server: {SmtpServer}", config.SmtpServer);
+                _logger.LogInformation("  Sender: {Sender}", config.Sender);
+                _logger.LogInformation("  Sender Name: {SenderName}", config.SenderName);
+                _logger.LogInformation("  SMTP Port: {SmtpPort}", config.SmtpPort);
+                _logger.LogInformation("  Username: {Username}", config.Username);
+                _logger.LogInformation("  Has Password: {HasPassword}", config.HasPassword);
+                _logger.LogInformation("  Enable SSL: {EnableSsl}", config.EnableSsl);
+
+                return Json(new { success = true, config = config });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Error testing email configuration");
+                return Json(new { success = false, error = ex.Message });
+            }
         }
 
         // Helper Methods

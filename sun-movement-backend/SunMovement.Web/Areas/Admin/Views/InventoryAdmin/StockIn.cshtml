@@ -2,7 +2,7 @@
 @{
     ViewBag.Title = "Nhập kho";
 }
-<h2>Nhập kho test</h2>
+<h2>Nhập kho</h2>
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
@@ -12,19 +12,26 @@
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-<form asp-action="StockIn" method="post" enctype="multipart/form-data">
+<form asp-action="StockIn" method="post" enctype="multipart/form-data" id="stockInForm">
     <div class="form-group mb-3">
         <label>Sản phẩm</label>
         <select asp-for="ProductId" class="form-control" id="ProductSelect" name="ProductId" onchange="onProductChange(); validateProductField();">
             <option value="">+ Thêm sản phẩm mới</option>
             @foreach (var item in ViewBag.Products as IEnumerable<SelectListItem>)
             {
-                <option value="@item.Value">@item.Text</option>
+                <option value="@item.Value" data-product-info="@item.Value">@item.Text</option>
             }
         </select>
         <input type="hidden" asp-for="IsNewProduct" id="IsNewProduct" />
         <span asp-validation-for="ProductId" class="text-danger"></span>
     </div>
+    
+    <!-- Thông tin sản phẩm đã chọn -->
+    <div id="selectedProductInfo" class="alert alert-info" style="display:none;">
+        <h6><i class="fas fa-info-circle"></i> Thông tin sản phẩm đã chọn:</h6>
+        <div id="productDetails"></div>
+    </div>
+    
     <div id="newProductFields" style="display:none;">
         <div class="form-group mb-3">
             <label asp-for="Name"></label>
@@ -65,15 +72,21 @@
         <table class="table table-bordered">
             <thead><tr><th>Size</th><th>Số lượng</th></tr></thead>
             <tbody>
-                @foreach (var size in new[] { "S", "M", "L", "XL", "XXL", "XXXL" })
+                @{
+                    var sizes = new[] { "S", "M", "L", "XL", "XXL", "XXXL" };
+                }
+                @for (int i = 0; i < sizes.Length; i++)
                 {
                     <tr>
-                        <td><input type="text" name="Sizes[@size].Size" value="@size" readonly class="form-control" /></td>
-                        <td><input type="number" name="Sizes[@size].Quantity" value="0" min="0" class="form-control" /></td>
+                        <td><input type="text" name="Sizes[@i].Size" value="@sizes[i]" readonly class="form-control" /></td>
+                        <td><input type="number" name="Sizes[@i].Quantity" value="0" min="0" class="form-control size-quantity" data-size="@sizes[i]" /></td>
                     </tr>
                 }
             </tbody>
         </table>
+        <div class="alert alert-info">
+            <strong>Tổng số lượng:</strong> <span id="totalSizeQuantity">0</span> sản phẩm
+        </div>
     </div>
     <div id="quantityField" class="form-group mb-3">
         <label asp-for="Quantity"></label>
@@ -106,48 +119,259 @@
         <textarea asp-for="Notes" class="form-control"></textarea>
     </div>
     <button type="submit" class="btn btn-primary">Nhập kho</button>
+    <button type="button" class="btn btn-info" onclick="debugForm()">Debug API</button>
+    <button type="button" class="btn btn-warning" onclick="debugSubmit()">Debug Submit</button>
 </form>
+
 @section Scripts {
     <script>
+        // Dữ liệu sản phẩm từ server - sửa cách serialize
+        var productsData = @Html.Raw(Json.Serialize(ViewBag.ProductsData ?? new List<object>()));
+        
         function onProductChange() {
             var val = document.getElementById('ProductSelect').value;
             var newFields = document.getElementById('newProductFields');
+            var selectedProductInfo = document.getElementById('selectedProductInfo');
             var isNewProductInput = document.getElementById('IsNewProduct');
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            
             if (val === "") {
                 newFields.style.display = '';
+                selectedProductInfo.style.display = 'none';
                 isNewProductInput.value = 'true';
+                // Ẩn size fields khi thêm sản phẩm mới và disable inputs
+                document.getElementById('sizeFields').style.display = 'none';
+                document.getElementById('quantityField').style.display = '';
+                sizeInputs.forEach(function(input) {
+                    input.disabled = true;
+                    input.required = false;
+                    input.value = '0';
+                });
+                
+                // Enable các field cho sản phẩm mới
+                enableNewProductFields();
             } else {
                 newFields.style.display = 'none';
                 isNewProductInput.value = 'false';
+                
+                // Disable các field cho sản phẩm mới
+                disableNewProductFields();
+                
+                // Hiển thị thông tin sản phẩm đã chọn
+                if (productsData && Array.isArray(productsData)) {
+                    var selectedProduct = productsData.find(p => p.id == parseInt(val));
+                    if (selectedProduct) {
+                        showSelectedProductInfo(selectedProduct);
+                        // Kiểm tra xem sản phẩm có phải sportwear không
+                        checkAndShowSizeFields(selectedProduct.category);
+                    }
+                }
             }
-            onCategoryChange();
             validateProductField();
         }
+        
+        function enableNewProductFields() {
+            var nameField = document.getElementById('NewProductName');
+            var categoryField = document.getElementById('CategorySelect');
+            var priceField = document.getElementById('NewProductPrice');
+            var descriptionField = document.getElementById('NewProductDescription');
+            var imageField = document.getElementById('NewProductImage');
+            
+            if (nameField) nameField.disabled = false;
+            if (categoryField) categoryField.disabled = false;
+            if (priceField) priceField.disabled = false;
+            if (descriptionField) descriptionField.disabled = false;
+            if (imageField) imageField.disabled = false;
+        }
+        
+        function disableNewProductFields() {
+            var nameField = document.getElementById('NewProductName');
+            var categoryField = document.getElementById('CategorySelect');
+            var priceField = document.getElementById('NewProductPrice');
+            var descriptionField = document.getElementById('NewProductDescription');
+            var imageField = document.getElementById('NewProductImage');
+            
+            if (nameField) {
+                nameField.disabled = true;
+                nameField.value = '';
+            }
+            if (categoryField) {
+                categoryField.disabled = true;
+                categoryField.value = '';
+            }
+            if (priceField) {
+                priceField.disabled = true;
+                priceField.value = '';
+            }
+            if (descriptionField) {
+                descriptionField.disabled = true;
+                descriptionField.value = '';
+            }
+            if (imageField) {
+                imageField.disabled = true;
+                imageField.value = '';
+            }
+        }
+        
+        function checkAndShowSizeFields(category) {
+            var isSportwear = category === 'Sportswear' || category === '0';
+            var sizeFields = document.getElementById('sizeFields');
+            var quantityField = document.getElementById('quantityField');
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            
+            if (isSportwear) {
+                sizeFields.style.display = '';
+                quantityField.style.display = 'none';
+                // Enable size inputs
+                sizeInputs.forEach(function(input) {
+                    input.disabled = false;
+                    input.required = true;
+                });
+                addSizeQuantityListeners();
+            } else {
+                sizeFields.style.display = 'none';
+                quantityField.style.display = '';
+                // Disable và clear size inputs
+                sizeInputs.forEach(function(input) {
+                    input.disabled = true;
+                    input.required = false;
+                    input.value = '0';
+                });
+            }
+        }
+        
+        function showSelectedProductInfo(product) {
+            var selectedProductInfo = document.getElementById('selectedProductInfo');
+            var productDetails = document.getElementById('productDetails');
+            
+            var infoHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Tên:</strong> ${product.name}<br>
+                        <strong>Danh mục:</strong> ${product.category}<br>
+                        <strong>Giá bán:</strong> ${product.price.toLocaleString('vi-VN')} VNĐ<br>
+                        <strong>Tồn kho hiện tại:</strong> ${product.stockQuantity} sản phẩm
+                    </div>
+                    <div class="col-md-6">
+                        <strong>SKU:</strong> ${product.sku || 'Chưa có'}<br>
+                        <strong>Trạng thái:</strong> ${product.isActive ? 'Hoạt động' : 'Không hoạt động'}<br>
+                        <strong>Ngày tạo:</strong> ${new Date(product.createdAt).toLocaleDateString('vi-VN')}
+                    </div>
+                </div>
+            `;
+            
+            productDetails.innerHTML = infoHtml;
+            selectedProductInfo.style.display = 'block';
+        }
+        
         function onCategoryChange() {
             var isSportwear = document.getElementById('IsSportwearCheckbox') && document.getElementById('IsSportwearCheckbox').checked;
             var sizeFields = document.getElementById('sizeFields');
             var quantityField = document.getElementById('quantityField');
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            
             if (isSportwear) {
                 sizeFields.style.display = '';
                 quantityField.style.display = 'none';
+                // Enable size inputs
+                sizeInputs.forEach(function(input) {
+                    input.disabled = false;
+                    input.required = true;
+                });
+                // Thêm event listener cho size quantity inputs
+                addSizeQuantityListeners();
             } else {
                 sizeFields.style.display = 'none';
                 quantityField.style.display = '';
+                // Disable và clear size inputs
+                sizeInputs.forEach(function(input) {
+                    input.disabled = true;
+                    input.required = false;
+                    input.value = '0';
+                });
             }
         }
+        
+        function addSizeQuantityListeners() {
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            sizeInputs.forEach(function(input) {
+                input.addEventListener('input', updateTotalSizeQuantity);
+            });
+        }
+        
+        function updateTotalSizeQuantity() {
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            var total = 0;
+            sizeInputs.forEach(function(input) {
+                total += parseInt(input.value) || 0;
+            });
+            document.getElementById('totalSizeQuantity').textContent = total;
+        }
+        
+        function debugForm() {
+            var formData = new FormData(document.getElementById('stockInForm'));
+            console.log('Form Data:');
+            for (var pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            // Hiển thị thông tin debug
+            var debugInfo = {
+                'IsNewProduct': document.getElementById('IsNewProduct').value,
+                'ProductId': document.getElementById('ProductSelect').value,
+                'Quantity': document.querySelector('input[name="Quantity"]').value,
+                'UnitPrice': document.querySelector('input[name="UnitPrice"]').value,
+                'IsNewSupplier': document.getElementById('IsNewSupplier').value,
+                'SupplierId': document.getElementById('SupplierSelect').value,
+                'NewSupplierName': document.getElementById('NewSupplierName').value,
+                'IsSportwear': document.getElementById('IsSportwearCheckbox').checked,
+                'Sizes': getSizesData()
+            };
+            
+            alert('Debug Info:\n' + JSON.stringify(debugInfo, null, 2));
+        }
+        
+        function getSizesData() {
+            var sizes = [];
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            sizeInputs.forEach(function(input) {
+                var size = input.getAttribute('data-size');
+                var quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    sizes.push({
+                        size: size,
+                        quantity: quantity
+                    });
+                }
+            });
+            return sizes;
+        }
+        
         function onSupplierChange() {
             var val = document.getElementById('SupplierSelect').value;
             var newSupplierField = document.getElementById('newSupplierField');
             var isNewSupplierInput = document.getElementById('IsNewSupplier');
+            var newSupplierNameField = document.getElementById('NewSupplierName');
+            
             if (val === "") {
                 newSupplierField.style.display = '';
                 isNewSupplierInput.value = 'true';
+                if (newSupplierNameField) {
+                    newSupplierNameField.disabled = false;
+                    newSupplierNameField.required = true;
+                }
             } else {
                 newSupplierField.style.display = 'none';
                 isNewSupplierInput.value = 'false';
+                if (newSupplierNameField) {
+                    newSupplierNameField.disabled = true;
+                    newSupplierNameField.required = false;
+                    newSupplierNameField.value = '';
+                }
             }
             validateSupplierField();
         }
+        
         function previewImage(event) {
             var input = event.target;
             var preview = document.getElementById('imagePreview');
@@ -163,6 +387,7 @@
                 preview.style.display = 'none';
             }
         }
+        
         function validateProductField() {
             var productSelect = document.getElementById('ProductSelect');
             var newProductName = document.getElementById('NewProductName');
@@ -177,6 +402,7 @@
                 isNewProductInput.value = 'false';
             }
         }
+        
         function validateSupplierField() {
             var supplierSelect = document.getElementById('SupplierSelect');
             var newSupplierName = document.getElementById('NewSupplierName');
@@ -191,21 +417,100 @@
                 isNewSupplierInput.value = 'false';
             }
         }
+        
+        function debugSubmit() {
+            var form = document.getElementById('stockInForm');
+            var formData = new FormData(form);
+            
+            // Thêm action debug
+            formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+            
+            fetch('/admin/InventoryAdmin/DebugStockIn', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Debug response:', data);
+                alert('Debug response: ' + JSON.stringify(data, null, 2));
+            })
+            .catch(error => {
+                console.error('Debug error:', error);
+                alert('Debug error: ' + error.message);
+            });
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             onProductChange();
             onSupplierChange();
             validateProductField();
             validateSupplierField();
         });
+        
         // Khi submit, nếu là sản phẩm mới thì ProductId sẽ là rỗng
         document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submitting...');
             var isNewProduct = document.getElementById('IsNewProduct').value === 'true';
+            var isNewSupplier = document.getElementById('IsNewSupplier').value === 'true';
+            
+            // Xử lý sản phẩm
             if (isNewProduct) {
                 document.getElementById('ProductSelect').value = '';
+            } else {
+                // Clear các field không cần thiết cho sản phẩm cũ
+                var nameField = document.getElementById('NewProductName');
+                var categoryField = document.getElementById('CategorySelect');
+                var priceField = document.getElementById('NewProductPrice');
+                var descriptionField = document.getElementById('NewProductDescription');
+                var imageField = document.getElementById('NewProductImage');
+                
+                if (nameField) nameField.value = '';
+                if (categoryField) categoryField.value = '';
+                if (priceField) priceField.value = '';
+                if (descriptionField) descriptionField.value = '';
+                if (imageField) imageField.value = '';
             }
-            var isNewSupplier = document.getElementById('IsNewSupplier').value === 'true';
+            
+            // Xử lý supplier
             if (isNewSupplier) {
                 document.getElementById('SupplierSelect').value = '';
+            } else {
+                // Clear field không cần thiết cho supplier cũ
+                var newSupplierNameField = document.getElementById('NewSupplierName');
+                if (newSupplierNameField) newSupplierNameField.value = '';
+            }
+            
+            // Xử lý size inputs trước khi submit
+            var sizeInputs = document.querySelectorAll('.size-quantity');
+            var isSportwear = false;
+            
+            // Kiểm tra xem có phải sportwear không
+            if (document.getElementById('IsSportwearCheckbox')) {
+                isSportwear = document.getElementById('IsSportwearCheckbox').checked;
+            } else {
+                // Kiểm tra từ sản phẩm đã chọn
+                var productId = document.getElementById('ProductSelect').value;
+                if (productId && productsData && Array.isArray(productsData)) {
+                    var selectedProduct = productsData.find(p => p.id == parseInt(productId));
+                    if (selectedProduct) {
+                        isSportwear = selectedProduct.category === 'Sportswear' || selectedProduct.category === '0';
+                    }
+                }
+            }
+            
+            // Nếu không phải sportwear, disable tất cả size inputs
+            if (!isSportwear) {
+                sizeInputs.forEach(function(input) {
+                    input.disabled = true;
+                    input.value = '0';
+                });
+            }
+            
+            // Log form data before submit
+            var formData = new FormData(this);
+            console.log('Submitting form with data:');
+            for (var pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
             }
         });
     </script>

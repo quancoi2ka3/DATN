@@ -96,37 +96,7 @@ export function UrgencyTimer({ endDate }: { endDate: Date }) {
     return () => clearInterval(timer);
   }, [endDate]);
 
-  return (
-    <div className="bg-gradient-to-r from-red-500 via-red-600 to-pink-500 text-white rounded-xl p-6 shadow-lg hover-lift transition-all-smooth">
-      <div className="flex items-center gap-2 mb-4 animate-in fade-in-up">
-        <Clock className="w-5 h-5" />
-        <h3 className="font-semibold">Ưu đái có thời hạn!</h3>
-      </div>
-      
-      <div className="grid grid-cols-4 gap-2 text-center">
-        <div className="bg-white/20 rounded-lg p-2">
-          <div className="text-2xl font-bold">{timeLeft.days}</div>
-          <div className="text-xs">Ngày</div>
-        </div>
-        <div className="bg-white/20 rounded-lg p-2">
-          <div className="text-2xl font-bold">{timeLeft.hours}</div>
-          <div className="text-xs">Giờ</div>
-        </div>
-        <div className="bg-white/20 rounded-lg p-2">
-          <div className="text-2xl font-bold">{timeLeft.minutes}</div>
-          <div className="text-xs">Phút</div>
-        </div>
-        <div className="bg-white/20 rounded-lg p-2">
-          <div className="text-2xl font-bold">{timeLeft.seconds}</div>
-          <div className="text-xs">Giây</div>
-        </div>
-      </div>
-      
-      <p className="text-center mt-4 text-sm opacity-90">
-        Giảm 30% cho gói tập 6 tháng - Chỉ còn lại ít suất!
-      </p>
-    </div>
-  );
+  
 }
 
 // Exit intent popup

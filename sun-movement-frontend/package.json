@@ -7,9 +7,14 @@
     "dev:turbo": "next dev --turbo",
     "dev:safe": "next dev",
     "build": "next build",
+    "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rimraf .next"
+    "clean": "rimraf .next",
+    "performance:test": "node scripts/test-performance.js",
+    "performance:test:build": "npm run build && node scripts/test-performance.js",
+    "lighthouse": "lighthouse http://localhost:3000 --output=html --output-path=./lighthouse-report.html",
+    "bundle:analyze": "npm run build && npx @next/bundle-analyzer"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.2",
@@ -45,6 +50,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.2.0",
     "@types/node": "^20",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
@@ -53,10 +59,12 @@
     "cssnano": "^7.0.7",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
+    "lighthouse": "^11.6.0",
     "postcss": "^8",
     "postcss-import": "^16.1.0",
     "postcss-nesting": "^13.0.1",
     "tailwindcss": "^3.4.1",
+    "terser-webpack-plugin": "^5.3.10",
     "typescript": "^5"
   }
 }

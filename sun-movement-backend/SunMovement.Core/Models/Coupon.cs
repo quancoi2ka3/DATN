@@ -100,11 +100,11 @@ namespace SunMovement.Core.Models
         
         // Computed properties
         public bool IsValid => IsActive && 
-                              DateTime.UtcNow >= StartDate && 
-                              DateTime.UtcNow <= EndDate &&
+                              DateTime.Now >= StartDate && 
+                              DateTime.Now <= EndDate &&
                               (UsageLimit == 0 || CurrentUsageCount < UsageLimit);
                               
-        public bool IsExpired => DateTime.UtcNow > EndDate;
+        public bool IsExpired => DateTime.Now > EndDate;
         
         public bool IsUsageLimitReached => UsageLimit > 0 && CurrentUsageCount >= UsageLimit;
         
